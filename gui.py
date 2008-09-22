@@ -61,7 +61,10 @@ class GUI:
             'dialog_cutlist',
             'dialog_rename'
             ])
-
+            
+        self.windows['main_window'].realize()
+        self.windows['main_window'].window.set_decorations(gtk.gdk.DECOR_ALL & ~gtk.gdk.DECOR_MAXIMIZE)
+            
         self.main_window = self.construct_dict(builder, [
             'toolbar',
             'toolbuttonDecode',
