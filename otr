@@ -93,6 +93,7 @@ class App:
         elif section==Section.ARCHIVE: 
             # returns NO files       
             text = self.section_archive()
+            self.gui.main_window['treeviewFiles'].expand_all()
 
         if len(files)>0: # this is not executed, when the section is "Archive"
             if len(files)==1:
