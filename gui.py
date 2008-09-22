@@ -338,7 +338,8 @@ class GUI:
                     builder.get_object('labelDescTrash'),
                     builder.get_object('labelBestCutlist'),
                     builder.get_object('labelChooseCutlist'),
-                    builder.get_object('labelManually')]
+                    builder.get_object('labelManually'),
+                    builder.get_object('labelDescAvidemux')]
         for label in labels:
             label.modify_font(pango.FontDescription("8"))            
         
