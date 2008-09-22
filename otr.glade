@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Sep  9 16:35:45 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Sep 22 15:22:15 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -67,12 +67,12 @@
               <widget class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
                 <child>
-                  <widget class="GtkTable" id="table1">
+                  <widget class="GtkTable" id="table6">
                     <property name="visible">True</property>
-                    <property name="border_width">6</property>
-                    <property name="n_rows">14</property>
+                    <property name="border_width">5</property>
+                    <property name="n_rows">6</property>
                     <property name="n_columns">2</property>
-                    <property name="row_spacing">5</property>
+                    <property name="row_spacing">6</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -80,28 +80,51 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <placeholder/>
+                      <widget class="GtkFileChooserButton" id="folderArchive">
+                        <property name="visible">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                        <signal name="current_folder_changed" handler="on_folderArchive_current_folder_changed"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="labelDeleteAvi">
+                      <widget class="GtkLabel" id="labelArchiveFolder">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Nicht empfohlen!</property>
+                        <property name="label" translatable="yes">Archiv:</property>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="labelDescTrash">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">In den Müll werden dekodierte und ungeschittene Dateien verschoben. Dieser Ordner kann auch der Müll-Ordner des Systems sein.</property>
                         <property name="wrap">True</property>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">8</property>
-                        <property name="bottom_attach">9</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="labelDeleteOtrkey">
+                      <widget class="GtkFileChooserButton" id="folderTrash">
                         <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Nicht empfohlen! Die Datei wird, wenn der Dekoder kein Fehler meldet, sofort gelöscht, und nicht in den Mülleimer verschoben!</property>
-                        <property name="wrap">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                        <property name="title" translatable="yes">Ordner wählen</property>
+                        <signal name="current_folder_changed" handler="on_folderTrash_current_folder_changed"/>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -111,116 +134,28 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkFileChooserButton" id="folderCutMoveAvi">
+                      <widget class="GtkLabel" id="label26">
                         <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal name="current_folder_changed" handler="on_folderCutMoveAvi_current_folder_changed"/>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">9</property>
-                        <property name="bottom_attach">10</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkRadioButton" id="radioCutMoveAvi">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... verschieben nach:</property>
-                        <property name="response_id">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioCutDeleteAvi</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">9</property>
-                        <property name="bottom_attach">10</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkRadioButton" id="radioCutDeleteAvi">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... löschen</property>
-                        <property name="response_id">0</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_radioCutDeleteAvi_toggled"/>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">8</property>
-                        <property name="bottom_attach">9</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkFileChooserButton" id="folderDecodeMoveOtrkey">
-                        <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal name="current_folder_changed" handler="on_folderDecodeMoveOtrkey_current_folder_changed"/>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkRadioButton" id="radioDecodeMoveOtrkey">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... verschieben nach:</property>
-                        <property name="response_id">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioDecodeDeleteOtrkey</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkRadioButton" id="radioDecodeDeleteOtrkey">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... löschen</property>
-                        <property name="response_id">0</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_radioDecodeDeleteOtrkey_toggled"/>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Müll:</property>
                       </widget>
                       <packing>
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
-                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label10">
+                      <widget class="GtkLabel" id="labelDescNewOtrkeys">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">War das Dekodieren erfolgreich, otrkey-Datei...</property>
+                        <property name="label" translatable="yes">Dies ist der Standard-Ordner von OTR-Verwaltung. In diesem Ordner werden auch die avi-Dateien, Cutlisten etc. abgelegt.</property>
+                        <property name="wrap">True</property>
                       </widget>
                       <packing>
+                        <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
                         <property name="top_attach">2</property>
                         <property name="bottom_attach">3</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator4">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -232,6 +167,8 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
@@ -243,109 +180,18 @@
                         <property name="ellipsize">PANGO_ELLIPSIZE_START</property>
                       </widget>
                       <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="labelArchiveFolder">
+                      <widget class="GtkLabel" id="labelHeadline">
                         <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Archiv:</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">12</property>
-                        <property name="bottom_attach">13</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkFileChooserButton" id="folderArchive">
-                        <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal name="current_folder_changed" handler="on_folderArchive_current_folder_changed"/>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">12</property>
-                        <property name="bottom_attach">13</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator6">
-                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Die Ordner müssen auf dem selben Dateisystem liegen!</property>
                       </widget>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">11</property>
-                        <property name="bottom_attach">12</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelArchive">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Geschnittenen Dateien, die man aufbewahren möchte, können in diesen Ordner verschoben werden.</property>
-                        <property name="wrap">True</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">13</property>
-                        <property name="bottom_attach">14</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelCutMove">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Diese Dateien werden unter "Überflüssige Dateien" angezeigt. Sie können dann dort gelöscht werden.</property>
-                        <property name="wrap">True</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">10</property>
-                        <property name="bottom_attach">11</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelAfterCut">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">War das Schneiden erfolgreich, die ungeschnittene avi...</property>
-                        <property name="justify">GTK_JUSTIFY_FILL</property>
-                      </widget>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">7</property>
-                        <property name="bottom_attach">8</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator5">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelDecodeMove">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Diese Dateien werden unter "Überflüssige Dateien" angezeigt. Sie können dann dort gelöscht werden.</property>
-                        <property name="wrap">True</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
                       </packing>
                     </child>
                   </widget>
@@ -1241,23 +1087,6 @@
             <property name="visible">True</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
             <child>
-              <widget class="GtkButton" id="buttonCreateFolder">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="label" translatable="yes">Unterordner anlegen</property>
-                <property name="response_id">0</property>
-              </widget>
-            </child>
-            <child>
-              <widget class="GtkVSeparator" id="vseparator1">
-                <property name="visible">True</property>
-              </widget>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkButton" id="archive_buttonCancel">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1267,9 +1096,6 @@
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="on_archive_buttonCancel_clicked"/>
               </widget>
-              <packing>
-                <property name="position">2</property>
-              </packing>
             </child>
             <child>
               <widget class="GtkButton" id="archive_buttonOK">
@@ -1281,7 +1107,7 @@
                 <property name="response_id">-5</property>
               </widget>
               <packing>
-                <property name="position">3</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </widget>
@@ -2246,7 +2072,7 @@
                           <widget class="GtkRadioButton" id="radioTrash">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Überflüssige Dateien</property>
+                            <property name="label" translatable="yes">Müll</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>

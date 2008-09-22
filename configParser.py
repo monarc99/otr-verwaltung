@@ -17,7 +17,7 @@ import os
 import datetime
 import sys
 
-from constants import Action_after_decode, Action_after_cut, Save_Email_Password, Cut_action
+from constants import Save_Email_Password, Cut_action
 
 class Config:
     def __init__(self):
@@ -45,11 +45,8 @@ class Config:
                 },
             'folders':               
                 {
-                    'new_otrkeys':          self.read_value('folders', 'new_otrkeys', ''),
-                    'action_after_decode':  int(self.read_value('folders', 'action_after_decode', Action_after_decode.DELETE_OTRKEY)),
-                    'decoded_otrkeys':      self.read_value('folders', 'decoded_otrkeys', ''),            
-                    'action_after_cut':     int(self.read_value('folders', 'action_after_cut', Action_after_cut.DELETE_AVI)),
-                    'cut_avis':             self.read_value('folders', 'cut_avis', ''),
+                    'new_otrkeys':          self.read_value('folders', 'new_otrkeys', ''),                    
+                    'trash':                self.read_value('folders', 'trash', ''),
                     'archive':              self.read_value('folders', 'archive', '')
                 },
             'decode':

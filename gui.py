@@ -26,7 +26,7 @@ except:
     print "PyGTK missing."
     sys.exit(-1)
     
-from constants import Action_after_decode, Action_after_cut, Section, Action, Save_Email_Password, Cut_action, Status
+from constants import Section, Action, Save_Email_Password, Cut_action, Status
 
 class GUI:
     def construct_dict(self, builder, descriptions):  
@@ -94,41 +94,21 @@ class GUI:
         
         
         self.preferences_window = self.construct_dict(builder, [
+            'notebook',
+ 
+            # Allgemein
             'checkCut',
             'checkTest',
-            'checkArchive',
-            'checkTasks',
-            'radioDecodeDeleteOtrkey',
-            'radioCutDeleteAvi',
-            'folderDecodeMoveOtrkey',
-            'folderCutMoveAvi',
+            # Speicherorte
             'folderArchive',
+            # Dekodieren
             'filechooserDecoder',
             'entryEMail',
             'entryPassword',      
-            'checkCorrect',
-            'labelDecodeMove',
-            'labelCutMove',
-            'labelArchive',
-            'labelDeleteOtrkey',
-            'labelDeleteAvi',
-            'notebook'
-             ])
-        
-        self.pref_archive = self.construct_dict(builder, [
-            'labelArchiveFolder',
-            'folderArchive',  
-            'labelArchive'
+            'checkCorrect'
+            # Schneiden
             ])
-        
-        self.pref_cut = self.construct_dict(builder, [            
-            'radioCutDeleteAvi',
-            'radioCutMoveAvi',
-            'folderCutMoveAvi',
-            'labelAfterCut',
-            'labelCutMove'
-            ])
-        
+                       
         self.dialog_email_password = self.construct_dict(builder, [           
             'entryDialogEMail',
             'entryDialogPassword'
@@ -248,7 +228,7 @@ class GUI:
         toolbar_buttons = {
                 'decode':       gtk.ToolButton(images[0], "Dekodieren"),
                 'decodeandcut': gtk.ToolButton(images[1], "Dekodieren und Schneiden"),
-                'delete':       gtk.ToolButton(images[2], "Löschen"),
+                'delete':       gtk.ToolButton(images[2], "In den Müll verschieben"),
                 'archive':      gtk.ToolButton(images[3], "Archivieren"),
                 'cut':          gtk.ToolButton(images[4], "Schneiden"),
                 'play':         gtk.ToolButton(images[5], "Abspielen"),
@@ -354,16 +334,15 @@ class GUI:
         
     def setup_preferences_window(self, builder):
         # preferences fonts (little explanations)
-        labels = [  self.preferences_window['labelDecodeMove'], 
-                    self.preferences_window['labelCutMove'], 
-                    self.preferences_window['labelArchive'], 
-                    self.preferences_window['labelDeleteOtrkey'], 
-                    self.preferences_window['labelDeleteAvi'],
+        labels = [  builder.get_object('labelDescNewOtrkeys'),
+                    builder.get_object('labelDescTrash'),
                     builder.get_object('labelBestCutlist'),
                     builder.get_object('labelChooseCutlist'),
                     builder.get_object('labelManually')]
         for label in labels:
             label.modify_font(pango.FontDescription("8"))            
+        
+        builder.get_object('labelHeadline').modify_font(pango.FontDescription("bold"))
           
         # fill combobox of player
         player_store = gtk.ListStore(str)
@@ -401,32 +380,14 @@ class GUI:
         # fill values from config_dic
                
         # check boxes on common tab
-        self.on_preferences_checkCut_toggled(builder.get_object('checkCut'), bool(self.app.config_dic['common']['activate_cut']))
-        self.on_preferences_checkArchive_toggled(builder.get_object('checkArchive'), bool(self.app.config_dic['common']['use_archive']))
+        builder.get_object('checkCut').set_active(bool(self.app.config_dic['common']['activate_cut']))
+        builder.get_object('checkArchive').set_active(bool(self.app.config_dic['common']['use_archive']))
 
         # folder choosers on folders tab           
         builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config_dic['folders']['new_otrkeys'])
-        builder.get_object('folderDecodeMoveOtrkey').set_current_folder(self.app.config_dic['folders']['decoded_otrkeys'])
-        builder.get_object('folderCutMoveAvi').set_current_folder(self.app.config_dic['folders']['cut_avis'])
+        builder.get_object('folderTrash').set_current_folder(self.app.config_dic['folders']['trash'])
         builder.get_object('folderArchive').set_current_folder(self.app.config_dic['folders']['archive'])     
-    
-        # radio buttons on folders tab
-        # 1. action after decode
-        if self.app.config_dic['folders']['action_after_decode'] == Action_after_decode.DELETE_OTRKEY:
-            builder.get_object('radioDecodeDeleteOtrkey').set_active(True)            
-        else:
-            builder.get_object('radioDecodeMoveOtrkey').set_active(True)
-            
-        # 2. action after cut
-        if self.app.config_dic['folders']['action_after_cut'] == Action_after_cut.DELETE_AVI:
-            builder.get_object('radioCutDeleteAvi').set_active(True)
-        else:
-            builder.get_object('radioCutMoveAvi').set_active(True)
-            
-        # call signal methods:
-        self.on_radioDecodeDeleteOtrkey_toggled(builder.get_object('radioDecodeDeleteOtrkey'))
-        self.on_radioCutDeleteAvi_toggled(builder.get_object('radioCutDeleteAvi'))          
-           
+              
         # decode tab
         self.preferences_window['filechooserDecoder'].set_filename(self.app.config_dic['decode']['path'])  
         if self.app.config_dic['decode']['save_email_password'] == Save_Email_Password.DONT_SAVE:
@@ -473,7 +434,6 @@ class GUI:
         treeview.append_column(tvcolumn_new)
         
         selection = treeview.get_selection()
-        selection.connect('changed', self.on_selection_treeviewFilesRename_changed, cell_renderer_new)        
 
         # change label
         self.dialog_archive['labelFiles'].modify_font(pango.FontDescription("bold"))        
@@ -568,6 +528,7 @@ class GUI:
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_name("OTR-Verwaltung")
         about_dialog.set_version("0.1")
+        about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2008 Benjamin Elbers")
         about_dialog.set_authors(["Benjamin Elbers <elbersb@googlemail.com>"])
         about_dialog.set_logo_icon_name(gtk.STOCK_EDIT)            
@@ -748,106 +709,22 @@ class GUI:
     # common tab
     # check box toggled save status to config_dic
     def on_preferences_checkCut_toggled(self, widget, data=None):
-        # 'data' is used to set the default state on startup
-        if data!=None:
-            widget.set_active(data) 
-            state = data
-        else:
-            state = widget.get_active()
-
-        self.app.config_dic['common']['activate_cut'] = int(state)
+        self.app.config_dic['common']['activate_cut'] = int(widget.get_active())
         
-        # activate/deactivate widgets
-        for cut_widget in self.pref_cut:
-            self.pref_cut[cut_widget].set_sensitive(state)
-   
-        if state==True: 
-            self.main_window['radioCut'].show()
-        else:
-            self.main_window['radioCut'].hide()
-        
-    def on_preferences_checkArchive_toggled(self, widget, data=None):
-        # 'data' is used to set the default state on startup
-        if data!=None:
-            widget.set_active(data) 
-            state = data
-        else:
-            state = widget.get_active()
-            
-        self.app.config_dic['common']['use_archive'] = int(state)
-        
-        # activate/deactivate widget
-        for archive_widget in self.pref_archive:
-            self.pref_archive[archive_widget].set_sensitive(state)
-        for sidebar_widget in [self.main_window['separator2'], self.main_window['radioArchive']]:
-            if state==True: 
-                sidebar_widget.show()
-            else:
-                sidebar_widget.hide()            
+    def on_preferences_checkArchive_toggled(self, widget, data=None):          
+        self.app.config_dic['common']['use_archive'] = int(widget.get_active())
                
     # folders tab
     # folder changed, save to config dictionary
     def on_folderNewOtrkeys_current_folder_changed(self, widget, data=None):        
         self.app.config_dic['folders']['new_otrkeys'] = widget.get_filename()
     
-    def on_folderDecodeMoveOtrkey_current_folder_changed(self, widget, data=None):    
-        self.app.config_dic['folders']['decoded_otrkeys'] = widget.get_filename()
-    
-    def on_folderCutMoveAvi_current_folder_changed(self, widget, data=None):
-        self.app.config_dic['folders']['cut_avis'] = widget.get_filename()
-        
-    def on_folderArchive_current_folder_changed(self, widget, data=None):
-        self.app.config_dic['folders']['archive'] = widget.get_filename()
-        
-    # radio changed
+    def on_folderTrash_current_folder_changed(self, widget, data=None):
+        self.app.config_dic['folders']['trash'] = widget.get_filename()
 
-    # action after decode
-    def on_radioDecodeDeleteOtrkey_toggled(self, widget, data=None):
-        delete = widget.get_active()
-       
-        self.preferences_window['labelDeleteOtrkey'].set_sensitive(delete)        
-        self.preferences_window['folderDecodeMoveOtrkey'].set_sensitive(not delete)    
-        self.preferences_window['labelDecodeMove'].set_sensitive(not delete)
-        
-        if delete == True:          
-            self.app.config_dic['folders']['action_after_decode'] = Action_after_decode.DELETE_OTRKEY
-            
-            # if cut is activated, check whether also the the cutted avi file should be deleted, 
-            # if that is true, hide the "trash" button, because it is not needed
-            if self.app.config_dic['common']['activate_cut'] == 1:
-                if self.preferences_window['radioCutDeleteAvi'].get_active() == True:
-                    self.main_window['radioTrash'].hide()
-                    self.main_window['separator3'].hide() 
-            else: # cut is disabled, hide the trash button
-                self.main_window['radioTrash'].hide()
-                self.main_window['separator3'].hide()
+    def on_folderArchive_current_folder_changed(self, widget, data=None):        
+        self.app.config_dic['folders']['archive'] = widget.get_filename()
                 
-        else: # move the otrkey
-            self.app.config_dic['folders']['action_after_decode'] = Action_after_decode.MOVE_OTRKEY
-            
-            self.main_window['radioTrash'].show()        
-            self.main_window['separator3'].show()   
-        
-    # action after cut
-    def on_radioCutDeleteAvi_toggled(self, widget, data=None):
-        delete = widget.get_active()
-        
-        self.preferences_window['labelDeleteAvi'].set_sensitive(delete)
-        self.preferences_window['folderCutMoveAvi'].set_sensitive(not delete)
-        self.preferences_window['labelCutMove'].set_sensitive(not delete)
-        
-        if delete == True:
-            self.app.config_dic['folders']['action_after_cut'] = Action_after_cut.DELETE_AVI
-            
-            # if the decoded otrkeys should also be deleted, hide the radio button
-            if self.preferences_window['radioDecodeDeleteOtrkey'].get_active() == True:
-                self.main_window['radioTrash'].hide()
-                self.main_window['separator3'].hide()
-        else:
-            self.app.config_dic['folders']['action_after_cut'] = Action_after_cut.MOVE_AVI
-            self.main_window['radioTrash'].show()
-            self.main_window['separator3'].show()   
-    
     # decode tab
     def on_filechooserDecoder_file_set(self, widget, data=None):
         self.app.config_dic['decode']['path'] = widget.get_filename()      
@@ -1070,8 +947,7 @@ class GUI:
     # DIALOG ARCHIVE
     #
     def on_archive_buttonCancel_clicked(self, widget, data=None):
-        answer_yes = self.question_box("Wirklich abbrechen?")
-        if answer_yes:
+        if self.question_box("Wirklich abbrechen?"):
             self.windows['dialog_archive'].hide()
     
     # methods for folder treeview
@@ -1086,14 +962,7 @@ class GUI:
     def append_row_treeviewFilesRename(self, filename):
         iter = self.dialog_archive['treeviewFilesRename_store'].append([filename])    
         return iter
-
-    def on_selection_treeviewFilesRename_changed(self, selection, cell_renderer_editable): 
-#        (model, iter) = selection.get_selected()
-#        print selection.count_selected_rows()
-#        if iter and selection.count_selected_rows()>0:
-#            path = model.get_path(iter)
-        pass
-
+        
     def new_name_cell_edited(self, cell, path, new_text, model):
         # update new name of file in model
         model[path][0] = new_text

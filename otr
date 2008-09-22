@@ -36,7 +36,7 @@ except:
 # intern
 import gui
 import configParser
-from constants import Action_after_decode, Action_after_cut, Section, Action, Cut_action, Save_Email_Password, Status
+from constants import Section, Action, Cut_action, Save_Email_Password, Status
 
 class App:
     
@@ -116,10 +116,7 @@ class App:
         if self.config_dic['folders']['new_otrkeys'] == "":      
             return text, []
         
-        if self.search_text == "":
-            files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".otrkey")]                           
-        else:
-            files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search_text in f.lower()]                           
+        files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
             
         return (text, files)
          
@@ -127,10 +124,7 @@ class App:
         text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config_dic['folders']['new_otrkeys']
         
-        if self.search_text == "":
-            files = [os.path.join(path, f) for f in os.listdir(path) if self.uncut_video.match(f)]
-        else:
-            files = [os.path.join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search_text in f.lower()]
+        files = [os.path.join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search(f)]
             
         return (text, files)
         
@@ -145,36 +139,19 @@ class App:
         for f in os.listdir(path):
             if not self.uncut_video.match(f):
                 if self.cut_video.match(f):
-                    if self.search_text == "":
+                    if self.search(f):
                         files += [os.path.join(path, f)]
-                    else:
-                        if self.search_text in f.lower():
-                            files += [os.path.join(path, f)]
         
         return (text, files)
         
     def section_trash(self):
-        text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können gelöscht werden."
-        
-        files = []
-                   
-        # move otrkeys enabled?        
-        if self.config_dic['folders']['action_after_decode'] == Action_after_decode.MOVE_OTRKEY:
-            path = self.config_dic['folders']['decoded_otrkeys']
-            
-            if self.search_text == "":
-                files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".otrkey")]
-            else:
-                files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search_text in f.lower()]
-            
-        # *cut enabled*, move avi enabled?
-        if self.config_dic['common']['activate_cut'] == 1 and self.config_dic['folders']['action_after_cut'] == Action_after_cut.MOVE_AVI:
-            path = self.config_dic['folders']['cut_avis']
-            
-            if self.search_text == "":
-                files += [os.path.join(path, f) for f in os.listdir(path) if self.cut_video.match(f)]
-            else:
-                files += [os.path.join(path, f) for f in os.listdir(path) if self.cut_video.match(f) and self.search_text in f.lower()]
+        text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
+        path = self.config_dic['folders']['trash']
+                    
+        if self.search_text == "":
+            files = [os.path.join(path, f) for f in os.listdir(path)]
+        else:
+            files = [os.path.join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
                 
         return (text, files)
 
@@ -209,7 +186,7 @@ class App:
                     if self.search_text == "":
                         self.gui.append_row_treeviewFiles(parent, full_path)
                     else:
-                        if self.search_text in file.lower():
+                        if self.search(file):
                             self.gui.append_row_treeviewFiles(parent, full_path)
 
     ###
@@ -252,7 +229,7 @@ class App:
         files = []
         for root, dirs, wfiles in os.walk(self.config_dic['folders']['archive']):
             for f in wfiles:
-                if f.endswith('.avi') and self.search_text in f.lower():
+                if f.endswith('.avi') and self.search(f):
                     files += [os.path.join(root, f)]
 
         count = len(files)
@@ -267,6 +244,15 @@ class App:
     def stop_search(self):
         self.search_text = ""
         self.show_section(self.section)
+        
+    def search(self, f):
+        if self.search_text == "":
+            return True
+        else:    
+            if self.search_text in f.lower():
+                return True
+            else:
+                return False
         
     ###
     ### Actions
@@ -428,14 +414,9 @@ class App:
             if len(errors) == 0: # dekodieren erfolgreich                
                 filenames_action_status[f][Action.DECODE] = (Status.OK, message)            
             
-                # which action should take place after successful decoding?
-                if self.config_dic['folders']['action_after_decode']==Action_after_decode.MOVE_OTRKEY:
-                    # move
-                    target = self.config_dic['folders']['decoded_otrkeys']
-                    os.rename(f, os.path.join(target, os.path.basename(f)))
-                else:
-                    # delete
-                    os.remove(f)
+                # move to trash
+                target = self.config_dic['folders']['trash']
+                os.rename(f, os.path.join(target, os.path.basename(f)))
             else:            
                 filenames_action_status[f][Action.DECODE] = (Status.ERROR, error_message)
                 
@@ -588,14 +569,10 @@ class App:
             status, message = filenames_action_status[f][Action.CUT]
             
             if status == Status.OK:
-                if self.config_dic['folders']['action_after_cut']==Action_after_cut.MOVE_AVI:
-                    # move
-                    target = self.config_dic['folders']['cut_avis']
-                    os.rename(avi, os.path.join(target, os.path.basename(avi)))
-                else:
-                    # delete
-                    os.remove(avi)
-            
+                # move to trash
+                target = self.config_dic['folders']['trash']
+                os.rename(avi, os.path.join(target, os.path.basename(avi)))
+             
             progress = 1./len(filenames) + count * (1. / len(filenames))
             self.gui.dialog_action['progressbar_cut'].set_fraction(progress)
         
@@ -895,9 +872,10 @@ class App:
         else:
             message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
         
-        if self.gui.question_box(message + "endgültig gelöscht werden? (Die Dateien werden NICHT in den Mülleimer verschoben!)"):
+        if self.gui.question_box(message + "in den Müll verschoben werden?"):
             for f in filenames:
-                os.remove(f)
+                target = self.config_dic['folders']['trash']
+                os.rename(f, os.path.join(target, os.path.basename(f)))
     
     def action_restore(self, filenames):
         for f in filenames:

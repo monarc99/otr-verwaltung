@@ -12,14 +12,6 @@
 # http://creativecommons.org/licenses/by-nc-sa/2.0/
 #
 
-class Action_after_decode:
-    DELETE_OTRKEY = 0
-    MOVE_OTRKEY   = 1
-
-class Action_after_cut:
-    DELETE_AVI    = 0
-    MOVE_AVI      = 1
-
 class Section:
     OTRKEY      = 0
     AVI_UNCUT   = 1

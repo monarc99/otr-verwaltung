@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Tue Sep  9 16:35:45 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Sep 22 15:22:15 2008 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -121,12 +121,12 @@
               <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkTable" id="table1">
+                  <object class="GtkTable" id="table6">
                     <property name="visible">True</property>
-                    <property name="border_width">6</property>
-                    <property name="n_rows">14</property>
+                    <property name="border_width">5</property>
+                    <property name="n_rows">6</property>
                     <property name="n_columns">2</property>
-                    <property name="row_spacing">5</property>
+                    <property name="row_spacing">6</property>
                     <child>
                       <placeholder/>
                     </child>
@@ -134,28 +134,51 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkFileChooserButton" id="folderArchive">
+                        <property name="visible">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                        <signal handler="on_folderArchive_current_folder_changed" name="current_folder_changed"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="labelDeleteAvi">
+                      <object class="GtkLabel" id="labelArchiveFolder">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Nicht empfohlen!</property>
+                        <property name="label" translatable="yes">Archiv:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelDescTrash">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">In den M&#xFC;ll werden dekodierte und ungeschittene Dateien verschoben. Dieser Ordner kann auch der M&#xFC;ll-Ordner des Systems sein.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">8</property>
-                        <property name="bottom_attach">9</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="labelDeleteOtrkey">
+                      <object class="GtkFileChooserButton" id="folderTrash">
                         <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Nicht empfohlen! Die Datei wird, wenn der Dekoder kein Fehler meldet, sofort gel&#xF6;scht, und nicht in den M&#xFC;lleimer verschoben!</property>
-                        <property name="wrap">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                        <property name="title" translatable="yes">Ordner w&#xE4;hlen</property>
+                        <signal handler="on_folderTrash_current_folder_changed" name="current_folder_changed"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -165,112 +188,28 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFileChooserButton" id="folderCutMoveAvi">
+                      <object class="GtkLabel" id="label26">
                         <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal handler="on_folderCutMoveAvi_current_folder_changed" name="current_folder_changed"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">9</property>
-                        <property name="bottom_attach">10</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioCutMoveAvi">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... verschieben nach:</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioCutDeleteAvi</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">9</property>
-                        <property name="bottom_attach">10</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioCutDeleteAvi">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... l&#xF6;schen</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_radioCutDeleteAvi_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="top_attach">8</property>
-                        <property name="bottom_attach">9</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFileChooserButton" id="folderDecodeMoveOtrkey">
-                        <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal handler="on_folderDecodeMoveOtrkey_current_folder_changed" name="current_folder_changed"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioDecodeMoveOtrkey">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... verschieben nach:</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioDecodeDeleteOtrkey</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioDecodeDeleteOtrkey">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... l&#xF6;schen</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_radioDecodeDeleteOtrkey_toggled" name="toggled"/>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">M&#xFC;ll:</property>
                       </object>
                       <packing>
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
-                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label10">
+                      <object class="GtkLabel" id="labelDescNewOtrkeys">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">War das Dekodieren erfolgreich, otrkey-Datei...</property>
+                        <property name="label" translatable="yes">Dies ist der Standard-Ordner von OTR-Verwaltung. In diesem Ordner werden auch die avi-Dateien, Cutlisten etc. abgelegt.</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
+                        <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
                         <property name="top_attach">2</property>
                         <property name="bottom_attach">3</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="hseparator4">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -282,6 +221,8 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
@@ -293,109 +234,18 @@
                         <property name="ellipsize">PANGO_ELLIPSIZE_START</property>
                       </object>
                       <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="labelArchiveFolder">
+                      <object class="GtkLabel" id="labelHeadline">
                         <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Archiv:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">12</property>
-                        <property name="bottom_attach">13</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFileChooserButton" id="folderArchive">
-                        <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal handler="on_folderArchive_current_folder_changed" name="current_folder_changed"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">12</property>
-                        <property name="bottom_attach">13</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="hseparator6">
-                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Die Ordner m&#xFC;ssen auf dem selben Dateisystem liegen!</property>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">11</property>
-                        <property name="bottom_attach">12</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelArchive">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Geschnittenen Dateien, die man aufbewahren m&#xF6;chte, k&#xF6;nnen in diesen Ordner verschoben werden.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">13</property>
-                        <property name="bottom_attach">14</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelCutMove">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Diese Dateien werden unter "&#xDC;berfl&#xFC;ssige Dateien" angezeigt. Sie k&#xF6;nnen dann dort gel&#xF6;scht werden.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">10</property>
-                        <property name="bottom_attach">11</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelAfterCut">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">War das Schneiden erfolgreich, die ungeschnittene avi...</property>
-                        <property name="justify">GTK_JUSTIFY_FILL</property>
-                      </object>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">7</property>
-                        <property name="bottom_attach">8</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="hseparator5">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelDecodeMove">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Diese Dateien werden unter "&#xDC;berfl&#xFC;ssige Dateien" angezeigt. Sie k&#xF6;nnen dann dort gel&#xF6;scht werden.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
                       </packing>
                     </child>
                   </object>
@@ -1266,22 +1116,6 @@
             <property name="visible">True</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
             <child>
-              <object class="GtkButton" id="buttonCreateFolder">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="label" translatable="yes">Unterordner anlegen</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkVSeparator" id="vseparator1">
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="archive_buttonCancel">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1290,9 +1124,6 @@
                 <property name="use_stock">True</property>
                 <signal handler="on_archive_buttonCancel_clicked" name="clicked"/>
               </object>
-              <packing>
-                <property name="position">2</property>
-              </packing>
             </child>
             <child>
               <object class="GtkButton" id="archive_buttonOK">
@@ -1303,7 +1134,7 @@
                 <property name="use_stock">True</property>
               </object>
               <packing>
-                <property name="position">3</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -2198,7 +2029,7 @@
                           <object class="GtkRadioButton" id="radioTrash">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">&#xDC;berfl&#xFC;ssige Dateien</property>
+                            <property name="label" translatable="yes">M&#xFC;ll</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radioUndecoded</property>
