@@ -725,12 +725,15 @@ class GUI:
     # folder changed, save to config dictionary
     def on_folderNewOtrkeys_current_folder_changed(self, widget, data=None):        
         self.app.config_dic['folders']['new_otrkeys'] = widget.get_filename()
+        self.app.show_section(self.app.section)
     
     def on_folderTrash_current_folder_changed(self, widget, data=None):
         self.app.config_dic['folders']['trash'] = widget.get_filename()
+        self.app.show_section(self.app.section)
 
     def on_folderArchive_current_folder_changed(self, widget, data=None):        
         self.app.config_dic['folders']['archive'] = widget.get_filename()
+        self.app.show_section(self.app.section)
                 
     # decode tab
     def on_filechooserDecoder_file_set(self, widget, data=None):
