@@ -3,13 +3,20 @@
 
 #
 # OTR-Verwaltung 0.9 (Beta 1)
-# Author: Benjamin Elbers
-#         elbersb@googlemail.com
+# Copyright (C) 2008 Benjamin Elbers (elbersb@googlemail.com)
 #
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# LICENSE: CREATIVE COMMONS
-#          Attribution-Noncommercial-Share Alike 2.0 Generic
-# http://creativecommons.org/licenses/by-nc-sa/2.0/
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
 import sys
@@ -149,10 +156,7 @@ class App:
         text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path = self.config_dic['folders']['trash']
                     
-        if self.search_text == "":
-            files = [os.path.join(path, f) for f in os.listdir(path)]
-        else:
-            files = [os.path.join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
+        files = [os.path.join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
                 
         return (text, files)
 
@@ -163,8 +167,7 @@ class App:
                
         self.tree(None, path)
         
-        return text
-                   
+        return text            
                  
     # recursive function for archive to add folders and files with a tree structure
     def tree(self, parent, path=None):              
@@ -184,11 +187,8 @@ class App:
                 self.tree(iter)
             else:
                 if file.endswith('.avi'):
-                    if self.search_text == "":
+                    if self.search(file):
                         self.gui.append_row_treeviewFiles(parent, full_path)
-                    else:
-                        if self.search(file):
-                            self.gui.append_row_treeviewFiles(parent, full_path)
 
     ###
     ### Helpers
