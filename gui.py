@@ -545,6 +545,9 @@ class GUI:
     def on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
     
+    def on_menuEditSearch_activate(self, widget, data=None):
+        self.main_window['entrySearch'].grab_focus()
+    
     # toolbar actions
     def on_toolbutton_clicked(self, button, action):
         """ Raised when a toolbutton is being clicked. """

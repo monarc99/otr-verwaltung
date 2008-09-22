@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Mon Sep 22 15:46:13 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Sep 22 15:57:17 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -1788,6 +1788,22 @@
                 <child>
                   <widget class="GtkMenu" id="menu2">
                     <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="menuEditSearch">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">gtk-find</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menuEditSearch_activate"/>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="menuitem2">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">menuitem2</property>
+                        <property name="use_underline">True</property>
+                      </widget>
+                    </child>
                     <child>
                       <widget class="GtkImageMenuItem" id="menuEditPreferences">
                         <property name="visible">True</property>
