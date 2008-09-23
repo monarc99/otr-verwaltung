@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+#build_action_window
 
 import sys
 import base64
@@ -809,29 +809,32 @@ class GUI:
         if self.question_box("Wirklich abbrechen?"):
             self.windows['dialog_action'].hide()
     
-    def build_action_window(self, filenames, action):
+    def build_action_window(self, count, action):
         dialog = self.windows['dialog_action']
+        decode_widgets = [self.dialog_action['labelActionDecode'], self.dialog_action['progressbar_decode']]
+        cut_widgets = [self.dialog_action['labelActionCut'], self.dialog_action['progressbar_cut']]
 
         # clean up  
-        for widget in [self.dialog_action['labelActionDecode'], self.dialog_action['progressbar_decode'], self.dialog_action['labelActionCut'], self.dialog_action['progressbar_cut']]:
+        for widget in (decode_widgets + cut_widgets):
             widget.show()
             
-        self.dialog_action['progressbar_decode'].set_fraction(0)
-        self.dialog_action['progressbar_cut'].set_fraction(0)
+        decode_widgets[1].set_fraction(0)
+        cut_widgets[1].set_fraction(0)
         
+        # message
         message = "Es "
-        if len(filenames)==1:
+        if count==1:
             message += "wird 1 Datei "
         else:
-            message += "werden %s Dateien " % len(filenames)
+            message += "werden %i Dateien " % count
   
         if action==Action.DECODE:
-            for widget in [self.dialog_action['labelActionCut'], self.dialog_action['progressbar_cut']]:
+            for widget in cut_widgets:
                 widget.hide()
             self.dialog_action['labelCaption'].set_text(message + "dekodiert.")
             
         elif action==Action.CUT:
-            for widget in [self.dialog_action['labelActionDecode'], self.dialog_action['progressbar_decode']]:
+            for widget in decode_widgets:
                 widget.hide()
             self.dialog_action['labelCaption'].set_text(message + "geschnitten.")
             
@@ -842,11 +845,11 @@ class GUI:
         
     #
     # DIALOG CONCLUSION
-    #                      
-    def build_conclusion_dialog(self, filenames_action_status, action):
+    #       
+    def build_conclusion_dialog(self, file_conclusions, action):
         dialog = self.windows['dialog_conclusion']
-
         dialog.show_all()
+        
         for radio in ['radiobuttonRate0', 'radiobuttonRate1', 'radiobuttonRate2', 'radiobuttonRate3', 'radiobuttonRate4', 'radiobuttonRate5' ]:
             self.dialog_conclusion[radio].set_sensitive(False)
         
@@ -863,34 +866,28 @@ class GUI:
             self.dialog_conclusion['labelConclusionDecodeStatus'].hide()
             self.dialog_conclusion['labelConclusionDecode'].hide()   
           
-        self.filenames_action_status = []
-        # build list from dict
-        count = -1
-        for filename in filenames_action_status:
-            count += 1
-            self.filenames_action_status.append({ 'filename': filename, 'action_status' : filenames_action_status[filename], 'rate': -1 })
+        self.file_conclusions = file_conclusions
                 
         self.show_conclusion(0)       
         return dialog        
         
     def on_buttonConclusionPlay_clicked(self, widget, data=None):        
-        status, data = self.filenames_action_status[self.conclusion_iter]['action_status'][Action.CUT]
-        filename = data[0]
+        filename = self.file_conclusions[self.conclusion_iter].cut_avi
 
         self.app.perform_action(Action.PLAY, [filename])      
         
     def on_radiobuttonRating_toggled(self, widget, rate):
         if widget.get_active()==True:
             print "Changed rate to ", str(rate)
-            self.filenames_action_status[self.conclusion_iter]['rate'] = rate 
+            self.file_conclusions[self.conclusion_iter].cut.rate = rate 
        
     def on_checkbuttonRate_toggled(self, widget, data=None):
         status = widget.get_active()
-        if status==True:
-            self.filenames_action_status[self.conclusion_iter]['rate'] = 0
+        if status==True: # now the checkbutton is checked:
+            self.file_conclusions[self.conclusion_iter].cut.rate = 0
             self.dialog_conclusion['radiobuttonRate0'].set_active(True)
         else:
-            self.filenames_action_status[self.conclusion_iter]['rate'] = -1
+            self.file_conclusions[self.conclusion_iter].cut.rate = -1
         
         for radio in ['radiobuttonRate0', 'radiobuttonRate1', 'radiobuttonRate2', 'radiobuttonRate3', 'radiobuttonRate4', 'radiobuttonRate5' ]:
             self.dialog_conclusion[radio].set_sensitive(status)
@@ -904,7 +901,7 @@ class GUI:
     def show_conclusion(self, new_iter):
         self.conclusion_iter = new_iter
         
-        self.dialog_conclusion['labelCount'].set_text("Zeige Datei %s/%s" % (self.conclusion_iter + 1, len(self.filenames_action_status)))
+        self.dialog_conclusion['labelCount'].set_text("Zeige Datei %s/%s" % (self.conclusion_iter + 1, len(self.file_conclusions)))
         
         # enable back-button?
         if self.conclusion_iter==0:
@@ -913,49 +910,49 @@ class GUI:
             self.dialog_conclusion['buttonBack'].set_sensitive(True)
         
         # enable forward-button?
-        if self.conclusion_iter + 1 == len(self.filenames_action_status):
+        if self.conclusion_iter + 1 == len(self.file_conclusions):
             self.dialog_conclusion['buttonForward'].set_sensitive(False)
         else:
             self.dialog_conclusion['buttonForward'].set_sensitive(True)
                 
-        item = self.filenames_action_status[self.conclusion_iter]                
+        file_conclusion = self.file_conclusions[self.conclusion_iter]
                 
-        self.dialog_conclusion['labelConclusionFilename'].set_text(os.path.basename(item['filename']))
+        self.dialog_conclusion['labelConclusionFilename'].set_text(os.path.basename(file_conclusion.uncut_avi))
                 
-        if self.action == Action.DECODE or self.action == Action.DECODEANDCUT:
-            status, message = item['action_status'][Action.DECODE]
-            text = self.app.status_to_s(status) + ": " + message
-            self.dialog_conclusion['labelConclusionDecodeStatus'].set_text(text)
-                
-        if self.action == Action.CUT or self.action == Action.DECODEANDCUT:
-            text = ""
-            
-            status, message = item['action_status'][Action.CUT]
-            if status == Status.OK:
-            
-                status, array = item['action_status'][Action.CUT] 
-                if len(array)==2: # this means the file was cut by a cutlist
-                    text = "OK: Geschnitten mit Cutlist #%s" % array[1]
-                    
-                    self.dialog_conclusion['vboxRating'].show()
-                    self.dialog_conclusion['vboxButtons'].show()
-                else: # file was cut manually...
-                    text = "OK: Datei wurde manuell geschnitten"
-                
-                    # ...so don't show rating options, and we don't know the filename
-                    # so we also can't play it
-                    self.dialog_conclusion['vboxButtons'].hide()
-                    self.dialog_conclusion['vboxRating'].hide()
-                    
-            else:
-                # hide play button and rating
-                self.dialog_conclusion['vboxRating'].hide()
-                self.dialog_conclusion['vboxButtons'].hide()
-                
-                status, message = item['action_status'][Action.CUT]
-                text = self.app.status_to_s(status) + ": " + message
-            
-            self.dialog_conclusion['labelConclusionCutStatus'].set_text(text)
+#        if self.action == Action.DECODE or self.action == Action.DECODEANDCUT:
+#            status, message = item['action_status'][Action.DECODE]
+#            text = self.app.status_to_s(status) + ": " + message
+#            self.dialog_conclusion['labelConclusionDecodeStatus'].set_text(text)
+#                
+#        if self.action == Action.CUT or self.action == Action.DECODEANDCUT:
+#            text = ""
+#            
+#            status, message = item['action_status'][Action.CUT]
+#            if status == Status.OK:
+#            
+#                status, array = item['action_status'][Action.CUT] 
+#                if len(array)==2: # this means the file was cut by a cutlist
+#                    text = "OK: Geschnitten mit Cutlist #%s" % array[1]
+#                    
+#                    self.dialog_conclusion['vboxRating'].show()
+#                    self.dialog_conclusion['vboxButtons'].show()
+#                else: # file was cut manually...
+#                    text = "OK: Datei wurde manuell geschnitten"
+#                
+#                    # ...so don't show rating options, and we don't know the filename
+#                    # so we also can't play it
+#                    self.dialog_conclusion['vboxButtons'].hide()
+#                    self.dialog_conclusion['vboxRating'].hide()
+#                    
+#            else:
+#                # hide play button and rating
+#                self.dialog_conclusion['vboxRating'].hide()
+#                self.dialog_conclusion['vboxButtons'].hide()
+#                
+#                status, message = item['action_status'][Action.CUT]
+#                text = self.app.status_to_s(status) + ": " + message
+#            
+#            self.dialog_conclusion['labelConclusionCutStatus'].set_text(text)
         
     def on_buttonConclusionClose_clicked(self, widget, data=None):
         self.windows['dialog_conclusion'].hide()

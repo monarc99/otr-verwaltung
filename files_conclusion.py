@@ -19,37 +19,31 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-class Section:
-    OTRKEY      = 0
-    AVI_UNCUT   = 1
-    AVI_CUT     = 2
-    ARCHIVE     = 3
-    TRASH       = 4
-    SEARCH      = 5
+from constants import Action
+
+class Decode:
+    def __init__(self):
+        self.status = -1
+        self.message = ""
+    
+class Cut:
+    def __init__(self):
+        self.status = -1
+        self.message = ""
         
-class Action:
-    DECODE          = 0
-    DECODEANDCUT    = 1
-    CUT             = 2
-    DELETE          = 3
-    ARCHIVE         = 4
-    PLAY            = 5
-    RESTORE         = 6
-    RENAME          = 7
-    NEW_FOLDER      = 8
-    CUT_PLAY        = 9
+        self.cut_action = -1
+        self.cutlist = -1
+        self.rating = -1
 
-class Cut_action:
-    ASK             = 0
-    BEST_CUTLIST    = 1
-    CHOOSE_CUTLIST  = 2
-    MANUALLY        = 3
-
-class Save_Email_Password:
-    DONT_SAVE   = 0
-    SAVE        = 1
-
-class Status:
-    OK          = 0
-    ERROR       = 1
-    NOT_DONE    = 2
+class FileConclusion:
+    def __init__(self, action, otrkey="", uncut_avi=""):
+        if action==Action.DECODE or action==Action.DECODEANDCUT:
+            self.otrkey = otrkey
+            self.decode = Decode()
+        
+        self.uncut_avi = uncut_avi
+        
+        if action==Action.CUT or action==Action.DECODEANDCUT:
+            self.cut_avi = ""
+            self.cut = Cut()
+            

@@ -43,6 +43,7 @@ except:
 # intern
 import gui
 import configParser
+from files_conclusion import FileConclusion
 from constants import Section, Action, Cut_action, Save_Email_Password, Status
 
 class App:
@@ -268,38 +269,43 @@ class App:
         
         # different actions:
         if action==Action.DECODE or action==Action.CUT or action==Action.DECODEANDCUT:
-       
-            # build dialog
-            dialog = self.gui.build_action_window(filenames, action)
-        
-            # hide main window and show dialog
-            self.gui.windows['main_window'].hide()              
-            dialog.show() 
-        
-            filenames_action_status = {}
-        
-            if action==Action.DECODE or action==Action.DECODEANDCUT:
-                filenames_action_status = self.action_decode(filenames, filenames_action_status, dialog)
+              
+            # (re)build progressbar dialog
+            dialog = self.gui.build_action_window(len(filenames), action)
             
+            # create file_conclusions array        
+            file_conclusions = []
+                
+            if action==Action.DECODE or action==Action.DECODEANDCUT:
+                for otrkey in filenames:
+                    file_conclusions.append(FileConclusion(action, otrkey=otrkey))
+                
+            if action==Action.CUT:
+                for uncut_avi in filenames:
+                    file_conclusions.append(FileConclusion(action, uncut_avi=uncut_avi))
+                
+            # decode files                    
+            if action==Action.DECODE or action==Action.DECODEANDCUT:
+                if self.action_decode(file_conclusions)==False: 
+                    return
+            
+            # cut files
             if action==Action.CUT or action==Action.DECODEANDCUT:
-                filenames_action_status = self.action_cut(filenames, filenames_action_status, dialog, action)
+                if self.action_cut(file_conclusions, action)==False:
+                    return                    
                 
             # hide action dialog
-            self.gui.windows['dialog_action'].hide()                
+            self.gui.windows['dialog_action'].hide()          
                 
             # show conclusion
-            dialog = self.gui.build_conclusion_dialog(filenames_action_status, action)
-            
+            dialog = self.gui.build_conclusion_dialog(file_conclusions, action)
             dialog.run()         
             
-            if action==Action.CUT or action==Action.DECODEANDCUT:
-                filenames_action_status = self.gui.filenames_action_status
-                for item in filenames_action_status:
-                    if item['rate'] > 0 and len(item['action_status'][Action.CUT]) == 2:
-                        print "#", item['action_status'][Action.CUT][1] , " für ", item['filename'], " wird mit ", item['rate'], "bewertet."
-                    else:
-                        print item['filename'], " wird mit nicht bewertet."
-                            
+            # rate...
+            #
+            #
+            #
+ 
             # update section
             self.gui.windows['main_window'].show()
             self.show_section(self.section)        
@@ -334,42 +340,43 @@ class App:
             self.action_cut_play(filenames[0])
       
     # helpers for actions                   
-    def action_decode(self, filenames, filenames_action_status, dialog):           
+    def action_decode(self, file_conclusions):           
         
         # no decoder        
-        if self.config_dic['decode']['path'] == None or not self.config_dic['decode']['path'].endswith("otrdecoder"): # no decoder specified
+        if not "decode" in self.config_dic['decode']['path']: # no decoder specified
             # dialog box: no decoder
-            self.gui.message_box("Es ist kein korrekter Dekoder angegeben (Bearbeiten>Optionen>Pfad zum Dekoder)!\nDer Dateiname lautet 'otrdecoder'.", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)   
-            return
+            self.gui.message_box("Es ist kein korrekter Dekoder angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)   
+            return False
         
         # retrieve email and password
         # user did not save email and password
         if self.config_dic['decode']['save_email_password'] == Save_Email_Password.DONT_SAVE:
             # let the user type in his data through a dialog
             response = self.gui.windows['dialog_email_password'].run()
+            self.gui.windows['dialog_email_password'].hide() 
             
             if response==gtk.RESPONSE_OK:
                 email = self.gui.dialog_email_password['entryDialogEMail'].get_text()
-                password = self.gui.dialog_email_password['entryDialogPassword'].get_text()
-
-                self.gui.windows['dialog_email_password'].hide()                 
-            else:
-                self.gui.windows['dialog_email_password'].hide()
-                return
-              
-        # user typed email and password in                
-        else: 
+                password = self.gui.dialog_email_password['entryDialogPassword'].get_text()                               
+            else: # user pressed cancel
+                return False
+                         
+        else: # user typed email and password in         
             email = self.config_dic['decode']['email']
-            password = base64.b64decode(self.config_dic['decode']['password'])
+            password = base64.b64decode(self.config_dic['decode']['password']) 
+        
+        # start decoding, show "action" window
+        # now this method may not return "False"
+        self.gui.windows['main_window'].hide()
+        self.gui.windows['dialog_action'].show()     
                  
         # decode each file
-        for count, f in enumerate(filenames):
-            check = ""
-            if self.config_dic['decode']['correct'] == 0:
-                check = " -q"
+        for count, file_conclusion in enumerate(file_conclusions):
                    
-            command = self.config_dic['decode']['path'] + " -i " + f + " -e " + email + " -p " + password + " -o " + self.config_dic['folders']['new_otrkeys'] + check
-                     
+            command = "%s -i %s -e %s -p %s -o %s" % (self.config_dic['decode']['path'], file_conclusion.otrkey, email, password, self.config_dic['folders']['new_otrkeys'])
+            if self.config_dic['decode']['correct'] == 0:
+                command += " -q"
+                                   
             (pout, pin, perr) = popen2.popen3(command)
             while True:
                 l = ""
@@ -385,7 +392,7 @@ class App:
                 try:      
                     progress = int(l[10:13])
                     # set progress on decode progressbar
-                    progress = (progress/100.) / len(filenames) + count * (1. / len(filenames))
+                    progress = (progress/100.) / len(file_conclusions) + count * (1. / len(file_conclusions))
                     self.gui.dialog_action['progressbar_decode'].set_fraction(progress)
                     while gtk.events_pending():
                         gtk.main_iteration(False)
@@ -395,54 +402,46 @@ class App:
             # errors?
             errors = perr.readlines()
             error_message = ""
-            for line in errors:
-                error_message += line.strip()
-            
+            for error in errors:
+                error_message += error.strip()
+                            
             # close process
             pout.close()
             perr.close()
             pin.close()
-                 
-                             
-            # special case:
-            message = ""
-            if error_message.find("Output file already exists") > 0:
-                errors = ""
-                message = "Die Datei wurde bereits dekodiert."
-                 
-            filenames_action_status[f] = {}
-                        
-            if len(errors) == 0: # dekodieren erfolgreich                
-                filenames_action_status[f][Action.DECODE] = (Status.OK, message)            
+                                                            
+            if len(errors)==0: # dekodieren erfolgreich                
+                file_conclusion.decode.status = Status.OK
             
+                # TODO nach zusammenfassung?
                 # move to trash
                 target = self.config_dic['folders']['trash']
-                os.rename(f, os.path.join(target, os.path.basename(f)))
+                os.rename(file_conclusion.otrkey, os.path.join(target, os.path.basename(file_conclusion.otrkey)))
             else:            
-                filenames_action_status[f][Action.DECODE] = (Status.ERROR, error_message)
+                file_conclusion.decode.status = Status.ERROR
+                file_conclusion.decode.message = error_message
                 
-        return filenames_action_status
+        return True
 
-    def action_cut(self, filenames, filenames_action_status, dialog, action):               
-        for count, f in enumerate(filenames):
-            avi = f
-            
+    def action_cut(self, file_conclusions, action):               
+        # start cutting, show "action" window
+        # now this method may not return "False"
+        self.gui.windows['main_window'].hide()
+        self.gui.windows['dialog_action'].show()       
+        
+        for count, file_conclusion in enumerate(file_conclusions):
+
+            # file correctly decoded?            
             if action==Action.DECODEANDCUT:
-                index = f.rfind('.otrkey')
-                avi = f[0:index]
-                status, message = filenames_action_status[f][Action.DECODE]
-                if status == Status.ERROR:
-                    filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, "Datei wurde nicht dekodiert.")
-
-            try: 
-                filenames_action_status[f]
-            except KeyError:
-                filenames_action_status[f] = {}  
+                if file_conclusions.decode.status == Status.ERROR:
+                    file_conclusions.cut.status = Status.NOT_DONE
+                    file_conclusions.cut.message = "Datei wurde nicht dekodiert."
+                    continue
 
             # how should the file be cut?
             cut_action = None
             if self.config_dic['cut']['cut_action'] == Cut_action.ASK:
-                self.gui.dialog_cut['labelCutFile'].set_text(os.path.basename(avi))
+                self.gui.dialog_cut['labelCutFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
                 self.gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config_dic['folders']['new_otrkeys'])
 
                 response = self.gui.windows['dialog_cut'].run()
@@ -456,20 +455,25 @@ class App:
                     else:                    
                         cut_action = Cut_action.MANUALLY
                 else:
-                    filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, "Abgebrochen")                  
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = "Abgebrochen"
+                    continue
             
-            else:
+            else: # !=ASK
                 cut_action = self.config_dic['cut']['cut_action']
  
+            # save cut_action
+            file_conclusion.cut.cut_action = cut_action
 
             if cut_action == Cut_action.BEST_CUTLIST:
                 # download all cutlist for the files and choose
                 # the cutlist with the best rating
                 
-                dom_cutlists, error_message = self.get_dom_from_cutlist(avi)
+                dom_cutlists, error_message = self.get_dom_from_cutlist(file_conclusion.uncut_avi)
                 
                 if dom_cutlists==None:
-                    filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, error_message)
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = error_message
                 else:                   
                     cutlists = {}             
                     for cutlist in dom_cutlists.getElementsByTagName('cutlist'):                          
@@ -486,32 +490,36 @@ class App:
                         cutlists[int(self.read_value(cutlist, "id"))] = rating
                     
                     if len(cutlists)==0:
-                        filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, "Keine Cutlist gefunden.")
+                        file_conclusion.cut.status = Status.NOT_DONE
+                        file_conclusion.cut.message = "Keine Cutlist gefunden."
                     else:                
                         sort_cutlists = cutlists.items()
                         sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
                                         
                         best_cutlist = sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
                         
-                        cut_avi, error = self.cut_file_by_cutlist(avi, best_cutlist)
+                        cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist)
                         if cut_avi == None:
-                            filenames_action_status[f][Action.CUT] = (Status.ERROR, error)
-                        else:                            
-                            filenames_action_status[f][Action.CUT] = (Status.OK, [cut_avi, best_cutlist])
+                            file_conclusion.cut.status = Status.ERROR
+                            file_conclusion.cut.message = error    
+                        else:
+                            file_conclusion.cut.status = Status.OK
+                            file_conclusion.cut_avi = cut_avi
+                            file_conclusion.cutlist = best_cutlist                            
                 
             elif cut_action == Cut_action.CHOOSE_CUTLIST:
                 # download all cutlist and display them to
                 # the user
 
                 self.gui.dialog_cutlist['treeviewCutlists_store'].clear()                
-                dom_cutlists, error_message = self.get_dom_from_cutlist(avi)
+                dom_cutlists, error_message = self.get_dom_from_cutlist(file_conclusion.uncut_avi)
                 
                 cutlists_found = False
                  
                 if dom_cutlists==None:
                     self.gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
-                    filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, error_message)
-                    
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = error_message
                 else:                   
                     for cutlist in dom_cutlists.getElementsByTagName('cutlist'):
                         cutlists_found = True
@@ -533,52 +541,57 @@ class App:
                         self.gui.add_cutlist(data_array)
                 
                     if cutlists_found:                        
-                        self.gui.dialog_cutlist['labelCutlistFile'].set_text(os.path.basename(avi))
+                        self.gui.dialog_cutlist['labelCutlistFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
                         response = self.gui.windows['dialog_cutlist'].run()
                         self.gui.windows['dialog_cutlist'].hide()
                         
                         treeselection = self.gui.dialog_cutlist['treeviewCutlists'].get_selection()  
                         
                         if treeselection.count_selected_rows()==0 or response != gtk.RESPONSE_OK:                            
-                            filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, "Keine Cutlist gewählt.")
+                            file_conclusion.cut.status = Status.NOT_DONE
+                            file_conclusion.cut.message = "Keine Cutlist gewählt."
                         else:
                             # retrieve id of chosen cutlist
                             (model, iter) = treeselection.get_selected()                   
                             chosen_cutlist = model.get_value(iter, 0)
                             
-                            cut_avi, error = self.cut_file_by_cutlist(avi, chosen_cutlist)
+                            cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, chosen_cutlist)
+                            
                             if cut_avi == None:
-                                filenames_action_status[f][Action.CUT] = (Status.ERROR, error)                                
-                            else:                            
-                                filenames_action_status[f][Action.CUT] = (Status.OK, [cut_avi, chosen_cutlist])
-                                                            
+                                file_conclusion.cut.status = Status.ERROR
+                                file_conclusion.cut.message = error    
+                            else:
+                                file_conclusion.cut.status = Status.OK
+                                file_conclusion.cut_avi = cut_avi
+                                file_conclusion.cutlist = chosen_cutlist         
+                                                                                        
                     else: # no cutlist in xml
-                        filenames_action_status[f][Action.CUT] = (Status.NOT_DONE, "Keine Cutlist gefunden.")
+                        file_conclusion.cut.status = Status.NOT_DONE
+                        file_conclusion.cut.message = "Keine Cutlist gefunden."
 
             elif cut_action == Cut_action.MANUALLY: # MANUALLY
-                cut_avi = avi[0:len(avi)-4] # remove .avi
-                cut_avi += "-cut.avi"
                 command = "%s --load %s >>/dev/null" %(self.config_dic['cut']['avidemux'], avi)
                 avidemux = subprocess.Popen(command, shell=True)    
                 while avidemux.poll()==None:
                     # wait
                     pass
                     
-                filenames_action_status[f][Action.CUT] = (Status.OK, None)
+                file_conclusion.cut.status = Status.OK
         
+            # TODO: Nach zusammenfassung?
             # action after cut
-            status, message = filenames_action_status[f][Action.CUT]
+            status = file_conclusion.cut.status
             
             if status == Status.OK:
                 # move to trash
                 target = self.config_dic['folders']['trash']
-                os.rename(avi, os.path.join(target, os.path.basename(avi)))
+                os.rename(file_conclusion.uncut_avi, os.path.join(target, os.path.basename(file_conclusion.uncut_avi)))
              
-            progress = 1./len(filenames) + count * (1. / len(filenames))
+            progress = 1./len(file_conclusions) + count * (1. / len(file_conclusions))
             self.gui.dialog_action['progressbar_cut'].set_fraction(progress)
         
         # after iterating over all items:
-        return filenames_action_status
+        return True
        
     def get_dom_from_cutlist(self, avi):
         size = os.path.getsize(avi)    
