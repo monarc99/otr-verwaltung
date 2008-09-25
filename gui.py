@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-#build_action_window
+#
 
 import sys
 import base64
@@ -50,10 +50,7 @@ class GUI:
         self.app = app_instance
     
         # init builder     
-        builder = gtk.Builder()
-
-
-            
+        builder = gtk.Builder()  
         builder.add_from_file(builder_file)
                 
         # dicts for widgets
@@ -229,7 +226,8 @@ class GUI:
             gtk.image_new_from_file(self.get_image_path('restore.png')),
             gtk.image_new_from_file(self.get_image_path('rename.png')),
             gtk.image_new_from_file(self.get_image_path('new_folder.png')),
-            gtk.image_new_from_file(self.get_image_path('play.png'))                        
+            gtk.image_new_from_file(self.get_image_path('play.png')),
+            gtk.image_new_from_file(self.get_image_path('delete.png'))                 
         ]
                        
         for img in images:
@@ -245,7 +243,8 @@ class GUI:
                 'restore':      gtk.ToolButton(images[6], "Wiederherstellen"),
                 'rename':       gtk.ToolButton(images[7], "Umbenennen"),
                 'new_folder':   gtk.ToolButton(images[8], "Neuer Ordner"),
-                'cut_play':     gtk.ToolButton(images[9], "Geschnitten Abspielen")
+                'cut_play':     gtk.ToolButton(images[9], "Geschnitten Abspielen"),
+                'real_delete':  gtk.ToolButton(images[10], "Löschen")
             }
 
         toolbar_buttons['decode'].connect("clicked", self.on_toolbutton_clicked, Action.DECODE)
@@ -258,6 +257,7 @@ class GUI:
         toolbar_buttons['rename'].connect("clicked", self.on_toolbutton_clicked, Action.RENAME)        
         toolbar_buttons['new_folder'].connect("clicked", self.on_toolbutton_clicked, Action.NEW_FOLDER)                                    
         toolbar_buttons['cut_play'].connect("clicked", self.on_toolbutton_clicked, Action.CUT_PLAY)  
+        toolbar_buttons['real_delete'].connect("clicked", self.on_toolbutton_clicked, Action.REAL_DELETE)
           
         # create sets of toolbuttons
         self.sets_of_toolbars = {
@@ -265,7 +265,7 @@ class GUI:
             Section.AVI_UNCUT:  [ toolbar_buttons['cut'], toolbar_buttons['delete'], toolbar_buttons['archive'], toolbar_buttons['play'], toolbar_buttons['cut_play'] ],
             Section.AVI_CUT:    [ toolbar_buttons['archive'], toolbar_buttons['delete'], toolbar_buttons['cut'], toolbar_buttons['play'], toolbar_buttons['rename'] ],
             Section.ARCHIVE:    [ toolbar_buttons['cut'], toolbar_buttons['delete'], toolbar_buttons['play'], toolbar_buttons['rename'], toolbar_buttons['new_folder'] ],
-            Section.TRASH:      [ toolbar_buttons['delete'], toolbar_buttons['restore'] ]
+            Section.TRASH:      [ toolbar_buttons['real_delete'], toolbar_buttons['restore'] ]
         }
         
         self.dialog_email_password['entryDialogPassword'].set_visibility(False)

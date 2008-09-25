@@ -38,6 +38,7 @@ class Action:
     RENAME          = 7
     NEW_FOLDER      = 8
     CUT_PLAY        = 9
+    REAL_DELETE     = 10
 
 class Cut_action:
     ASK             = 0

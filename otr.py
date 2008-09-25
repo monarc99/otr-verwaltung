@@ -19,6 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+
 import sys
 import os
 import re
@@ -338,6 +339,10 @@ class App:
         
         elif action==Action.CUT_PLAY:
             self.action_cut_play(filenames[0])
+            
+        elif action==Action.REAL_DELETE:
+            self.action_real_delete(filenames)
+            self.show_section(self.section)
       
     # helpers for actions                   
     def action_decode(self, file_conclusions):           
@@ -579,6 +584,7 @@ class App:
                 file_conclusion.cut.status = Status.OK
         
             # TODO: Nach zusammenfassung?
+            # FIXME: fixme
             # action after cut
             status = file_conclusion.cut.status
             
@@ -890,6 +896,16 @@ class App:
             for f in filenames:
                 target = self.config_dic['folders']['trash']
                 os.rename(f, os.path.join(target, os.path.basename(f)))
+                
+    def action_real_delete(self, filenames):
+        if len(filenames) == 1:
+            message = "Es ist eine Datei ausgewählt. Soll diese Datei "
+        else:
+            message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
+        
+        if self.gui.question_box(message + "endgültig gelöscht werden?"):
+            for f in filenames:
+                os.remove(f)
     
     def action_restore(self, filenames):
         for f in filenames:
