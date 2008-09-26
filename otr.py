@@ -418,7 +418,7 @@ class App:
             if len(errors)==0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
             
-                # TODO nach zusammenfassung?
+                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
                 # move to trash
                 target = self.config_dic['folders']['trash']
                 os.rename(file_conclusion.otrkey, os.path.join(target, os.path.basename(file_conclusion.otrkey)))
@@ -438,9 +438,9 @@ class App:
 
             # file correctly decoded?            
             if action==Action.DECODEANDCUT:
-                if file_conclusions.decode.status == Status.ERROR:
-                    file_conclusions.cut.status = Status.NOT_DONE
-                    file_conclusions.cut.message = "Datei wurde nicht dekodiert."
+                if file_conclusion.decode.status == Status.ERROR:
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = "Datei wurde nicht dekodiert."
                     continue
 
             # how should the file be cut?
@@ -583,8 +583,7 @@ class App:
                     
                 file_conclusion.cut.status = Status.OK
         
-            # TODO: Nach zusammenfassung?
-            # FIXME: fixme
+            # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
             # action after cut
             status = file_conclusion.cut.status
             

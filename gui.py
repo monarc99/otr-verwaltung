@@ -854,31 +854,31 @@ class GUI:
             self.dialog_conclusion[radio].set_sensitive(False)
         
         self.action = action
-        if self.action == Action.DECODE or self.action == Action.DECODEANDCUT:
+
+        # show status/rating for decode/cut?
+        if self.action==Action.DECODE:
             self.dialog_conclusion['labelConclusionCutStatus'].hide()
-            self.dialog_conclusion['labelConclusionCut'].hide()
-                
-            # hide play button and rating
+            self.dialog_conclusion['labelConclusionCut'].hide()   
             self.dialog_conclusion['vboxRating'].hide()
-            self.dialog_conclusion['vboxButtons'].hide()
-                
-        if self.action == Action.CUT or self.action == Action.DECODEANDCUT:
+        elif self.action==Action.CUT:
             self.dialog_conclusion['labelConclusionDecodeStatus'].hide()
             self.dialog_conclusion['labelConclusionDecode'].hide()   
-          
+                        
         self.file_conclusions = file_conclusions
                 
         self.show_conclusion(0)       
         return dialog        
         
-    def on_buttonConclusionPlay_clicked(self, widget, data=None):        
-        filename = self.file_conclusions[self.conclusion_iter].cut_avi
+    def on_buttonConclusionPlay_clicked(self, widget, data=None):    
+        if self.action==Action.DECODE:
+            filename = self.file_conclusions[self.conclusion_iter].uncut_avi
+        else:    
+            filename = self.file_conclusions[self.conclusion_iter].cut_avi
 
         self.app.perform_action(Action.PLAY, [filename])      
         
     def on_radiobuttonRating_toggled(self, widget, rate):
-        if widget.get_active()==True:
-            print "Changed rate to ", str(rate)
+        if widget.get_active()==True:            
             self.file_conclusions[self.conclusion_iter].cut.rate = rate 
        
     def on_checkbuttonRate_toggled(self, widget, data=None):
@@ -901,7 +901,10 @@ class GUI:
     def show_conclusion(self, new_iter):
         self.conclusion_iter = new_iter
         
+        # reset dialog        
         self.dialog_conclusion['labelCount'].set_text("Zeige Datei %s/%s" % (self.conclusion_iter + 1, len(self.file_conclusions)))
+        self.dialog_conclusion['vboxRating'].hide()
+        self.dialog_conclusion['vboxButtons'].hide()
         
         # enable back-button?
         if self.conclusion_iter==0:
@@ -914,45 +917,50 @@ class GUI:
             self.dialog_conclusion['buttonForward'].set_sensitive(False)
         else:
             self.dialog_conclusion['buttonForward'].set_sensitive(True)
-                
+        
+        # conclusion of file
         file_conclusion = self.file_conclusions[self.conclusion_iter]
+        
+        # filename
+        if self.action == Action.CUT:
+            filename = file_conclusion.uncut_avi
+        else:
+            # remove ugly .otrkey
+            filename = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]
+                          
+        self.dialog_conclusion['labelConclusionFilename'].set_text(os.path.basename(filename))  
+        
+        # decode status
+        if self.action != Action.CUT:
+            text = self.app.status_to_s(file_conclusion.decode.status)
+            message = file_conclusion.decode.message
+            if message != "":
+                text += "(%s)" % message
+            
+            if file_conclusion.decode.status==Status.OK:
+                self.dialog_conclusion['vboxButtons'].show()
+                            
+            self.dialog_conclusion['labelConclusionDecodeStatus'].set_text(text)
+        
+        # cut status
+        if self.action != Action.DECODE:
+            text = self.app.status_to_s(file_conclusion.cut.status)
+            message = file_conclusion.cut.message
+            
+            if message != "":
+                text += " (%s)" % message
+           
+            if file_conclusion.cut.cut_action != -1 and file_conclusion.cut.status==Status.OK:
+                if file_conclusion.cut.cut_action == Cut_action.MANUALLY:
+                    text += ", Manuell geschnitten"
+                else:
+                    text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist
+                    # enable rating options and play option
+                    self.dialog_conclusion['vboxRating'].show()
+                    self.dialog_conclusion['vboxButtons'].show()
                 
-        self.dialog_conclusion['labelConclusionFilename'].set_text(os.path.basename(file_conclusion.uncut_avi))
-                
-#        if self.action == Action.DECODE or self.action == Action.DECODEANDCUT:
-#            status, message = item['action_status'][Action.DECODE]
-#            text = self.app.status_to_s(status) + ": " + message
-#            self.dialog_conclusion['labelConclusionDecodeStatus'].set_text(text)
-#                
-#        if self.action == Action.CUT or self.action == Action.DECODEANDCUT:
-#            text = ""
-#            
-#            status, message = item['action_status'][Action.CUT]
-#            if status == Status.OK:
-#            
-#                status, array = item['action_status'][Action.CUT] 
-#                if len(array)==2: # this means the file was cut by a cutlist
-#                    text = "OK: Geschnitten mit Cutlist #%s" % array[1]
-#                    
-#                    self.dialog_conclusion['vboxRating'].show()
-#                    self.dialog_conclusion['vboxButtons'].show()
-#                else: # file was cut manually...
-#                    text = "OK: Datei wurde manuell geschnitten"
-#                
-#                    # ...so don't show rating options, and we don't know the filename
-#                    # so we also can't play it
-#                    self.dialog_conclusion['vboxButtons'].hide()
-#                    self.dialog_conclusion['vboxRating'].hide()
-#                    
-#            else:
-#                # hide play button and rating
-#                self.dialog_conclusion['vboxRating'].hide()
-#                self.dialog_conclusion['vboxButtons'].hide()
-#                
-#                status, message = item['action_status'][Action.CUT]
-#                text = self.app.status_to_s(status) + ": " + message
-#            
-#            self.dialog_conclusion['labelConclusionCutStatus'].set_text(text)
+            self.dialog_conclusion['labelConclusionCutStatus'].set_text(text) 
+
         
     def on_buttonConclusionClose_clicked(self, widget, data=None):
         self.windows['dialog_conclusion'].hide()
