@@ -141,6 +141,7 @@ class GUI:
             'labelConclusionDecodeStatus',
             'labelConclusionCut',
             'labelConclusionDecode',
+            'checkbuttonRate',
             'vboxRating',
             'vboxButtons',
             'radiobuttonRate0',
@@ -879,15 +880,14 @@ class GUI:
         
     def on_radiobuttonRating_toggled(self, widget, rate):
         if widget.get_active()==True:            
-            self.file_conclusions[self.conclusion_iter].cut.rate = rate 
+            self.file_conclusions[self.conclusion_iter].cut.rating = rate 
        
     def on_checkbuttonRate_toggled(self, widget, data=None):
         status = widget.get_active()
-        if status==True: # now the checkbutton is checked:
-            self.file_conclusions[self.conclusion_iter].cut.rate = 0
+
+        if status==False:
             self.dialog_conclusion['radiobuttonRate0'].set_active(True)
-        else:
-            self.file_conclusions[self.conclusion_iter].cut.rate = -1
+            self.file_conclusions[self.conclusion_iter].cut.rating = -1
         
         for radio in ['radiobuttonRate0', 'radiobuttonRate1', 'radiobuttonRate2', 'radiobuttonRate3', 'radiobuttonRate4', 'radiobuttonRate5' ]:
             self.dialog_conclusion[radio].set_sensitive(status)
@@ -917,7 +917,7 @@ class GUI:
             self.dialog_conclusion['buttonForward'].set_sensitive(False)
         else:
             self.dialog_conclusion['buttonForward'].set_sensitive(True)
-        
+                
         # conclusion of file
         file_conclusion = self.file_conclusions[self.conclusion_iter]
         
@@ -958,9 +958,17 @@ class GUI:
                     # enable rating options and play option
                     self.dialog_conclusion['vboxRating'].show()
                     self.dialog_conclusion['vboxButtons'].show()
-                
+                    
+                    # already rated?
+                    if file_conclusion.cut.rating > -1:                               
+                        self.dialog_conclusion['checkbuttonRate'].set_active(True)
+                        self.dialog_conclusion['radiobuttonRate' + str(file_conclusion.cut.rating)].set_active(True)
+                    else:
+                        self.dialog_conclusion['checkbuttonRate'].set_active(False)
+                                       
             self.dialog_conclusion['labelConclusionCutStatus'].set_text(text) 
 
+        
         
     def on_buttonConclusionClose_clicked(self, widget, data=None):
         self.windows['dialog_conclusion'].hide()

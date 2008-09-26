@@ -302,11 +302,23 @@ class App:
             dialog = self.gui.build_conclusion_dialog(file_conclusions, action)
             dialog.run()         
             
-            # rate...
-            #
-            #
-            #
- 
+            file_conclusions = self.gui.file_conclusions
+            
+            if action != Action.DECODE:
+                count = 0
+                for file_conclusion in file_conclusions:                    
+                    if file_conclusion.cut.rating > -1:
+                        url = self.config_dic['cut']['server'] + "rate.php?version=0.9.8.0&rate=%s&rating=%s" % (file_conclusion.cut.cutlist, file_conclusion.cut.rating)
+
+                        try:
+                            urllib.urlopen(url)                                 
+                            count += 1
+                        except IOError, e:
+                            print e
+                
+                if count > 0:
+                    self.gui.message_box("Es wurden %s Cutlisten bewertet!" % count, gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
+
             # update section
             self.gui.windows['main_window'].show()
             self.show_section(self.section)        
@@ -510,7 +522,7 @@ class App:
                         else:
                             file_conclusion.cut.status = Status.OK
                             file_conclusion.cut_avi = cut_avi
-                            file_conclusion.cutlist = best_cutlist                            
+                            file_conclusion.cut.cutlist = best_cutlist                            
                 
             elif cut_action == Cut_action.CHOOSE_CUTLIST:
                 # download all cutlist and display them to
@@ -568,14 +580,14 @@ class App:
                             else:
                                 file_conclusion.cut.status = Status.OK
                                 file_conclusion.cut_avi = cut_avi
-                                file_conclusion.cutlist = chosen_cutlist         
+                                file_conclusion.cut.cutlist = chosen_cutlist         
                                                                                         
                     else: # no cutlist in xml
                         file_conclusion.cut.status = Status.NOT_DONE
                         file_conclusion.cut.message = "Keine Cutlist gefunden."
 
             elif cut_action == Cut_action.MANUALLY: # MANUALLY
-                command = "%s --load %s >>/dev/null" %(self.config_dic['cut']['avidemux'], avi)
+                command = "%s --load %s >>/dev/null" %(self.config_dic['cut']['avidemux'], file_conclusion.uncut_avi)
                 avidemux = subprocess.Popen(command, shell=True)    
                 while avidemux.poll()==None:
                     # wait
