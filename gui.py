@@ -103,17 +103,15 @@ class GUI:
         self.preferences_window = self.construct_dict(builder, [
             'notebook',
  
-            # Allgemein
-            'checkCut',
-            'checkTest',
             # Speicherorte
             'folderArchive',
             # Dekodieren
             'filechooserDecoder',
             'entryEMail',
             'entryPassword',      
-            'checkCorrect'
+            'checkCorrect',
             # Schneiden
+            'comboboxMPlayer'
             ])
                        
         self.dialog_email_password = self.construct_dict(builder, [           
@@ -177,6 +175,9 @@ class GUI:
         self.dialog_rename = self.construct_dict(builder, [
             'vboxRename'
             ])
+            
+        # connect signals    
+        builder.connect_signals(self)
                               
         # setup different guis
         self.setup_main_window(builder)
@@ -188,11 +189,7 @@ class GUI:
                        
         # set icons
         for window in self.windows:
-            self.windows[window].set_icon(gtk.gdk.pixbuf_new_from_file(self.get_image_path('icon3.png')))
-
-        # connect signals    
-        builder.connect_signals(self)
-        
+            self.windows[window].set_icon(gtk.gdk.pixbuf_new_from_file(self.get_image_path('icon3.png')))        
        
     # run method     
     def run(self):
@@ -234,7 +231,7 @@ class GUI:
         for img in images:
             img.show()   
                        
-        toolbar_buttons = {
+        self.toolbar_buttons = {
                 'decode':       gtk.ToolButton(images[0], "Dekodieren"),
                 'decodeandcut': gtk.ToolButton(images[1], "Dekodieren und Schneiden"),
                 'delete':       gtk.ToolButton(images[2], "In den Müll verschieben"),
@@ -248,27 +245,30 @@ class GUI:
                 'real_delete':  gtk.ToolButton(images[10], "Löschen")
             }
 
-        toolbar_buttons['decode'].connect("clicked", self.on_toolbutton_clicked, Action.DECODE)
-        toolbar_buttons['decodeandcut'].connect("clicked", self.on_toolbutton_clicked, Action.DECODEANDCUT)
-        toolbar_buttons['delete'].connect("clicked", self.on_toolbutton_clicked, Action.DELETE)
-        toolbar_buttons['archive'].connect("clicked", self.on_toolbutton_clicked, Action.ARCHIVE)
-        toolbar_buttons['cut'].connect("clicked", self.on_toolbutton_clicked, Action.CUT)
-        toolbar_buttons['play'].connect("clicked", self.on_toolbutton_clicked, Action.PLAY)
-        toolbar_buttons['restore'].connect("clicked", self.on_toolbutton_clicked, Action.RESTORE)   
-        toolbar_buttons['rename'].connect("clicked", self.on_toolbutton_clicked, Action.RENAME)        
-        toolbar_buttons['new_folder'].connect("clicked", self.on_toolbutton_clicked, Action.NEW_FOLDER)                                    
-        toolbar_buttons['cut_play'].connect("clicked", self.on_toolbutton_clicked, Action.CUT_PLAY)  
-        toolbar_buttons['real_delete'].connect("clicked", self.on_toolbutton_clicked, Action.REAL_DELETE)
+        self.toolbar_buttons['decode'].connect("clicked", self.on_toolbutton_clicked, Action.DECODE)
+        self.toolbar_buttons['decodeandcut'].connect("clicked", self.on_toolbutton_clicked, Action.DECODEANDCUT)
+        self.toolbar_buttons['delete'].connect("clicked", self.on_toolbutton_clicked, Action.DELETE)
+        self.toolbar_buttons['archive'].connect("clicked", self.on_toolbutton_clicked, Action.ARCHIVE)
+        self.toolbar_buttons['cut'].connect("clicked", self.on_toolbutton_clicked, Action.CUT)
+        self.toolbar_buttons['play'].connect("clicked", self.on_toolbutton_clicked, Action.PLAY)
+        self.toolbar_buttons['restore'].connect("clicked", self.on_toolbutton_clicked, Action.RESTORE)   
+        self.toolbar_buttons['rename'].connect("clicked", self.on_toolbutton_clicked, Action.RENAME)        
+        self.toolbar_buttons['new_folder'].connect("clicked", self.on_toolbutton_clicked, Action.NEW_FOLDER)                                    
+        self.toolbar_buttons['cut_play'].connect("clicked", self.on_toolbutton_clicked, Action.CUT_PLAY)  
+        self.toolbar_buttons['real_delete'].connect("clicked", self.on_toolbutton_clicked, Action.REAL_DELETE)
+        
+        for toolbutton in self.toolbar_buttons:
+            self.toolbar_buttons[toolbutton].show()
           
         # create sets of toolbuttons
         self.sets_of_toolbars = {
-            Section.OTRKEY :    [ toolbar_buttons['decode'], toolbar_buttons['decodeandcut'], toolbar_buttons['delete'] ],
-            Section.AVI_UNCUT:  [ toolbar_buttons['cut'], toolbar_buttons['delete'], toolbar_buttons['archive'], toolbar_buttons['play'], toolbar_buttons['cut_play'] ],
-            Section.AVI_CUT:    [ toolbar_buttons['archive'], toolbar_buttons['delete'], toolbar_buttons['cut'], toolbar_buttons['play'], toolbar_buttons['rename'] ],
-            Section.ARCHIVE:    [ toolbar_buttons['cut'], toolbar_buttons['delete'], toolbar_buttons['play'], toolbar_buttons['rename'], toolbar_buttons['new_folder'] ],
-            Section.TRASH:      [ toolbar_buttons['real_delete'], toolbar_buttons['restore'] ]
+            Section.OTRKEY :    [ self.toolbar_buttons['decode'], self.toolbar_buttons['decodeandcut'], self.toolbar_buttons['delete'] ],
+            Section.AVI_UNCUT:  [ self.toolbar_buttons['cut'], self.toolbar_buttons['delete'], self.toolbar_buttons['archive'], self.toolbar_buttons['play'], self.toolbar_buttons['cut_play'] ],
+            Section.AVI_CUT:    [ self.toolbar_buttons['archive'], self.toolbar_buttons['delete'], self.toolbar_buttons['cut'], self.toolbar_buttons['play'], self.toolbar_buttons['rename'] ],
+            Section.ARCHIVE:    [ self.toolbar_buttons['cut'], self.toolbar_buttons['delete'], self.toolbar_buttons['play'], self.toolbar_buttons['rename'], self.toolbar_buttons['new_folder'] ],
+            Section.TRASH:      [ self.toolbar_buttons['real_delete'], self.toolbar_buttons['restore'] ]
         }
-        
+
         self.dialog_email_password['entryDialogPassword'].set_visibility(False)
               
         # connect other signals
@@ -390,14 +390,11 @@ class GUI:
         builder.get_object('comboboxentry-server').set_text(self.app.config_dic['cut']['server'])
         
         # fill values from config_dic
-               
-        # check boxes on common tab
-        builder.get_object('checkCut').set_active(bool(self.app.config_dic['common']['activate_cut']))
-        builder.get_object('checkArchive').set_active(bool(self.app.config_dic['common']['use_archive']))
-
         # folder choosers on folders tab           
         builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config_dic['folders']['new_otrkeys'])
         builder.get_object('folderTrash').set_current_folder(self.app.config_dic['folders']['trash'])
+        builder.get_object('checkArchive').set_active(bool(self.app.config_dic['common']['use_archive']))     
+        builder.get_object('checkUseCutPlay').set_active(bool(self.app.config_dic['play']['use_cut_play']))   
         builder.get_object('folderArchive').set_current_folder(self.app.config_dic['folders']['archive'])     
               
         # decode tab
@@ -413,12 +410,12 @@ class GUI:
         self.preferences_window['entryPassword'].set_visibility(False)
             
         self.preferences_window['checkCorrect'].set_active(bool(self.app.config_dic['decode']['correct']))
-    
+            
         # radio buttons on cut tab
         radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually' ]
         builder.get_object(radiobuttons[self.app.config_dic['cut']['cut_action']]).set_active(True)
     
-        builder.get_object('checkbutton_use_cut_play').set_active(bool(self.app.config_dic['play']['use_cut_play']))
+
     
     def setup_dialog_archive(self, builder):
         # create folder treestore
@@ -570,8 +567,7 @@ class GUI:
         for toolbutton in self.main_window['toolbar'].get_children():
             self.main_window['toolbar'].remove(toolbutton)
         
-        for toolbutton in self.sets_of_toolbars[section]: 
-            toolbutton.show()      
+        for toolbutton in self.sets_of_toolbars[section]:        
             self.main_window['toolbar'].insert(toolbutton, -1)
     
     def get_selected_filenames(self):
@@ -720,15 +716,7 @@ class GUI:
     def on_preferences_window_delete_event(self, window, event):        
         window.hide()
         return True
-        
-    # common tab
-    # check box toggled save status to config_dic
-    def on_preferences_checkCut_toggled(self, widget, data=None):
-        self.app.config_dic['common']['activate_cut'] = int(widget.get_active())
-        
-    def on_preferences_checkArchive_toggled(self, widget, data=None):          
-        self.app.config_dic['common']['use_archive'] = int(widget.get_active())
-               
+                       
     # folders tab
     # folder changed, save to config dictionary
     def on_folderNewOtrkeys_current_folder_changed(self, widget, data=None):        
@@ -739,6 +727,18 @@ class GUI:
         self.app.config_dic['folders']['trash'] = widget.get_filename()
         self.app.show_section(self.app.section)
 
+    def on_preferences_checkArchive_toggled(self, widget, data=None):          
+        status = widget.get_active()
+        self.app.config_dic['common']['use_archive'] = int(status)
+
+        self.preferences_window['folderArchive'].set_sensitive(status)
+        
+        self.main_window['radioArchive'].set_property('visible', status)
+        self.main_window['labelArchiveCount'].set_property('visible', status)
+        self.main_window['separator3'].set_property('visible', status)
+                
+        self.toolbar_buttons['archive'].set_property('visible', status)            
+                          
     def on_folderArchive_current_folder_changed(self, widget, data=None):        
         self.app.config_dic['folders']['archive'] = widget.get_filename()
         self.app.show_section(self.app.section)
@@ -799,9 +799,13 @@ class GUI:
     
     def on_comboboxentry_mplayer_changed(self, widget, data=None):
         self.app.config_dic['play']['mplayer'] = widget.get_text()      
-        
-    def on_checkbutton_use_cut_play_toggled(self, widget, data=None):
+       
+    def on_checkUseCutPlay_toggled(self, widget, data=None):       
         self.app.config_dic['play']['use_cut_play'] = int(widget.get_active())
+        
+        self.preferences_window['comboboxMPlayer'].set_sensitive(widget.get_active())
+                    
+        self.toolbar_buttons['cut_play'].set_property('visible', widget.get_active()) 
     
     #
     # DIALOG ACTION
@@ -1005,4 +1009,4 @@ class GUI:
         
 if __name__ == "__main__":
     print "Use otr"
-    sys.exit(-1)       
+    sys.exit(-1)
