@@ -33,7 +33,7 @@ except:
     print "PyGTK missing."
     sys.exit(-1)
     
-from constants import Section, Action, Save_Email_Password, Cut_action, Status
+from constants import Section, Action, Save_Email_Password, Cut_action, Status, On_Quit
 
 class GUI:
     def construct_dict(self, builder, descriptions):  
@@ -63,13 +63,16 @@ class GUI:
             'dialog_conclusion',
             'dialog_cut',
             'dialog_cutlist',
-            'dialog_rename'
+            'dialog_rename',
+            'dialog_close_minimize'
             ])
             
         self.windows['main_window'].realize()
         self.windows['main_window'].window.set_decorations(gtk.gdk.DECOR_ALL & ~gtk.gdk.DECOR_MAXIMIZE)
             
         self.main_window = self.construct_dict(builder, [
+            'status_menu',
+            
             'toolbar',
             'toolbuttonDecode',
             'toolbuttonDecodeAll',
@@ -102,6 +105,11 @@ class GUI:
         
         self.preferences_window = self.construct_dict(builder, [
             'notebook',
+ 
+            # Allgemein
+            'radio_ask',
+            'radio_quit',
+            'radio_minimize',
  
             # Speicherorte
             'folderArchive',
@@ -175,7 +183,11 @@ class GUI:
         self.dialog_rename = self.construct_dict(builder, [
             'vboxRename'
             ])
-            
+        
+        self.dialog_close_minimize = self.construct_dict(builder, [
+            'checkbutton_keep'
+            ])
+        
         # connect signals    
         builder.connect_signals(self)
                               
@@ -198,6 +210,7 @@ class GUI:
         if self.app.config_dic['folders']['new_otrkeys'] == "":      
             self.message_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)  
             self.windows['preferences_window'].show()
+        
         gtk.main()
 
     ###
@@ -208,6 +221,14 @@ class GUI:
         return os.path.join(os.path.join(sys.path[0], 'images'), image)
 
     def setup_main_window(self, builder):
+        # status icon
+        self.main_window['status'] = gtk.StatusIcon()
+        self.main_window['status'].set_from_file(self.get_image_path('icon3.png'))
+        self.main_window['status'].set_tooltip("OTR-Verwaltung")
+        self.main_window['status'].connect("activate", self.status_activate)
+        self.main_window['status'].connect("popup_menu", self.status_popup)
+        self.main_window['status'].set_visible(True)
+        
         # sidebar
         image = gtk.Image()
         image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
@@ -412,11 +433,13 @@ class GUI:
         self.preferences_window['checkCorrect'].set_active(bool(self.app.config_dic['decode']['correct']))
             
         # radio buttons on cut tab
-        radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually' ]
+        radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually' ] # order is important!
         builder.get_object(radiobuttons[self.app.config_dic['cut']['cut_action']]).set_active(True)
-    
-
-    
+       
+        # radio buttons common tab
+        radiobuttons = [ 'radio_ask', 'radio_minimize', 'radio_quit' ] # order is important!
+        builder.get_object(radiobuttons[self.app.config_dic['common']['on_quit']]).set_active(True)
+       
     def setup_dialog_archive(self, builder):
         # create folder treestore
         treeview = self.dialog_archive['treeviewFolders']
@@ -526,6 +549,24 @@ class GUI:
             return True
         else:
             return False    
+     
+    ###
+    ### CONTEXT_MENU
+    ###
+    def on_status_menu_open_activate(self, widget, data=None):
+        # hide/show window
+        self.windows['main_window'].set_property('visible', not self.windows['main_window'].get_property('visible'))
+      
+    def on_status_menu_quit_activate(self, widget, data=None):
+        gtk.main_quit()
+         
+    def status_activate(self, widget, data=None):
+        # hide/show window     
+        self.windows['main_window'].set_property("visible", not self.windows['main_window'].get_property("visible"))
+        
+    def status_popup(self, widget, button, activate_time, data=None):        
+        # show context menu
+        self.main_window['status_menu'].popup(None, None, None, button, activate_time)         
           
     ###
     ### MAIN_WINDOW
@@ -552,6 +593,35 @@ class GUI:
         
     def on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
+        
+    def on_main_window_delete_event(self, widget, data=None):
+        # dialog
+        if self.app.config_dic['common']['on_quit'] == On_Quit.ASK:
+            self.dialog_close_minimize['checkbutton_keep'].set_active(False)
+            response = self.windows['dialog_close_minimize'].run()
+            self.windows['dialog_close_minimize'].hide()
+            
+            if response==On_Quit.MINIMIZE:
+                if self.dialog_close_minimize['checkbutton_keep'].get_active()==True:
+                    self.preferences_window['radio_minimize'].set_active(True)
+                    
+                self.windows['main_window'].hide()    
+                return True
+            
+            elif response==On_Quit.QUIT:
+                if self.dialog_close_minimize['checkbutton_keep'].get_active()==True:
+                    self.preferences_window['radio_quit'].set_active(True)
+                    
+                return False
+            
+            else: # canceled
+                return True
+                
+        elif self.app.config_dic['common']['on_quit'] == On_Quit.MINIMIZE:
+            self.windows['main_window'].hide()
+            return True # don't destroy window
+        else: # quit
+            return False # destroy window
     
     def on_menuEditSearch_activate(self, widget, data=None):
         self.main_window['entrySearch'].grab_focus()
@@ -715,8 +785,21 @@ class GUI:
 
     def on_preferences_window_delete_event(self, window, event):        
         window.hide()
-        return True
-                       
+        return True # don't destroy
+     
+    # common tab
+    def on_radio_ask_toggled(self, widget, data=None):
+        if widget.get_active()==True:
+            self.app.config_dic['common']['on_quit'] = On_Quit.ASK
+            
+    def on_radio_quit_toggled(self, widget, data=None):
+        if widget.get_active()==True:
+            self.app.config_dic['common']['on_quit'] = On_Quit.QUIT
+    
+    def on_radio_minimize_toggled(self, widget, data=None):
+        if widget.get_active()==True:
+            self.app.config_dic['common']['on_quit'] = On_Quit.MINIMIZE
+                      
     # folders tab
     # folder changed, save to config dictionary
     def on_folderNewOtrkeys_current_folder_changed(self, widget, data=None):        
