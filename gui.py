@@ -23,6 +23,7 @@ import sys
 import base64
 import os
 import time
+import pynotify
 
 try:
     import pygtk
@@ -58,7 +59,6 @@ class GUI:
             'main_window', 
             'preferences_window',
             'dialog_email_password',
-            'dialog_action',
             'dialog_archive',
             'dialog_conclusion',
             'dialog_cut',
@@ -126,16 +126,7 @@ class GUI:
             'entryDialogEMail',
             'entryDialogPassword'
             ])
-            
-        self.dialog_action = self.construct_dict(builder, [
-            'labelCaption',
-            'labelActionDecode',
-            'labelActionCut',
-            'progressbar_decode',
-            'progressbar_cut',
-            'dialog_action_buttonCancel'
-            ])
-        
+
         self.dialog_conclusion = self.construct_dict(builder, [
             'buttonBack',
             'buttonForward',
@@ -228,6 +219,9 @@ class GUI:
         self.main_window['status'].connect("activate", self.status_activate)
         self.main_window['status'].connect("popup_menu", self.status_popup)
         self.main_window['status'].set_visible(True)
+        
+        # popup
+        pynotify.init("pynotify")
         
         # sidebar
         image = gtk.Image()
@@ -554,15 +548,26 @@ class GUI:
     ### CONTEXT_MENU
     ###
     def on_status_menu_open_activate(self, widget, data=None):
-        # hide/show window
-        self.windows['main_window'].set_property('visible', not self.windows['main_window'].get_property('visible'))
+        self.show_main_window()
       
     def on_status_menu_quit_activate(self, widget, data=None):
         gtk.main_quit()
          
     def status_activate(self, widget, data=None):
-        # hide/show window     
-        self.windows['main_window'].set_property("visible", not self.windows['main_window'].get_property("visible"))
+        self.show_main_window()
+        
+    def show_main_window(self):
+        if self.app.blocked==False:
+            self.windows['main_window'].set_property("visible", not self.windows['main_window'].get_property("visible"))        
+        else:
+            self.notify_popup("OTR-Verwaltung arbeitet gerade...", self.app.get_notify_text(), 3)
+        
+    def notify_popup(self, title, text, seconds):
+      	notify = pynotify.Notification(title, text, "pynotify")
+    	notify.set_urgency(pynotify.URGENCY_NORMAL)
+    	notify.attach_to_status_icon(self.main_window['status'])
+    	notify.set_timeout(seconds * 1000)
+    	notify.show()      
         
     def status_popup(self, widget, button, activate_time, data=None):        
         # show context menu
@@ -889,48 +894,7 @@ class GUI:
         self.preferences_window['comboboxMPlayer'].set_sensitive(widget.get_active())
                     
         self.toolbar_buttons['cut_play'].set_property('visible', widget.get_active()) 
-    
-    #
-    # DIALOG ACTION
-    #
-    def on_dialog_action_buttonCancel_clicked(self, widget, user_data=None):
-        if self.question_box("Wirklich abbrechen?"):
-            self.windows['dialog_action'].hide()
-    
-    def build_action_window(self, count, action):
-        dialog = self.windows['dialog_action']
-        decode_widgets = [self.dialog_action['labelActionDecode'], self.dialog_action['progressbar_decode']]
-        cut_widgets = [self.dialog_action['labelActionCut'], self.dialog_action['progressbar_cut']]
-
-        # clean up  
-        for widget in (decode_widgets + cut_widgets):
-            widget.show()
-            
-        decode_widgets[1].set_fraction(0)
-        cut_widgets[1].set_fraction(0)
-        
-        # message
-        message = "Es "
-        if count==1:
-            message += "wird 1 Datei "
-        else:
-            message += "werden %i Dateien " % count
-  
-        if action==Action.DECODE:
-            for widget in cut_widgets:
-                widget.hide()
-            self.dialog_action['labelCaption'].set_text(message + "dekodiert.")
-            
-        elif action==Action.CUT:
-            for widget in decode_widgets:
-                widget.hide()
-            self.dialog_action['labelCaption'].set_text(message + "geschnitten.")
-            
-        elif action==Action.DECODEANDCUT:
-            self.dialog_action['labelCaption'].set_text(message + "dekodiert und geschnitten.")
-                                            
-        return dialog
-        
+       
     #
     # DIALOG CONCLUSION
     #       

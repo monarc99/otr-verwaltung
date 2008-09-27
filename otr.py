@@ -54,18 +54,24 @@ class App:
         config = configParser.Config() 
         self.config_dic = config.read(os.path.join(sys.path[0], ".otr-conf"))
 
-        self.search_text = ""
-
+        self.__search_text = ""
+        self.blocked = False
+        # tuple: action, len of files
+        self.__block_action = None
+        # tuple: number of file, progress
+        self.__decode_progress = -1, 0
+        # number of file
+        self.__cut_count = -1
+    
         # load gui
-        self.gui = gui.GUI(self, os.path.join(sys.path[0], "otr.ui"))       
+        self.__gui = gui.GUI(self, os.path.join(sys.path[0], "otr.ui"))       
         
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
         
         # regex
-        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
-        self.cut_video = re.compile('.*(avi|mp4)$')
-        
+        self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
+        self.__cut_video = re.compile('.*(avi|mp4)$')     
         
     ### 
     ### Show sections
@@ -81,9 +87,9 @@ class App:
         self.section = section
         
         # set toolbar
-        self.gui.set_toolbar(section)
+        self.__gui.set_toolbar(section)
                 
-        self.gui.main_window['treeviewFiles_store'].clear()
+        self.__gui.main_window['treeviewFiles_store'].clear()
         files = []
         text = ""
         
@@ -102,7 +108,7 @@ class App:
         elif section==Section.ARCHIVE: 
             # returns NO files       
             text = self.section_archive()
-            self.gui.main_window['treeviewFiles'].expand_all()
+            self.__gui.main_window['treeviewFiles'].expand_all()
 
         if len(files)>0: # this is not executed, when the section is "Archive"
             if len(files)==1:
@@ -113,10 +119,10 @@ class App:
             files.sort()
             # put filenames into treestore
             for f in files:
-                self.gui.append_row_treeviewFiles(None, f)
+                self.__gui.append_row_treeviewFiles(None, f)
 
         # set message textfilenames_action_status[file][action][0]
-        self.gui.main_window['labelMessage'].set_text(text)
+        self.__gui.main_window['labelMessage'].set_text(text)
              
     # helper for different section
     def section_otrkey(self):
@@ -134,7 +140,7 @@ class App:
         text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config_dic['folders']['new_otrkeys']
         
-        files = [os.path.join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search(f)]
+        files = [os.path.join(path, f) for f in os.listdir(path) if self.__uncut_video.match(f) and self.search(f)]
             
         return (text, files)
         
@@ -147,8 +153,8 @@ class App:
         
         files = []                
         for f in os.listdir(path):
-            if not self.uncut_video.match(f):
-                if self.cut_video.match(f):
+            if not self.__uncut_video.match(f):
+                if self.__cut_video.match(f):
                     if self.search(f):
                         files += [os.path.join(path, f)]
         
@@ -174,7 +180,7 @@ class App:
     # recursive function for archive to add folders and files with a tree structure
     def tree(self, parent, path=None):              
         if parent!=None:            
-            dir = self.gui.get_filename(parent)
+            dir = self.__gui.get_filename(parent)
         else:  # base path (archive directory)
             dir = path
             
@@ -185,12 +191,12 @@ class App:
             full_path = os.path.join(dir, file)
             
             if os.path.isdir(full_path):                
-                iter = self.gui.append_row_treeviewFiles(parent, full_path)
+                iter = self.__gui.append_row_treeviewFiles(parent, full_path)
                 self.tree(iter)
             else:
                 if file.endswith('.avi'):
                     if self.search(file):
-                        self.gui.append_row_treeviewFiles(parent, full_path)
+                        self.__gui.append_row_treeviewFiles(parent, full_path)
 
     ###
     ### Helpers
@@ -211,7 +217,7 @@ class App:
             return "Schneiden"
                        
     def start_search(self, search):
-        self.search_text = search.lower()
+        self.__search_text = search.lower()
         
         # create dict of counts
         counts = {}
@@ -245,14 +251,14 @@ class App:
         return counts
     
     def stop_search(self):
-        self.search_text = ""
+        self.__search_text = ""
         self.show_section(self.section)
         
     def search(self, f):
-        if self.search_text == "":
+        if self.__search_text == "":
             return True
         else:    
-            if self.search_text in f.lower():
+            if self.__search_text in f.lower():
                 return True
             else:
                 return False
@@ -265,15 +271,12 @@ class App:
         """ Performs an action (toolbar, context menu, etc.) """
         
         if len(filenames) == 0 and action!=Action.NEW_FOLDER:        
-            self.gui.message_box("Es sind keine Dateien markiert!", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)   
+            self.__gui.message_box("Es sind keine Dateien markiert!", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)   
             return
         
         # different actions:
         if action==Action.DECODE or action==Action.CUT or action==Action.DECODEANDCUT:
-              
-            # (re)build progressbar dialog
-            dialog = self.gui.build_action_window(len(filenames), action)
-            
+                                        
             # create file_conclusions array        
             file_conclusions = []
                 
@@ -284,25 +287,28 @@ class App:
             if action==Action.CUT:
                 for uncut_avi in filenames:
                     file_conclusions.append(FileConclusion(action, uncut_avi=uncut_avi))
+              
+            self.__block_action = action, len(file_conclusions)
                 
             # decode files                    
             if action==Action.DECODE or action==Action.DECODEANDCUT:
                 if self.action_decode(file_conclusions)==False: 
                     return
             
+            self.__decode_progress = -1, 0
+            
             # cut files
             if action==Action.CUT or action==Action.DECODEANDCUT:
                 if self.action_cut(file_conclusions, action)==False:
                     return                    
-                
-            # hide action dialog
-            self.gui.windows['dialog_action'].hide()          
+
+            self.__cut_count = -1
                 
             # show conclusion
-            dialog = self.gui.build_conclusion_dialog(file_conclusions, action)
+            dialog = self.__gui.build_conclusion_dialog(file_conclusions, action)
             dialog.run()         
             
-            file_conclusions = self.gui.file_conclusions
+            file_conclusions = self.__gui.file_conclusions
             
             if action != Action.DECODE:
                 count = 0
@@ -316,11 +322,14 @@ class App:
                         except IOError, e:
                             print e
                 
-                if count > 0:
-                    self.gui.message_box("Es wurden %s Cutlisten bewertet!" % count, gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
+                if count == 1:
+                    self.__gui.message_box("Es wurde 1 Cutlisten bewertet!", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
+                elif count > 1:
+                    self.__gui.message_box("Es wurden %s Cutlisten bewertet!" % count, gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
 
             # update section
-            self.gui.windows['main_window'].show()
+            self.blocked = False
+            self.__gui.windows['main_window'].show()
             self.show_section(self.section)        
             
         elif action==Action.DELETE:
@@ -356,25 +365,45 @@ class App:
             self.action_real_delete(filenames)
             self.show_section(self.section)
       
+    def get_notify_text(self):
+        decode_count, progress = self.__decode_progress
+        cut_count = self.__cut_count
+        action, length = self.__block_action
+      
+        text = ""
+        if action==Action.DECODE or action==Action.DECODEANDCUT:
+            if decode_count > -1:
+                text += "Datei %i/%i wird dekodiert: %i%% \n" % (decode_count + 1, length, progress)
+            else:
+                text += "Dekodieren abgeschlossen.\n"
+                
+        if action==Action.CUT or action==Action.DECODEANDCUT:
+            if cut_count > -1:
+                text += "Datei %i/%i wird geschnitten." % (cut_count + 1, length)
+            else:
+                text += "Schneiden abgeschlossen."
+          
+        return text
+      
     # helpers for actions                   
     def action_decode(self, file_conclusions):           
         
         # no decoder        
         if not "decode" in self.config_dic['decode']['path']: # no decoder specified
             # dialog box: no decoder
-            self.gui.message_box("Es ist kein korrekter Dekoder angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)   
+            self.__gui.message_box("Es ist kein korrekter Dekoder angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)   
             return False
         
         # retrieve email and password
         # user did not save email and password
         if self.config_dic['decode']['save_email_password'] == Save_Email_Password.DONT_SAVE:
             # let the user type in his data through a dialog
-            response = self.gui.windows['dialog_email_password'].run()
-            self.gui.windows['dialog_email_password'].hide() 
+            response = self.__gui.windows['dialog_email_password'].run()
+            self.__gui.windows['dialog_email_password'].hide() 
             
             if response==gtk.RESPONSE_OK:
-                email = self.gui.dialog_email_password['entryDialogEMail'].get_text()
-                password = self.gui.dialog_email_password['entryDialogPassword'].get_text()                               
+                email = self.__gui.dialog_email_password['entryDialogEMail'].get_text()
+                password = self.__gui.dialog_email_password['entryDialogPassword'].get_text()                               
             else: # user pressed cancel
                 return False
                          
@@ -382,13 +411,16 @@ class App:
             email = self.config_dic['decode']['email']
             password = base64.b64decode(self.config_dic['decode']['password']) 
         
-        # start decoding, show "action" window
+        # start decoding, block app
         # now this method may not return "False"
-        self.gui.windows['main_window'].hide()
-        self.gui.windows['dialog_action'].show()     
-                 
+        self.__gui.windows['main_window'].hide()
+        self.blocked = True
+        self.__gui.notify_popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
+                   
         # decode each file
         for count, file_conclusion in enumerate(file_conclusions):
+            # update progress
+            self.__decode_progress = count, 0
                    
             command = "%s -i %s -e %s -p %s -o %s" % (self.config_dic['decode']['path'], file_conclusion.otrkey, email, password, self.config_dic['folders']['new_otrkeys'])
             if self.config_dic['decode']['correct'] == 0:
@@ -407,10 +439,9 @@ class App:
                     break
             
                 try:      
-                    progress = int(l[10:13])
-                    # set progress on decode progressbar
-                    progress = (progress/100.) / len(file_conclusions) + count * (1. / len(file_conclusions))
-                    self.gui.dialog_action['progressbar_decode'].set_fraction(progress)
+                    progress = int(l[10:13])                    
+                    # update progress
+                    self.__decode_progress = count, progress
                     while gtk.events_pending():
                         gtk.main_iteration(False)
                 except ValueError:                
@@ -429,7 +460,7 @@ class App:
                                                             
             if len(errors)==0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
-            
+                file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]
                 # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
                 # move to trash
                 target = self.config_dic['folders']['trash']
@@ -441,13 +472,15 @@ class App:
         return True
 
     def action_cut(self, file_conclusions, action):               
-        # start cutting, show "action" window
+        # start cutting, block app
         # now this method may not return "False"
-        self.gui.windows['main_window'].hide()
-        self.gui.windows['dialog_action'].show()       
+        self.__gui.windows['main_window'].hide()
+        self.blocked = True
+        self.__gui.notify_popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
         
         for count, file_conclusion in enumerate(file_conclusions):
-
+            self.__cut_count = count
+    
             # file correctly decoded?            
             if action==Action.DECODEANDCUT:
                 if file_conclusion.decode.status == Status.ERROR:
@@ -458,16 +491,16 @@ class App:
             # how should the file be cut?
             cut_action = None
             if self.config_dic['cut']['cut_action'] == Cut_action.ASK:
-                self.gui.dialog_cut['labelCutFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
-                self.gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config_dic['folders']['new_otrkeys'])
+                self.__gui.dialog_cut['labelCutFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
+                self.__gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config_dic['folders']['new_otrkeys'])
 
-                response = self.gui.windows['dialog_cut'].run()
-                self.gui.windows['dialog_cut'].hide()
+                response = self.__gui.windows['dialog_cut'].run()
+                self.__gui.windows['dialog_cut'].hide()
                 
                 if response == gtk.RESPONSE_OK:            
-                    if self.gui.dialog_cut['radioCutBestCutlist'].get_active() == True:
+                    if self.__gui.dialog_cut['radioCutBestCutlist'].get_active() == True:
                         cut_action = Cut_action.BEST_CUTLIST
-                    elif self.gui.dialog_cut['radioCutChooseCutlist'].get_active() == True:
+                    elif self.__gui.dialog_cut['radioCutChooseCutlist'].get_active() == True:
                         cut_action = Cut_action.CHOOSE_CUTLIST
                     else:                    
                         cut_action = Cut_action.MANUALLY
@@ -528,13 +561,13 @@ class App:
                 # download all cutlist and display them to
                 # the user
 
-                self.gui.dialog_cutlist['treeviewCutlists_store'].clear()                
+                self.__gui.dialog_cutlist['treeviewCutlists_store'].clear()                
                 dom_cutlists, error_message = self.get_dom_from_cutlist(file_conclusion.uncut_avi)
                 
                 cutlists_found = False
                  
                 if dom_cutlists==None:
-                    self.gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+                    self.__gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = error_message
                 else:                   
@@ -555,14 +588,14 @@ class App:
                             self.read_value(cutlist, "withtime"),
                             self.read_value(cutlist, "duration")]
                     
-                        self.gui.add_cutlist(data_array)
+                        self.__gui.add_cutlist(data_array)
                 
                     if cutlists_found:                        
-                        self.gui.dialog_cutlist['labelCutlistFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
-                        response = self.gui.windows['dialog_cutlist'].run()
-                        self.gui.windows['dialog_cutlist'].hide()
+                        self.__gui.dialog_cutlist['labelCutlistFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
+                        response = self.__gui.windows['dialog_cutlist'].run()
+                        self.__gui.windows['dialog_cutlist'].hide()
                         
-                        treeselection = self.gui.dialog_cutlist['treeviewCutlists'].get_selection()  
+                        treeselection = self.__gui.dialog_cutlist['treeviewCutlists'].get_selection()  
                         
                         if treeselection.count_selected_rows()==0 or response != gtk.RESPONSE_OK:                            
                             file_conclusion.cut.status = Status.NOT_DONE
@@ -604,8 +637,8 @@ class App:
                 target = self.config_dic['folders']['trash']
                 os.rename(file_conclusion.uncut_avi, os.path.join(target, os.path.basename(file_conclusion.uncut_avi)))
              
-            progress = 1./len(file_conclusions) + count * (1. / len(file_conclusions))
-            self.gui.dialog_action['progressbar_cut'].set_fraction(progress)
+            # update progress
+            self.__cut_count = count
         
         # after iterating over all items:
         return True
@@ -729,12 +762,12 @@ class App:
     def action_play(self, filename):
         player = self.config_dic['play']['player']
 
-        if not self.cut_video.match(filename):
-            self.gui.message_box("Die ausgewählte Datei ist kein Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+        if not self.__cut_video.match(filename):
+            self.__gui.message_box("Die ausgewählte Datei ist kein Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return 
             
         if player=='':
-            self.gui.message_box("Es ist kein Player angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_box("Es ist kein Player angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return
         
         p = subprocess.Popen([player, filename])
@@ -742,12 +775,12 @@ class App:
     def action_cut_play(self, filename):
         mplayer = self.config_dic['play']['mplayer']
         
-        if not self.uncut_video.match(filename):
-            self.gui.message_box("Die ausgewählte Datei ist kein ungeschnittenes Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+        if not self.__uncut_video.match(filename):
+            self.__gui.message_box("Die ausgewählte Datei ist kein ungeschnittenes Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return 
             
         if mplayer=='':
-            self.gui.message_box("Der MPlayer ist nicht angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_box("Der MPlayer ist nicht angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return
         
         # get best cutlist
@@ -756,7 +789,7 @@ class App:
         best_cutlist = None
         
         if dom_cutlists==None:
-            self.gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return
         else:                   
             cutlists = {}             
@@ -774,7 +807,7 @@ class App:
                 cutlists[int(self.read_value(cutlist, "id"))] = rating
             
             if len(cutlists)==0:
-                self.gui.message_box("Keine Cutlist gefunden!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+                self.__gui.message_box("Keine Cutlist gefunden!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
                 return
             else: 
                 sort_cutlists = cutlists.items()
@@ -789,7 +822,7 @@ class App:
         try:
             local_filename, headers = urllib.urlretrieve(url, local_filename)
         except IOError:
-            self.gui.message_box("Verbindungsprobleme", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_box("Verbindungsprobleme", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return
         
         config_parser = ConfigParser.ConfigParser()        
@@ -806,10 +839,10 @@ class App:
                 cuts.append((float(config_parser.get("Cut"+str(count), "Start")), float(config_parser.get("Cut"+str(count), "Duration"))))
             
         except ConfigParser.NoSectionError, (ErrorNumber, ErrorMessage):
-            self.gui.message_box("Fehler in Cutlist: " + ErrorMessage, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_box("Fehler in Cutlist: " + ErrorMessage, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return
         except ConfigParser.NoOptionError, (ErrorNumber, ErrorMessage):
-            self.gui.message_box("Fehler in Cutlist: " + ErrorMessage, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_box("Fehler in Cutlist: " + ErrorMessage, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
             return
         
         # make edl
@@ -830,23 +863,23 @@ class App:
        
     def action_archive(self, filenames):       
         # widgets
-        dialog = self.gui.windows['dialog_archive']
-        treeview_files = self.gui.dialog_archive['treeviewFilesRename']
-        treestore_files = self.gui.dialog_archive['treeviewFilesRename_store']
-        treeview_folders = self.gui.dialog_archive['treeviewFolders']
-        treestore_folders = self.gui.dialog_archive['treeviewFolders_store']
+        dialog = self.__gui.windows['dialog_archive']
+        treeview_files = self.__gui.dialog_archive['treeviewFilesRename']
+        treestore_files = self.__gui.dialog_archive['treeviewFilesRename_store']
+        treeview_folders = self.__gui.dialog_archive['treeviewFolders']
+        treestore_folders = self.__gui.dialog_archive['treeviewFolders_store']
                 
-        self.gui.dialog_archive['labelFiles'].set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
+        self.__gui.dialog_archive['labelFiles'].set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
         
         # fill rename tree
         dict_files_iter = {}        
         for f in filenames:
-            iter = self.gui.append_row_treeviewFilesRename(os.path.basename(f))
+            iter = self.__gui.append_row_treeviewFilesRename(os.path.basename(f))
             # keep relation between filename and iter
             dict_files_iter[f] = iter
             
         # fill tree of folders  
-        root = self.gui.append_row_treeviewFolders(None, self.config_dic['folders']['archive'])    
+        root = self.__gui.append_row_treeviewFolders(None, self.config_dic['folders']['archive'])    
         self.tree_folders(root)        
         # select first node
         selection = treeview_folders.get_selection()
@@ -884,7 +917,7 @@ class App:
 
     # recursive
     def tree_folders(self, parent):              
-        dir = self.gui.dialog_archive['treeviewFolders_store'].get_value(parent, 0)
+        dir = self.__gui.dialog_archive['treeviewFolders_store'].get_value(parent, 0)
             
         files = []
         files = os.listdir(dir)            
@@ -893,7 +926,7 @@ class App:
             full_path = os.path.join(dir, file)
             
             if os.path.isdir(full_path):                
-                iter = self.gui.append_row_treeviewFolders(parent, full_path)
+                iter = self.__gui.append_row_treeviewFolders(parent, full_path)
                 self.tree_folders(iter)
 
        
@@ -903,7 +936,7 @@ class App:
         else:
             message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
         
-        if self.gui.question_box(message + "in den Müll verschoben werden?"):
+        if self.__gui.question_box(message + "in den Müll verschoben werden?"):
             for f in filenames:
                 target = self.config_dic['folders']['trash']
                 os.rename(f, os.path.join(target, os.path.basename(f)))
@@ -914,7 +947,7 @@ class App:
         else:
             message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
         
-        if self.gui.question_box(message + "endgültig gelöscht werden?"):
+        if self.__gui.question_box(message + "endgültig gelöscht werden?"):
             for f in filenames:
                 os.remove(f)
     
@@ -923,8 +956,8 @@ class App:
             os.rename(f, os.path.join(self.config_dic['folders']['new_otrkeys'], os.path.basename(f)))        
     
     def action_rename(self, filenames):
-        dialog = self.gui.windows['dialog_rename']
-        vbox = self.gui.dialog_rename['vboxRename']
+        dialog = self.__gui.windows['dialog_rename']
+        vbox = self.__gui.dialog_rename['vboxRename']
         
         entries = {}
         for f in filenames:
@@ -955,8 +988,8 @@ class App:
         else:
             dirname = os.path.dirname(filename)
 
-        dialog = self.gui.windows['dialog_rename']
-        vbox = self.gui.dialog_rename['vboxRename']
+        dialog = self.__gui.windows['dialog_rename']
+        vbox = self.__gui.dialog_rename['vboxRename']
 
         entry = gtk.Entry()
         entry.show()
@@ -971,7 +1004,7 @@ class App:
         vbox.remove(entry)
         
     def main(self):
-        self.gui.run()
+        self.__gui.run()
         config = configParser.Config() 
         config.save(".otr-conf", self.config_dic)   
 
