@@ -19,8 +19,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from os.path import isfile
 import ConfigParser
-import os
 import datetime
 import sys
 
@@ -35,7 +35,7 @@ class Config:
         """ read config file, if exists, otherwise, use default value """
         
         try:
-            if os.path.isfile(config_file):
+            if isfile(config_file):
                 self.config_parser.read(config_file)
         except Exception, inst:
             print "Config file couldn't be read: "
@@ -83,15 +83,12 @@ class Config:
    
     def save(self, config_file, config_dic):
         """ Called by app to save the config dictionary.
-            Creates a new config file if it doesn't exist """
+            Creates a new config file if it doesn't exist. """
+                                
         try:
-            if os.path.isfile(config_file):
-                f = open(config_file, "w")
-            else:
-                print "Config file %s does not exist, creating a new one..." % config_file
-                f = open(config_file, "w")                   
+            f = open(config_file, "w")
         except Exception, inst:
-            print "Config file couldn't be read: "
+            print "Config file couldn't be written: "
             print "ERROR: ", inst
             sys.exit(-1)  
        
@@ -99,7 +96,7 @@ class Config:
         for section in config_dic:
             for option in config_dic[section]:
                 self.save_value(section, option, config_dic[section][option])
-                
+        
         self.config_parser.write(f)
         
         f.close()

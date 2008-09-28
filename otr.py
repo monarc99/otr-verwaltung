@@ -21,7 +21,8 @@
 
 
 import sys
-import os
+from os import listdir, walk, mkdir
+from os.path import join, isdir, basename, dirname
 import re
 import base64
 import time
@@ -43,16 +44,17 @@ except:
     
 # intern
 import gui
-import configParser
-from files_conclusion import FileConclusion
+from configparser import Config
+import fileoperations
+from filesconclusion import FileConclusion
 from constants import Section, Action, Cut_action, Save_Email_Password, Status
 
 class App:
     
     def __init__(self):             
         # read configs
-        config = configParser.Config() 
-        self.config_dic = config.read(os.path.join(sys.path[0], ".otr-conf"))
+        config = Config() 
+        self.config_dic = config.read(join(sys.path[0], ".otr-conf"))
 
         self.__search_text = ""
         self.blocked = False
@@ -64,7 +66,7 @@ class App:
         self.__cut_count = -1
     
         # load gui
-        self.__gui = gui.GUI(self, os.path.join(sys.path[0], "otr.ui"))       
+        self.__gui = gui.GUI(self, join(sys.path[0], "otr.ui"))       
         
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
@@ -119,7 +121,7 @@ class App:
             files.sort()
             # put filenames into treestore
             for f in files:
-                self.__gui.append_row_treeviewFiles(None, f)
+                self.append_row_treeview_files(None, f)
 
         # set message textfilenames_action_status[file][action][0]
         self.__gui.main_window['labelMessage'].set_text(text)
@@ -132,7 +134,7 @@ class App:
         if self.config_dic['folders']['new_otrkeys'] == "":      
             return text, []
         
-        files = [os.path.join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
+        files = [join(path, f) for f in listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
             
         return (text, files)
          
@@ -140,7 +142,7 @@ class App:
         text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config_dic['folders']['new_otrkeys']
         
-        files = [os.path.join(path, f) for f in os.listdir(path) if self.__uncut_video.match(f) and self.search(f)]
+        files = [join(path, f) for f in listdir(path) if self.__uncut_video.match(f) and self.search(f)]
             
         return (text, files)
         
@@ -152,11 +154,11 @@ class App:
         path = self.config_dic['folders']['new_otrkeys']
         
         files = []                
-        for f in os.listdir(path):
+        for f in listdir(path):
             if not self.__uncut_video.match(f):
                 if self.__cut_video.match(f):
                     if self.search(f):
-                        files += [os.path.join(path, f)]
+                        files += [join(path, f)]
         
         return (text, files)
         
@@ -164,7 +166,7 @@ class App:
         text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path = self.config_dic['folders']['trash']
                     
-        files = [os.path.join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
+        files = [join(path, f) for f in listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
                 
         return (text, files)
 
@@ -185,18 +187,18 @@ class App:
             dir = path
             
         files = []
-        files = os.listdir(dir)            
+        files = listdir(dir)            
 
         for file in files:
-            full_path = os.path.join(dir, file)
+            full_path = join(dir, file)
             
-            if os.path.isdir(full_path):                
-                iter = self.__gui.append_row_treeviewFiles(parent, full_path)
+            if isdir(full_path):                
+                iter = self.append_row_treeview_files(parent, full_path)
                 self.tree(iter)
             else:
                 if file.endswith('.avi'):
                     if self.search(file):
-                        self.__gui.append_row_treeviewFiles(parent, full_path)
+                        self.append_row_treeview_files(parent, full_path)
 
     ###
     ### Helpers
@@ -215,7 +217,14 @@ class App:
             return "Dekodieren"
         elif action==Action.CUT:
             return "Schneiden"
-                       
+     
+    def append_row_treeview_files(self, parent, filename):        
+        self.append_row_treeview_files(parent, filename, file_operations.get_size(filename), file_operations.get_date(filename))
+     
+    ### 
+    ### Search
+    ### 
+                      
     def start_search(self, search):
         self.__search_text = search.lower()
         
@@ -236,10 +245,10 @@ class App:
          
         # archive
         files = []
-        for root, dirs, wfiles in os.walk(self.config_dic['folders']['archive']):
+        for root, dirs, wfiles in walk(self.config_dic['folders']['archive']):
             for f in wfiles:
                 if f.endswith('.avi') and self.search(f):
-                    files += [os.path.join(root, f)]
+                    files += [join(root, f)]
 
         count = len(files)
         if count > 0:
@@ -377,7 +386,7 @@ class App:
             else:
                 text += "Dekodieren abgeschlossen.\n"
                 
-        if action==Action.CUT or action==Action.DECODEANDCUT:
+        if action==Action.CUT or (action==Action.DECODEANDCUT and decode_count == -1):
             if cut_count > -1:
                 text += "Datei %i/%i wird geschnitten." % (cut_count + 1, length)
             else:
@@ -464,7 +473,7 @@ class App:
                 # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
                 # move to trash
                 target = self.config_dic['folders']['trash']
-                os.rename(file_conclusion.otrkey, os.path.join(target, os.path.basename(file_conclusion.otrkey)))
+                file_operations.move_file(file_conclusion.otrkey, target)
             else:            
                 file_conclusion.decode.status = Status.ERROR
                 file_conclusion.decode.message = error_message
@@ -491,7 +500,7 @@ class App:
             # how should the file be cut?
             cut_action = None
             if self.config_dic['cut']['cut_action'] == Cut_action.ASK:
-                self.__gui.dialog_cut['labelCutFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
+                self.__gui.dialog_cut['labelCutFile'].set_text(basename(file_conclusion.uncut_avi))
                 self.__gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config_dic['folders']['new_otrkeys'])
 
                 response = self.__gui.windows['dialog_cut'].run()
@@ -591,7 +600,7 @@ class App:
                         self.__gui.add_cutlist(data_array)
                 
                     if cutlists_found:                        
-                        self.__gui.dialog_cutlist['labelCutlistFile'].set_text(os.path.basename(file_conclusion.uncut_avi))
+                        self.__gui.dialog_cutlist['labelCutlistFile'].set_text(basename(file_conclusion.uncut_avi))
                         response = self.__gui.windows['dialog_cutlist'].run()
                         self.__gui.windows['dialog_cutlist'].hide()
                         
@@ -635,7 +644,7 @@ class App:
             if status == Status.OK:
                 # move to trash
                 target = self.config_dic['folders']['trash']
-                os.rename(file_conclusion.uncut_avi, os.path.join(target, os.path.basename(file_conclusion.uncut_avi)))
+                file_operations.move_file(file_conclusion.uncut_avi, target)
              
             # update progress
             self.__cut_count = count
@@ -644,7 +653,7 @@ class App:
         return True
        
     def get_dom_from_cutlist(self, avi):
-        size = os.path.getsize(avi)    
+        size = file_operations.get_size(avi)
         url = self.config_dic['cut']['server'] + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
 
         try:
@@ -678,7 +687,7 @@ class App:
         url = self.config_dic['cut']['server'] + "getfile.php?id=" + str(cutlist)
         
         # save cutlist to folder
-        local_filename = os.path.join(self.config_dic['folders']['new_otrkeys'], os.path.basename(filename) + ".cutlist")
+        local_filename = join(self.config_dic['folders']['new_otrkeys'], basename(filename) + ".cutlist")
         
         try:
             local_filename, headers = urllib.urlretrieve(url, local_filename)
@@ -754,7 +763,7 @@ class App:
             while gtk.events_pending():
                 gtk.main_iteration(False)  
         
-        os.remove('tmp.js')
+        file_operations.remove('tmp.js')
         
         # successful
         return cut_avi, None
@@ -817,7 +826,7 @@ class App:
                 
         # download cutlist + save it
         url = self.config_dic['cut']['server'] + "getfile.php?id=" + str(best_cutlist)        
-        local_filename = os.path.join(self.config_dic['folders']['new_otrkeys'], os.path.basename(filename) + ".cutlist")
+        local_filename = join(self.config_dic['folders']['new_otrkeys'], basename(filename) + ".cutlist")
         
         try:
             local_filename, headers = urllib.urlretrieve(url, local_filename)
@@ -874,7 +883,7 @@ class App:
         # fill rename tree
         dict_files_iter = {}        
         for f in filenames:
-            iter = self.__gui.append_row_treeviewFilesRename(os.path.basename(f))
+            iter = self.__gui.append_row_treeviewFilesRename(basename(f))
             # keep relation between filename and iter
             dict_files_iter[f] = iter
             
@@ -905,9 +914,7 @@ class App:
                 if not new_name.endswith('.avi'):
                     new_name += '.avi'
             
-                target = os.path.join(target_folder, new_name)
-                print "Moving: ", f, " TO ", target
-                os.rename(f, target)   
+                file_operations.move_file(f, target_folder)   
                     
         dialog.hide()
                 
@@ -920,12 +927,12 @@ class App:
         dir = self.__gui.dialog_archive['treeviewFolders_store'].get_value(parent, 0)
             
         files = []
-        files = os.listdir(dir)            
+        files = listdir(dir)            
 
         for file in files:
-            full_path = os.path.join(dir, file)
+            full_path = join(dir, file)
             
-            if os.path.isdir(full_path):                
+            if isdir(full_path):                
                 iter = self.__gui.append_row_treeviewFolders(parent, full_path)
                 self.tree_folders(iter)
 
@@ -939,7 +946,7 @@ class App:
         if self.__gui.question_box(message + "in den Müll verschoben werden?"):
             for f in filenames:
                 target = self.config_dic['folders']['trash']
-                os.rename(f, os.path.join(target, os.path.basename(f)))
+                file_operations.move_file(f, target)
                 
     def action_real_delete(self, filenames):
         if len(filenames) == 1:
@@ -949,11 +956,11 @@ class App:
         
         if self.__gui.question_box(message + "endgültig gelöscht werden?"):
             for f in filenames:
-                os.remove(f)
+                file_operations.remove(f)
     
     def action_restore(self, filenames):
         for f in filenames:
-            os.rename(f, os.path.join(self.config_dic['folders']['new_otrkeys'], os.path.basename(f)))        
+            file_operations.move_file(f, self.config_dic['folders']['new_otrkeys'])
     
     def action_rename(self, filenames):
         dialog = self.__gui.windows['dialog_rename']
@@ -962,19 +969,19 @@ class App:
         entries = {}
         for f in filenames:
             entries[f] = gtk.Entry()
-            entries[f].set_text(os.path.basename(f))
+            entries[f].set_text(basename(f))
             entries[f].show()
             vbox.pack_start(entries[f])
         
         dialog.set_title("Umbenennen")    
         if dialog.run() == gtk.RESPONSE_OK:            
             for f in filenames:
-                new_name = os.path.join(os.path.dirname(f), entries[f].get_text())
+                new_name = join(dirname(f), entries[f].get_text())
                 
                 if f.endswith('.avi') and not new_name.endswith('.avi'):
                     new_name+='.avi'
                     
-                os.rename(f, new_name)
+                file_operations.rename(f, new_name)
         
         dialog.hide()
             
@@ -983,10 +990,10 @@ class App:
             vbox.remove(entries[f])
                                
     def action_new_folder(self, filename):
-        if os.path.isdir(filename):
+        if isdir(filename):
             dirname = filename
         else:
-            dirname = os.path.dirname(filename)
+            dirname = dirname(filename)
 
         dialog = self.__gui.windows['dialog_rename']
         vbox = self.__gui.dialog_rename['vboxRename']
@@ -997,7 +1004,7 @@ class App:
         dialog.set_title("Neuer Ordner")
         
         if dialog.run()==gtk.RESPONSE_OK and entry.get_text!="":            
-            os.mkdir(os.path.join(dirname, entry.get_text()))
+            mkdir(join(dirname, entry.get_text()))
             
         dialog.hide()
         
@@ -1005,7 +1012,7 @@ class App:
         
     def main(self):
         self.__gui.run()
-        config = configParser.Config() 
+        config = Config() 
         config.save(".otr-conf", self.config_dic)   
 
 app = App()

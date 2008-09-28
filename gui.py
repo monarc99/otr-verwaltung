@@ -21,7 +21,7 @@
 
 import sys
 import base64
-import os
+from os.path import join, isdir, basename
 import time
 import pynotify
 
@@ -209,7 +209,7 @@ class GUI:
     ###
 
     def get_image_path(self, image):
-        return os.path.join(os.path.join(sys.path[0], 'images'), image)
+        return join(join(sys.path[0], 'images'), image)
 
     def setup_main_window(self, builder):
         # status icon
@@ -683,11 +683,7 @@ class GUI:
             self.main_window['labelTrashCount'].set_text(counts_of_section[Section.TRASH])
 
     # related to treeview on main window  
-    def append_row_treeviewFiles(self, parent, filename):       
-        filestat = os.stat(filename)
-        date = filestat.st_mtime
-        size = os.path.getsize(filename)
-        
+    def append_row_treeviewFiles(self, parent, filename, size, date):               
         data = [filename, size, date]
     
         iter = self.main_window['treeviewFiles_store'].append(parent, data)
@@ -704,8 +700,8 @@ class GUI:
         if filename_iter2 == None:
             return -1
         
-        iter1_isdir = os.path.isdir(filename_iter1)
-        iter2_isdir = os.path.isdir(filename_iter2)
+        iter1_isdir = isdir(filename_iter1)
+        iter2_isdir = isdir(filename_iter2)
         
         if iter1_isdir and iter2_isdir: # both are folders
             # put names into array
@@ -728,7 +724,7 @@ class GUI:
     def file_pixbuf(self, column, cell, model, iter):
         filename = model.get_value(iter, self.FILENAME)
         
-        if os.path.isdir(filename):
+        if isdir(filename):
             cell.set_property('pixbuf', self.pix_folder)
         else:
             if filename.endswith('.otrkey'):
@@ -737,11 +733,11 @@ class GUI:
                 cell.set_property('pixbuf', self.pix_avi)
 
     def file_name(self, column, cell, model, iter):            
-        cell.set_property('text', os.path.basename(model.get_value(iter, self.FILENAME)))
+        cell.set_property('text', basename(model.get_value(iter, self.FILENAME)))
 
     def file_size(self, column, cell, model, iter):
         filename = model.get_value(iter, self.FILENAME)
-        if os.path.isdir(filename):
+        if isdir(filename):
             cell.set_property('text', '')
         else:
             cell.set_property('text', self.humanize_size(model.get_value(iter, self.SIZE)))
@@ -979,7 +975,7 @@ class GUI:
             # remove ugly .otrkey
             filename = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]
                           
-        self.dialog_conclusion['labelConclusionFilename'].set_text(os.path.basename(filename))  
+        self.dialog_conclusion['labelConclusionFilename'].set_text(basename(filename))  
         
         # decode status
         if self.action != Action.CUT:
@@ -1037,7 +1033,7 @@ class GUI:
         return iter
     
     def folder_name(self, column, cell, model, iter):
-        cell.set_property('text', os.path.basename(model.get_value(iter, 0)))
+        cell.set_property('text', basename(model.get_value(iter, 0)))
 
     # methods for file-rename treeview    
     def append_row_treeviewFilesRename(self, filename):

@@ -22,7 +22,24 @@
 import os
 
 def remove_file(filename):
-    pass
+    os.remove(filename)
     
-def rename_file():
-    pass
+def rename_file(old_filename, new_filename):
+    os.rename(old_filename, new_filename)
+
+def move_file(filename, target):
+    os.rename(filename, os.join(target, basename(filename)))
+
+def get_size(filename):
+    """ Returns a file's size."""
+    filestat = os.stat(filename)
+    date = filestat.st_mtime
+    
+    return size
+
+def get_date(filename):
+    """ Returns a file's last changed date."""
+    filestat = os.stat(filename)
+    date = filestat.st_mtime
+    
+    return date
