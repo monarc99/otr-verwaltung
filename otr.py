@@ -53,8 +53,7 @@ class App:
     
     def __init__(self):             
         # read configs
-        config = Config() 
-        self.config_dic = config.read(join(sys.path[0], ".otr-conf"))
+        self.config = Config(join(sys.path[0], ".otr-conf"))
 
         self.__search_text = ""
         self.blocked = False
@@ -129,9 +128,9 @@ class App:
     # helper for different section
     def section_otrkey(self):
         text = "Diese Dateien wurden noch nicht dekodiert." 
-        path = self.config_dic['folders']['new_otrkeys']
+        path = self.config.get('folders', 'new_otrkeys')
         
-        if self.config_dic['folders']['new_otrkeys'] == "":      
+        if path == "":      
             return text, []
         
         files = [join(path, f) for f in listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
@@ -140,7 +139,7 @@ class App:
          
     def section_avi_uncut(self):
         text = "Diese Dateien wurden noch nicht geschnitten."
-        path = self.config_dic['folders']['new_otrkeys']
+        path = self.config.get('folders', 'new_otrkeys')
         
         files = [join(path, f) for f in listdir(path) if self.__uncut_video.match(f) and self.search(f)]
             
@@ -148,10 +147,10 @@ class App:
         
     def section_avi_cut(self):
         text = "Diese avi-Dateien sind fertig geschnitten."
-        if self.config_dic['common']['use_archive']:
+        if self.config.get('common', 'use_archive'):
             text += " Sie können ins Archiv verschoben werden."
                 
-        path = self.config_dic['folders']['new_otrkeys']
+        path = self.config.get('folders', 'new_otrkeys')
         
         files = []                
         for f in listdir(path):
@@ -164,7 +163,7 @@ class App:
         
     def section_trash(self):
         text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
-        path = self.config_dic['folders']['trash']
+        path = self.config.get('folders', 'trash')
                     
         files = [join(path, f) for f in listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
                 
@@ -173,7 +172,7 @@ class App:
     def section_archive(self):
         text = "Diese Dateien wurden ins Archiv verschoben."
 
-        path = self.config_dic['folders']['archive']
+        path = self.config.get('folders', 'archive')
                
         self.tree(None, path)
         
@@ -181,11 +180,11 @@ class App:
                  
     # recursive function for archive to add folders and files with a tree structure
     def tree(self, parent, path=None):              
-        if parent!=None:            
+        if parent != None:            
             dir = self.__gui.get_filename(parent)
         else:  # base path (archive directory)
             dir = path
-            
+
         files = []
         files = listdir(dir)            
 
@@ -219,7 +218,8 @@ class App:
             return "Schneiden"
      
     def append_row_treeview_files(self, parent, filename):        
-        self.append_row_treeview_files(parent, filename, file_operations.get_size(filename), file_operations.get_date(filename))
+        iter = self.__gui.append_row_treeviewFiles(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
+        return iter
      
     ### 
     ### Search
@@ -245,7 +245,7 @@ class App:
          
         # archive
         files = []
-        for root, dirs, wfiles in walk(self.config_dic['folders']['archive']):
+        for root, dirs, wfiles in walk(self.config.get('folders', 'archive')):
             for f in wfiles:
                 if f.endswith('.avi') and self.search(f):
                     files += [join(root, f)]
@@ -323,7 +323,7 @@ class App:
                 count = 0
                 for file_conclusion in file_conclusions:                    
                     if file_conclusion.cut.rating > -1:
-                        url = self.config_dic['cut']['server'] + "rate.php?version=0.9.8.0&rate=%s&rating=%s" % (file_conclusion.cut.cutlist, file_conclusion.cut.rating)
+                        url = self.config.get('cut', 'server') + "rate.php?version=0.9.8.0&rate=%s&rating=%s" % (file_conclusion.cut.cutlist, file_conclusion.cut.rating)
 
                         try:
                             urllib.urlopen(url)                                 
@@ -362,7 +362,7 @@ class App:
         
         elif action==Action.NEW_FOLDER:
             if len(filenames) == 0:
-                self.action_new_folder(self.config_dic['folders']['archive'])
+                self.action_new_folder(self.config.get('folders', 'archive'))
             else:
                 self.action_new_folder(filenames[0])
             self.show_section(self.section)
@@ -398,14 +398,14 @@ class App:
     def action_decode(self, file_conclusions):           
         
         # no decoder        
-        if not "decode" in self.config_dic['decode']['path']: # no decoder specified
+        if not "decode" in self.config.get('decode', 'path'): # no decoder specified
             # dialog box: no decoder
             self.__gui.message_box("Es ist kein korrekter Dekoder angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)   
             return False
         
         # retrieve email and password
         # user did not save email and password
-        if self.config_dic['decode']['save_email_password'] == Save_Email_Password.DONT_SAVE:
+        if self.config.get('decode', 'save_email_password') == Save_Email_Password.DONT_SAVE:
             # let the user type in his data through a dialog
             response = self.__gui.windows['dialog_email_password'].run()
             self.__gui.windows['dialog_email_password'].hide() 
@@ -417,8 +417,8 @@ class App:
                 return False
                          
         else: # user typed email and password in         
-            email = self.config_dic['decode']['email']
-            password = base64.b64decode(self.config_dic['decode']['password']) 
+            email = self.config.get('decode', 'email')
+            password = base64.b64decode(self.config.get('decode', 'password')) 
         
         # start decoding, block app
         # now this method may not return "False"
@@ -431,9 +431,11 @@ class App:
             # update progress
             self.__decode_progress = count, 0
                    
-            command = "%s -i %s -e %s -p %s -o %s" % (self.config_dic['decode']['path'], file_conclusion.otrkey, email, password, self.config_dic['folders']['new_otrkeys'])
-            if self.config_dic['decode']['correct'] == 0:
-                command += " -q"
+            command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
+            # TODO: Reset
+            print command
+         #   if self.config.get('decode', 'correct') == 0:
+         #       command += " -q"
                                    
             (pout, pin, perr) = popen2.popen3(command)
             while True:
@@ -472,8 +474,8 @@ class App:
                 file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]
                 # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
                 # move to trash
-                target = self.config_dic['folders']['trash']
-                file_operations.move_file(file_conclusion.otrkey, target)
+                target = self.config.get('folders', 'trash')
+                fileoperations.move_file(file_conclusion.otrkey, target)
             else:            
                 file_conclusion.decode.status = Status.ERROR
                 file_conclusion.decode.message = error_message
@@ -499,9 +501,10 @@ class App:
 
             # how should the file be cut?
             cut_action = None
-            if self.config_dic['cut']['cut_action'] == Cut_action.ASK:
+            if self.config.get('cut', 'cut_action') == Cut_action.ASK:
+            
                 self.__gui.dialog_cut['labelCutFile'].set_text(basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config_dic['folders']['new_otrkeys'])
+                self.__gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config.get('folders', 'new_otrkeys'))
 
                 response = self.__gui.windows['dialog_cut'].run()
                 self.__gui.windows['dialog_cut'].hide()
@@ -519,7 +522,7 @@ class App:
                     continue
             
             else: # !=ASK
-                cut_action = self.config_dic['cut']['cut_action']
+                cut_action = self.config.get('cut', 'cut_action')
  
             # save cut_action
             file_conclusion.cut.cut_action = cut_action
@@ -629,22 +632,20 @@ class App:
                         file_conclusion.cut.message = "Keine Cutlist gefunden."
 
             elif cut_action == Cut_action.MANUALLY: # MANUALLY
-                command = "%s --load %s >>/dev/null" %(self.config_dic['cut']['avidemux'], file_conclusion.uncut_avi)
+                command = "%s --load %s >>/dev/null" %(self.config.get('cut', 'avidemux'), file_conclusion.uncut_avi)
                 avidemux = subprocess.Popen(command, shell=True)    
                 while avidemux.poll()==None:
                     # wait
                     pass
                     
                 file_conclusion.cut.status = Status.OK
-        
-            # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
-            # action after cut
-            status = file_conclusion.cut.status
-            
-            if status == Status.OK:
+                    
+            if file_conclusion.cut.status == Status.OK:
+                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
+                # action after cut
                 # move to trash
-                target = self.config_dic['folders']['trash']
-                file_operations.move_file(file_conclusion.uncut_avi, target)
+                target = self.config.get('folders', 'trash')
+                fileoperations.move_file(file_conclusion.uncut_avi, target)
              
             # update progress
             self.__cut_count = count
@@ -653,8 +654,8 @@ class App:
         return True
        
     def get_dom_from_cutlist(self, avi):
-        size = file_operations.get_size(avi)
-        url = self.config_dic['cut']['server'] + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
+        size = fileoperations.get_size(avi)
+        url = self.config.get('cut', 'server') + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
 
         try:
             handle = urllib.urlopen(url)     
@@ -683,11 +684,10 @@ class App:
              
     def cut_file_by_cutlist(self, filename, cutlist):
         # download cutlist
-        print "Downloading cutlist ", cutlist, " from ", self.config_dic['cut']['server'], " for ", filename
-        url = self.config_dic['cut']['server'] + "getfile.php?id=" + str(cutlist)
+        url = self.config.get('cut', 'server') + "getfile.php?id=" + str(cutlist)
         
         # save cutlist to folder
-        local_filename = join(self.config_dic['folders']['new_otrkeys'], basename(filename) + ".cutlist")
+        local_filename = join(self.config.get('folders', 'new_otrkeys'), basename(filename) + ".cutlist")
         
         try:
             local_filename, headers = urllib.urlretrieve(url, local_filename)
@@ -763,13 +763,13 @@ class App:
             while gtk.events_pending():
                 gtk.main_iteration(False)  
         
-        file_operations.remove('tmp.js')
+        fileoperations.remove('tmp.js')
         
         # successful
         return cut_avi, None
                         
     def action_play(self, filename):
-        player = self.config_dic['play']['player']
+        player = self.config('play', 'player')
 
         if not self.__cut_video.match(filename):
             self.__gui.message_box("Die ausgewählte Datei ist kein Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
@@ -782,7 +782,7 @@ class App:
         p = subprocess.Popen([player, filename])
     
     def action_cut_play(self, filename):
-        mplayer = self.config_dic['play']['mplayer']
+        mplayer = self.config('play', 'mplayer')
         
         if not self.__uncut_video.match(filename):
             self.__gui.message_box("Die ausgewählte Datei ist kein ungeschnittenes Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
@@ -825,8 +825,8 @@ class App:
                 best_cutlist = sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
                 
         # download cutlist + save it
-        url = self.config_dic['cut']['server'] + "getfile.php?id=" + str(best_cutlist)        
-        local_filename = join(self.config_dic['folders']['new_otrkeys'], basename(filename) + ".cutlist")
+        url =self.config.get('cut', 'server') + "getfile.php?id=" + str(best_cutlist)        
+        local_filename = join(self.config.get('folders', 'new_otrkeys'), basename(filename) + ".cutlist")
         
         try:
             local_filename, headers = urllib.urlretrieve(url, local_filename)
@@ -888,7 +888,7 @@ class App:
             dict_files_iter[f] = iter
             
         # fill tree of folders  
-        root = self.__gui.append_row_treeviewFolders(None, self.config_dic['folders']['archive'])    
+        root = self.__gui.append_row_treeviewFolders(None, self.config.get('folders', 'archive'))    
         self.tree_folders(root)        
         # select first node
         selection = treeview_folders.get_selection()
@@ -914,7 +914,7 @@ class App:
                 if not new_name.endswith('.avi'):
                     new_name += '.avi'
             
-                file_operations.move_file(f, target_folder)   
+                fileoperations.move_file(f, target_folder)   
                     
         dialog.hide()
                 
@@ -945,8 +945,8 @@ class App:
         
         if self.__gui.question_box(message + "in den Müll verschoben werden?"):
             for f in filenames:
-                target = self.config_dic['folders']['trash']
-                file_operations.move_file(f, target)
+                target = self.config.get('folders', 'trash')
+                fileoperations.move_file(f, target)
                 
     def action_real_delete(self, filenames):
         if len(filenames) == 1:
@@ -956,11 +956,11 @@ class App:
         
         if self.__gui.question_box(message + "endgültig gelöscht werden?"):
             for f in filenames:
-                file_operations.remove(f)
+                fileoperations.remove(f)
     
     def action_restore(self, filenames):
         for f in filenames:
-            file_operations.move_file(f, self.config_dic['folders']['new_otrkeys'])
+            fileoperations.move_file(f, self.config.get('folders', 'new_otrkeys'))
     
     def action_rename(self, filenames):
         dialog = self.__gui.windows['dialog_rename']
@@ -981,7 +981,7 @@ class App:
                 if f.endswith('.avi') and not new_name.endswith('.avi'):
                     new_name+='.avi'
                     
-                file_operations.rename(f, new_name)
+                fileoperations.rename(f, new_name)
         
         dialog.hide()
             
@@ -1012,8 +1012,9 @@ class App:
         
     def main(self):
         self.__gui.run()
-        config = Config() 
-        config.save(".otr-conf", self.config_dic)   
+        
+        self.config.save()
+        
 
 app = App()
 app.main()

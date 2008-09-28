@@ -33,7 +33,7 @@ def move_file(filename, target):
 def get_size(filename):
     """ Returns a file's size."""
     filestat = os.stat(filename)
-    date = filestat.st_mtime
+    size = filestat.st_size
     
     return size
 

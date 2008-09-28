@@ -198,7 +198,7 @@ class GUI:
     def run(self):
         self.windows['main_window'].show()        
 
-        if self.app.config_dic['folders']['new_otrkeys'] == "":      
+        if self.app.config.get('folders', 'new_otrkeys') == "":      
             self.message_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)  
             self.windows['preferences_window'].show()
         
@@ -371,6 +371,8 @@ class GUI:
         
         builder.get_object('labelHeadline').modify_font(pango.FontDescription("bold"))
           
+        # TODO: Do filling of comboboxes by glade
+          
         # fill combobox of player
         player_store = gtk.ListStore(str)
         player_store.append(["vlc"])
@@ -378,14 +380,14 @@ class GUI:
         player_store.append(["mplayer"])
         builder.get_object('comboboxPlayer').set_model(player_store)
         builder.get_object('comboboxPlayer').set_text_column(0)
-        builder.get_object('comboboxentry-player').set_text(self.app.config_dic['play']['player'])
+        builder.get_object('comboboxentry-player').set_text(self.app.config.get('play', 'player'))
         
         # fill combobox of mplayer
         mplayer_store = gtk.ListStore(str)
         mplayer_store.append(["mplayer"])
         builder.get_object('comboboxMPlayer').set_model(mplayer_store)
         builder.get_object('comboboxMPlayer').set_text_column(0)
-        builder.get_object('comboboxentry-mplayer').set_text(self.app.config_dic['play']['mplayer'])
+        builder.get_object('comboboxentry-mplayer').set_text(self.app.config.get('play', 'mplayer'))
         
         # fill combobox avidemux
         avidemux_store = gtk.ListStore(str)
@@ -393,7 +395,7 @@ class GUI:
         avidemux_store.append(["avidemux2"])        
         builder.get_object('comboboxAvidemux').set_model(avidemux_store)
         builder.get_object('comboboxAvidemux').set_text_column(0)
-        builder.get_object('comboboxentry-avidemux').set_text(self.app.config_dic['cut']['avidemux'])
+        builder.get_object('comboboxentry-avidemux').set_text(self.app.config.get('cut', 'avidemux'))
         
         # fill combobox servers
         server_store = gtk.ListStore(str)
@@ -402,37 +404,37 @@ class GUI:
         server_store.append(["http://cutlist.at/"])
         builder.get_object('comboboxServer').set_model(server_store)
         builder.get_object('comboboxServer').set_text_column(0)
-        builder.get_object('comboboxentry-server').set_text(self.app.config_dic['cut']['server'])
+        builder.get_object('comboboxentry-server').set_text(self.app.config.get('cut', 'server'))
         
         # fill values from config_dic
         # folder choosers on folders tab           
-        builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config_dic['folders']['new_otrkeys'])
-        builder.get_object('folderTrash').set_current_folder(self.app.config_dic['folders']['trash'])
-        builder.get_object('checkArchive').set_active(bool(self.app.config_dic['common']['use_archive']))     
-        builder.get_object('checkUseCutPlay').set_active(bool(self.app.config_dic['play']['use_cut_play']))   
-        builder.get_object('folderArchive').set_current_folder(self.app.config_dic['folders']['archive'])     
+        builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config.get('folders', 'new_otrkeys'))
+        builder.get_object('folderTrash').set_current_folder(self.app.config.get('folders', 'trash'))
+        builder.get_object('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
+        builder.get_object('checkUseCutPlay').set_active(self.app.config.get('play', 'use_cut_play'))
+        builder.get_object('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
               
         # decode tab
-        self.preferences_window['filechooserDecoder'].set_filename(self.app.config_dic['decode']['path'])  
-        if self.app.config_dic['decode']['save_email_password'] == Save_Email_Password.DONT_SAVE:
+        self.preferences_window['filechooserDecoder'].set_filename(self.app.config.get('decode', 'path'))  
+        if self.app.config.get('decode', 'save_email_password') == Save_Email_Password.DONT_SAVE:
             builder.get_object('radioDontSave').set_active(True)
             self.on_radioDontSave_toggled(builder.get_object('radioDontSave'))
         else:
             builder.get_object('radioSave').set_active(True)
-            self.preferences_window['entryEMail'].set_text(self.app.config_dic['decode']['email'])
-            self.preferences_window['entryPassword'].set_text(base64.b64decode(self.app.config_dic['decode']['password']))
+            self.preferences_window['entryEMail'].set_text(self.app.config.get('decode', 'email'))
+            self.preferences_window['entryPassword'].set_text(base64.b64decode(self.app.config.get('decode', 'password')))
            
         self.preferences_window['entryPassword'].set_visibility(False)
             
-        self.preferences_window['checkCorrect'].set_active(bool(self.app.config_dic['decode']['correct']))
+        self.preferences_window['checkCorrect'].set_active(self.app.config.get('decode', 'correct'))
             
         # radio buttons on cut tab
         radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually' ] # order is important!
-        builder.get_object(radiobuttons[self.app.config_dic['cut']['cut_action']]).set_active(True)
+        builder.get_object(radiobuttons[self.app.config.get('cut', 'cut_action')]).set_active(True)
        
         # radio buttons common tab
         radiobuttons = [ 'radio_ask', 'radio_minimize', 'radio_quit' ] # order is important!
-        builder.get_object(radiobuttons[self.app.config_dic['common']['on_quit']]).set_active(True)
+        builder.get_object(radiobuttons[self.app.config.get('common', 'on_quit')]).set_active(True)
        
     def setup_dialog_archive(self, builder):
         # create folder treestore
@@ -601,7 +603,7 @@ class GUI:
         
     def on_main_window_delete_event(self, widget, data=None):
         # dialog
-        if self.app.config_dic['common']['on_quit'] == On_Quit.ASK:
+        if self.app.config.get('common', 'on_quit') == On_Quit.ASK:
             self.dialog_close_minimize['checkbutton_keep'].set_active(False)
             response = self.windows['dialog_close_minimize'].run()
             self.windows['dialog_close_minimize'].hide()
@@ -622,7 +624,7 @@ class GUI:
             else: # canceled
                 return True
                 
-        elif self.app.config_dic['common']['on_quit'] == On_Quit.MINIMIZE:
+        elif self.app.config.get('common', 'on_quit') == On_Quit.MINIMIZE:
             self.windows['main_window'].hide()
             return True # don't destroy window
         else: # quit
@@ -791,29 +793,29 @@ class GUI:
     # common tab
     def on_radio_ask_toggled(self, widget, data=None):
         if widget.get_active()==True:
-            self.app.config_dic['common']['on_quit'] = On_Quit.ASK
+            self.app.config.set('common', 'on_quit', On_Quit.ASK)
             
     def on_radio_quit_toggled(self, widget, data=None):
         if widget.get_active()==True:
-            self.app.config_dic['common']['on_quit'] = On_Quit.QUIT
+            self.app.config.set('common', 'on_quit', On_Quit.QUIT)
     
     def on_radio_minimize_toggled(self, widget, data=None):
         if widget.get_active()==True:
-            self.app.config_dic['common']['on_quit'] = On_Quit.MINIMIZE
+            self.app.config.set('common', 'on_quit', On_Quit.MINIMIZE)
                       
     # folders tab
     # folder changed, save to config dictionary
     def on_folderNewOtrkeys_current_folder_changed(self, widget, data=None):        
-        self.app.config_dic['folders']['new_otrkeys'] = widget.get_filename()
+        self.app.config.set('folders', 'new_otrkeys', widget.get_filename())
         self.app.show_section(self.app.section)
     
     def on_folderTrash_current_folder_changed(self, widget, data=None):
-        self.app.config_dic['folders']['trash'] = widget.get_filename()
+        self.app.config.set('folders', 'trash', widget.get_filename())
         self.app.show_section(self.app.section)
 
     def on_preferences_checkArchive_toggled(self, widget, data=None):          
         status = widget.get_active()
-        self.app.config_dic['common']['use_archive'] = int(status)
+        self.app.config.set('common', 'use_archive', int(status))
 
         self.preferences_window['folderArchive'].set_sensitive(status)
         
@@ -824,16 +826,16 @@ class GUI:
         self.toolbar_buttons['archive'].set_property('visible', status)            
                           
     def on_folderArchive_current_folder_changed(self, widget, data=None):        
-        self.app.config_dic['folders']['archive'] = widget.get_filename()
+        self.app.config.set('folders', 'archive', widget.get_filename())
         self.app.show_section(self.app.section)
                 
     # decode tab
     def on_filechooserDecoder_file_set(self, widget, data=None):
-        self.app.config_dic['decode']['path'] = widget.get_filename()      
+        self.app.config.set('decode', 'path', widget.get_filename())
     
     def on_radioDontSave_toggled(self, widget, data=None):
         if widget.get_active() == True:
-            self.app.config_dic['decode']['save_email_password'] = Save_Email_Password.DONT_SAVE
+            self.app.config.set('decode', 'save_email_password', Save_Email_Password.DONT_SAVE)
             self.preferences_window['entryEMail'].set_text("")
             self.preferences_window['entryEMail'].set_sensitive(False)
             self.preferences_window['entryPassword'].set_text("")
@@ -841,51 +843,51 @@ class GUI:
         
     def on_radioSave_toggled(self, widget, data=None):
         if widget.get_active() == True:
-            self.app.config_dic['decode']['save_email_password'] = Save_Email_Password.SAVE
+            self.app.config.set('decode', 'save_email_password', Save_Email_Password.SAVE)
             self.preferences_window['entryEMail'].set_sensitive(True)
             self.preferences_window['entryPassword'].set_sensitive(True)
             
     def on_entryEMail_changed(self, widget, data=None):
-        self.app.config_dic['decode']['email'] = widget.get_text()
+        self.app.config.set('decode', 'email', widget.get_text())
         
     def on_entryPassword_changed(self, widget, data=None):
-        self.app.config_dic['decode']['password'] = base64.b64encode(widget.get_text())
+        self.app.config.set('decode', 'password', base64.b64encode(widget.get_text()))
     
     def on_checkCorrect_toggled(self, widget, data=None):
-        self.app.config_dic['decode']['correct'] = int(widget.get_active())    
+        self.app.config.set('decode', 'correct', int(widget.get_active()))
   
     # cut tab
     def on_radioAsk_toggled(self, widget, data=None):
         if widget.get_active()==True:
-            self.app.config_dic['cut']['cut_action'] = Cut_action.ASK
+            self.app.config.set('cut', 'cut_action', Cut_action.ASK)
             
     def on_radioBestCutlist_toggled(self, widget, data=None):
         if widget.get_active()==True:
-           self.app.config_dic['cut']['cut_action'] = Cut_action.BEST_CUTLIST
+           self.app.config.set('cut', 'cut_action', Cut_action.BEST_CUTLIST)
                 
     def on_radioChooseCutlist_toggled(self, widget, data=None):
         if widget.get_active()==True:
-            self.app.config_dic['cut']['cut_action'] = Cut_action.CHOOSE_CUTLIST        
+            self.app.config.set('cut', 'cut_action', Cut_action.CHOOSE_CUTLIST)
                 
     def on_radioManually_toggled(self, widget, data=None):
         if widget.get_active()==True:
-            self.app.config_dic['cut']['cut_action'] = Cut_action.MANUALLY
+            self.app.config.set('cut', 'cut_action', Cut_action.MANUALLY)
 
     def on_comboboxentry_avidemux_changed(self, widget, data=None):
-        self.app.config_dic['cut']['avidemux'] = widget.get_text()
+        self.app.config.set('cut', 'avidemux', widget.get_text())
     
     def on_comboboxentry_server_changed(self, widget, data=None):
-        self.app.config_dic['cut']['server'] = widget.get_text()
+        self.app.config.set('cut', 'server', widget.get_text())
         
     # play tab
     def on_comboboxentry_player_changed(self, widget, data=None):
-        self.app.config_dic['play']['player'] = widget.get_text()
+        self.app.config.set('play', 'player', widget.get_text())
     
     def on_comboboxentry_mplayer_changed(self, widget, data=None):
-        self.app.config_dic['play']['mplayer'] = widget.get_text()      
+        self.app.config.set('play', 'mplayer', widget.get_text())      
        
     def on_checkUseCutPlay_toggled(self, widget, data=None):       
-        self.app.config_dic['play']['use_cut_play'] = int(widget.get_active())
+        self.app.config.set('play', 'use_cut_play', int(widget.get_active()))
         
         self.preferences_window['comboboxMPlayer'].set_sensitive(widget.get_active())
                     
