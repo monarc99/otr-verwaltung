@@ -19,27 +19,28 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os
+from os import remove, rename, stat
+from os.path import join, basename
 
 def remove_file(filename):
-    os.remove(filename)
+    remove(filename)
     
 def rename_file(old_filename, new_filename):
-    os.rename(old_filename, new_filename)
+    rename(old_filename, new_filename)
 
 def move_file(filename, target):
-    os.rename(filename, os.join(target, basename(filename)))
+    rename(filename, join(target, basename(filename)))
 
 def get_size(filename):
     """ Returns a file's size."""
-    filestat = os.stat(filename)
+    filestat = stat(filename)
     size = filestat.st_size
     
     return size
 
 def get_date(filename):
     """ Returns a file's last changed date."""
-    filestat = os.stat(filename)
+    filestat = stat(filename)
     date = filestat.st_mtime
     
     return date

@@ -20,6 +20,15 @@
 #
 
 
+# TODO: remove this from otr.py. this dependency belongs to gui
+# TODO: do i need pygtk? (see also other files)
+try:
+    from gtk import events_pending, main_iteration, RESPONSE_OK
+except:
+    print "PyGTK/GTK is missing."
+    sys.exit(-1)
+
+
 import sys
 from os import listdir, walk, mkdir
 from os.path import join, isdir, basename, dirname
@@ -34,16 +43,9 @@ import urllib
 import xml.dom.minidom
 import ConfigParser
 
-try:
-    import pygtk
-    pygtk.require('2.0')
-    import gtk
-    import pango
-except:
-    sys.exit(-1)
-    
 # intern
-import gui
+import otrpath
+from gui.gui import Gui
 from configparser import Config
 import fileoperations
 from filesconclusion import FileConclusion
@@ -53,7 +55,7 @@ class App:
     
     def __init__(self):             
         # read configs
-        self.config = Config(join(sys.path[0], ".otr-conf"))
+        self.config = Config(otrpath.get_path(".otr-conf"))
 
         self.__search_text = ""
         self.blocked = False
@@ -65,15 +67,15 @@ class App:
         self.__cut_count = -1
     
         # load gui
-        self.__gui = gui.GUI(self, join(sys.path[0], "otr.ui"))       
-        
+        self.__gui = Gui(self)
+    
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
         
         # regex
         self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
         self.__cut_video = re.compile('.*(avi|mp4)$')     
-        
+                        
     ### 
     ### Show sections
     ###
@@ -88,9 +90,9 @@ class App:
         self.section = section
         
         # set toolbar
-        self.__gui.set_toolbar(section)
+        self.__gui.main_window.set_toolbar(section)
                 
-        self.__gui.main_window['treeviewFiles_store'].clear()
+        self.__gui.main_window.clear_files()
         files = []
         text = ""
         
@@ -109,7 +111,6 @@ class App:
         elif section==Section.ARCHIVE: 
             # returns NO files       
             text = self.section_archive()
-            self.__gui.main_window['treeviewFiles'].expand_all()
 
         if len(files)>0: # this is not executed, when the section is "Archive"
             if len(files)==1:
@@ -123,7 +124,7 @@ class App:
                 self.append_row_treeview_files(None, f)
 
         # set message textfilenames_action_status[file][action][0]
-        self.__gui.main_window['labelMessage'].set_text(text)
+        self.__gui.main_window.get_widget('labelMessage').set_text(text)
              
     # helper for different section
     def section_otrkey(self):
@@ -181,7 +182,7 @@ class App:
     # recursive function for archive to add folders and files with a tree structure
     def tree(self, parent, path=None):              
         if parent != None:            
-            dir = self.__gui.get_filename(parent)
+            dir = self.__gui.main_window.get_filename(parent)
         else:  # base path (archive directory)
             dir = path
 
@@ -202,23 +203,9 @@ class App:
     ###
     ### Helpers
     ###
-
-    def status_to_s(self, status):
-        if status==Status.OK:
-            return "OK"
-        elif status==Status.ERROR:
-            return "Fehler"
-        elif status==Status.NOT_DONE:
-            return "Nicht durchgeführt"
-            
-    def action_to_s(self, action):              
-        if action==Action.DECODE:
-            return "Dekodieren"
-        elif action==Action.CUT:
-            return "Schneiden"
      
     def append_row_treeview_files(self, parent, filename):        
-        iter = self.__gui.append_row_treeviewFiles(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
+        iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
         return iter
      
     ### 
@@ -280,7 +267,7 @@ class App:
         """ Performs an action (toolbar, context menu, etc.) """
         
         if len(filenames) == 0 and action!=Action.NEW_FOLDER:        
-            self.__gui.message_box("Es sind keine Dateien markiert!", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)   
+            self.__gui.message_info_box("Es sind keine Dateien markiert!")
             return
         
         # different actions:
@@ -314,10 +301,10 @@ class App:
             self.__cut_count = -1
                 
             # show conclusion
-            dialog = self.__gui.build_conclusion_dialog(file_conclusions, action)
+            dialog = self.__gui.dialog_conclusion.build(file_conclusions, action)
             dialog.run()         
             
-            file_conclusions = self.__gui.file_conclusions
+            file_conclusions = self.__gui.dialog_conclusion.file_conclusions
             
             if action != Action.DECODE:
                 count = 0
@@ -332,13 +319,13 @@ class App:
                             print e
                 
                 if count == 1:
-                    self.__gui.message_box("Es wurde 1 Cutlisten bewertet!", gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
+                    self.__gui.message_info_box("Es wurde 1 Cutlisten bewertet!")
                 elif count > 1:
-                    self.__gui.message_box("Es wurden %s Cutlisten bewertet!" % count, gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
+                    self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
 
             # update section
             self.blocked = False
-            self.__gui.windows['main_window'].show()
+            self.__gui.main_window.show()
             self.show_section(self.section)        
             
         elif action==Action.DELETE:
@@ -400,19 +387,19 @@ class App:
         # no decoder        
         if not "decode" in self.config.get('decode', 'path'): # no decoder specified
             # dialog box: no decoder
-            self.__gui.message_box("Es ist kein korrekter Dekoder angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)   
+            self.__gui.message_error_box("Es ist kein korrekter Dekoder angegeben!")
             return False
         
         # retrieve email and password
         # user did not save email and password
         if self.config.get('decode', 'save_email_password') == Save_Email_Password.DONT_SAVE:
             # let the user type in his data through a dialog
-            response = self.__gui.windows['dialog_email_password'].run()
-            self.__gui.windows['dialog_email_password'].hide() 
+            response = self.__gui.dialog_email_password.run()
+            self.__gui.dialog_email_password.hide() 
             
-            if response==gtk.RESPONSE_OK:
-                email = self.__gui.dialog_email_password['entryDialogEMail'].get_text()
-                password = self.__gui.dialog_email_password['entryDialogPassword'].get_text()                               
+            if response==RESPONSE_OK:
+                email = self.__gui.dialog_email_password.get_widget('entryDialogEMail').get_text()
+                password = self.__gui.dialog_email_password.get_widget('entryDialogPassword').get_text()                               
             else: # user pressed cancel
                 return False
                          
@@ -422,9 +409,9 @@ class App:
         
         # start decoding, block app
         # now this method may not return "False"
-        self.__gui.windows['main_window'].hide()
+        self.__gui.main_window.hide()
         self.blocked = True
-        self.__gui.notify_popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
+        self.__gui.notify.popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
                    
         # decode each file
         for count, file_conclusion in enumerate(file_conclusions):
@@ -432,10 +419,9 @@ class App:
             self.__decode_progress = count, 0
                    
             command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
-            # TODO: Reset
-            print command
-         #   if self.config.get('decode', 'correct') == 0:
-         #       command += " -q"
+            
+            if self.config.get('decode', 'correct') == 0:
+                command += " -q"
                                    
             (pout, pin, perr) = popen2.popen3(command)
             while True:
@@ -453,8 +439,8 @@ class App:
                     progress = int(l[10:13])                    
                     # update progress
                     self.__decode_progress = count, progress
-                    while gtk.events_pending():
-                        gtk.main_iteration(False)
+                    while events_pending():
+                        main_iteration(False)
                 except ValueError:                
                     pass
             
@@ -485,9 +471,11 @@ class App:
     def action_cut(self, file_conclusions, action):               
         # start cutting, block app
         # now this method may not return "False"
-        self.__gui.windows['main_window'].hide()
+        self.__gui.main_window.hide()
         self.blocked = True
-        self.__gui.notify_popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
+        # only show when everything is donw automatically, otherwise it's confusing
+        if self.config.get('cut', 'cut_action') == Cut_action.BEST_CUTLIST: 
+            self.__gui.notify.popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
         
         for count, file_conclusion in enumerate(file_conclusions):
             self.__cut_count = count
@@ -503,16 +491,16 @@ class App:
             cut_action = None
             if self.config.get('cut', 'cut_action') == Cut_action.ASK:
             
-                self.__gui.dialog_cut['labelCutFile'].set_text(basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut['labelWarning'].set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config.get('folders', 'new_otrkeys'))
+                self.__gui.dialog_cut.get_widget('labelCutFile').set_text(basename(file_conclusion.uncut_avi))
+                self.__gui.dialog_cut.get_widget('labelWarning').set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config.get('folders', 'new_otrkeys'))
 
-                response = self.__gui.windows['dialog_cut'].run()
-                self.__gui.windows['dialog_cut'].hide()
+                response = self.__gui.dialog_cut.run()
+                self.__gui.dialog_cut.hide()
                 
-                if response == gtk.RESPONSE_OK:            
-                    if self.__gui.dialog_cut['radioCutBestCutlist'].get_active() == True:
+                if response == RESPONSE_OK:            
+                    if self.__gui.dialog_cut.get_widget('radioCutBestCutlist').get_active() == True:
                         cut_action = Cut_action.BEST_CUTLIST
-                    elif self.__gui.dialog_cut['radioCutChooseCutlist'].get_active() == True:
+                    elif self.__gui.dialog_cut.get_widget('radioCutChooseCutlist').get_active() == True:
                         cut_action = Cut_action.CHOOSE_CUTLIST
                     else:                    
                         cut_action = Cut_action.MANUALLY
@@ -573,13 +561,13 @@ class App:
                 # download all cutlist and display them to
                 # the user
 
-                self.__gui.dialog_cutlist['treeviewCutlists_store'].clear()                
+                self.__gui.dialog_cutlist.get_widget('treeviewCutlists').get_model().clear()                
                 dom_cutlists, error_message = self.get_dom_from_cutlist(file_conclusion.uncut_avi)
                 
                 cutlists_found = False
                  
                 if dom_cutlists==None:
-                    self.__gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+                    self.__gui.message_error_box(error_message)
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = error_message
                 else:                   
@@ -600,16 +588,16 @@ class App:
                             self.read_value(cutlist, "withtime"),
                             self.read_value(cutlist, "duration")]
                     
-                        self.__gui.add_cutlist(data_array)
+                        self.__gui.dialog_cutlist.add_cutlist(data_array)
                 
                     if cutlists_found:                        
-                        self.__gui.dialog_cutlist['labelCutlistFile'].set_text(basename(file_conclusion.uncut_avi))
-                        response = self.__gui.windows['dialog_cutlist'].run()
-                        self.__gui.windows['dialog_cutlist'].hide()
+                        self.__gui.dialog_cutlist.get_widget('labelCutlistFile').set_text(basename(file_conclusion.uncut_avi))
+                        response = self.__gui.dialog_cutlist.run()
+                        self.__gui.dialog_cutlist.hide()
                         
-                        treeselection = self.__gui.dialog_cutlist['treeviewCutlists'].get_selection()  
+                        treeselection = self.__gui.dialog_cutlist.get_widget('treeviewCutlists').get_selection()  
                         
-                        if treeselection.count_selected_rows()==0 or response != gtk.RESPONSE_OK:                            
+                        if treeselection.count_selected_rows()==0 or response != RESPONSE_OK:                            
                             file_conclusion.cut.status = Status.NOT_DONE
                             file_conclusion.cut.message = "Keine Cutlist gewählt."
                         else:
@@ -760,8 +748,8 @@ class App:
         command = "avidemux --force-smart --run tmp.js --quit >>/dev/null" # --nogui
         avidemux = subprocess.Popen(command, shell=True)
         while avidemux.poll()==None:
-            while gtk.events_pending():
-                gtk.main_iteration(False)  
+            while events_pending():
+                main_iteration(False)  
         
         fileoperations.remove('tmp.js')
         
@@ -769,27 +757,27 @@ class App:
         return cut_avi, None
                         
     def action_play(self, filename):
-        player = self.config('play', 'player')
+        player = self.config.get('play', 'player')
 
         if not self.__cut_video.match(filename):
-            self.__gui.message_box("Die ausgewählte Datei ist kein Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Die ausgewählte Datei ist kein Video!")
             return 
             
         if player=='':
-            self.__gui.message_box("Es ist kein Player angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Es ist kein Player angegeben!")
             return
         
         p = subprocess.Popen([player, filename])
     
     def action_cut_play(self, filename):
-        mplayer = self.config('play', 'mplayer')
+        mplayer = self.config.get('play', 'mplayer')
         
         if not self.__uncut_video.match(filename):
-            self.__gui.message_box("Die ausgewählte Datei ist kein ungeschnittenes Video!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Die ausgewählte Datei ist kein ungeschnittenes Video!")
             return 
             
         if mplayer=='':
-            self.__gui.message_box("Der MPlayer ist nicht angegeben!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Der MPlayer ist nicht angegeben!")
             return
         
         # get best cutlist
@@ -798,7 +786,7 @@ class App:
         best_cutlist = None
         
         if dom_cutlists==None:
-            self.__gui.message_box(error_message, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box(error_message)
             return
         else:                   
             cutlists = {}             
@@ -816,7 +804,7 @@ class App:
                 cutlists[int(self.read_value(cutlist, "id"))] = rating
             
             if len(cutlists)==0:
-                self.__gui.message_box("Keine Cutlist gefunden!", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+                self.__gui.message_error_box("Keine Cutlist gefunden!")
                 return
             else: 
                 sort_cutlists = cutlists.items()
@@ -831,7 +819,7 @@ class App:
         try:
             local_filename, headers = urllib.urlretrieve(url, local_filename)
         except IOError:
-            self.__gui.message_box("Verbindungsprobleme", gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Verbindungsprobleme")
             return
         
         config_parser = ConfigParser.ConfigParser()        
@@ -848,10 +836,10 @@ class App:
                 cuts.append((float(config_parser.get("Cut"+str(count), "Start")), float(config_parser.get("Cut"+str(count), "Duration"))))
             
         except ConfigParser.NoSectionError, (ErrorNumber, ErrorMessage):
-            self.__gui.message_box("Fehler in Cutlist: " + ErrorMessage, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Fehler in Cutlist: " + ErrorMessage)
             return
         except ConfigParser.NoOptionError, (ErrorNumber, ErrorMessage):
-            self.__gui.message_box("Fehler in Cutlist: " + ErrorMessage, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE)
+            self.__gui.message_error_box("Fehler in Cutlist: " + ErrorMessage)
             return
         
         # make edl
@@ -872,23 +860,24 @@ class App:
        
     def action_archive(self, filenames):       
         # widgets
-        dialog = self.__gui.windows['dialog_archive']
-        treeview_files = self.__gui.dialog_archive['treeviewFilesRename']
-        treestore_files = self.__gui.dialog_archive['treeviewFilesRename_store']
-        treeview_folders = self.__gui.dialog_archive['treeviewFolders']
-        treestore_folders = self.__gui.dialog_archive['treeviewFolders_store']
+        dialog = self.__gui.dialog_archive
+       
+        treeview_files = self.__gui.dialog_archive.get_widget('treeviewFilesRename')
+        treestore_files = treeview_files.get_model()
+        treeview_folders = self.__gui.dialog_archive.get_widget('treeviewFolders')
+        treestore_folders = treeview_folders.get_model()
                 
-        self.__gui.dialog_archive['labelFiles'].set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
+        self.__gui.dialog_archive.get_widget('labelFiles').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
         
         # fill rename tree
         dict_files_iter = {}        
         for f in filenames:
-            iter = self.__gui.append_row_treeviewFilesRename(basename(f))
+            iter = self.__gui.dialog_archive.append_row_treeviewFilesRename(basename(f))
             # keep relation between filename and iter
             dict_files_iter[f] = iter
             
-        # fill tree of folders  
-        root = self.__gui.append_row_treeviewFolders(None, self.config.get('folders', 'archive'))    
+        # fill tree of folders
+        root = self.__gui.dialog_archive.append_row_treeviewFolders(None, self.config.get('folders', 'archive'))    
         self.tree_folders(root)        
         # select first node
         selection = treeview_folders.get_selection()
@@ -899,7 +888,7 @@ class App:
         
         result = dialog.run()
 
-        if result==gtk.RESPONSE_OK:            
+        if result == RESPONSE_OK:            
             # get selection
             selection = treeview_folders.get_selection()
             (model, iter) = selection.get_selected()
@@ -910,11 +899,14 @@ class App:
             for f in filenames:
                 # get new filename
                 new_name = treestore_files.get_value(dict_files_iter[f], 0)
-            
+                                
                 if not new_name.endswith('.avi'):
                     new_name += '.avi'
             
-                fileoperations.move_file(f, target_folder)   
+                new_name = join(dirname(f), new_name)
+                fileoperations.rename(f, new_name)
+                fileoperations.move_file(new_name, target_folder)   
+                
                     
         dialog.hide()
                 
@@ -924,7 +916,7 @@ class App:
 
     # recursive
     def tree_folders(self, parent):              
-        dir = self.__gui.dialog_archive['treeviewFolders_store'].get_value(parent, 0)
+        dir = self.__gui.dialog_archive.get_widget('treeviewFolders').get_model().get_value(parent, 0)
             
         files = []
         files = listdir(dir)            
@@ -933,7 +925,7 @@ class App:
             full_path = join(dir, file)
             
             if isdir(full_path):                
-                iter = self.__gui.append_row_treeviewFolders(parent, full_path)
+                iter = self.__gui.dialog_archive.append_row_treeviewFolders(parent, full_path)
                 self.tree_folders(iter)
 
        
@@ -963,58 +955,37 @@ class App:
             fileoperations.move_file(f, self.config.get('folders', 'new_otrkeys'))
     
     def action_rename(self, filenames):
-        dialog = self.__gui.windows['dialog_rename']
-        vbox = self.__gui.dialog_rename['vboxRename']
-        
-        entries = {}
-        for f in filenames:
-            entries[f] = gtk.Entry()
-            entries[f].set_text(basename(f))
-            entries[f].show()
-            vbox.pack_start(entries[f])
-        
-        dialog.set_title("Umbenennen")    
-        if dialog.run() == gtk.RESPONSE_OK:            
+        response, new_names = self.__gui.dialog_rename.init_and_run("Umbenennen", filenames)  
+                
+        if response:
             for f in filenames:
-                new_name = join(dirname(f), entries[f].get_text())
+                new_name = join(dirname(f), new_names[f])
                 
                 if f.endswith('.avi') and not new_name.endswith('.avi'):
                     new_name+='.avi'
                     
-                fileoperations.rename(f, new_name)
-        
-        dialog.hide()
-            
-        # remove entry widgets
-        for f in entries:
-            vbox.remove(entries[f])
-                               
+                fileoperations.rename_file(f, new_name)
+
     def action_new_folder(self, filename):
         if isdir(filename):
             dirname = filename
         else:
             dirname = dirname(filename)
 
-        dialog = self.__gui.windows['dialog_rename']
-        vbox = self.__gui.dialog_rename['vboxRename']
+        response, new_names = self.__gui.dialog_rename.init_and_run("Neuer Ordner", ["Neuer Ordner"])
 
-        entry = gtk.Entry()
-        entry.show()
-        vbox.pack_start(entry)
-        dialog.set_title("Neuer Ordner")
-        
-        if dialog.run()==gtk.RESPONSE_OK and entry.get_text!="":            
-            mkdir(join(dirname, entry.get_text()))
+        if response and new_names["Neuer Ordner"] != "":            
+            mkdir(join(dirname, new_names["Neuer Ordner"]))
             
-        dialog.hide()
+    def run(self):
+        self.__gui.main_window.show()      
+
+        if self.config.get('folders', 'new_otrkeys') == "":      
+            self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
+            self.__gui.preferences_window.show()
         
-        vbox.remove(entry)
-        
-    def main(self):
         self.__gui.run()
-        
-        self.config.save()
-        
 
 app = App()
-app.main()
+app.run()
+app.config.save()
