@@ -75,12 +75,15 @@ class Notify(BaseWindow):
     def __show_main_window(self):
         if self.app.blocked == False:
             # show/hide main window
-            self.get_parent().props.visible = not self.get_parent().props.visible
+            if self.main_window.get_window().props.visible:
+                self.main_window.hide()
+            else:
+                self.main_window.show()
         else:
             # when blocked, don't show main window but a notification
             self.popup("OTR-Verwaltung arbeitet gerade...", self.app.get_notify_text(), 3)
     
-    def __show_context_menu(self):
+    def __show_context_menu(self, button=None, activate_time=None):
         if self.app.blocked == False:
             # show context menu
             self.get_widget('status_menu').popup(None, None, None, button, activate_time)        
@@ -97,7 +100,7 @@ class Notify(BaseWindow):
         self.__show_main_window()
 
     def on_status_popup_menu(self, widget, button, activate_time, data=None):        
-        self.__show_context_menu()
+        self.__show_context_menu(button, activate_time)
         
     # menu items
     def on_status_menu_open_activate(self, widget, data=None):
