@@ -36,6 +36,7 @@ from dialog_cut import DialogCut
 from dialog_cutlist import DialogCutlist
 from dialog_email_password import DialogEmailPassword
 from dialog_rename import DialogRename
+from dialog_planning import DialogPlanning
 from notify import Notify
 
 class Gui:
@@ -57,6 +58,7 @@ class Gui:
         self.dialog_cutlist = DialogCutlist(self.main_window)
         self.dialog_email_password = DialogEmailPassword(self.main_window)
         self.dialog_rename = DialogRename(self.main_window)
+        self.dialog_planning = DialogPlanning(self, self.main_window)
         self.notify = Notify(app, self.main_window)
 
     def run(self):

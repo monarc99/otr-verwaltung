@@ -10,3 +10,4 @@ gtk-builder-convert -r "dialog_cutlist"         otr.glade gui/dialog_cutlist.ui
 gtk-builder-convert -r "dialog_cut"             otr.glade gui/dialog_cut.ui
 gtk-builder-convert -r "dialog_rename"          otr.glade gui/dialog_rename.ui
 gtk-builder-convert -r "dialog_close_minimize"  otr.glade gui/dialog_close_minimize.ui
+gtk-builder-convert -r "dialog_planning"        otr.glade gui/dialog_planning.ui

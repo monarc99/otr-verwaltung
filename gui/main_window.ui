@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Oct  9 15:40:59 2008 -->
+<!--Generated with glade3 3.4.5 on Wed Dec 31 03:11:22 2008 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -120,13 +120,64 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkHBox" id="hbox11">
+                        <property name="visible">True</property>
+                        <property name="spacing">3</property>
+                        <child>
+                          <object class="GtkRadioButton" id="radioPlanning">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="label" translatable="yes">Geplante Sendungen</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">radioUndecoded</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEventBox" id="eventboxPlanningCurrentCount">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkLabel" id="labelPlanningCurrentCount">
+                                <property name="width_request">30</property>
+                                <property name="height_request">30</property>
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;&gt;</property>
+                                <property name="use_underline">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHSeparator" id="hseparator4">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkLabel" id="labelSearch">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Suche</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">1</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -153,7 +204,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">2</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -162,7 +213,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">3</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
@@ -174,7 +225,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">4</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                     <child>
@@ -204,7 +255,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">5</property>
+                        <property name="position">7</property>
                       </packing>
                     </child>
                     <child>
@@ -213,7 +264,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">6</property>
+                        <property name="position">8</property>
                       </packing>
                     </child>
                     <child>
@@ -225,7 +276,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">7</property>
+                        <property name="position">9</property>
                       </packing>
                     </child>
                     <child>
@@ -256,7 +307,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">8</property>
+                        <property name="position">10</property>
                       </packing>
                     </child>
                     <child>
@@ -287,16 +338,16 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">9</property>
+                        <property name="position">11</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHSeparator" id="separator2">
+                      <object class="GtkHSeparator" id="hseparator3">
                         <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">10</property>
+                        <property name="position">12</property>
                       </packing>
                     </child>
                     <child>
@@ -327,16 +378,16 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">11</property>
+                        <property name="position">13</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHSeparator" id="separator3">
+                      <object class="GtkHSeparator" id="separator2">
                         <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">12</property>
+                        <property name="position">14</property>
                       </packing>
                     </child>
                     <child>
@@ -367,11 +418,17 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">13</property>
+                        <property name="position">15</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkHSeparator" id="separator3">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">16</property>
+                      </packing>
                     </child>
                   </object>
                 </child>
@@ -407,7 +464,6 @@
                         <property name="height_request">80</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="headers_clickable">True</property>
                         <property name="level_indentation">3</property>
                       </object>
                     </child>

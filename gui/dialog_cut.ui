@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Oct  9 15:40:59 2008 -->
+<!--Generated with glade3 3.4.5 on Wed Dec 31 03:11:22 2008 -->
 <interface>
   <object class="GtkDialog" id="dialog_cut">
     <property name="border_width">5</property>
@@ -118,6 +118,7 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
+                <property name="image_position">GTK_POS_RIGHT</property>
               </object>
               <packing>
                 <property name="position">1</property>

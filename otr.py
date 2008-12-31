@@ -20,8 +20,8 @@
 #
 
 
-# TODO: remove this from otr.py. this dependency belongs to gui
-# TODO: do i need pygtk? (see also other files)
+# TODO: do i need gtk? (see also other files)
+
 try:
     from gtk import events_pending, main_iteration, RESPONSE_OK
 except:
@@ -42,6 +42,7 @@ import gobject
 import urllib
 import xml.dom.minidom
 import ConfigParser
+import webbrowser
 
 # intern
 import otrpath
@@ -70,8 +71,23 @@ class App:
         self.__gui = Gui(self)
     
         # show undecoded otrkeys         
+        self.section = Section.OTRKEY
         self.show_section(Section.OTRKEY)
         
+        # compile list of planned items
+        self.planned_broadcasts = []
+        
+        for item in self.config.get('planning', 'planned_items').split(';'):
+            try:
+                values = item.split(',')
+                assert len(values) == 3
+            except:
+                continue
+                
+            self.planned_broadcasts += [(values[0], int(values[1]), values[2])]
+        
+        self.broadcasts_badge()
+                            
         # regex
         self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
         self.__cut_video = re.compile('.*(avi|mp4)$')     
@@ -96,6 +112,11 @@ class App:
         files = []
         text = ""
         
+        if section==Section.PLANNING:
+            text = self.section_planning()                
+        else:
+            self.__gui.main_window.toggle_columns(False)        
+        
         if section==Section.OTRKEY:            
             text, files = self.section_otrkey()   
         
@@ -112,21 +133,33 @@ class App:
             # returns NO files       
             text = self.section_archive()
 
-        if len(files)>0: # this is not executed, when the section is "Archive"
+        if len(files) > 0: # this is not executed, when the section is "Archive"
             if len(files)==1:
                 text += " (1 Datei)"
             else:
                 text += " (%s Dateien) " % len(files)
             
-            files.sort()
+            files.sort() 
             # put filenames into treestore
             for f in files:
                 self.append_row_treeview_files(None, f)
 
-        # set message textfilenames_action_status[file][action][0]
+        # set message text
         self.__gui.main_window.get_widget('labelMessage').set_text(text)
+
+
+    # helper for different sections
+    def section_planning(self):
+        text = "Diese Aufnahmen wurden geplant." 
+
+        # show date/time and station columns
+        self.__gui.main_window.toggle_columns(True)
              
-    # helper for different section
+        for i in range(len(self.planned_broadcasts)):
+            self.__gui.main_window.append_row_planning(i)
+            
+        return text
+             
     def section_otrkey(self):
         text = "Diese Dateien wurden noch nicht dekodiert." 
         path = self.config.get('folders', 'new_otrkeys')
@@ -208,6 +241,20 @@ class App:
         iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
         return iter
      
+    def broadcasts_badge(self):
+        count = 0
+        now = time.time()
+        for broadcast in self.planned_broadcasts:
+            stamp = broadcast[1]
+            if stamp < now:
+                count += 1
+    
+        if count == 0:
+            self.__gui.main_window.get_widget('eventboxPlanningCurrentCount').hide()
+        else:
+            self.__gui.main_window.get_widget('eventboxPlanningCurrentCount').show()
+            self.__gui.main_window.get_widget('labelPlanningCurrentCount').set_text(str(count))
+     
     ### 
     ### Search
     ### 
@@ -263,10 +310,10 @@ class App:
     ### Actions
     ###        
     
-    def perform_action(self, action, filenames):
+    def perform_action(self, action, filenames=None, broadcasts=None):
         """ Performs an action (toolbar, context menu, etc.) """
         
-        if len(filenames) == 0 and action!=Action.NEW_FOLDER:        
+        if len(filenames) == 0 and action!=Action.NEW_FOLDER and action!=Action.PLAN_ADD:        
             self.__gui.message_info_box("Es sind keine Dateien markiert!")
             return
         
@@ -360,6 +407,21 @@ class App:
         elif action==Action.REAL_DELETE:
             self.action_real_delete(filenames)
             self.show_section(self.section)
+      
+        elif action==Action.PLAN_ADD:
+            self.action_plan_add()
+            self.show_section(self.section)
+            
+        elif action==Action.PLAN_REMOVE:
+            self.action_plan_remove(broadcasts)
+            self.show_section(self.section)
+            
+        elif action==Action.PLAN_EDIT:
+            self.action_plan_edit(broadcasts[0])
+            self.show_section(self.section)
+            
+        elif action==Action.PLAN_SEARCH:
+            self.action_plan_search(broadcasts)
       
     def get_notify_text(self):
         decode_count, progress = self.__decode_progress
@@ -985,7 +1047,60 @@ class App:
             self.__gui.preferences_window.show()
         
         self.__gui.run()
+        
+        # rewrite config value
+        string = ''
+        for broadcast in self.planned_broadcasts:
+            string += broadcast[0] + ',' + str(broadcast[1]) + ',' + broadcast[2] + ';'
+        self.config.set('planning', 'planned_items', string)
+        
+    def action_plan_add(self):
+        if self.__gui.dialog_planning.run_new() == RESPONSE_OK:
+            self.planned_broadcasts += [self.__gui.dialog_planning.get_values()]
+            
+            self.broadcasts_badge()
+            
+        self.__gui.dialog_planning.hide()
+        
+    def action_plan_edit(self, broadcast):
+        index = self.__gui.main_window.get_widget('treeviewFiles').get_model().get_value(broadcast, self.__gui.main_window.PLANNING)
+        
+        if self.__gui.dialog_planning.run_edit(*self.planned_broadcasts[index]) == RESPONSE_OK:
+            self.planned_broadcasts[index] = (self.__gui.dialog_planning.get_values())
+            
+            self.broadcasts_badge()
+            
+        self.__gui.dialog_planning.hide()
 
+    def action_plan_remove(self, broadcasts):
+        if len(broadcasts) == 1:
+            message = "Es ist eine Sendung ausgewählt. Soll diese Sendung "
+        else:
+            message = "Es sind %s Sendungen ausgewählt. Sollen diese Sendungen " % len(broadcasts)
+        
+        if self.__gui.question_box(message + "gelöscht werden?"):
+            # convert indices to references in the list
+            items = []
+            for iter in broadcasts:
+                index = self.__gui.main_window.get_widget('treeviewFiles').get_model().get_value(iter, self.__gui.main_window.PLANNING)
+                items.append(self.planned_broadcasts[index])
+            for item in items:
+                self.planned_broadcasts.remove(item)
+            
+            self.broadcasts_badge()
+        
+    def action_plan_search(self, broadcasts):
+        for broadcast in broadcasts:
+            index = self.__gui.main_window.get_widget('treeviewFiles').get_model().get_value(broadcast, self.__gui.main_window.PLANNING)
+            title, stamp, station = self.planned_broadcasts[index]
+                        
+            # build string: Titanic_08.12.24_20-15_pro7_
+            string = title.replace(' ', '_') + '_'
+            string += time.strftime("%y.%m.%d_%H-%M", time.localtime(stamp)) + "_"
+            string += station + "_"
+            
+            webbrowser.open("http://www.otr-search.com/?q=%s" % string)
+        
 app = App()
 app.run()
 app.config.save()

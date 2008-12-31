@@ -1,50 +1,86 @@
 <?xml version="1.0"?>
 <!--Generated with glade3 3.4.5 on Wed Dec 31 03:11:22 2008 -->
 <interface>
-  <object class="GtkDialog" id="dialog_email_password">
+  <object class="GtkDialog" id="dialog_planning">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Zugangsdaten</property>
+    <property name="title" translatable="yes">Geplante Sendung</property>
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="skip_taskbar_hint">True</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox1">
+      <object class="GtkVBox" id="dialog-vbox9">
         <property name="visible">True</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkTable" id="table2">
+          <object class="GtkTable" id="table5">
             <property name="visible">True</property>
-            <property name="n_rows">4</property>
+            <property name="n_rows">5</property>
             <property name="n_columns">2</property>
-            <property name="row_spacing">9</property>
+            <property name="column_spacing">3</property>
+            <property name="row_spacing">3</property>
             <child>
-              <object class="GtkHSeparator" id="hseparator7">
+              <object class="GtkHBox" id="hbox13">
                 <property name="visible">True</property>
+                <child>
+                  <object class="GtkEntry" id="entry_time">
+                    <property name="width_request">50</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="max_length">5</property>
+                    <property name="text" translatable="yes">00:00</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
+                <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entryDialogPassword">
+              <object class="GtkComboBoxEntry" id="combobox_station">
+                <property name="visible">True</property>
+                <child internal-child="entry">
+                  <object class="GtkEntry" id="comboboxentry_station">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCalendar" id="calendar">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="year">2008</property>
+                <property name="month">11</property>
+                <property name="day">31</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
-                <property name="y_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entryDialogEMail">
+              <object class="GtkEntry" id="entry_broadcast">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -53,38 +89,59 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
-                <property name="y_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label12">
+              <object class="GtkLabel" id="label29">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Passwort:</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Sender:</property>
               </object>
               <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-                <property name="y_options">GTK_EXPAND</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label11">
+              <object class="GtkLabel" id="label28">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">E-Mail:</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Uhrzeit:</property>
               </object>
               <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-                <property name="y_options">GTK_EXPAND</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label7">
+              <object class="GtkLabel" id="label25_">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
                 <property name="yalign">0</property>
-                <property name="label" translatable="yes">Geben Sie bitte Ihre OTR-Zugangsdaten ein, um zu dekodieren:</property>
-                <property name="wrap">True</property>
+                <property name="label" translatable="yes">Datum:</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label25">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Name der Sendung:</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="y_options">GTK_EXPAND</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_headline">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Neue Sendung hinzuf&#xFC;gen:</property>
               </object>
               <packing>
                 <property name="right_attach">2</property>
@@ -94,16 +151,16 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="padding">5</property>
-            <property name="position">1</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area1">
+          <object class="GtkHButtonBox" id="dialog-action_area9">
             <property name="visible">True</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
             <child>
-              <object class="GtkButton" id="buttonCancel">
+              <object class="GtkButton" id="button4">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -112,12 +169,13 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="buttonOK">
+              <object class="GtkButton" id="button_ok">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
+                <signal handler="on_button_ok_clicked" name="clicked"/>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -132,8 +190,7 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">buttonCancel</action-widget>
-      <action-widget response="-5">buttonOK</action-widget>
+      <action-widget response="-6">button4</action-widget>
     </action-widgets>
   </object>
 </interface>

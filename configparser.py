@@ -106,6 +106,10 @@ class Config:
                     'player':               self.__read_value('play', 'player', ''),
                     'use_cut_play':         int(self.__read_value('play', 'use_cut_play', 0)),
                     'mplayer':              self.__read_value('play', 'mplayer', 'mplayer')
+                },
+            'planning':
+                {
+                    'planned_items':        self.__read_value('planning', 'planned_items', '')
                 }
         }
         

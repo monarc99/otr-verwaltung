@@ -20,6 +20,7 @@
 #
 
 class Section:
+    PLANNING    = 6
     OTRKEY      = 0
     AVI_UNCUT   = 1
     AVI_CUT     = 2
@@ -28,6 +29,10 @@ class Section:
     SEARCH      = 5
         
 class Action:
+    PLAN_ADD        = 11
+    PLAN_REMOVE     = 12
+    PLAN_EDIT       = 13
+    PLAN_SEARCH     = 14
     DECODE          = 0
     DECODEANDCUT    = 1
     CUT             = 2
