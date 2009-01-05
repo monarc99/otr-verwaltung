@@ -47,9 +47,13 @@ class DialogPlanning(BaseWindow):
         builder = self.create_builder("dialog_planning.ui")
             
         BaseWindow.__init__(self, builder, "dialog_planning", widgets, parent)
-    
+            
     def run_new(self):       
         self.get_widget('label_headline').set_text('Neue Sendung hinzufügen:')
+     
+        dt = datetime.datetime.today()
+        self.get_widget('calendar').select_month(dt.month - 1, dt.year)
+        self.get_widget('calendar').select_day(dt.day)
      
         self.get_widget('entry_broadcast').set_text('')
         self.get_widget('comboboxentry_station').set_text('')

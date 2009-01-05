@@ -45,6 +45,8 @@ cp ../../rules rules
 cat > dirs << EOF
 /usr/bin
 /usr/share/applications
+/usr/share/icons
+/usr/share/python-support
 EOF
 
 cat > copyright << EOF
@@ -74,10 +76,13 @@ cat >> otr-verwaltung.desktop << EOF
 Encoding=UTF-8
 Name=OTR-Verwaltung
 Exec=otrverwaltung
-Icon=
+Icon=/usr/share/icons/hicolor/48x48/apps/otrverwaltung.png
 Comment=Verwalten von otrkey- und avi-Dateien von onlinetvrecorder.com
 Type=Application
 Categories=AudioVideo;
 EOF
 
 dpkg-buildpackage   
+
+cd ..
+rm -r $name-$version

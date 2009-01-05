@@ -51,11 +51,26 @@ install: build
 	# Add here commands to install the package into debian/otr-verwaltung.
 	#$(MAKE) DESTDIR=$(CURDIR)/debian/otr-verwaltung install
 	mkdir -p $(CURDIR)/debian/otr-verwaltung
-	### insert your commands here
+	
+	# executable
 	cp otr $(CURDIR)/debian/otr-verwaltung/usr/bin/otrverwaltung
 	
+	# other files
+	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
+	cp *.py $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
+	
+	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/gui
+	cp gui/* $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/gui
+	
+	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/images
+	cp images/* $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/images
+	
+	# icon
+	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/icons/hicolor/48x48/apps
+	cp images/icon.png $(CURDIR)/debian/otr-verwaltung/usr/share/icons/hicolor/48x48/apps/otrverwaltung.png
+	
+	# desktop file
 	cp otr-verwaltung.desktop $(CURDIR)/debian/otr-verwaltung/usr/share/applications/
-
 
 
 # Build architecture-independent files here.

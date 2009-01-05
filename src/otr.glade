@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed Dec 31 03:11:22 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Jan  5 15:34:45 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -2110,7 +2110,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHSeparator" id="separator2">
+                      <widget class="GtkHSeparator" id="separator3">
                         <property name="visible">True</property>
                       </widget>
                       <packing>
@@ -2151,7 +2151,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHSeparator" id="separator3">
+                      <widget class="GtkHSeparator" id="separa4">
                         <property name="visible">True</property>
                       </widget>
                       <packing>
