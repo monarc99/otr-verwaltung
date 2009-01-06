@@ -48,7 +48,7 @@ class Notify(BaseWindow):
         # status icon
         status_icon = self.create_widget('status', gtk.StatusIcon())
         # TODO: path
-        status_icon.set_from_file(get_image_path('icon3.png'))
+        status_icon.set_from_file(get_image_path('icon.png'))
         status_icon.set_tooltip("OTR-Verwaltung")
         status_icon.connect("activate", self.on_status_clicked)
         status_icon.connect("popup_menu", self.on_status_popup_menu)

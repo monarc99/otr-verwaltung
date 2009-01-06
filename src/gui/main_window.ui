@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Mon Jan  5 15:34:45 2009 -->
+<!--Generated with glade3 3.4.5 on Tue Jan  6 23:10:24 2009 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -419,15 +419,6 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="position">15</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="separa4">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">16</property>
                       </packing>
                     </child>
                   </object>

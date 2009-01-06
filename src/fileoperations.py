@@ -22,6 +22,9 @@
 from os import remove, rename, stat
 from os.path import join, basename
 
+# TODO: Achten auf :/\* etc. in Dateiname!
+# TODO: Fehler abfangen, fehlerwert zurückgeben, damit das Programm weitermachen kann
+
 def remove_file(filename):
     remove(filename)
     

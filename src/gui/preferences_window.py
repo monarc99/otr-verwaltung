@@ -54,7 +54,10 @@ class PreferencesWindow(BaseWindow):
             'entryPassword',      
             'checkCorrect',
             # Schneiden
-            'comboboxMPlayer'
+            'comboboxMPlayer',
+            # Umbenennen
+            'entry_schema',
+            'label_schema'   
             ]
         
         builder = self.create_builder("preferences_window.ui")
@@ -64,6 +67,8 @@ class PreferencesWindow(BaseWindow):
         self.__setup_widgets(builder)
         
     def __setup_widgets(self, builder):
+        self.example_filename = 'James_Bond_007_09.01.06_20-15_ard_120_TVOON_DE.mpg.HQ.avi'
+        
         # preferences fonts (little explanations)
         labels = [  'labelDescNewOtrkeys',
                     'labelDescTrash',
@@ -141,6 +146,10 @@ class PreferencesWindow(BaseWindow):
         radiobuttons = [ 'radio_ask', 'radio_minimize', 'radio_quit' ] # order is important!
         builder.get_object(radiobuttons[self.app.config.get('common', 'on_quit')]).set_active(True)
         
+        # rename tab
+        builder.get_object('check_rename_cut').set_active(self.app.config.get('rename', 'rename_cut'))
+        self.get_widget('entry_schema').set_sensitive(self.app.config.get('rename', 'rename_cut'))
+        self.get_widget('entry_schema').set_text(self.app.config.get('rename', 'schema'))
         
     #
     #  Signal handlers
@@ -257,3 +266,12 @@ class PreferencesWindow(BaseWindow):
                     
         self.gui.main_window.toolbar_buttons['cut_play'].props.visible = widget.get_active()
         
+    # rename tab   
+    def on_check_rename_cut_toggled(self, widget, data=None):
+        self.get_widget('entry_schema').set_sensitive(widget.get_active())
+        self.app.config.set('rename', 'rename_cut', int(widget.get_active()))
+           
+    def on_entry_schema_changed(self, widget, data=None):
+        self.app.config.set('rename', 'schema', widget.get_text())
+        new = self.app.rename_by_schema(self.example_filename, widget.get_text())
+        self.get_widget('label_schema').set_label("<i>%s</i> wird zu <i>%s</i>" % (self.example_filename, new))       

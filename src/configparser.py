@@ -110,6 +110,11 @@ class Config:
             'planning':
                 {
                     'planned_items':        self.__read_value('planning', 'planned_items', '')
+                },
+            'rename':
+                {
+                    'rename_cut':           int(self.__read_value('rename', 'rename_cut', 0)),
+                    'schema':               self.__read_value('rename', 'schema', '{titel} vom {tag}. {MONAT} {jahr}, {stunde}:{minute} ({sender})'),            
                 }
         }
         

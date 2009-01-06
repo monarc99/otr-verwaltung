@@ -73,6 +73,10 @@ class App:
         # number of file
         self.__cut_count = -1
     
+        # regex
+        self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
+        self.__cut_video = re.compile('.*(avi|mp4)$') 
+    
         # load gui
         self.__gui = Gui(self)
     
@@ -93,10 +97,7 @@ class App:
             self.planned_broadcasts += [(values[0], int(values[1]), values[2])]
         
         self.broadcasts_badge()
-                            
-        # regex
-        self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
-        self.__cut_video = re.compile('.*(avi|mp4)$')     
+                                
                         
     ### 
     ### Show sections
@@ -525,7 +526,8 @@ class App:
                                                             
             if len(errors)==0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
-                file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]
+                file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]  
+                                  
                 # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
                 # move to trash
                 target = self.config.get('folders', 'trash')
@@ -696,19 +698,79 @@ class App:
                     
                 file_conclusion.cut.status = Status.OK
                     
-            if file_conclusion.cut.status == Status.OK:
+            if file_conclusion.cut.status == Status.OK:            
                 # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
                 # action after cut
                 # move to trash
                 target = self.config.get('folders', 'trash')
                 fileoperations.move_file(file_conclusion.uncut_avi, target)
-             
+               
+                
             # update progress
             self.__cut_count = count
         
         # after iterating over all items:
         return True
-       
+    
+    def rename_by_schema(self, filename, schema=""):   
+        if schema == "":
+            schema = self.config.get('rename', 'schema')        
+        
+        if self.__uncut_video.match(filename):           
+            
+            parts = filename.split('_')
+            parts.reverse()
+
+            titel_list = parts[6:len(parts)]
+            titel_list.reverse()
+            titel = " ".join(titel_list)
+            titel_mit = "_".join(titel_list)
+
+            stunde, minute = parts[4].split('-')
+            jahr, monat, tag = parts[5].split('.')           
+            monatsname = time.strptime(monat, '%m')
+            monatsname = time.strftime('%B', monatsname)
+
+            sender_gross = parts[3].capitalize()
+
+            format = parts[0]
+            mp4 = False
+            
+            if 'HQ' in format:
+                format = 'HQ'                
+            elif 'mp4' in format:
+                format = 'mp4'
+                mp4 = True
+            else:
+                format = 'avi'
+
+            values = {
+                'titel' : titel,
+                'titel_' : titel_mit,
+                'sender' : parts[3],
+                'SENDER': sender_gross,
+                'tag': tag,
+                'monat': monat,
+                'MONAT': monatsname,
+                'jahr': jahr,
+                'stunde': stunde,
+                'minute': minute,
+                'dauer' : parts[2],
+                'format' : format
+            }
+             
+            for token, value in values.iteritems():
+                schema = schema.replace('{%s}' % token, value)
+                 
+            if mp4 == True:
+                schema += ".mp4"
+            else:
+                schema += ".avi"                   
+                
+            return schema
+        else:         
+            return filename
+    
     def get_dom_from_cutlist(self, avi):
         size = fileoperations.get_size(avi)
         url = self.config.get('cut', 'server') + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
@@ -787,9 +849,17 @@ class App:
             f.write("app.addSegment(0, %s, %s);\n" %(str(int(frame_start)), str(int(frame_duration))))
 
         # generate filename for a cut avi
-        cut_avi = filename[0:len(filename)-4] # remove .avi
-        cut_avi += "-cut.avi"
-
+        if self.config.get('rename', 'rename_cut'):
+            directory = dirname(filename)
+            name = basename(filename)        
+            new_name = self.rename_by_schema(name)
+                    
+            cut_avi = join(directory, new_name)        
+        else:
+            cut_avi = filename[0:len(filename)-4] # remove .avi
+            cut_avi += "-cut.avi"
+           
+                   
         f.writelines([
             '//** Postproc **\n',
             'app.video.setPostProc(3,3,0);\n',
