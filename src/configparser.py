@@ -24,7 +24,7 @@ import ConfigParser
 import datetime
 import sys
 
-from constants import Save_Email_Password, Cut_action, On_Quit
+from constants import Save_Email_Password, Cut_action
 
 class Config:
     def __init__(self, config_file):
@@ -78,8 +78,7 @@ class Config:
             'common':
                 {
                     'activate_cut':         int(self.__read_value('common', 'activate_cut', 1)),
-                    'use_archive':          int(self.__read_value('common', 'use_archive', 0)),        
-                    'on_quit':             int(self.__read_value('common', 'on_quit', On_Quit.ASK))                       
+                    'use_archive':          int(self.__read_value('common', 'use_archive', 0))                    
                 },
             'folders':               
                 {

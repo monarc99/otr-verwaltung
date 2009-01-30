@@ -21,12 +21,7 @@
 
 from os.path import basename
 
-try:
-    import gtk
-    import pango
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 
@@ -68,9 +63,6 @@ class DialogArchive(BaseWindow):
         treeview.append_column(tvcolumn_new)
         
         selection = treeview.get_selection()
-
-        # change label
-        self.get_widget('labelFiles').modify_font(pango.FontDescription("bold"))        
     
     
     ###

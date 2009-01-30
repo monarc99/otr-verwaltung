@@ -37,13 +37,13 @@ class Cut:
 
 class FileConclusion:
     def __init__(self, action, otrkey="", uncut_avi=""):
-        if action==Action.DECODE or action==Action.DECODEANDCUT:
+        if action == Action.DECODE or action == Action.DECODEANDCUT:
             self.otrkey = otrkey
             self.decode = Decode()
         
         self.uncut_avi = uncut_avi
         
-        if action==Action.CUT or action==Action.DECODEANDCUT:
+        if action == Action.CUT or action == Action.DECODEANDCUT:
             self.cut_avi = ""
             self.cut = Cut()
             

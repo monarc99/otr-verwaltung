@@ -21,12 +21,7 @@
 
 from os.path import basename
 
-try:
-    import gtk
-    import pango
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 from constants import Action, Status, Cut_action
@@ -63,7 +58,6 @@ class DialogConclusion(BaseWindow):
         BaseWindow.__init__(self, builder, "dialog_conclusion", widgets, parent)
                 
         # setup widgets
-        self.get_widget('labelConclusionFilename').modify_font(pango.FontDescription("bold"))
         for radio in range(6):
             self.get_widget("radiobuttonRate" + str(radio)).connect('toggled', self.on_radiobuttonRating_toggled, radio)
     

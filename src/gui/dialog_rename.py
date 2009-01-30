@@ -21,11 +21,7 @@
 
 from os.path import basename
 
-try:
-    import gtk
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 

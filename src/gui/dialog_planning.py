@@ -23,11 +23,7 @@ from os.path import basename
 import datetime
 import time
 
-try:
-    import gtk
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 

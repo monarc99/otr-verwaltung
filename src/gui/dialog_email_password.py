@@ -19,11 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-try:
-    import gtk
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 

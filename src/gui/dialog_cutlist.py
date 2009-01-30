@@ -19,12 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-try:
-    import gtk
-    import pango
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 
@@ -44,9 +39,7 @@ class DialogCutlist(BaseWindow):
         self.__setup_widgets()
         
     def __setup_widgets(self):   
-        # font
-        self.get_widget('labelCutlistFile').modify_font(pango.FontDescription("bold"))          
-        
+       
         # setup the file treeview
         treeview = self.get_widget('treeviewCutlists')
         store = gtk.ListStore(

@@ -59,8 +59,3 @@ class Status:
     OK          = 0
     ERROR       = 1
     NOT_DONE    = 2
-
-class On_Quit:
-    ASK         = 0
-    MINIMIZE    = 1
-    QUIT        = 2

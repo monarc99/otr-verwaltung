@@ -19,12 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-try:
-    import gtk
-    import pango
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
 
 from basewindow import BaseWindow
 
@@ -42,6 +37,3 @@ class DialogCut(BaseWindow):
         builder = self.create_builder("dialog_cut.ui")    
         
         BaseWindow.__init__(self, builder, "dialog_cut", widgets, parent)
-        
-        self.get_widget('labelWarning').modify_font(pango.FontDescription("8"))          
-        self.get_widget('labelCutFile').modify_font(pango.FontDescription("bold"))

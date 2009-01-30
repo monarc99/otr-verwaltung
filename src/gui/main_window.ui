@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Tue Jan  6 23:10:24 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Jan 29 15:57:30 2009 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -73,7 +73,6 @@
     <property name="title" translatable="yes">OTR-Verwaltung</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <signal handler="on_main_window_destroy" name="destroy"/>
-    <signal handler="on_main_window_delete_event" name="delete_event"/>
     <child>
       <object class="GtkVBox" id="vboxMain">
         <property name="visible">True</property>
@@ -97,6 +96,90 @@
           </packing>
         </child>
         <child>
+          <object class="GtkEventBox" id="eventbox_tasks">
+            <property name="height_request">50</property>
+            <child>
+              <object class="GtkVBox" id="vbox17">
+                <property name="visible">True</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label_tasks">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Datei 1/2 dekodieren&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="padding">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox12">
+                    <property name="visible">True</property>
+                    <property name="spacing">2</property>
+                    <child>
+                      <object class="GtkLabel" id="label32">
+                        <property name="visible">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkProgressBar" id="progressbar_tasks">
+                        <property name="width_request">300</property>
+                        <property name="height_request">10</property>
+                        <property name="visible">True</property>
+                        <property name="fraction">0.40000000000000002</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEventBox" id="eventbox_cancel">
+                        <property name="visible">True</property>
+                        <signal handler="on_eventbox_cancel_button_press_event" name="button_press_event"/>
+                        <child>
+                          <object class="GtkImage" id="image_cancel">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-missing-image</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label34">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHSeparator" id="hseparator5">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkHPaned" id="hpaned1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -106,19 +189,10 @@
                 <child>
                   <object class="GtkVBox" id="vbox3">
                     <property name="width_request">215</property>
-                    <property name="height_request">300</property>
+                    <property name="height_request">350</property>
                     <property name="visible">True</property>
                     <property name="border_width">8</property>
                     <property name="spacing">4</property>
-                    <child>
-                      <object class="GtkLabel" id="labelFilter">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Filter</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkHBox" id="hbox11">
                         <property name="visible">True</property>
@@ -144,7 +218,7 @@
                                 <property name="width_request">30</property>
                                 <property name="height_request">30</property>
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">&lt;&gt;</property>
+                                <property name="label" translatable="yes">?</property>
                                 <property name="use_underline">True</property>
                               </object>
                             </child>
@@ -158,7 +232,6 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -167,7 +240,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -177,7 +250,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">3</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -204,7 +277,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">4</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -213,7 +286,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">5</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
@@ -225,7 +298,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">6</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
@@ -255,7 +328,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">7</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                     <child>
@@ -264,7 +337,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">8</property>
+                        <property name="position">7</property>
                       </packing>
                     </child>
                     <child>
@@ -276,7 +349,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">9</property>
+                        <property name="position">8</property>
                       </packing>
                     </child>
                     <child>
@@ -307,7 +380,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">10</property>
+                        <property name="position">9</property>
                       </packing>
                     </child>
                     <child>
@@ -338,7 +411,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">11</property>
+                        <property name="position">10</property>
                       </packing>
                     </child>
                     <child>
@@ -347,7 +420,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">12</property>
+                        <property name="position">11</property>
                       </packing>
                     </child>
                     <child>
@@ -378,7 +451,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">13</property>
+                        <property name="position">12</property>
                       </packing>
                     </child>
                     <child>
@@ -387,7 +460,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">14</property>
+                        <property name="position">13</property>
                       </packing>
                     </child>
                     <child>
@@ -418,7 +491,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">15</property>
+                        <property name="position">14</property>
                       </packing>
                     </child>
                   </object>
@@ -471,7 +544,7 @@
             </child>
           </object>
           <packing>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -492,7 +565,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

@@ -21,16 +21,11 @@
 
 import base64
 
-try:
-    import gtk
-    import pango
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
+import pango
 
 from basewindow import BaseWindow
-
-from constants import Save_Email_Password, On_Quit, Cut_action
+from constants import Save_Email_Password, Cut_action
 
 class PreferencesWindow(BaseWindow):
     
@@ -40,11 +35,6 @@ class PreferencesWindow(BaseWindow):
     
         widgets = [
             'notebook',
- 
-            # Allgemein
-            'radio_ask',
-            'radio_quit',
-            'radio_minimize',
  
             # Speicherorte
             'folderArchive',
@@ -79,10 +69,7 @@ class PreferencesWindow(BaseWindow):
         for label in labels:
             builder.get_object(label).modify_font(pango.FontDescription("8"))            
         
-        builder.get_object('labelHeadline').modify_font(pango.FontDescription("bold"))
-          
-        # TODO: Do filling of comboboxes by glade
-          
+                  
         # fill combobox of player
         player_store = gtk.ListStore(str)
         player_store.append(["vlc"])
@@ -141,11 +128,7 @@ class PreferencesWindow(BaseWindow):
         # radio buttons on cut tab
         radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually' ] # order is important!
         builder.get_object(radiobuttons[self.app.config.get('cut', 'cut_action')]).set_active(True)
-       
-        # radio buttons common tab
-        radiobuttons = [ 'radio_ask', 'radio_minimize', 'radio_quit' ] # order is important!
-        builder.get_object(radiobuttons[self.app.config.get('common', 'on_quit')]).set_active(True)
-        
+               
         # rename tab
         builder.get_object('check_rename_cut').set_active(self.app.config.get('rename', 'rename_cut'))
         self.get_widget('entry_schema').set_sensitive(self.app.config.get('rename', 'rename_cut'))
@@ -163,19 +146,7 @@ class PreferencesWindow(BaseWindow):
         window.hide()
         return True # don't destroy
      
-    # common tab
-    def on_radio_ask_toggled(self, widget, data=None):
-        if widget.get_active()==True:
-            self.app.config.set('common', 'on_quit', On_Quit.ASK)
-            
-    def on_radio_quit_toggled(self, widget, data=None):
-        if widget.get_active()==True:
-            self.app.config.set('common', 'on_quit', On_Quit.QUIT)
-    
-    def on_radio_minimize_toggled(self, widget, data=None):
-        if widget.get_active()==True:
-            self.app.config.set('common', 'on_quit', On_Quit.MINIMIZE)
-                      
+                     
     # folders tab
     # folder changed, save to config dictionary
     def on_folderNewOtrkeys_current_folder_changed(self, widget, data=None):        

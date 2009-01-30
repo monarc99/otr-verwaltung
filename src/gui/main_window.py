@@ -23,16 +23,13 @@ from os.path import join, isdir, basename
 import sys
 import time
 
-try:
-    import gtk
-    import pango
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
+import gtk
+import pango
+
 
 from basewindow import BaseWindow
 import otrpath
-from constants import Action, Section, On_Quit
+from constants import Action, Section
 
 class MainWindow(BaseWindow):
     
@@ -42,12 +39,10 @@ class MainWindow(BaseWindow):
     
         widgets = [            
             'toolbar',
-            'toolbuttonDecode',
-            'toolbuttonDecodeAll',
-            'toolbuttonCut',
-            'toolbuttonCutAll',
-            'toolbuttonDecodeAndCut',
-            'toolbuttonDecodeAndCutAll',    
+
+            'eventbox_tasks',
+            'progressbar_tasks',
+            'label_tasks',
 
             # sidebar
             'entry_search',
@@ -145,23 +140,32 @@ class MainWindow(BaseWindow):
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
 
+        # change background of tasks bar
+        eventbox = builder.get_object('eventbox_tasks')
+        cmap = eventbox.get_colormap()
+        colour = cmap.alloc_color("#FFF288")
+        style = eventbox.get_style().copy()
+        style.bg[gtk.STATE_NORMAL] = colour
+        eventbox.set_style(style)
+
+        # image cancel
+        builder.get_object('image_cancel').set_from_file(otrpath.get_image_path('cancel.png'))
+
         style = builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
         pixmap, mask = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('badge.png')).render_pixmap_and_mask()
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
         builder.get_object('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
         builder.get_object('eventboxPlanningCurrentCount').set_style(style)
-        builder.get_object('labelPlanningCurrentCount').modify_font(pango.FontDescription("bold"))
 
-        # change font of sidebar
-        builder.get_object('labelFilter').modify_font(pango.FontDescription("bold 12"))
-        
-        for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelSearch',   'labelOtrkey', 'labelAvi']:
+        # change font of sidebar     
+        for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelSearch',   'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
             builder.get_object(label).modify_font(pango.FontDescription("bold"))
         
         # setup the file treeview
         treeview = self.get_widget('treeviewFiles') 
         store = gtk.TreeStore(str, long, float,  # avi/otrkeys
-                              int)    # planning
+                              int)               # planning
+                         
         treeview.set_model(store)
             
         # constants for avi/otrkeys and planning  
@@ -170,7 +174,7 @@ class MainWindow(BaseWindow):
         self.DATE =     2
         
         self.PLANNING = 3
-                 
+        
         # create the TreeViewColumns to display the data
         column_names = ['Dateiname', 'Größe', 'Geändert',   # avi/otrkeys
                         'Sendung', 'Datum/Zeit', 'Sender' ] # planning
@@ -319,36 +323,7 @@ class MainWindow(BaseWindow):
         
     def on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
-        
-    def on_main_window_delete_event(self, widget, data=None):
-        # dialog
-        if self.app.config.get('common', 'on_quit') == On_Quit.ASK:
-            self.gui.dialog_close_minimize.get_widget('checkbutton_keep').set_active(False)
-            response = self.gui.dialog_close_minimize.run()
-            self.gui.dialog_close_minimize.hide()
-            
-            if response==On_Quit.MINIMIZE:
-                if self.gui.dialog_close_minimize.get_widget('checkbutton_keep').get_active()==True:
-                    self.gui.preferences_window.get_widget('radio_minimize').set_active(True)
-                    
-                self.hide()    
-                return True
-            
-            elif response==On_Quit.QUIT:
-                if self.gui.dialog_close_minimize.get_widget('checkbutton_keep').get_active()==True:
-                    self.gui.preferences_window.get_widget('radio_quit').set_active(True)
-                    
-                return False
-            
-            else: # canceled
-                return True
-                
-        elif self.app.config.get('common', 'on_quit') == On_Quit.MINIMIZE:
-            self.hide()
-            return True # don't destroy window
-        else: # quit
-            return False # destroy window
-    
+           
     def on_menuEditSearch_activate(self, widget, data=None):
         self.get_widget('entry_search').grab_focus()
     
@@ -382,7 +357,11 @@ class MainWindow(BaseWindow):
             self.get_widget('labelCutCount').set_text(counts_of_section[Section.AVI_CUT])                            
             self.get_widget('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
             self.get_widget('labelTrashCount').set_text(counts_of_section[Section.TRASH])
-     
+       
+    def on_eventbox_cancel_button_press_event(self, widget, data=None):
+        # TODO: Cancel 
+        pass
+        
     #
     # Treeview
     #

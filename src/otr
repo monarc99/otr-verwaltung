@@ -65,14 +65,7 @@ class App:
             self.config = Config(otrpath.get_config_path())
 
         self.__search_text = ""
-        self.blocked = False
-        # tuple: action, len of files
-        self.__block_action = None
-        # tuple: number of file, progress
-        self.__decode_progress = -1, 0
-        # number of file
-        self.__cut_count = -1
-    
+            
         # regex
         self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
         self.__cut_video = re.compile('.*(avi|mp4)$') 
@@ -91,14 +84,13 @@ class App:
             try:
                 values = item.split(',')
                 assert len(values) == 3
+                
+                self.planned_broadcasts += [(values[0], int(values[1]), values[2])]
             except:
                 continue
-                
-            self.planned_broadcasts += [(values[0], int(values[1]), values[2])]
         
         self.broadcasts_badge()
                                 
-                        
     ### 
     ### Show sections
     ###
@@ -140,15 +132,17 @@ class App:
             # returns NO files       
             text = self.section_archive()
 
-        if len(files) > 0: # this is not executed, when the section is "Archive"
-            if len(files)==1:
+        if len(files) > 0: # this is not executed when the section is "Archive"
+            if len(files) == 1:
                 text += " (1 Datei)"
             else:
                 text += " (%s Dateien) " % len(files)
             
             files.sort() 
+            
             # put filenames into treestore
             for f in files:
+                # TODO: don't show if in use
                 self.append_row_treeview_files(None, f)
 
         # set message text
@@ -320,39 +314,50 @@ class App:
     def perform_action(self, action, filenames=None, broadcasts=None):
         """ Performs an action (toolbar, context menu, etc.) """
         
-        if len(filenames) == 0 and action!=Action.NEW_FOLDER and action!=Action.PLAN_ADD:        
+        if len(filenames) == 0 and not action in [Action.NEW_FOLDER, Action.PLAN_ADD]:        
             self.__gui.message_info_box("Es sind keine Dateien markiert!")
             return
-        
+               
         # different actions:
-        if action==Action.DECODE or action==Action.CUT or action==Action.DECODEANDCUT:
+        if action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:
+
+            decode, cut = False, False            
+            
+            # prepare tasks
+            self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(0.0)
+
+            if action == Action.DECODE:
+                self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren')
+                decode = True
+            elif action == Action.CUT:
+                self.__gui.main_window.get_widget('label_tasks').set_text('Schneiden')
+                cut = True
+            else:
+                self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren/Schneiden')
+                decode, cut = True, True
                                         
             # create file_conclusions array        
             file_conclusions = []
                 
-            if action==Action.DECODE or action==Action.DECODEANDCUT:
+            if decode:
                 for otrkey in filenames:
                     file_conclusions.append(FileConclusion(action, otrkey=otrkey))
                 
-            if action==Action.CUT:
+            if cut:
                 for uncut_avi in filenames:
                     file_conclusions.append(FileConclusion(action, uncut_avi=uncut_avi))
-              
-            self.__block_action = action, len(file_conclusions)
-                
+                            
             # decode files                    
-            if action==Action.DECODE or action==Action.DECODEANDCUT:
-                if self.action_decode(file_conclusions)==False: 
+            if decode:
+                if self.action_decode(file_conclusions) == False: 
                     return
-            
-            self.__decode_progress = -1, 0
-            
+                
             # cut files
-            if action==Action.CUT or action==Action.DECODEANDCUT:
-                if self.action_cut(file_conclusions, action)==False:
-                    return                    
+            if cut:
+                self.action_cut(file_conclusions, action)
 
-            self.__cut_count = -1
+            # no more need for tasks view
+            self.__gui.main_window.get_widget('eventbox_tasks').hide()
                 
             # show conclusion
             dialog = self.__gui.dialog_conclusion.build(file_conclusions, action)
@@ -360,7 +365,7 @@ class App:
             
             file_conclusions = self.__gui.dialog_conclusion.file_conclusions
             
-            if action != Action.DECODE:
+            if cut:
                 count = 0
                 for file_conclusion in file_conclusions:                    
                     if file_conclusion.cut.rating > -1:
@@ -373,13 +378,11 @@ class App:
                             print e
                 
                 if count == 1:
-                    self.__gui.message_info_box("Es wurde 1 Cutlisten bewertet!")
+                    self.__gui.message_info_box("Es wurde 1 Cutliste bewertet!")
                 elif count > 1:
                     self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
 
-            # update section
-            self.blocked = False
-            self.__gui.main_window.show()
+            # update section         
             self.show_section(self.section)        
             
         elif action==Action.DELETE:
@@ -430,28 +433,9 @@ class App:
         elif action==Action.PLAN_SEARCH:
             self.action_plan_search(broadcasts)
       
-    def get_notify_text(self):
-        decode_count, progress = self.__decode_progress
-        cut_count = self.__cut_count
-        action, length = self.__block_action
-      
-        text = ""
-        if action==Action.DECODE or action==Action.DECODEANDCUT:
-            if decode_count > -1:
-                text += "Datei %i/%i wird dekodiert: %i%% \n" % (decode_count + 1, length, progress)
-            else:
-                text += "Dekodieren abgeschlossen.\n"
-                
-        if action==Action.CUT or (action==Action.DECODEANDCUT and decode_count == -1):
-            if cut_count > -1:
-                text += "Datei %i/%i wird geschnitten." % (cut_count + 1, length)
-            else:
-                text += "Schneiden abgeschlossen."
-          
-        return text
-      
+     
     # helpers for actions                   
-    def action_decode(self, file_conclusions):           
+    def action_decode(self, file_conclusions):          
         
         # no decoder        
         if not "decode" in self.config.get('decode', 'path'): # no decoder specified
@@ -476,16 +460,13 @@ class App:
             email = self.config.get('decode', 'email')
             password = base64.b64decode(self.config.get('decode', 'password')) 
         
-        # start decoding, block app
         # now this method may not return "False"
-        self.__gui.main_window.hide()
-        self.blocked = True
-        self.__gui.notify.popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
-                   
+        self.__gui.main_window.get_widget('eventbox_tasks').show()
+                  
         # decode each file
         for count, file_conclusion in enumerate(file_conclusions):
             # update progress
-            self.__decode_progress = count, 0
+            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
                    
             command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
             
@@ -507,7 +488,8 @@ class App:
                 try:      
                     progress = int(l[10:13])                    
                     # update progress
-                    self.__decode_progress = count, progress
+                    self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
+                    
                     while events_pending():
                         main_iteration(False)
                 except ValueError:                
@@ -524,7 +506,7 @@ class App:
             perr.close()
             pin.close()
                                                             
-            if len(errors)==0: # dekodieren erfolgreich                
+            if len(errors) == 0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
                 file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]  
                                   
@@ -538,15 +520,9 @@ class App:
                 
         return True
 
-    def action_cut(self, file_conclusions, action):               
-        # start cutting, block app
-        # now this method may not return "False"
-        self.__gui.main_window.hide()
-        self.blocked = True
-        # only show when everything is donw automatically, otherwise it's confusing
-        if self.config.get('cut', 'cut_action') == Cut_action.BEST_CUTLIST: 
-            self.__gui.notify.popup("OTR-Verwaltung führt die gewählten Aktionen aus...", "", 3)
-        
+    def action_cut(self, file_conclusions, action):                      
+        self.__gui.main_window.get_widget('eventbox_tasks').show()
+          
         for count, file_conclusion in enumerate(file_conclusions):
             self.__cut_count = count
     
@@ -562,7 +538,7 @@ class App:
             if self.config.get('cut', 'cut_action') == Cut_action.ASK:
             
                 self.__gui.dialog_cut.get_widget('labelCutFile').set_text(basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut.get_widget('labelWarning').set_text('Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!' % self.config.get('folders', 'new_otrkeys'))
+                self.__gui.dialog_cut.get_widget('labelWarning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'new_otrkeys'))
 
                 response = self.__gui.dialog_cut.run()
                 self.__gui.dialog_cut.hide()

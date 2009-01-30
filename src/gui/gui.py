@@ -30,14 +30,12 @@ except:
 from main_window import MainWindow
 from preferences_window import PreferencesWindow
 from dialog_archive import DialogArchive
-from dialog_close_minimize import DialogCloseMinimize
 from dialog_conclusion import DialogConclusion
 from dialog_cut import DialogCut
 from dialog_cutlist import DialogCutlist
 from dialog_email_password import DialogEmailPassword
 from dialog_rename import DialogRename
 from dialog_planning import DialogPlanning
-from notify import Notify
 
 class Gui:
     def __init__(self, app):
@@ -52,14 +50,12 @@ class Gui:
         self.main_window = MainWindow(app, self)
         self.preferences_window = PreferencesWindow(app, self, self.main_window)
         self.dialog_archive = DialogArchive(self.main_window)
-        self.dialog_close_minimize = DialogCloseMinimize(self.main_window)
         self.dialog_conclusion = DialogConclusion(app, self.main_window)
         self.dialog_cut = DialogCut(self.main_window)
         self.dialog_cutlist = DialogCutlist(self.main_window)
         self.dialog_email_password = DialogEmailPassword(self.main_window)
         self.dialog_rename = DialogRename(self.main_window)
         self.dialog_planning = DialogPlanning(self, self.main_window)
-        self.notify = Notify(app, self.main_window)
 
     def run(self):
         gtk.main()

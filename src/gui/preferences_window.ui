@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Tue Jan  6 23:10:24 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Jan 29 15:57:30 2009 -->
 <interface>
+  <object class="GtkListStore" id="model1">
+    <columns>
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">v</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
     <property name="title" translatable="yes">Optionen</property>
@@ -24,59 +34,7 @@
                 <child>
                   <object class="GtkVBox" id="vbox15">
                     <property name="visible">True</property>
-                    <property name="spacing">3</property>
-                    <child>
-                      <object class="GtkLabel" id="label10">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Beim Schlie&#xDF;en des Fensters das Programm...</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_quit">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... beenden</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_ask</property>
-                        <signal handler="on_radio_quit_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_minimize">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">... minimieren</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_ask</property>
-                        <signal handler="on_radio_minimize_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_ask">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Jedesmal nachfragen</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_radio_ask_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                  </packing>
                 </child>
               </object>
             </child>
@@ -108,7 +66,8 @@
                     <child>
                       <object class="GtkLabel" id="labelHeadline">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Die Ordner m&#xFC;ssen auf dem selben Dateisystem liegen!</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Die Ordner m&#xFC;ssen auf dem selben Dateisystem liegen!&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
@@ -659,6 +618,13 @@
                                 <property name="can_focus">True</property>
                                 <signal handler="on_comboboxentry_player_changed" name="changed"/>
                               </object>
+                            </child>
+                            <property name="model">model1</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="renderer1"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
                             </child>
                           </object>
                           <packing>
