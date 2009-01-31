@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Jan 29 15:57:30 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Jan 31 13:33:37 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_cut">
     <property name="border_width">5</property>
@@ -17,12 +17,15 @@
             <property name="visible">True</property>
             <property name="spacing">7</property>
             <child>
-              <object class="GtkLabel" id="labelCutFile">
+              <object class="GtkLabel" id="label_file">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">&lt;b&gt;labelCutFile&lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;label_file&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
             </child>
             <child>
               <object class="GtkLabel" id="label3">
@@ -31,11 +34,12 @@
                 <property name="label" translatable="yes">Wie soll geschnitten werden?</property>
               </object>
               <packing>
+                <property name="expand">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkRadioButton" id="radioCutBestCutlist">
+              <object class="GtkRadioButton" id="radio_best_cutlist">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes">Programm w&#xE4;hlt beste Cutlist</property>
@@ -43,21 +47,66 @@
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
+                <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">2</property>
               </packing>
             </child>
             <child>
-              <object class="GtkRadioButton" id="radioCutChooseCutlist">
+              <object class="GtkVBox" id="vbox18">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="label" translatable="yes">Cutlist selbst w&#xE4;hlen</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-                <property name="group">radioCutBestCutlist</property>
+                <child>
+                  <object class="GtkHBox" id="hbox14">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_choose_cutlist">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Cutlist selbst w&#xE4;hlen</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_best_cutlist</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_status">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="xpad">11</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Status&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <child>
+                      <object class="GtkTreeView" id="treeview_cutlists">
+                        <property name="height_request">100</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="fill">False</property>
+                <property name="expand">False</property>
                 <property name="position">3</property>
               </packing>
             </child>
@@ -65,20 +114,20 @@
               <object class="GtkVBox" id="vbox11">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkRadioButton" id="radioCutManually">
+                  <object class="GtkRadioButton" id="radio_manually">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes">Manuell schneiden</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">radioCutBestCutlist</property>
+                    <property name="group">radio_best_cutlist</property>
                   </object>
                   <packing>
                     <property name="fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="labelWarning">
+                  <object class="GtkLabel" id="label_warning">
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
                     <property name="xpad">23</property>
@@ -92,12 +141,12 @@
                 </child>
               </object>
               <packing>
+                <property name="expand">False</property>
                 <property name="position">4</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="fill">False</property>
             <property name="position">1</property>
           </packing>
         </child>
@@ -121,6 +170,7 @@
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="image_position">GTK_POS_RIGHT</property>
+                <signal handler="on_buttonCutOK_clicked" name="clicked"/>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -136,7 +186,6 @@
     </child>
     <action-widgets>
       <action-widget response="-6">buttonDontCut</action-widget>
-      <action-widget response="-5">buttonCutOK</action-widget>
     </action-widgets>
   </object>
 </interface>

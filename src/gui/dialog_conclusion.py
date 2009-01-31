@@ -105,7 +105,7 @@ class DialogConclusion(BaseWindow):
     ###
         
     def on_buttonConclusionPlay_clicked(self, widget, data=None):    
-        if self.action==Action.DECODE:
+        if self.action==Action.DECODE or self.file_conclusions[self.conclusion_iter].cut.status != Status.OK:
             filename = self.file_conclusions[self.conclusion_iter].uncut_avi
         else:    
             filename = self.file_conclusions[self.conclusion_iter].cut_avi
@@ -169,7 +169,7 @@ class DialogConclusion(BaseWindow):
             text = self.__status_to_s(file_conclusion.decode.status)
             message = file_conclusion.decode.message
             if message != "":
-                text += "(%s)" % message
+                text += " (%s)" % message
             
             if file_conclusion.decode.status==Status.OK:
                 self.get_widget('vboxButtons').show()

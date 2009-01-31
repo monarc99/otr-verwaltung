@@ -32,10 +32,12 @@ import urllib
 import xml.dom.minidom
 import ConfigParser
 import webbrowser
+import threading
 
-# TODO: do i need gtk? (see also other files)
 try:
-    from gtk import events_pending, main_iteration, RESPONSE_OK
+    from gtk import gdk, events_pending, main_iteration, RESPONSE_OK
+    import gobject
+    gdk.threads_init()    
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
@@ -54,6 +56,34 @@ from configparser import Config
 import fileoperations
 from filesconclusion import FileConclusion
 from constants import Section, Action, Cut_action, Save_Email_Password, Status
+
+class GeneratorTask(object):
+   def __init__(self, generator, loop_callback, complete_callback=None):
+       self.generator = generator
+       self.loop_callback = loop_callback
+       self.complete_callback = complete_callback
+
+   def _start(self, *args, **kwargs):
+       self._stopped = False
+       for ret in self.generator(*args, **kwargs):
+           if self._stopped:
+               thread.exit()
+           gobject.idle_add(self._loop, ret)
+       if self.complete_callback is not None:
+           gobject.idle_add(self.complete_callback)
+
+   def _loop(self, ret):
+       if ret is None:
+           ret = ()
+       if not isinstance(ret, tuple):
+           ret = (ret,)
+       self.loop_callback(*ret)
+
+   def start(self, *args, **kwargs):
+       threading.Thread(target=self._start, args=args, kwargs=kwargs).start()
+
+   def stop(self):
+       self._stopped = True
 
 class App:
     
@@ -343,7 +373,7 @@ class App:
                 for otrkey in filenames:
                     file_conclusions.append(FileConclusion(action, otrkey=otrkey))
                 
-            if cut:
+            if cut and not decode: # dont add twice
                 for uncut_avi in filenames:
                     file_conclusions.append(FileConclusion(action, uncut_avi=uncut_avi))
                             
@@ -354,7 +384,10 @@ class App:
                 
             # cut files
             if cut:
-                self.action_cut(file_conclusions, action)
+                if self.action_cut(file_conclusions, action) == False: 
+                    return
+
+            self.block_gui(False)
 
             # no more need for tasks view
             self.__gui.main_window.get_widget('eventbox_tasks').hide()
@@ -378,7 +411,7 @@ class App:
                             print e
                 
                 if count == 1:
-                    self.__gui.message_info_box("Es wurde 1 Cutliste bewertet!")
+                    self.__gui.message_info_box("Es wurde 1 Cutlist bewertet!")
                 elif count > 1:
                     self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
 
@@ -434,6 +467,10 @@ class App:
             self.action_plan_search(broadcasts)
       
      
+    def block_gui(self, state):
+        for button in ["decode", "cut", "decodeandcut"]:
+            self.__gui.main_window.toolbar_buttons[button].set_sensitive(not state)
+        
     # helpers for actions                   
     def action_decode(self, file_conclusions):          
         
@@ -462,7 +499,8 @@ class App:
         
         # now this method may not return "False"
         self.__gui.main_window.get_widget('eventbox_tasks').show()
-                  
+        self.block_gui(True)
+                   
         # decode each file
         for count, file_conclusion in enumerate(file_conclusions):
             # update progress
@@ -520,14 +558,63 @@ class App:
                 
         return True
 
+    def download_cutlists(self, filename, error_cb=None, cutlist_found_cb=None):
+        
+        size = fileoperations.get_size(filename)
+        url = self.config.get('cut', 'server') + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
+
+        try:
+            handle = urllib.urlopen(url)     
+        except IOError:
+            if error_cb: error_cb("Verbindungsprobleme")
+            return []
+                       
+        try:
+            dom_cutlists = xml.dom.minidom.parse(handle)
+            handle.close()
+            dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
+        except:
+            if error_cb: error_cb("Keine Cutlists gefunden")
+            return []
+                        
+        cutlists = []           
+            
+        for cutlist in dom_cutlists:
+                                                                            
+            cutlist_data = [
+                self.read_value(cutlist, "id"),
+                self.read_value(cutlist, "author"),
+                self.read_value(cutlist, "ratingbyauthor"),
+                self.read_value(cutlist, "rating"),
+                self.read_value(cutlist, "ratingcount"),
+                self.read_value(cutlist, "cuts"),
+                self.read_value(cutlist, "actualcontent"),
+                self.read_value(cutlist, "usercomment"),
+                self.read_value(cutlist, "filename"),
+                self.read_value(cutlist, "withframes"),
+                self.read_value(cutlist, "withtime"),
+                self.read_value(cutlist, "duration")]
+                            
+            if cutlist_found_cb: cutlist_found_cb(cutlist_data)
+            cutlists.append(cutlist_data)
+
+        return cutlists            
+               
     def action_cut(self, file_conclusions, action):                      
+        if self.config.get('cut', 'avidemux') == "":
+            self.__gui.message_error_box("Es ist kein Avidemux angegeben!")
+            return False        
+
+        # now this method may not return "False"
         self.__gui.main_window.get_widget('eventbox_tasks').show()
-          
+        self.block_gui(True)  
+        
         for count, file_conclusion in enumerate(file_conclusions):
-            self.__cut_count = count
+            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
+            self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(0.0)
     
             # file correctly decoded?            
-            if action==Action.DECODEANDCUT:
+            if action == Action.DECODEANDCUT:
                 if file_conclusion.decode.status == Status.ERROR:
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = "Datei wurde nicht dekodiert."
@@ -535,158 +622,136 @@ class App:
 
             # how should the file be cut?
             cut_action = None
-            if self.config.get('cut', 'cut_action') == Cut_action.ASK:
+            cutlists = []
             
-                self.__gui.dialog_cut.get_widget('labelCutFile').set_text(basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut.get_widget('labelWarning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'new_otrkeys'))
+            if self.config.get('cut', 'cut_action') == Cut_action.MANUALLY:
+                cut_action = Cut_action.MANUALLY
 
-                response = self.__gui.dialog_cut.run()
+            elif self.config.get('cut', 'cut_action') == Cut_action.BEST_CUTLIST:
+                cut_action = Cut_action.BEST_CUTLIST
+
+                def error_cb(error):
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = error
+                    
+                cutlists = self.download_cutlists(file_conclusion.uncut_avi, error_cb)
+                
+                if len(cutlists) == 0:
+                    continue
+                 
+            else:            
+                # show dialog
+                self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_avi))
+                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'new_otrkeys'))
+
+                if self.config.get('cut', 'cut_action') == Cut_action.ASK:
+                    self.__gui.dialog_cut.get_widget('radio_best_cutlist').set_active(True)
+                else:
+                    self.__gui.dialog_cut.get_widget('radio_choose_cutlist').set_active(True)
+
+                # start looking for cutlists
+                self.__gui.dialog_cut.get_widget('treeview_cutlists').get_model().clear()                
+                self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
+                              
+                self.cutlists_error = False
+                
+                def error_cb(error):                         
+                    self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>%s</b>" % error)
+                    self.cutlists_error = True
+                     
+                def cutlist_found_cb(cutlist):
+                    self.__gui.dialog_cut.add_cutlist(cutlist)
+                    cutlists.append(cutlist)
+               
+                def completed():
+                    if not self.cutlists_error:
+                        self.__gui.dialog_cut.get_widget('label_status').set_markup("")
+               
+                GeneratorTask(self.download_cutlists, cutlist_found_cb, completed).start(file_conclusion.uncut_avi, error_cb)
+                
+                response = self.__gui.dialog_cut.run()                
                 self.__gui.dialog_cut.hide()
                 
-                if response == RESPONSE_OK:            
-                    if self.__gui.dialog_cut.get_widget('radioCutBestCutlist').get_active() == True:
-                        cut_action = Cut_action.BEST_CUTLIST
-                    elif self.__gui.dialog_cut.get_widget('radioCutChooseCutlist').get_active() == True:
-                        cut_action = Cut_action.CHOOSE_CUTLIST
-                    else:                    
-                        cut_action = Cut_action.MANUALLY
-                else:
+                if response < 0:
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = "Abgebrochen"
                     continue
-            
-            else: # !=ASK
-                cut_action = self.config.get('cut', 'cut_action')
- 
+                else:
+                    cut_action = response
+                    
             # save cut_action
             file_conclusion.cut.cut_action = cut_action
 
             if cut_action == Cut_action.BEST_CUTLIST:
-                # download all cutlist for the files and choose
-                # the cutlist with the best rating
-                
-                dom_cutlists, error_message = self.get_dom_from_cutlist(file_conclusion.uncut_avi)
-                
-                if dom_cutlists==None:
+                if len(cutlists) == 0:
                     file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = error_message
-                else:                   
-                    cutlists = {}             
-                    for cutlist in dom_cutlists.getElementsByTagName('cutlist'):                          
-                        ratingbyauthor = self.read_value(cutlist, "ratingbyauthor")
-                        userrating = self.read_value(cutlist, "rating")
-                                                
-                        if ratingbyauthor=="":
-                            rating = userrating
-                        elif userrating=="":
-                            rating = ratingbyauthor
-                        else:
-                            rating = float(ratingbyauthor) * 0.3 + float(userrating) * 0.7
-    
-                        cutlists[int(self.read_value(cutlist, "id"))] = rating
-                    
-                    if len(cutlists)==0:
-                        file_conclusion.cut.status = Status.NOT_DONE
-                        file_conclusion.cut.message = "Keine Cutlist gefunden."
-                    else:                
-                        sort_cutlists = cutlists.items()
-                        sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
-                                        
-                        best_cutlist = sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
-                        
-                        cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist)
-                        if cut_avi == None:
-                            file_conclusion.cut.status = Status.ERROR
-                            file_conclusion.cut.message = error    
-                        else:
-                            file_conclusion.cut.status = Status.OK
-                            file_conclusion.cut_avi = cut_avi
-                            file_conclusion.cut.cutlist = best_cutlist                            
+                    file_conclusion.cut.message = "Keine Cutlist gefunden"
+                    continue
+            
+                best_cutlist = self.get_best_cutlist(cutlists)                 
+                
+                cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist)
+
+                if cut_avi == None:
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = error    
+                else:
+                    file_conclusion.cut.status = Status.OK
+                    file_conclusion.cut_avi = cut_avi
+                    file_conclusion.cut.cutlist = best_cutlist                            
                 
             elif cut_action == Cut_action.CHOOSE_CUTLIST:
-                # download all cutlist and display them to
-                # the user
-
-                self.__gui.dialog_cutlist.get_widget('treeviewCutlists').get_model().clear()                
-                dom_cutlists, error_message = self.get_dom_from_cutlist(file_conclusion.uncut_avi)
+                cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist)
                 
-                cutlists_found = False
-                 
-                if dom_cutlists==None:
-                    self.__gui.message_error_box(error_message)
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = error_message
-                else:                   
-                    for cutlist in dom_cutlists.getElementsByTagName('cutlist'):
-                        cutlists_found = True
-                                                                 
-                        data_array = [
-                            self.read_value(cutlist, "id"),
-                            self.read_value(cutlist, "author"),
-                            self.read_value(cutlist, "ratingbyauthor"),
-                            self.read_value(cutlist, "rating"),
-                            self.read_value(cutlist, "ratingcount"),
-                            self.read_value(cutlist, "cuts"),
-                            self.read_value(cutlist, "actualcontent"),
-                            self.read_value(cutlist, "usercomment"),
-                            self.read_value(cutlist, "filename"),
-                            self.read_value(cutlist, "withframes"),
-                            self.read_value(cutlist, "withtime"),
-                            self.read_value(cutlist, "duration")]
-                    
-                        self.__gui.dialog_cutlist.add_cutlist(data_array)
-                
-                    if cutlists_found:                        
-                        self.__gui.dialog_cutlist.get_widget('labelCutlistFile').set_text(basename(file_conclusion.uncut_avi))
-                        response = self.__gui.dialog_cutlist.run()
-                        self.__gui.dialog_cutlist.hide()
-                        
-                        treeselection = self.__gui.dialog_cutlist.get_widget('treeviewCutlists').get_selection()  
-                        
-                        if treeselection.count_selected_rows()==0 or response != RESPONSE_OK:                            
-                            file_conclusion.cut.status = Status.NOT_DONE
-                            file_conclusion.cut.message = "Keine Cutlist gewählt."
-                        else:
-                            # retrieve id of chosen cutlist
-                            (model, iter) = treeselection.get_selected()                   
-                            chosen_cutlist = model.get_value(iter, 0)
-                            
-                            cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, chosen_cutlist)
-                            
-                            if cut_avi == None:
-                                file_conclusion.cut.status = Status.ERROR
-                                file_conclusion.cut.message = error    
-                            else:
-                                file_conclusion.cut.status = Status.OK
-                                file_conclusion.cut_avi = cut_avi
-                                file_conclusion.cut.cutlist = chosen_cutlist         
-                                                                                        
-                    else: # no cutlist in xml
-                        file_conclusion.cut.status = Status.NOT_DONE
-                        file_conclusion.cut.message = "Keine Cutlist gefunden."
+                if cut_avi == None:
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = error    
+                else:
+                    file_conclusion.cut.status = Status.OK
+                    file_conclusion.cut_avi = cut_avi
+                    file_conclusion.cut.cutlist = chosen_cutlist         
 
             elif cut_action == Cut_action.MANUALLY: # MANUALLY
-                command = "%s --load %s >>/dev/null" %(self.config.get('cut', 'avidemux'), file_conclusion.uncut_avi)
+                command = "%s --load %s >>/dev/null" % (self.config.get('cut', 'avidemux'), file_conclusion.uncut_avi)
                 avidemux = subprocess.Popen(command, shell=True)    
-                while avidemux.poll()==None:
+                while avidemux.poll() == None:
                     # wait
                     pass
                     
                 file_conclusion.cut.status = Status.OK
+       
                     
             if file_conclusion.cut.status == Status.OK:            
-                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
+                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?, vor allem bei manuell!!!!!            
                 # action after cut
                 # move to trash
                 target = self.config.get('folders', 'trash')
                 fileoperations.move_file(file_conclusion.uncut_avi, target)
-               
-                
-            # update progress
-            self.__cut_count = count
         
         # after iterating over all items:
         return True
+    
+    def get_best_cutlist(self, cutlists):
+        dic_cutlists = {}
+        
+        for cutlist in cutlists:                          
+            ratingbyauthor = cutlist[2]
+            userrating = cutlist[3]
+            ratingcount = cutlist[4]                            
+
+            if ratingbyauthor == "":
+                rating = userrating
+            elif userrating == "":
+                rating = ratingbyauthor
+            else:
+                rating = float(ratingbyauthor) * 0.3 + float(userrating) * 0.7
+
+            dic_cutlists[cutlist[0]] = rating
+        
+        sort_cutlists = dic_cutlists.items()
+        sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
+                        
+        return sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
     
     def rename_by_schema(self, filename, schema=""):   
         if schema == "":
@@ -746,26 +811,10 @@ class App:
             return schema
         else:         
             return filename
-    
-    def get_dom_from_cutlist(self, avi):
-        size = fileoperations.get_size(avi)
-        url = self.config.get('cut', 'server') + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
-
-        try:
-            handle = urllib.urlopen(url)     
-        except IOError:
-            return None, "Verbindungsprobleme"
-                       
-        try:
-            dom_cutlists = xml.dom.minidom.parse(handle)
-            handle.close()
-            
-            return dom_cutlists, None
-        except:
-            return None, "Keine Cutlist gefunden"
+   
         
     def read_value(self, cutlist_element, node_name):
-        value=None
+        value = None
         try:
             elements = cutlist_element.getElementsByTagName(node_name)
             for node in elements[0].childNodes:
@@ -773,7 +822,7 @@ class App:
         except:
             return ""
         
-        if value==None:
+        if value == None:
             return ""
              
     def cut_file_by_cutlist(self, filename, cutlist):
@@ -859,7 +908,7 @@ class App:
         f.close()
         
         # start avidemux:   
-        command = "avidemux --force-smart --run tmp.js --quit >>/dev/null" # --nogui
+        command = "%s --force-smart --run tmp.js --quit >>/dev/null" % self.config.get('cut', 'avidemux') # --nogui
         avidemux = subprocess.Popen(command, shell=True)
         while avidemux.poll()==None:
             while events_pending():
@@ -890,44 +939,23 @@ class App:
             self.__gui.message_error_box("Die ausgewählte Datei ist kein ungeschnittenes Video!")
             return 
             
-        if mplayer=='':
+        if mplayer == '':
             self.__gui.message_error_box("Der MPlayer ist nicht angegeben!")
             return
         
-        # get best cutlist
-        dom_cutlists, error_message = self.get_dom_from_cutlist(filename)
+        # get best cutlist       
+        def error_cb(error):
+            self.__gui.message_error_box(error)
         
-        best_cutlist = None
+        cutlists = self.download_cutlists(filename, error_cb) 
         
-        if dom_cutlists==None:
-            self.__gui.message_error_box(error_message)
+        if len(cutlists) == 0:
             return
-        else:                   
-            cutlists = {}             
-            for cutlist in dom_cutlists.getElementsByTagName('cutlist'):                          
-                ratingbyauthor = self.read_value(cutlist, "ratingbyauthor")
-                userrating = self.read_value(cutlist, "rating")
-                                        
-                if ratingbyauthor=="":
-                    rating = userrating
-                elif userrating=="":
-                    rating = ratingbyauthor
-                else:
-                    rating = float(ratingbyauthor) * 0.3 + float(userrating) * 0.7
-
-                cutlists[int(self.read_value(cutlist, "id"))] = rating
             
-            if len(cutlists)==0:
-                self.__gui.message_error_box("Keine Cutlist gefunden!")
-                return
-            else: 
-                sort_cutlists = cutlists.items()
-                sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
-                       
-                best_cutlist = sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
+        best_cutlist = self.get_best_cutlist(cutlists)
                 
-        # download cutlist + save it
-        url =self.config.get('cut', 'server') + "getfile.php?id=" + str(best_cutlist)        
+        # download cutlist and save it
+        url = self.config.get('cut', 'server') + "getfile.php?id=" + str(best_cutlist)        
         local_filename = join(self.config.get('folders', 'new_otrkeys'), basename(filename) + ".cutlist")
         
         try:

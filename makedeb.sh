@@ -32,12 +32,14 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: otr-verwaltung
 Architecture: all
-Depends: 
+Depends: python, python-gtk2
 Description: Manages otrkeys and avis from onlinetvrecorder.com
  Manages otrkeys and avis from onlinetvrecorder.com
  Feature list:
-    -
-    -
+    - Decode otrkey files
+    - Cut avi files with avidemux by cutlists
+    - Organize your files by undecoded, decoded, cut, ...
+    - Keep track of files you want to download later
 EOF
 
 cp ../../rules rules
@@ -46,7 +48,6 @@ cat > dirs << EOF
 /usr/bin
 /usr/share/applications
 /usr/share/icons
-/usr/share/python-support
 EOF
 
 cat > copyright << EOF
