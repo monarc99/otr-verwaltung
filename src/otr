@@ -326,8 +326,8 @@ class App:
          
         # archive 
         files = []       
-        for root, dirs, files in walk(self.config.get('folders', 'archive')):
-            for f in files:
+        for root, dirs, wfiles in walk(self.config.get('folders', 'archive')):
+            for f in wfiles:
                 # TODO: match all videos files
                 if f.endswith('.avi') and self.search(f):
                     items += [join(root, f)]
@@ -370,14 +370,19 @@ class App:
     ### Actions
     ###        
     
-    def perform_action(self, chosen_action, filenames=[], broadcasts=[]):
+    def perform_action(self, chosen_action, filenames=None, broadcasts=None):
         """ Performs an action (toolbar, context menu, etc.) """
-        
-        if (len(filenames) == 0 and chosen_action != Action.NEW_FOLDER) or \
-           (len(broadcasts) == 0 and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE]):
-            self.__gui.message_info_box("Es ist keine Sendung markiert!")
-            return
-   
+
+        if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD]:
+            if len(broadcasts) == 0 and chosen_action != Action.PLAN_ADD:
+                self.__gui.message_info_box("Es ist keine Sendung markiert!")   
+                return
+
+        elif filenames != None:
+            if len(filenames) == 0 and chosen_action != Action.NEW_FOLDER:
+                self.__gui.message_info_box("Es ist keine Datei markiert!")     
+                return           
+           
         action = actions.get_action(chosen_action, self.__gui)            
                
         # different actions:

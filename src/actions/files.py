@@ -66,7 +66,7 @@ class Rename(BaseAction):
 
 class NewFolder(BaseAction):
     def __init__(self, gui):
-        self.update_list = True
+        self.update_list = False
         self.__gui = gui
         
     def do(self, filename):
@@ -78,4 +78,5 @@ class NewFolder(BaseAction):
         response, new_names = self.__gui.dialog_rename.init_and_run("Neuer Ordner", ["Neuer Ordner"])
 
         if response and new_names["Neuer Ordner"] != "":            
+            self.update_list = True
             mkdir(join(dirname, new_names["Neuer Ordner"]))

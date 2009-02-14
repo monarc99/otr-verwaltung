@@ -205,6 +205,8 @@ class MainWindow(BaseWindow):
 
     def __setup_widgets(self, builder):
         
+        self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+        
         # delete-search button image
         image = gtk.Image()
         image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
@@ -233,7 +235,7 @@ class MainWindow(BaseWindow):
         builder.get_object('eventboxPlanningCurrentCount').set_style(style)
 
         # change font of sidebar     
-        for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelSearch', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
+        for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
             builder.get_object(label).modify_font(pango.FontDescription("bold"))
 
         # change background of tasks bar
@@ -419,6 +421,8 @@ class MainWindow(BaseWindow):
     #
     #  Signal handlers
     #
+    
+
                   
     def on_menuHelpAbout_activate(self, widget, data=None):
         about_dialog = gtk.AboutDialog()        
@@ -457,12 +461,23 @@ class MainWindow(BaseWindow):
             self.app.show_section(section)            
     
     def on_buttonClear_clicked(self, widget, data=None):
-        self.get_widget('entry_search').set_text("")
+        self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+        self.get_widget('entry_search').set_text("Durchsuchen")
+   
+    def on_entry_search_button_press_event(self, widget, data=None):
+        self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
+        if self.get_widget('entry_search').get_text() == "Durchsuchen":
+            self.get_widget('entry_search').set_text("")
     
+    def on_entry_search_focus_out_event(self, widget, data=None):
+        if self.get_widget('entry_search').get_text() == "":
+            self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+            self.get_widget('entry_search').set_text("Durchsuchen")
+            
     def on_entry_search_changed(self, widget, data=None):
         search = widget.get_text()
 
-        if search == "":
+        if search == "Durchsuchen" or search == "":
             self.app.stop_search()
             
             for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:

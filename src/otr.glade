@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Feb 14 21:27:32 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Feb 14 22:47:04 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -1846,9 +1846,6 @@
                     <property name="label" translatable="yes">&lt;b&gt;Datei 1/2 dekodieren&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </widget>
-                  <packing>
-                    <property name="padding">4</property>
-                  </packing>
                 </child>
                 <child>
                   <widget class="GtkHBox" id="hbox12">
@@ -1920,33 +1917,28 @@
           <widget class="GtkHPaned" id="hpaned1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="position">240</property>
+            <property name="position_set">True</property>
             <child>
               <widget class="GtkEventBox" id="eventboxSidebar">
+                <property name="width_request">240</property>
                 <property name="visible">True</property>
                 <child>
                   <widget class="GtkVBox" id="vbox3">
-                    <property name="width_request">215</property>
-                    <property name="height_request">350</property>
                     <property name="visible">True</property>
                     <property name="border_width">8</property>
                     <property name="spacing">4</property>
                     <child>
-                      <widget class="GtkLabel" id="labelSearch">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Suche</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox3">
+                      <widget class="GtkHBox" id="hbox4">
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkEntry" id="entry_search">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="text" translatable="yes">Durchsuchen</property>
                             <signal name="changed" handler="on_entry_search_changed"/>
+                            <signal name="button_press_event" handler="on_entry_search_button_press_event"/>
+                            <signal name="focus_out_event" handler="on_entry_search_focus_out_event"/>
                           </widget>
                         </child>
                         <child>
@@ -1964,7 +1956,6 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -1973,7 +1964,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -2025,7 +2016,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">3</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -2034,7 +2025,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">4</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -2046,11 +2037,11 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">5</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="hbox4">
+                      <widget class="GtkHBox" id="hbox5">
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkRadioButton" id="radioUndecoded">
@@ -2077,7 +2068,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">6</property>
+                        <property name="position">5</property>
                       </packing>
                     </child>
                     <child>
@@ -2086,7 +2077,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">7</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                     <child>
@@ -2098,11 +2089,11 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">8</property>
+                        <property name="position">7</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="hbox5">
+                      <widget class="GtkHBox" id="hbox6">
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkRadioButton" id="radioUncut">
@@ -2130,11 +2121,11 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">9</property>
+                        <property name="position">8</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="hbox6">
+                      <widget class="GtkHBox" id="hbox7">
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkRadioButton" id="radioCut">
@@ -2162,11 +2153,11 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">10</property>
+                        <property name="position">9</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="hbox7">
+                      <widget class="GtkHBox" id="hbox8">
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkRadioButton" id="radioArchive">
@@ -2194,7 +2185,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">11</property>
+                        <property name="position">10</property>
                       </packing>
                     </child>
                     <child>
@@ -2203,11 +2194,11 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">12</property>
+                        <property name="position">11</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="hbox8">
+                      <widget class="GtkHBox" id="hbox15">
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkRadioButton" id="radioTrash">
@@ -2235,7 +2226,7 @@
                       </widget>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">13</property>
+                        <property name="position">12</property>
                       </packing>
                     </child>
                   </widget>
@@ -2296,7 +2287,7 @@
                 </child>
               </widget>
               <packing>
-                <property name="resize">False</property>
+                <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
