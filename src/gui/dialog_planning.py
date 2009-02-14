@@ -43,6 +43,16 @@ class DialogPlanning(BaseWindow):
         builder = self.create_builder("dialog_planning.ui")
             
         BaseWindow.__init__(self, builder, "dialog_planning", widgets, parent)
+        
+        # fill combobox
+        store = gtk.ListStore(str)
+        
+        stations = "ARD ZDF Sat.1 Pro7 RTL kabel1 VOX RTL2 SWR WDR NDR MDR RBB HR BR BR alpha SuperRTL Tele5 DMAX 3sat ARTE PHOENIX EinsExtra EinsPlus EinsFestival ZDFdokukanal ZDFinfokanal ZDFtheaterkanal ComedyCentral 9live DASVIERTE Nickelodeon KIKA Eurosport DSF GIGA VIVA MTV N24 n-tv BBC World CNN TRT" 
+        for station in stations.split(" "):
+            store.append([station])        
+
+        builder.get_object('combobox_station').set_model(store)
+        builder.get_object('combobox_station').set_text_column(0)
             
     def run_new(self):       
         self.get_widget('label_headline').set_text('Neue Sendung hinzufügen:')

@@ -26,7 +26,6 @@ import time
 import gtk
 import pango
 
-
 from basewindow import BaseWindow
 import otrpath
 from constants import Action, Section
@@ -48,6 +47,7 @@ class MainWindow(BaseWindow):
             'entry_search',
             'eventboxPlanningCurrentCount',
             'labelPlanningCurrentCount',
+            'labelPlanningCount',
             'radioPlanning',
             'radioUndecoded',            
             'separator1',
@@ -65,7 +65,10 @@ class MainWindow(BaseWindow):
             'labelTrashCount',
 
             'labelMessage',
-            'treeviewFiles',
+            'scrolledwindow_planning',
+            'treeview_planning',
+            'scrolledwindow_files',
+            'treeview_files'
             ]
                 
         builder = self.create_builder("main_window.ui")
@@ -75,16 +78,12 @@ class MainWindow(BaseWindow):
                             "main_window",
                             widgets)
        
+        self.__setup_toolbar(builder)
+        self.__setup_treeview_planning(builder)
+        self.__setup_treeview_files(builder)
         self.__setup_widgets(builder)
-
-    def __setup_widgets(self, builder):
         
-        # delete-search button image
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
-        builder.get_object('buttonClear').set_image(image)
-    
-        # toolbar buttons        
+    def __setup_toolbar(self, builder):       
         toolbar_buttons = [
             ('decode', 'decode.png', 'Dekodieren', Action.DECODE),
             ('decodeandcut', 'decodeandcut.png', "Dekodieren und Schneiden", Action.DECODEANDCUT),
@@ -111,18 +110,105 @@ class MainWindow(BaseWindow):
             self.toolbar_buttons[key] = gtk.ToolButton(image, text)
             self.toolbar_buttons[key].connect("clicked", self.on_toolbutton_clicked, action)
             self.toolbar_buttons[key].show()
-                                
-          
-        # create sets of toolbuttons
+             
+             
         self.sets_of_toolbars = {
-            Section.PLANNING :  [ self.toolbar_buttons['plan_add'], self.toolbar_buttons['plan_edit'], self.toolbar_buttons['plan_remove'], self.toolbar_buttons['plan_search'] ],
-            Section.OTRKEY :    [ self.toolbar_buttons['decodeandcut'], self.toolbar_buttons['decode'], self.toolbar_buttons['delete'] ],
-            Section.AVI_UNCUT:  [ self.toolbar_buttons['cut'], self.toolbar_buttons['delete'], self.toolbar_buttons['archive'], self.toolbar_buttons['play'], self.toolbar_buttons['cut_play'] ],
-            Section.AVI_CUT:    [ self.toolbar_buttons['archive'], self.toolbar_buttons['delete'], self.toolbar_buttons['cut'], self.toolbar_buttons['play'], self.toolbar_buttons['rename'] ],
-            Section.ARCHIVE:    [ self.toolbar_buttons['cut'], self.toolbar_buttons['delete'], self.toolbar_buttons['play'], self.toolbar_buttons['rename'], self.toolbar_buttons['new_folder'] ],
-            Section.TRASH:      [ self.toolbar_buttons['real_delete'], self.toolbar_buttons['restore'] ]
-        }
+            Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search' ],
+            Section.OTRKEY :    [ 'decodeandcut', 'decode', 'delete' ],
+            Section.AVI_UNCUT:  [ 'cut', 'delete', 'archive', 'play', 'cut_play' ],
+            Section.AVI_CUT:    [ 'archive', 'delete', 'cut', 'play', 'rename' ],
+            Section.ARCHIVE:    [ 'cut', 'delete', 'play', 'rename', 'new_folder' ],
+            Section.TRASH:      [ 'real_delete', 'restore' ]
+        }                       
 
+        # create sets of toolbuttons          
+        for section, button_names in self.sets_of_toolbars.iteritems():
+            toolbar_buttons = []
+            for button_name in button_names:
+                toolbar_buttons.append(self.toolbar_buttons[button_name])
+                
+            self.sets_of_toolbars[section] = toolbar_buttons
+    
+    def __setup_treeview_planning(self, builder):
+        treeview = self.get_widget('treeview_planning') 
+        store = gtk.TreeStore(int, str, str, str)                        
+        treeview.set_model(store)
+        
+        # create the TreeViewColumns to display the data
+        column_names = [ 'Sendung', 'Datum/Zeit', 'Sender' ]
+        tvcolumns = [None] * len(column_names)
+                             
+        tvcolumns[0] = gtk.TreeViewColumn(column_names[0], gtk.CellRendererText(), markup=1)
+        tvcolumns[1] = gtk.TreeViewColumn(column_names[1], gtk.CellRendererText(), markup=2)        
+        tvcolumns[2] = gtk.TreeViewColumn(column_names[2], gtk.CellRendererText(), markup=3)
+       
+        # append the columns
+        for col in tvcolumns:
+            col.set_resizable(True)
+            treeview.append_column(col)
+        
+        # allow multiple selection
+        treeselection = treeview.get_selection()
+        treeselection.set_mode(gtk.SELECTION_MULTIPLE)
+               
+        # sorting
+        treeview.get_model().set_sort_func(0, self.tv_planning_sort, None)
+        treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)    
+    
+    def __setup_treeview_files(self, builder):
+        treeview = self.get_widget('treeview_files') 
+        store = gtk.TreeStore(str, str, str, bool) # filename, size, date, locked
+        treeview.set_model(store)
+            
+        # constants for model and columns
+        self.FILENAME = 0
+        self.SIZE =     1
+        self.DATE =     2
+        
+        # create the TreeViewColumns to display the data
+        column_names = ['Dateiname', 'Größe', 'Geändert' ]                       
+        tvcolumns = [None] * len(column_names)
+                       
+        # pixbuf and filename
+        cell_renderer_pixbuf = gtk.CellRendererPixbuf()
+        tvcolumns[self.FILENAME] = gtk.TreeViewColumn(column_names[self.FILENAME], cell_renderer_pixbuf)
+        cell_renderer_text_name = gtk.CellRendererText()
+        tvcolumns[self.FILENAME].pack_start(cell_renderer_text_name, False)
+        tvcolumns[self.FILENAME].set_cell_data_func(cell_renderer_pixbuf, self.tv_files_pixbuf)
+        tvcolumns[self.FILENAME].set_cell_data_func(cell_renderer_text_name, self.tv_files_name)
+
+        # size
+        cell_renderer_text_size = gtk.CellRendererText()
+        cell_renderer_text_size.set_property('xalign', 1.0) 
+        tvcolumns[self.SIZE] = gtk.TreeViewColumn(column_names[self.SIZE], cell_renderer_text_size, text=self.SIZE)        
+        
+        # date
+        tvcolumns[self.DATE] = gtk.TreeViewColumn(column_names[self.DATE], gtk.CellRendererText(), text=self.DATE)        
+
+        # append the columns
+        for col in tvcolumns:
+            col.set_resizable(True)
+            treeview.append_column(col)
+        
+        # allow multiple selection
+        treeselection = treeview.get_selection()
+        treeselection.set_mode(gtk.SELECTION_MULTIPLE)
+               
+        # sorting
+        treeview.get_model().set_sort_func(0, self.tv_files_sort, None)
+        treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)
+        
+        # load pixbufs for treeview
+        self.pix_avi = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('avi.png'))      
+        self.pix_otrkey = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('decode.png'))
+        self.pix_folder = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('folder.png'))
+
+    def __setup_widgets(self, builder):
+        
+        # delete-search button image
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
+        builder.get_object('buttonClear').set_image(image)
                       
         # connect other signals
         self.get_widget('radioPlanning').connect('clicked', self.on_sidebar_toggled, Section.PLANNING)
@@ -140,6 +226,16 @@ class MainWindow(BaseWindow):
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
 
+        style = builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
+        pixmap, mask = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('badge.png')).render_pixmap_and_mask()
+        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
+        builder.get_object('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
+        builder.get_object('eventboxPlanningCurrentCount').set_style(style)
+
+        # change font of sidebar     
+        for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelSearch', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
+            builder.get_object(label).modify_font(pango.FontDescription("bold"))
+
         # change background of tasks bar
         eventbox = builder.get_object('eventbox_tasks')
         cmap = eventbox.get_colormap()
@@ -150,121 +246,107 @@ class MainWindow(BaseWindow):
 
         # image cancel
         builder.get_object('image_cancel').set_from_file(otrpath.get_image_path('cancel.png'))
-
-        style = builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
-        pixmap, mask = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('badge.png')).render_pixmap_and_mask()
-        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
-        builder.get_object('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
-        builder.get_object('eventboxPlanningCurrentCount').set_style(style)
-
-        # change font of sidebar     
-        for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelSearch',   'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
-            builder.get_object(label).modify_font(pango.FontDescription("bold"))
         
-        # setup the file treeview
-        treeview = self.get_widget('treeviewFiles') 
-        store = gtk.TreeStore(str, long, float,  # avi/otrkeys
-                              int)               # planning
-                         
-        treeview.set_model(store)
-            
-        # constants for avi/otrkeys and planning  
-        self.FILENAME = 0
-        self.SIZE =     1
-        self.DATE =     2
-        
-        self.PLANNING = 3
-        
-        # create the TreeViewColumns to display the data
-        column_names = ['Dateiname', 'Größe', 'Geändert',   # avi/otrkeys
-                        'Sendung', 'Datum/Zeit', 'Sender' ] # planning
-        tvcolumns = [None] * len(column_names)
-                       
-        # pixbuf and filename
-        cell_renderer_pixbuf = gtk.CellRendererPixbuf()
-        tvcolumns[self.FILENAME] = gtk.TreeViewColumn(column_names[self.FILENAME], cell_renderer_pixbuf)
-        cell_renderer_text_name = gtk.CellRendererText()
-        tvcolumns[self.FILENAME].pack_start(cell_renderer_text_name, False)
-        tvcolumns[self.FILENAME].set_cell_data_func(cell_renderer_pixbuf, self.file_pixbuf)
-        tvcolumns[self.FILENAME].set_cell_data_func(cell_renderer_text_name, self.file_name)
-
-        # size
-        cell_renderer_text_size = gtk.CellRendererText()
-        cell_renderer_text_size.set_property('xalign', 1.0) 
-        tvcolumns[self.SIZE] = gtk.TreeViewColumn(column_names[self.SIZE], cell_renderer_text_size, text=self.SIZE)
-        tvcolumns[self.SIZE].set_cell_data_func(cell_renderer_text_size, self.file_size)               
-        
-        # date
-        cell_renderer_text_date = gtk.CellRendererText()
-        tvcolumns[self.DATE] = gtk.TreeViewColumn(column_names[self.DATE], cell_renderer_text_date, text=self.DATE)
-        tvcolumns[self.DATE].set_cell_data_func(cell_renderer_text_date, self.file_date)        
-
-        # Planning:
-        # pixbuf and broadcast        
-        cell_renderer_text_broadcast = gtk.CellRendererText()
-        tvcolumns[3] = gtk.TreeViewColumn(column_names[3], cell_renderer_text_broadcast)
-        tvcolumns[3].set_cell_data_func(cell_renderer_text_broadcast, self.planning_broadcast)        
-        tvcolumns[3].set_visible(False)
-
-        # datetime
-        cell_renderer_text_datetime = gtk.CellRendererText()
-        tvcolumns[4] = gtk.TreeViewColumn(column_names[4], cell_renderer_text_datetime)
-        tvcolumns[4].set_cell_data_func(cell_renderer_text_datetime, self.planning_datetime)        
-        tvcolumns[4].set_visible(False)
-        
-        # station
-        cell_renderer_text_station = gtk.CellRendererText()
-        tvcolumns[5] = gtk.TreeViewColumn(column_names[5], cell_renderer_text_station)
-        tvcolumns[5].set_cell_data_func(cell_renderer_text_station, self.planning_station)        
-        tvcolumns[5].set_visible(False)
-                
-        # append the columns
-        for col in tvcolumns:
-            col.set_resizable(True)
-            treeview.append_column(col)
-        
-        # allow multiple selection
-        treeselection = treeview.get_selection()
-        treeselection.set_mode(gtk.SELECTION_MULTIPLE)
-               
-        # sorting
-        treeview.get_model().set_sort_func(0, self.sort, None)
-        treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)
-        
-        # load pixbufs for treeview
-        self.pix_avi = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('avi.png'))      
-        self.pix_otrkey = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('decode.png'))
-        self.pix_folder = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('folder.png'))
       
     #
-    # Convenience methods
+    # treeview_files
     #
     
     def clear_files(self):
-        self.get_widget('treeviewFiles').get_model().clear()
+        self.get_widget('treeview_files').get_model().clear()
+        self.get_widget('treeview_planning').get_model().clear()
     
-    def set_toolbar(self, section):
-        for toolbutton in self.get_widget('toolbar').get_children():
-           self.get_widget('toolbar').remove(toolbutton)
-        
-        for toolbutton in self.sets_of_toolbars[section]:        
-            self.get_widget('toolbar').insert(toolbutton, -1)
-     
     def get_selected_filenames(self):
         """ Return the selected filenames """
-        selection = self.get_widget('treeviewFiles').get_selection()
+        selection = self.get_widget('treeview_files').get_selection()
             
         def selected_row(model, path, iter, filenames):
-            filenames += [self.get_filename(iter)]
+            filenames += [self.get_widget('treeview_files').get_model().get_value(iter, self.FILENAME)]
         
         filenames = []        
         selection.selected_foreach(selected_row, filenames)      
 
         return filenames
         
+    def append_row_files(self, parent, filename, size, date, locked=False):               
+
+        if isdir(filename):
+            size = ''
+        else:
+            size = self.humanize_size(size)
+
+        date = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(date))
+    
+        data = [filename, size, date, locked]
+    
+        iter = self.get_widget('treeview_files').get_model().append(parent, data)
+        return iter
+   
+    def humanize_size(self, size):
+        abbrevs = [
+            (1<<30L, 'GB'), 
+            (1<<20L, 'MB'), 
+            (1<<10L, 'k'),
+            (1, '')
+        ]
+
+        for factor, suffix in abbrevs:
+            if size > factor:
+                break
+        return `int(size/factor)` + ' ' + suffix
+       
+    def tv_files_sort(self, model, iter1, iter2, data):
+        # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row
+         
+        filename_iter1 = model.get_value(iter1, self.FILENAME)    
+        filename_iter2 = model.get_value(iter2, self.FILENAME)
+        
+        # why???
+        if filename_iter2 == None:
+            return -1
+        
+        iter1_isdir, iter2_isdir = isdir(filename_iter1), isdir(filename_iter2)
+        
+        if iter1_isdir and iter2_isdir: # both are folders
+            # put names into array
+            folders = [ filename_iter1, filename_iter2 ]
+            # sort them
+            folders.sort()
+            # check if the first element is still iter1
+            if folders[0] == filename_iter1:
+                return -1
+            else:
+                return 1
+                
+        elif iter1_isdir: # only iter1 is a folder
+            return -1
+        elif iter2_isdir: # only iter2 is a folder
+            return 1
+        else: # none of them is a folder
+            return 0
+            
+    # displaying methods for treeview_files
+    def tv_files_name(self, column, cell, model, iter):            
+        cell.set_property('text', basename(model.get_value(iter, self.FILENAME)))
+
+    def tv_files_pixbuf(self, column, cell, model, iter):
+        filename = model.get_value(iter, self.FILENAME)
+    
+        if isdir(filename):
+            cell.set_property('pixbuf', self.pix_folder)
+        else:
+            if filename.endswith('.otrkey'):
+                cell.set_property('pixbuf', self.pix_otrkey)
+            else:
+                cell.set_property('pixbuf', self.pix_avi)
+
+    #
+    # treeview_planning
+    #
+            
     def get_selected_broadcasts(self):
         """ Return the selected filenames """
-        selection = self.get_widget('treeviewFiles').get_selection()
+        selection = self.get_widget('treeview_planning').get_selection()
             
         def selected_row(model, path, iter, broadcasts):
             broadcasts += [iter]
@@ -273,30 +355,66 @@ class MainWindow(BaseWindow):
         selection.selected_foreach(selected_row, broadcasts)      
 
         return broadcasts
-        
-    def append_row_files(self, parent, filename, size, date):               
-        data = [filename, size, date, 0]
-    
-        iter = self.get_widget('treeviewFiles').get_model().append(parent, data)
-        return iter
-        
+               
     def append_row_planning(self, index):
-        data = [None, 0, 0, index]
-                           # object, long, float,  # avi/otrkeys
-                           # int)  
-        iter = self.get_widget('treeviewFiles').get_model().append(None, data)
+        broadcast, stamp, station = self.app.planned_broadcasts[index]
+        datetime = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(stamp))
+    
+        now = time.time()
+
+        if stamp < now: 
+            # everything bold
+            data = [index, "<b>%s</b>" % broadcast, "<b>%s</b>" % datetime, "<b>%s</b>" % station]
+        else:
+            data = [index, broadcast, datetime, station]
+              
+        iter = self.get_widget('treeview_planning').get_model().append(None, data)
         return iter
-      
-    def get_filename(self, iter):
-        return self.get_widget('treeviewFiles').get_model().get_value(iter, self.FILENAME)
+
+    def tv_planning_sort(self, model, iter1, iter2, data):
+        # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row              
+        time1 = self.app.planned_broadcasts[model.get_value(iter1, 0)][1]
+        time2 = self.app.planned_broadcasts[model.get_value(iter2, 0)][1]
+
+        if time1 > time2:
+            return 1
+        elif time1 < time2:
+            return -1
+        else:
+            return 0
         
-    def toggle_columns(self, state_of_planned):
-        for column in self.get_widget('treeviewFiles').get_columns()[0:3]:
-            column.set_visible(not state_of_planned)
-   
-        for column in self.get_widget('treeviewFiles').get_columns()[3:6]:
-            column.set_visible(state_of_planned)
-           
+    #
+    # Convenience
+    #       
+    
+    def set_toolbar(self, section):
+        for toolbutton in self.get_widget('toolbar').get_children():
+           self.get_widget('toolbar').remove(toolbutton)
+        
+        for toolbutton in self.sets_of_toolbars[section]:        
+            self.get_widget('toolbar').insert(toolbutton, -1)
+                
+    def show_planning(self, planning):
+        self.get_widget('scrolledwindow_files').props.visible = not planning
+        self.get_widget('scrolledwindow_planning').props.visible = planning
+     
+    def block_gui(self, state):
+        for button in ["decode", "cut", "decodeandcut"]:
+            self.toolbar_buttons[button].set_sensitive(not state)
+     
+    def broadcasts_badge(self):
+        count = 0
+        now = time.time()
+        for broadcast in self.app.planned_broadcasts:
+            stamp = broadcast[1]
+            if stamp < now:
+                count += 1
+    
+        if count == 0:
+            self.get_widget('eventboxPlanningCurrentCount').hide()
+        else:
+            self.get_widget('eventboxPlanningCurrentCount').show()
+            self.get_widget('labelPlanningCurrentCount').set_text(str(count))
       
     #
     #  Signal handlers
@@ -347,11 +465,12 @@ class MainWindow(BaseWindow):
         if search == "":
             self.app.stop_search()
             
-            for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
+            for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
                 self.get_widget(label).set_text("")
         else:
             counts_of_section = self.app.start_search(search)
                   
+            self.get_widget('labelPlanningCount').set_text(counts_of_section[Section.PLANNING])                  
             self.get_widget('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
             self.get_widget('labelUncutCount').set_text(counts_of_section[Section.AVI_UNCUT])
             self.get_widget('labelCutCount').set_text(counts_of_section[Section.AVI_CUT])                            
@@ -361,107 +480,3 @@ class MainWindow(BaseWindow):
     def on_eventbox_cancel_button_press_event(self, widget, data=None):
         # TODO: Cancel 
         pass
-        
-    #
-    # Treeview
-    #
-                          
-    def sort(self, model, iter1, iter2, data):
-        # sort_func should return: -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row
-        filename_iter1 = self.get_filename(iter1)    
-        filename_iter2 = self.get_filename(iter2)
-        # why???
-        if filename_iter2 == None:
-            return -1
-        
-        iter1_isdir = isdir(filename_iter1)
-        iter2_isdir = isdir(filename_iter2)
-        
-        if iter1_isdir and iter2_isdir: # both are folders
-            # put names into array
-            folders = [ filename_iter1, filename_iter2 ]
-            # sort them
-            folders.sort()
-            # check if the first element is still iter1
-            if folders[0] == filename_iter1:
-                return -1
-            else:
-                return 1
-        elif iter1_isdir: # only iter1 is a folder
-            return -1
-        elif iter2_isdir: # only iter2 is a folder
-            return 1
-        else: # none of them is a folder
-            return 0
-            
-    # displaying methods for treeviewFiles
-    def file_name(self, column, cell, model, iter):            
-        filename = self.get_filename(iter)
-        if filename != None:
-            cell.set_property('text', basename(model.get_value(iter, self.FILENAME)))
-
-    def file_pixbuf(self, column, cell, model, iter):
-        filename = self.get_filename(iter)
-    
-        if filename != None:
-            if isdir(filename):
-                cell.set_property('pixbuf', self.pix_folder)
-            else:
-                if filename.endswith('.otrkey'):
-                    cell.set_property('pixbuf', self.pix_otrkey)
-                else:
-                    cell.set_property('pixbuf', self.pix_avi)
-
-    def file_size(self, column, cell, model, iter):
-        filename = self.get_filename(iter)
-        
-        if filename != None:
-            if isdir(filename):
-                cell.set_property('text', '')
-            else:
-                cell.set_property('text', self.humanize_size(model.get_value(iter, self.SIZE)))
-
-    def file_date(self, column, cell, model, iter):
-        cell.set_property('text', time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(model.get_value(iter, self.DATE))))
-    
-    def humanize_size(self, size):
-        abbrevs = [
-            (1<<30L, 'GB'), 
-            (1<<20L, 'MB'), 
-            (1<<10L, 'k'),
-            (1, '')
-        ]
-
-        for factor, suffix in abbrevs:
-            if size > factor:
-                break
-        return `int(size/factor)` + ' ' + suffix
-
-    def planning_broadcast(self, column, cell, model, iter):
-
-        cell.set_property('text', self.app.planned_broadcasts[model.get_value(iter, self.PLANNING)][0])
-
-    def planning_datetime(self, column, cell, model, iter):            
-        cell.set_property('text', time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(self.app.planned_broadcasts[model.get_value(iter, self.PLANNING)][1])))
-   
-    def planning_station(self, column, cell, model, iter):
-        cell.set_property('text', self.app.planned_broadcasts[model.get_value(iter, self.PLANNING)][2])
-   
-    def on_header_checkbox_clicked(self, tvcolumn):
-        tvcolumn.get_widget().set_active(not tvcolumn.get_widget().get_active())
-
-        self.get_widget('treeviewFiles').get_model().foreach(self.foreach_toggle_checkbox, tvcolumn.get_widget().get_active())
-
-    def foreach_toggle_checkbox(self, model, path, iter, user_data):
-        # set boolean value in first column
-        model.set_value(iter, self.CHECK, user_data)
-
-    def on_tv_checkbox_clicked(self, cell, path, model):
-        model[path][self.CHECK] = not model[path][self.CHECK]
-        self.set_checkbox_children(model[path], model[path][self.CHECK])
-
-    # set value recursively
-    def set_checkbox_children(self, treemodelrow, value):
-        for row in treemodelrow.iterchildren():
-            row[self.CHECK] = value
-            self.set_checkbox_children(row, value)

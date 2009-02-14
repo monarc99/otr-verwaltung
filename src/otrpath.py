@@ -23,12 +23,12 @@ import sys
 from os.path import join, isdir
 import os
 
-def get_config_path():
+def get_config_path(filename):
     home = os.environ.get('HOME')
     config_dir = join(home, '.otr-verwaltung')
     if not isdir(config_dir):
         os.mkdir(config_dir)
-    return join(config_dir, 'conf')
+    return join(config_dir, filename)
 
 def get_path(filename=None):
     if filename == None:

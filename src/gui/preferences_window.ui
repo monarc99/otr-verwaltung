@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sat Jan 31 13:33:37 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Feb 14 20:28:47 2009 -->
 <interface>
   <object class="GtkListStore" id="model1">
     <columns>
@@ -64,106 +64,18 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="labelHeadline">
+                      <object class="GtkCheckButton" id="checkArchive">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Die Ordner m&#xFC;ssen auf dem selben Dateisystem liegen!&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Archiv verwenden</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal handler="on_preferences_checkArchive_toggled" name="toggled"/>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label9">
-                        <property name="width_request">100</property>
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Neue otrkey-Dateien:</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_START</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFileChooserButton" id="folderNewOtrkeys">
-                        <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <signal handler="on_folderNewOtrkeys_current_folder_changed" name="current_folder_changed"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelDescNewOtrkeys">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Dies ist der Standard-Ordner von OTR-Verwaltung. In diesem Ordner werden auch die avi-Dateien, Cutlisten etc. abgelegt.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label26">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">M&#xFC;ll:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFileChooserButton" id="folderTrash">
-                        <property name="visible">True</property>
-                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                        <property name="title" translatable="yes">Ordner w&#xE4;hlen</property>
-                        <signal handler="on_folderTrash_current_folder_changed" name="current_folder_changed"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelDescTrash">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">In den M&#xFC;ll werden dekodierte und ungeschittene Dateien verschoben. Dieser Ordner kann auch der M&#xFC;ll-Ordner des Systems sein.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelArchiveFolder">
-                        <property name="visible">True</property>
-                        <property name="xalign">0.14000000059604645</property>
-                        <property name="label" translatable="yes">Archiv:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                        <property name="y_options">GTK_EXPAND</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
                       </packing>
                     </child>
                     <child>
@@ -181,18 +93,106 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="checkArchive">
+                      <object class="GtkLabel" id="labelArchiveFolder">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Archiv verwenden</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_preferences_checkArchive_toggled" name="toggled"/>
+                        <property name="xalign">0.14000000059604645</property>
+                        <property name="label" translatable="yes">Archiv:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelDescTrash">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">In den M&#xFC;ll werden dekodierte und ungeschittene Dateien verschoben. Dieser Ordner kann auch der M&#xFC;ll-Ordner des Systems sein.</property>
+                        <property name="wrap">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="folderTrash">
+                        <property name="visible">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                        <property name="title" translatable="yes">Ordner w&#xE4;hlen</property>
+                        <signal handler="on_folderTrash_current_folder_changed" name="current_folder_changed"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label26">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">M&#xFC;ll:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelDescNewOtrkeys">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Dies ist der Standard-Ordner von OTR-Verwaltung. In diesem Ordner werden auch die avi-Dateien, Cutlisten etc. abgelegt.</property>
+                        <property name="wrap">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="folderNewOtrkeys">
+                        <property name="visible">True</property>
+                        <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                        <signal handler="on_folderNewOtrkeys_current_folder_changed" name="current_folder_changed"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label9">
+                        <property name="width_request">100</property>
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Neue otrkey-Dateien:</property>
+                        <property name="ellipsize">PANGO_ELLIPSIZE_START</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelHeadline">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Die Ordner m&#xFC;ssen auf demselben Dateisystem liegen!&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
                       </packing>
                     </child>
                   </object>
@@ -223,39 +223,65 @@
                     <property name="n_columns">2</property>
                     <property name="row_spacing">11</property>
                     <child>
-                      <object class="GtkCheckButton" id="checkCorrect">
+                      <object class="GtkRadioButton" id="radioSave">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Dateien auf Korrektheit pr&#xFC;fen (Nicht empfohlen)</property>
+                        <property name="label" translatable="yes">Benutzernamen und Passwort speichern (Verschl&#xFC;sselt)</property>
+                        <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                        <signal handler="on_checkCorrect_toggled" name="toggled"/>
+                        <property name="group">radioDontSave</property>
+                        <signal handler="on_radioSave_toggled" name="toggled"/>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
-                        <property name="y_options">GTK_EXPAND</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label6">
+                      <object class="GtkEntry" id="entryPassword">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Passwort:</property>
+                        <property name="can_focus">True</property>
+                        <signal handler="on_entryPassword_changed" name="changed"/>
                       </object>
                       <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
                         <property name="top_attach">4</property>
                         <property name="bottom_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="entryEMail">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <signal handler="on_entryEMail_changed" name="changed"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label4">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Pfad zum Dekoder:</property>
+                      </object>
+                      <packing>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label5">
+                      <object class="GtkFileChooserButton" id="filechooserDecoder">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">E-Mail:</property>
+                        <signal handler="on_filechooserDecoder_file_set" name="file_set"/>
                       </object>
                       <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
@@ -275,66 +301,40 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFileChooserButton" id="filechooserDecoder">
+                      <object class="GtkLabel" id="label5">
                         <property name="visible">True</property>
-                        <signal handler="on_filechooserDecoder_file_set" name="file_set"/>
+                        <property name="label" translatable="yes">E-Mail:</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label4">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Pfad zum Dekoder:</property>
-                      </object>
-                      <packing>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="entryEMail">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <signal handler="on_entryEMail_changed" name="changed"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
+                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="entryPassword">
+                      <object class="GtkLabel" id="label6">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <signal handler="on_entryPassword_changed" name="changed"/>
+                        <property name="label" translatable="yes">Passwort:</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                         <property name="top_attach">4</property>
                         <property name="bottom_attach">5</property>
+                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="radioSave">
+                      <object class="GtkCheckButton" id="checkCorrect">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Benutzernamen und Passwort speichern (Verschl&#xFC;sselt)</property>
-                        <property name="active">True</property>
+                        <property name="label" translatable="yes">Dateien auf Korrektheit pr&#xFC;fen (Nicht empfohlen)</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radioDontSave</property>
-                        <signal handler="on_radioSave_toggled" name="toggled"/>
+                        <signal handler="on_checkCorrect_toggled" name="toggled"/>
                       </object>
                       <packing>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                   </object>
@@ -375,17 +375,170 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="labelDescAvidemux">
+                      <object class="GtkLabel" id="label16">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Um die Nachfragen von Avidemux zu verhindern und das Schneiden automatisch ablaufen zu lassen, m&#xFC;ssen in den Einstellungen von Avidemux unter der Registerkarte "Automation" die Einstellungen "VBR-Zeitkarte automatisch erstellen" und "Index automatisch wieder erstellen" aktiviert werden.</property>
+                        <property name="label" translatable="yes">Avidemux:</property>
+                      </object>
+                      <packing>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxEntry" id="comboboxAvidemux">
+                        <property name="visible">True</property>
+                        <child internal-child="entry">
+                          <object class="GtkEntry" id="comboboxentry-avidemux">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <signal handler="on_comboboxentry_avidemux_changed" name="changed"/>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radioManually">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Manuell schneiden</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radioAsk</property>
+                        <signal handler="on_radioManually_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="top_attach">8</property>
+                        <property name="bottom_attach">9</property>
+                        <property name="x_options">GTK_FILL</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radioChooseCutlist">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Cutlist selbst w&#xE4;hlen</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radioAsk</property>
+                        <signal handler="on_radioChooseCutlist_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="top_attach">7</property>
+                        <property name="bottom_attach">8</property>
+                        <property name="x_options">GTK_FILL</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radioBestCutlist">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Programm w&#xE4;hlt beste Cutlist</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radioAsk</property>
+                        <signal handler="on_radioBestCutlist_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                        <property name="x_options">GTK_FILL</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radioAsk">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Jedesmal nachfragen</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal handler="on_radioAsk_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelManually">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Avidemux wird ge&#xF6;ffnet, damit der Benutzer die Datei selber schneiden kann.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
+                        <property name="top_attach">8</property>
+                        <property name="bottom_attach">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelChooseCutlist">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Die Cutlist wird vom Benutzer bei jeder Datei selbst ausgew&#xE4;hlt.</property>
+                        <property name="wrap">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">7</property>
+                        <property name="bottom_attach">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelBestCutlist">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Das Programm w&#xE4;hlt die beste Cutlist auf Basis der Benutzerbewertungen und der Wertung des Autors aus.</property>
+                        <property name="wrap">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">6</property>
+                        <property name="bottom_attach">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label18">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Beim Schneiden:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHSeparator" id="hseparator8">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                        <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label17">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Cutlist-Server:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
@@ -408,170 +561,17 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label17">
+                      <object class="GtkLabel" id="labelDescAvidemux">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Cutlist-Server:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="hseparator8">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label18">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Beim Schneiden:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelBestCutlist">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Das Programm w&#xE4;hlt die beste Cutlist auf Basis der Benutzerbewertungen und der Wertung des Autors aus.</property>
+                        <property name="label" translatable="yes">Um die Nachfragen von Avidemux zu verhindern und das Schneiden automatisch ablaufen zu lassen, m&#xFC;ssen in den Einstellungen von Avidemux unter der Registerkarte "Automation" die Einstellungen "VBR-Zeitkarte automatisch erstellen" und "Index automatisch wieder erstellen" aktiviert werden.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelChooseCutlist">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Die Cutlist wird vom Benutzer bei jeder Datei selbst ausgew&#xE4;hlt.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">7</property>
-                        <property name="bottom_attach">8</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelManually">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Avidemux wird ge&#xF6;ffnet, damit der Benutzer die Datei selber schneiden kann.</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">8</property>
-                        <property name="bottom_attach">9</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioAsk">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Jedesmal nachfragen</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_radioAsk_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioBestCutlist">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Programm w&#xE4;hlt beste Cutlist</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioAsk</property>
-                        <signal handler="on_radioBestCutlist_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                        <property name="x_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioChooseCutlist">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Cutlist selbst w&#xE4;hlen</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioAsk</property>
-                        <signal handler="on_radioChooseCutlist_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="top_attach">7</property>
-                        <property name="bottom_attach">8</property>
-                        <property name="x_options">GTK_FILL</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radioManually">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Manuell schneiden</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radioAsk</property>
-                        <signal handler="on_radioManually_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="top_attach">8</property>
-                        <property name="bottom_attach">9</property>
-                        <property name="x_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxEntry" id="comboboxAvidemux">
-                        <property name="visible">True</property>
-                        <child internal-child="entry">
-                          <object class="GtkEntry" id="comboboxentry-avidemux">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <signal handler="on_comboboxentry_avidemux_changed" name="changed"/>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label16">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Avidemux:</property>
-                      </object>
-                      <packing>
-                        <property name="y_options">GTK_EXPAND</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                   </object>
@@ -741,23 +741,16 @@
                         <property name="column_spacing">8</property>
                         <property name="row_spacing">8</property>
                         <child>
-                          <object class="GtkLabel" id="label31">
+                          <object class="GtkLabel" id="label_schema">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">Schema:</property>
+                            <property name="label" translatable="yes">example</property>
+                            <property name="use_markup">True</property>
+                            <property name="wrap">True</property>
                           </object>
                           <packing>
-                            <property name="x_options">GTK_FILL</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label33">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="yalign">0</property>
-                            <property name="label" translatable="yes">Beispiel:</property>
-                          </object>
-                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
                             <property name="top_attach">1</property>
                             <property name="bottom_attach">2</property>
                             <property name="x_options">GTK_FILL</property>
@@ -777,18 +770,25 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label_schema">
+                          <object class="GtkLabel" id="label33">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">example</property>
-                            <property name="use_markup">True</property>
-                            <property name="wrap">True</property>
+                            <property name="yalign">0</property>
+                            <property name="label" translatable="yes">Beispiel:</property>
                           </object>
                           <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
                             <property name="top_attach">1</property>
                             <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label31">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Schema:</property>
+                          </object>
+                          <packing>
                             <property name="x_options">GTK_FILL</property>
                           </packing>
                         </child>

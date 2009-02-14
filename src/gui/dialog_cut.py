@@ -87,6 +87,9 @@ class DialogCut(BaseWindow):
         for col in tvcolumns:
             col.set_resizable(True)        
             treeview.append_column(col)
+            
+        selection = treeview.get_selection()
+        selection.connect('changed', self.on_selection_changed)
     
     ###
     ### Convenience methods
@@ -98,7 +101,12 @@ class DialogCut(BaseWindow):
     ###
     ### Signal handlers
     ###
-        
+    
+    def on_selection_changed(self, selection, data=None):     
+        model, paths = selection.get_selected_rows()
+        if paths:
+            self.get_widget('radio_choose_cutlist').set_active(True)
+       
     def on_buttonCutOK_clicked(self, widget, data=None):
         if self.get_widget('radio_best_cutlist').get_active() == True:
             self.get_window().response(Cut_action.BEST_CUTLIST)

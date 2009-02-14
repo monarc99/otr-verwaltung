@@ -103,7 +103,7 @@ class DialogConclusion(BaseWindow):
     ###
     ### Signals handlers
     ###
-        
+             
     def on_buttonConclusionPlay_clicked(self, widget, data=None):    
         if self.action==Action.DECODE or self.file_conclusions[self.conclusion_iter].cut.status != Status.OK:
             filename = self.file_conclusions[self.conclusion_iter].uncut_avi
@@ -156,13 +156,12 @@ class DialogConclusion(BaseWindow):
         file_conclusion = self.file_conclusions[self.conclusion_iter]
         
         # filename
-        if self.action == Action.CUT:
-            filename = file_conclusion.uncut_avi
+        if self.action == Action.DECODE:
+            filename = basename(file_conclusion.otrkey)
         else:
-            # remove ugly .otrkey
-            filename = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]
+            filename = "%s\n%s" % (basename(file_conclusion.uncut_avi), basename(file_conclusion.cut_avi))
                           
-        self.get_widget('labelConclusionFilename').set_text(basename(filename))  
+        self.get_widget('labelConclusionFilename').set_markup("<b>%s</b>" % filename)
         
         # decode status
         if self.action != Action.CUT:
@@ -201,7 +200,3 @@ class DialogConclusion(BaseWindow):
                         self.get_widget('checkbuttonRate').set_active(False)
                                        
             self.get_widget('labelConclusionCutStatus').set_text(text) 
-
-
-    def on_buttonConclusionClose_clicked(self, widget, data=None):
-        self.hide()

@@ -18,72 +18,42 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+
 import sys
-from os import listdir, walk, mkdir
-from os.path import join, isdir, basename, dirname, exists
+from os import listdir, walk
+from os.path import join, isdir, exists
 import re
-import base64
 import time
-import pango
-import popen2
-import subprocess
-import gobject
-import urllib
-import xml.dom.minidom
-import ConfigParser
-import webbrowser
-import threading
 
 try:
-    from gtk import gdk, events_pending, main_iteration, RESPONSE_OK
+    from gtk import gdk
     import gobject
     gdk.threads_init()    
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
 
-if exists(join(sys.path[0], 'otrpath.py')):
+from log import Log
+
+if exists(join(sys.path[0], 'otrpath.py')):    
     f = open(join(sys.path[0], 'conf'), 'a')
     f.close()
+    filename = join(sys.path[0], 'log')
+    log = Log(True, filename)
+    log.l("Log file created at", filename)
 else:
     sys.path.insert(0, "/usr/share/otr-verwaltung")
- 
+    filename = otrpath.get_config_path('log')
+    log = Log(False, filename)
+    log.l("Log file created at", filename)
 
 # intern
 import otrpath
 from gui.gui import Gui
+from actions import actions
 from configparser import Config
 import fileoperations
-from filesconclusion import FileConclusion
-from constants import Section, Action, Cut_action, Save_Email_Password, Status
-
-class GeneratorTask(object):
-   def __init__(self, generator, loop_callback, complete_callback=None):
-       self.generator = generator
-       self.loop_callback = loop_callback
-       self.complete_callback = complete_callback
-
-   def _start(self, *args, **kwargs):
-       self._stopped = False
-       for ret in self.generator(*args, **kwargs):
-           if self._stopped:
-               thread.exit()
-           gobject.idle_add(self._loop, ret)
-       if self.complete_callback is not None:
-           gobject.idle_add(self.complete_callback)
-
-   def _loop(self, ret):
-       if ret is None:
-           ret = ()
-       if not isinstance(ret, tuple):
-           ret = (ret,)
-       self.loop_callback(*ret)
-
-   def start(self, *args, **kwargs):
-       threading.Thread(target=self._start, args=args, kwargs=kwargs).start()
-
-   def stop(self):
-       self._stopped = True
+from constants import Section, Action
 
 class App:
     
@@ -92,7 +62,7 @@ class App:
         if exists(otrpath.get_path('conf')):
             self.config = Config(otrpath.get_path('conf'))
         else:
-            self.config = Config(otrpath.get_config_path())
+            self.config = Config(otrpath.get_config_path('conf'))
 
         self.__search_text = ""
             
@@ -119,7 +89,7 @@ class App:
             except:
                 continue
         
-        self.broadcasts_badge()
+        self.__gui.main_window.broadcasts_badge()
                                 
     ### 
     ### Show sections
@@ -142,19 +112,20 @@ class App:
         text = ""
         
         if section==Section.PLANNING:
-            text = self.section_planning()                
+            text = self.section_planning()
+            self.__gui.main_window.show_planning(True)
         else:
-            self.__gui.main_window.toggle_columns(False)        
+            self.__gui.main_window.show_planning(False)
         
-        if section==Section.OTRKEY:            
-            text, files = self.section_otrkey()   
+        if section==Section.OTRKEY:
+            text, files = self.section_otrkey()
         
         elif section==Section.AVI_UNCUT:
             text, files = self.section_avi_uncut()   
-    
+
         elif section==Section.AVI_CUT:
             text, files = self.section_avi_cut()   
-            
+
         elif section==Section.TRASH:
             text, files = self.section_trash()   
 
@@ -172,7 +143,7 @@ class App:
             
             # put filenames into treestore
             for f in files:
-                # TODO: don't show if in use
+                # TODO: don't show files if in use
                 self.append_row_treeview_files(None, f)
 
         # set message text
@@ -182,12 +153,10 @@ class App:
     # helper for different sections
     def section_planning(self):
         text = "Diese Aufnahmen wurden geplant." 
-
-        # show date/time and station columns
-        self.__gui.main_window.toggle_columns(True)
-             
-        for i in range(len(self.planned_broadcasts)):
-            self.__gui.main_window.append_row_planning(i)
+       
+        for count, broadcast in enumerate(self.planned_broadcasts):
+            if self.search(broadcast[0]):
+                self.__gui.main_window.append_row_planning(count)
             
         return text
              
@@ -238,15 +207,15 @@ class App:
         text = "Diese Dateien wurden ins Archiv verschoben."
 
         path = self.config.get('folders', 'archive')
-               
-        self.tree(None, path)
+        
+        gobject.idle_add(self.tree, None, path)        
         
         return text            
                  
     # recursive function for archive to add folders and files with a tree structure
-    def tree(self, parent, path=None):              
+    def tree(self, parent=None, path=None):              
         if parent != None:            
-            dir = self.__gui.main_window.get_filename(parent)
+            dir = self.__gui.main_window.get_widget('treeview_files').get_model().get_value(parent, 0)
         else:  # base path (archive directory)
             dir = path
 
@@ -267,491 +236,6 @@ class App:
     ###
     ### Helpers
     ###
-     
-    def append_row_treeview_files(self, parent, filename):        
-        iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
-        return iter
-     
-    def broadcasts_badge(self):
-        count = 0
-        now = time.time()
-        for broadcast in self.planned_broadcasts:
-            stamp = broadcast[1]
-            if stamp < now:
-                count += 1
-    
-        if count == 0:
-            self.__gui.main_window.get_widget('eventboxPlanningCurrentCount').hide()
-        else:
-            self.__gui.main_window.get_widget('eventboxPlanningCurrentCount').show()
-            self.__gui.main_window.get_widget('labelPlanningCurrentCount').set_text(str(count))
-     
-    ### 
-    ### Search
-    ### 
-                      
-    def start_search(self, search):
-        self.__search_text = search.lower()
-        
-        # create dict of counts
-        counts = {}
-
-        for method, section in [(self.section_otrkey, Section.OTRKEY),
-                                (self.section_avi_uncut, Section.AVI_UNCUT),
-                                (self.section_avi_cut, Section.AVI_CUT),
-                                (self.section_trash, Section.TRASH)]:
-            files = []
-            text, files = method()   
-            count = len(files)
-            if count > 0:
-                counts[section] = "(%s)" % count
-            else:
-                counts[section] = ""
-         
-        # archive
-        files = []
-        for root, dirs, wfiles in walk(self.config.get('folders', 'archive')):
-            for f in wfiles:
-                if f.endswith('.avi') and self.search(f):
-                    files += [join(root, f)]
-
-        count = len(files)
-        if count > 0:
-            counts[Section.ARCHIVE] = "(%s)" % count
-        else:
-            counts[Section.ARCHIVE] = ""
-        
-        self.show_section(self.section)                   
-        return counts
-    
-    def stop_search(self):
-        self.__search_text = ""
-        self.show_section(self.section)
-        
-    def search(self, f):
-        if self.__search_text == "":
-            return True
-        else:    
-            if self.__search_text in f.lower():
-                return True
-            else:
-                return False
-        
-    ###
-    ### Actions
-    ###        
-    
-    def perform_action(self, action, filenames=None, broadcasts=None):
-        """ Performs an action (toolbar, context menu, etc.) """
-        
-        if len(filenames) == 0 and not action in [Action.NEW_FOLDER, Action.PLAN_ADD]:        
-            self.__gui.message_info_box("Es sind keine Dateien markiert!")
-            return
-               
-        # different actions:
-        if action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:
-
-            decode, cut = False, False            
-            
-            # prepare tasks
-            self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(0.0)
-
-            if action == Action.DECODE:
-                self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren')
-                decode = True
-            elif action == Action.CUT:
-                self.__gui.main_window.get_widget('label_tasks').set_text('Schneiden')
-                cut = True
-            else:
-                self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren/Schneiden')
-                decode, cut = True, True
-                                        
-            # create file_conclusions array        
-            file_conclusions = []
-                
-            if decode:
-                for otrkey in filenames:
-                    file_conclusions.append(FileConclusion(action, otrkey=otrkey))
-                
-            if cut and not decode: # dont add twice
-                for uncut_avi in filenames:
-                    file_conclusions.append(FileConclusion(action, uncut_avi=uncut_avi))
-                            
-            # decode files                    
-            if decode:
-                if self.action_decode(file_conclusions) == False: 
-                    return
-                
-            # cut files
-            if cut:
-                if self.action_cut(file_conclusions, action) == False: 
-                    return
-
-            self.block_gui(False)
-
-            # no more need for tasks view
-            self.__gui.main_window.get_widget('eventbox_tasks').hide()
-                
-            # show conclusion
-            dialog = self.__gui.dialog_conclusion.build(file_conclusions, action)
-            dialog.run()         
-            
-            file_conclusions = self.__gui.dialog_conclusion.file_conclusions
-            
-            if cut:
-                count = 0
-                for file_conclusion in file_conclusions:                    
-                    if file_conclusion.cut.rating > -1:
-                        url = self.config.get('cut', 'server') + "rate.php?version=0.9.8.0&rate=%s&rating=%s" % (file_conclusion.cut.cutlist, file_conclusion.cut.rating)
-
-                        try:
-                            urllib.urlopen(url)                                 
-                            count += 1
-                        except IOError, e:
-                            print e
-                
-                if count == 1:
-                    self.__gui.message_info_box("Es wurde 1 Cutlist bewertet!")
-                elif count > 1:
-                    self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
-
-            # update section         
-            self.show_section(self.section)        
-            
-        elif action==Action.DELETE:
-            self.action_delete(filenames)
-            self.show_section(self.section)        
-            
-        elif action==Action.ARCHIVE:
-            self.action_archive(filenames)
-            self.show_section(self.section)        
-                                
-        elif action==Action.PLAY:                    
-            self.action_play(filenames[0])        
-            
-        elif action==Action.RESTORE:
-            self.action_restore(filenames)
-            self.show_section(self.section)
-        
-        elif action==Action.RENAME:
-            self.action_rename(filenames)
-            self.show_section(self.section)
-        
-        elif action==Action.NEW_FOLDER:
-            if len(filenames) == 0:
-                self.action_new_folder(self.config.get('folders', 'archive'))
-            else:
-                self.action_new_folder(filenames[0])
-            self.show_section(self.section)
-        
-        elif action==Action.CUT_PLAY:
-            self.action_cut_play(filenames[0])
-            
-        elif action==Action.REAL_DELETE:
-            self.action_real_delete(filenames)
-            self.show_section(self.section)
-      
-        elif action==Action.PLAN_ADD:
-            self.action_plan_add()
-            self.show_section(self.section)
-            
-        elif action==Action.PLAN_REMOVE:
-            self.action_plan_remove(broadcasts)
-            self.show_section(self.section)
-            
-        elif action==Action.PLAN_EDIT:
-            self.action_plan_edit(broadcasts[0])
-            self.show_section(self.section)
-            
-        elif action==Action.PLAN_SEARCH:
-            self.action_plan_search(broadcasts)
-      
-     
-    def block_gui(self, state):
-        for button in ["decode", "cut", "decodeandcut"]:
-            self.__gui.main_window.toolbar_buttons[button].set_sensitive(not state)
-        
-    # helpers for actions                   
-    def action_decode(self, file_conclusions):          
-        
-        # no decoder        
-        if not "decode" in self.config.get('decode', 'path'): # no decoder specified
-            # dialog box: no decoder
-            self.__gui.message_error_box("Es ist kein korrekter Dekoder angegeben!")
-            return False
-        
-        # retrieve email and password
-        # user did not save email and password
-        if self.config.get('decode', 'save_email_password') == Save_Email_Password.DONT_SAVE:
-            # let the user type in his data through a dialog
-            response = self.__gui.dialog_email_password.run()
-            self.__gui.dialog_email_password.hide() 
-            
-            if response==RESPONSE_OK:
-                email = self.__gui.dialog_email_password.get_widget('entryDialogEMail').get_text()
-                password = self.__gui.dialog_email_password.get_widget('entryDialogPassword').get_text()                               
-            else: # user pressed cancel
-                return False
-                         
-        else: # user typed email and password in         
-            email = self.config.get('decode', 'email')
-            password = base64.b64decode(self.config.get('decode', 'password')) 
-        
-        # now this method may not return "False"
-        self.__gui.main_window.get_widget('eventbox_tasks').show()
-        self.block_gui(True)
-                   
-        # decode each file
-        for count, file_conclusion in enumerate(file_conclusions):
-            # update progress
-            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
-                   
-            command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
-            
-            if self.config.get('decode', 'correct') == 0:
-                command += " -q"
-                                   
-            (pout, pin, perr) = popen2.popen3(command)
-            while True:
-                l = ""
-                while True:
-                    c = pout.read(1)
-                    if c == "\r" or c == "\n":
-                        break
-                    l += c
-            
-                if not l:
-                    break
-            
-                try:      
-                    progress = int(l[10:13])                    
-                    # update progress
-                    self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
-                    
-                    while events_pending():
-                        main_iteration(False)
-                except ValueError:                
-                    pass
-            
-            # errors?
-            errors = perr.readlines()
-            error_message = ""
-            for error in errors:
-                error_message += error.strip()
-                            
-            # close process
-            pout.close()
-            perr.close()
-            pin.close()
-                                                            
-            if len(errors) == 0: # dekodieren erfolgreich                
-                file_conclusion.decode.status = Status.OK
-                file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]  
-                                  
-                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
-                # move to trash
-                target = self.config.get('folders', 'trash')
-                fileoperations.move_file(file_conclusion.otrkey, target)
-            else:            
-                file_conclusion.decode.status = Status.ERROR
-                file_conclusion.decode.message = error_message
-                
-        return True
-
-    def download_cutlists(self, filename, error_cb=None, cutlist_found_cb=None):
-        
-        size = fileoperations.get_size(filename)
-        url = self.config.get('cut', 'server') + "getxml.php?version=0.9.8.0&ofsb=" + str(size)
-
-        try:
-            handle = urllib.urlopen(url)     
-        except IOError:
-            if error_cb: error_cb("Verbindungsprobleme")
-            return []
-                       
-        try:
-            dom_cutlists = xml.dom.minidom.parse(handle)
-            handle.close()
-            dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
-        except:
-            if error_cb: error_cb("Keine Cutlists gefunden")
-            return []
-                        
-        cutlists = []           
-            
-        for cutlist in dom_cutlists:
-                                                                            
-            cutlist_data = [
-                self.read_value(cutlist, "id"),
-                self.read_value(cutlist, "author"),
-                self.read_value(cutlist, "ratingbyauthor"),
-                self.read_value(cutlist, "rating"),
-                self.read_value(cutlist, "ratingcount"),
-                self.read_value(cutlist, "cuts"),
-                self.read_value(cutlist, "actualcontent"),
-                self.read_value(cutlist, "usercomment"),
-                self.read_value(cutlist, "filename"),
-                self.read_value(cutlist, "withframes"),
-                self.read_value(cutlist, "withtime"),
-                self.read_value(cutlist, "duration")]
-                            
-            if cutlist_found_cb: cutlist_found_cb(cutlist_data)
-            cutlists.append(cutlist_data)
-
-        return cutlists            
-               
-    def action_cut(self, file_conclusions, action):                      
-        if self.config.get('cut', 'avidemux') == "":
-            self.__gui.message_error_box("Es ist kein Avidemux angegeben!")
-            return False        
-
-        # now this method may not return "False"
-        self.__gui.main_window.get_widget('eventbox_tasks').show()
-        self.block_gui(True)  
-        
-        for count, file_conclusion in enumerate(file_conclusions):
-            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
-            self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(0.0)
-    
-            # file correctly decoded?            
-            if action == Action.DECODEANDCUT:
-                if file_conclusion.decode.status == Status.ERROR:
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Datei wurde nicht dekodiert."
-                    continue
-
-            # how should the file be cut?
-            cut_action = None
-            cutlists = []
-            
-            if self.config.get('cut', 'cut_action') == Cut_action.MANUALLY:
-                cut_action = Cut_action.MANUALLY
-
-            elif self.config.get('cut', 'cut_action') == Cut_action.BEST_CUTLIST:
-                cut_action = Cut_action.BEST_CUTLIST
-
-                def error_cb(error):
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = error
-                    
-                cutlists = self.download_cutlists(file_conclusion.uncut_avi, error_cb)
-                
-                if len(cutlists) == 0:
-                    continue
-                 
-            else:            
-                # show dialog
-                self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'new_otrkeys'))
-
-                if self.config.get('cut', 'cut_action') == Cut_action.ASK:
-                    self.__gui.dialog_cut.get_widget('radio_best_cutlist').set_active(True)
-                else:
-                    self.__gui.dialog_cut.get_widget('radio_choose_cutlist').set_active(True)
-
-                # start looking for cutlists
-                self.__gui.dialog_cut.get_widget('treeview_cutlists').get_model().clear()                
-                self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
-                              
-                self.cutlists_error = False
-                
-                def error_cb(error):                         
-                    self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>%s</b>" % error)
-                    self.cutlists_error = True
-                     
-                def cutlist_found_cb(cutlist):
-                    self.__gui.dialog_cut.add_cutlist(cutlist)
-                    cutlists.append(cutlist)
-               
-                def completed():
-                    if not self.cutlists_error:
-                        self.__gui.dialog_cut.get_widget('label_status').set_markup("")
-               
-                GeneratorTask(self.download_cutlists, cutlist_found_cb, completed).start(file_conclusion.uncut_avi, error_cb)
-                
-                response = self.__gui.dialog_cut.run()                
-                self.__gui.dialog_cut.hide()
-                
-                if response < 0:
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Abgebrochen"
-                    continue
-                else:
-                    cut_action = response
-                    
-            # save cut_action
-            file_conclusion.cut.cut_action = cut_action
-
-            if cut_action == Cut_action.BEST_CUTLIST:
-                if len(cutlists) == 0:
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Keine Cutlist gefunden"
-                    continue
-            
-                best_cutlist = self.get_best_cutlist(cutlists)                 
-                
-                cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist)
-
-                if cut_avi == None:
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error    
-                else:
-                    file_conclusion.cut.status = Status.OK
-                    file_conclusion.cut_avi = cut_avi
-                    file_conclusion.cut.cutlist = best_cutlist                            
-                
-            elif cut_action == Cut_action.CHOOSE_CUTLIST:
-                cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist)
-                
-                if cut_avi == None:
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error    
-                else:
-                    file_conclusion.cut.status = Status.OK
-                    file_conclusion.cut_avi = cut_avi
-                    file_conclusion.cut.cutlist = chosen_cutlist         
-
-            elif cut_action == Cut_action.MANUALLY: # MANUALLY
-                command = "%s --load %s >>/dev/null" % (self.config.get('cut', 'avidemux'), file_conclusion.uncut_avi)
-                avidemux = subprocess.Popen(command, shell=True)    
-                while avidemux.poll() == None:
-                    # wait
-                    pass
-                    
-                file_conclusion.cut.status = Status.OK
-       
-                    
-            if file_conclusion.cut.status == Status.OK:            
-                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?, vor allem bei manuell!!!!!            
-                # action after cut
-                # move to trash
-                target = self.config.get('folders', 'trash')
-                fileoperations.move_file(file_conclusion.uncut_avi, target)
-        
-        # after iterating over all items:
-        return True
-    
-    def get_best_cutlist(self, cutlists):
-        dic_cutlists = {}
-        
-        for cutlist in cutlists:                          
-            ratingbyauthor = cutlist[2]
-            userrating = cutlist[3]
-            ratingcount = cutlist[4]                            
-
-            if ratingbyauthor == "":
-                rating = userrating
-            elif userrating == "":
-                rating = ratingbyauthor
-            else:
-                rating = float(ratingbyauthor) * 0.3 + float(userrating) * 0.7
-
-            dic_cutlists[cutlist[0]] = rating
-        
-        sort_cutlists = dic_cutlists.items()
-        sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
-                        
-        return sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
     
     def rename_by_schema(self, filename, schema=""):   
         if schema == "":
@@ -811,314 +295,114 @@ class App:
             return schema
         else:         
             return filename
-   
-        
-    def read_value(self, cutlist_element, node_name):
-        value = None
-        try:
-            elements = cutlist_element.getElementsByTagName(node_name)
-            for node in elements[0].childNodes:
-                return node.nodeValue
-        except:
-            return ""
-        
-        if value == None:
-            return ""
-             
-    def cut_file_by_cutlist(self, filename, cutlist):
-        # download cutlist
-        url = self.config.get('cut', 'server') + "getfile.php?id=" + str(cutlist)
-        
-        # save cutlist to folder
-        local_filename = join(self.config.get('folders', 'new_otrkeys'), basename(filename) + ".cutlist")
-        
-        try:
-            local_filename, headers = urllib.urlretrieve(url, local_filename)
-        except IOError:
-            return None, "Verbindungsprobleme"
-        
-        config_parser = ConfigParser.ConfigParser()        
-        config_parser.read(local_filename)
-       
-        noofcuts = 0        
-        cuts = {}
-        try:
-            noofcuts = int(config_parser.get("General", "NoOfCuts"))
-           
-            for count in range(noofcuts):
-                cuts[count] = (
-                    float(config_parser.get("Cut"+str(count), "Start")), 
-                    float(config_parser.get("Cut"+str(count), "Duration")))            
-            
-        except ConfigParser.NoSectionError, (ErrorNumber, ErrorMessage):
-            return None, "Fehler in Cutlist: " + ErrorMessage
-        except ConfigParser.NoOptionError, (ErrorNumber, ErrorMessage):
-            return None, "Fehler in Cutlist: " + ErrorMessage
-        
-        # make file for avidemux scripting engine
-        f = open("tmp.js", "w")
-        
-        f.writelines([
-            '//AD\n',
-            'var app = new Avidemux();\n',
-            '\n'
-            '//** Video **\n',            
-            'app.load("%s");\n' % filename,            
-            '\n',            
-            'app.clearSegments();\n'
-            ])
-            
-        for count, (start, duration) in cuts.iteritems():
-            frame_start = start * 25   
-            frame_duration = duration * 25
-            f.write("app.addSegment(0, %s, %s);\n" %(str(int(frame_start)), str(int(frame_duration))))
-
-        # generate filename for a cut avi
-        if self.config.get('rename', 'rename_cut'):
-            directory = dirname(filename)
-            name = basename(filename)        
-            new_name = self.rename_by_schema(name)
-                    
-            cut_avi = join(directory, new_name)        
-        else:
-            cut_avi = filename[0:len(filename)-4] # remove .avi
-            cut_avi += "-cut.avi"
-           
-                   
-        f.writelines([
-            '//** Postproc **\n',
-            'app.video.setPostProc(3,3,0);\n',
-            'app.video.setFps1000(25000);\n',
-            '\n',
-            '//** Video Codec conf **\n',
-            'app.video.codec("Copy","CQ=4","0");\n',
-            '\n',
-            '//** Audio **\n',
-            'app.audio.reset();\n',
-            'app.audio.codec("copy",128,0,"");\n',
-            'app.audio.normalizeMode=0;\n',
-            'app.audio.normalizeValue=0;\n',
-            'app.audio.delay=0;\n',
-            'app.audio.mixer("NONE");\n',
-            'app.audio.scanVBR();\n',
-            'app.setContainer("AVI");\n',
-            'setSuccess(app.save("%s"));\n' % cut_avi
-            ])
-
-        f.close()
-        
-        # start avidemux:   
-        command = "%s --force-smart --run tmp.js --quit >>/dev/null" % self.config.get('cut', 'avidemux') # --nogui
-        avidemux = subprocess.Popen(command, shell=True)
-        while avidemux.poll()==None:
-            while events_pending():
-                main_iteration(False)  
-        
-        fileoperations.remove('tmp.js')
-        
-        # successful
-        return cut_avi, None
-                        
-    def action_play(self, filename):
-        player = self.config.get('play', 'player')
-
-        if not self.__cut_video.match(filename):
-            self.__gui.message_error_box("Die ausgewählte Datei ist kein Video!")
-            return 
-            
-        if player=='':
-            self.__gui.message_error_box("Es ist kein Player angegeben!")
-            return
-        
-        p = subprocess.Popen([player, filename])
+     
+    def append_row_treeview_files(self, parent, filename):        
+        iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
+        return iter
+     
     
-    def action_cut_play(self, filename):
-        mplayer = self.config.get('play', 'mplayer')
-        
-        if not self.__uncut_video.match(filename):
-            self.__gui.message_error_box("Die ausgewählte Datei ist kein ungeschnittenes Video!")
-            return 
-            
-        if mplayer == '':
-            self.__gui.message_error_box("Der MPlayer ist nicht angegeben!")
-            return
-        
-        # get best cutlist       
-        def error_cb(error):
-            self.__gui.message_error_box(error)
-        
-        cutlists = self.download_cutlists(filename, error_cb) 
-        
-        if len(cutlists) == 0:
-            return
-            
-        best_cutlist = self.get_best_cutlist(cutlists)
-                
-        # download cutlist and save it
-        url = self.config.get('cut', 'server') + "getfile.php?id=" + str(best_cutlist)        
-        local_filename = join(self.config.get('folders', 'new_otrkeys'), basename(filename) + ".cutlist")
-        
-        try:
-            local_filename, headers = urllib.urlretrieve(url, local_filename)
-        except IOError:
-            self.__gui.message_error_box("Verbindungsprobleme")
-            return
-        
-        config_parser = ConfigParser.ConfigParser()        
-        config_parser.read(local_filename)
-       
-        print local_filename
-       
-        noofcuts = 0        
-        cuts = []
-        try:
-            noofcuts = int(config_parser.get("General", "NoOfCuts"))
-           
-            for count in range(noofcuts):
-                cuts.append((float(config_parser.get("Cut"+str(count), "Start")), float(config_parser.get("Cut"+str(count), "Duration"))))
-            
-        except ConfigParser.NoSectionError, (ErrorNumber, ErrorMessage):
-            self.__gui.message_error_box("Fehler in Cutlist: " + ErrorMessage)
-            return
-        except ConfigParser.NoOptionError, (ErrorNumber, ErrorMessage):
-            self.__gui.message_error_box("Fehler in Cutlist: " + ErrorMessage)
-            return
-        
-        # make edl
-        # http://www.mplayerhq.hu/DOCS/HTML/en/edl.html
-        # [Begin Second] [End Second] [0=Skip/1=Mute]
-        f = open(".tmp.edl", "w")
-        
-        f.write("0 %s 0\n" % (cuts[0][0] - 1))
+    ### 
+    ### Search
+    ### 
+                      
+    def start_search(self, search):
+        self.__search_text = search.lower()
 
-        for count, (start, duration) in enumerate(cuts):
-            end = start + duration
-            if count+1 == len(cuts):
-                f.write("%s 50000 0\n" % (end))
+        items = []        
+        # create dict of counts
+        counts = {}
+
+        for method, section in [(self.section_otrkey, Section.OTRKEY),
+                                (self.section_avi_uncut, Section.AVI_UNCUT),
+                                (self.section_avi_cut, Section.AVI_CUT),
+                                (self.section_trash, Section.TRASH)]:
+            files = []
+            text, items = method()   
+            count = len(items)
+            if count > 0:
+                counts[section] = "(%s)" % count
             else:
-                f.write("%s %s 0\n" % (end, (cuts[count+1][0] - 1)))
-        
-        p = subprocess.Popen([mplayer, "-edl", ".tmp.edl", filename])
-       
-    def action_archive(self, filenames):       
-        # widgets
-        dialog = self.__gui.dialog_archive
-       
-        treeview_files = self.__gui.dialog_archive.get_widget('treeviewFilesRename')
-        treestore_files = treeview_files.get_model()
-        treeview_folders = self.__gui.dialog_archive.get_widget('treeviewFolders')
-        treestore_folders = treeview_folders.get_model()
-                
-        self.__gui.dialog_archive.get_widget('labelFiles').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
-        
-        # fill rename tree
-        dict_files_iter = {}        
-        for f in filenames:
-            iter = self.__gui.dialog_archive.append_row_treeviewFilesRename(basename(f))
-            # keep relation between filename and iter
-            dict_files_iter[f] = iter
-            
-        # fill tree of folders
-        root = self.__gui.dialog_archive.append_row_treeviewFolders(None, self.config.get('folders', 'archive'))    
-        self.tree_folders(root)        
-        # select first node
-        selection = treeview_folders.get_selection()
-        selection.select_path(0)
-        
-        # expand
-        treeview_folders.expand_all()
-        
-        result = dialog.run()
+                counts[section] = ""
+         
+        # archive 
+        files = []       
+        for root, dirs, files in walk(self.config.get('folders', 'archive')):
+            for f in files:
+                # TODO: match all videos files
+                if f.endswith('.avi') and self.search(f):
+                    items += [join(root, f)]
 
-        if result == RESPONSE_OK:            
-            # get selection
-            selection = treeview_folders.get_selection()
-            (model, iter) = selection.get_selected()
-            
-            # get target path
-            target_folder = model.get_value(iter, 0)
-            
-            for f in filenames:
-                # get new filename
-                new_name = treestore_files.get_value(dict_files_iter[f], 0)
-                                
-                if not new_name.endswith('.avi'):
-                    new_name += '.avi'
-            
-                new_name = join(dirname(f), new_name)
-                fileoperations.rename(f, new_name)
-                fileoperations.move_file(new_name, target_folder)   
-                
-                    
-        dialog.hide()
-                
-        # clear treeview and listview
-        treestore_folders.clear()
-        treestore_files.clear()
-
-    # recursive
-    def tree_folders(self, parent):              
-        dir = self.__gui.dialog_archive.get_widget('treeviewFolders').get_model().get_value(parent, 0)
-            
-        files = []
-        files = listdir(dir)            
-
-        for file in files:
-            full_path = join(dir, file)
-            
-            if isdir(full_path):                
-                iter = self.__gui.dialog_archive.append_row_treeviewFolders(parent, full_path)
-                self.tree_folders(iter)
-
-       
-    def action_delete(self, filenames):
-        if len(filenames) == 1:
-            message = "Es ist eine Datei ausgewählt. Soll diese Datei "
+        count = len(files)
+        if count > 0:
+            counts[Section.ARCHIVE] = "(%s)" % count
         else:
-            message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
-        
-        if self.__gui.question_box(message + "in den Müll verschoben werden?"):
-            for f in filenames:
-                target = self.config.get('folders', 'trash')
-                fileoperations.move_file(f, target)
-                
-    def action_real_delete(self, filenames):
-        if len(filenames) == 1:
-            message = "Es ist eine Datei ausgewählt. Soll diese Datei "
+            counts[Section.ARCHIVE] = ""
+
+        # planning
+        items = []
+        for count, broadcast in enumerate(self.planned_broadcasts):
+            if self.search(broadcast[0]):
+                items += [count]
+
+        count = len(items)
+        if count > 0:
+            counts[Section.PLANNING] = "(%s)" % count
         else:
-            message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
+            counts[Section.PLANNING] = ""
         
-        if self.__gui.question_box(message + "endgültig gelöscht werden?"):
-            for f in filenames:
-                fileoperations.remove(f)
+        self.show_section(self.section)                   
+        return counts
     
-    def action_restore(self, filenames):
-        for f in filenames:
-            fileoperations.move_file(f, self.config.get('folders', 'new_otrkeys'))
+    def stop_search(self):
+        self.__search_text = ""
+        self.show_section(self.section)
+        
+    def search(self, f):
+        if self.__search_text == "":
+            return True
+        else:    
+            if self.__search_text in f.lower():
+                return True
+            else:
+                return False
+        
+    ###
+    ### Actions
+    ###        
     
-    def action_rename(self, filenames):
-        response, new_names = self.__gui.dialog_rename.init_and_run("Umbenennen", filenames)  
-                
-        if response:
-            for f in filenames:
-                new_name = join(dirname(f), new_names[f])
-                
-                if f.endswith('.avi') and not new_name.endswith('.avi'):
-                    new_name+='.avi'
-                    
-                fileoperations.rename_file(f, new_name)
-
-    def action_new_folder(self, filename):
-        if isdir(filename):
-            dirname = filename
-        else:
-            dirname = dirname(filename)
-
-        response, new_names = self.__gui.dialog_rename.init_and_run("Neuer Ordner", ["Neuer Ordner"])
-
-        if response and new_names["Neuer Ordner"] != "":            
-            mkdir(join(dirname, new_names["Neuer Ordner"]))
-            
+    def perform_action(self, chosen_action, filenames=[], broadcasts=[]):
+        """ Performs an action (toolbar, context menu, etc.) """
+        
+        if (len(filenames) == 0 and chosen_action != Action.NEW_FOLDER) or \
+           (len(broadcasts) == 0 and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE]):
+            self.__gui.message_info_box("Es ist keine Sendung markiert!")
+            return
+   
+        action = actions.get_action(chosen_action, self.__gui)            
+               
+        # different actions:
+        if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]: action.do(chosen_action, filenames, self.config, self.rename_by_schema)
+        elif chosen_action == Action.RENAME: action.do(filenames)
+        elif chosen_action == Action.REAL_DELETE: action.do(filenames)
+        elif chosen_action == Action.RESTORE: action.do(filenames, self.config.get('folders', 'new_otrkeys'))
+        elif chosen_action == Action.DELETE: action.do(filenames, self.config.get('folders', 'trash'))
+        elif chosen_action == Action.PLAY: action.do(filenames[0], self.config.get('play', 'player'))
+        elif chosen_action == Action.CUT_PLAY: action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'new_otrkeys'), self.config.get('cut', 'server'))            
+        elif chosen_action == Action.PLAN_REMOVE: action.do(broadcasts, self.planned_broadcasts) 
+        elif chosen_action == Action.PLAN_SEARCH: action.do(broadcasts, self.planned_broadcasts)            
+        elif chosen_action == Action.PLAN_ADD: action.do(self.planned_broadcasts)
+        elif chosen_action == Action.PLAN_EDIT: action.do(broadcasts[0], self.planned_broadcasts)        
+        elif chosen_action == Action.ARCHIVE: action.do(filenames, self.config.get('folders', 'archive'))
+        elif chosen_action == Action.NEW_FOLDER:
+            if len(filenames) == 0:
+                action.do(self.config.get('folders', 'archive'))
+            else:
+                action.do(filenames[0])
+        
+        # update view?
+        if action.update_list:
+            self.show_section(self.section)
+          
     def run(self):
         self.__gui.main_window.show()      
 
@@ -1128,58 +412,12 @@ class App:
         
         self.__gui.run()
         
-        # rewrite config value
+        # write planning to config
         string = ''
         for broadcast in self.planned_broadcasts:
             string += broadcast[0] + ',' + str(broadcast[1]) + ',' + broadcast[2] + ';'
-        self.config.set('planning', 'planned_items', string)
-        
-    def action_plan_add(self):
-        if self.__gui.dialog_planning.run_new() == RESPONSE_OK:
-            self.planned_broadcasts += [self.__gui.dialog_planning.get_values()]
-            
-            self.broadcasts_badge()
-            
-        self.__gui.dialog_planning.hide()
-        
-    def action_plan_edit(self, broadcast):
-        index = self.__gui.main_window.get_widget('treeviewFiles').get_model().get_value(broadcast, self.__gui.main_window.PLANNING)
-        
-        if self.__gui.dialog_planning.run_edit(*self.planned_broadcasts[index]) == RESPONSE_OK:
-            self.planned_broadcasts[index] = (self.__gui.dialog_planning.get_values())
-            
-            self.broadcasts_badge()
-            
-        self.__gui.dialog_planning.hide()
+        self.config.set('planning', 'planned_items', string)               
 
-    def action_plan_remove(self, broadcasts):
-        if len(broadcasts) == 1:
-            message = "Es ist eine Sendung ausgewählt. Soll diese Sendung "
-        else:
-            message = "Es sind %s Sendungen ausgewählt. Sollen diese Sendungen " % len(broadcasts)
-        
-        if self.__gui.question_box(message + "gelöscht werden?"):
-            # convert indices to references in the list
-            items = []
-            for iter in broadcasts:
-                index = self.__gui.main_window.get_widget('treeviewFiles').get_model().get_value(iter, self.__gui.main_window.PLANNING)
-                items.append(self.planned_broadcasts[index])
-            for item in items:
-                self.planned_broadcasts.remove(item)
-            
-            self.broadcasts_badge()
-        
-    def action_plan_search(self, broadcasts):
-        for broadcast in broadcasts:
-            index = self.__gui.main_window.get_widget('treeviewFiles').get_model().get_value(broadcast, self.__gui.main_window.PLANNING)
-            title, stamp, station = self.planned_broadcasts[index]
-                        
-            # build string: Titanic_08.12.24_20-15_pro7_
-            string = title.replace(' ', '_') + '_'
-            string += time.strftime("%y.%m.%d_%H-%M", time.localtime(stamp)) + "_"
-            string += station + "_"
-            
-            webbrowser.open("http://www.otr-search.com/?q=%s" % string)
              
 app = App()
 app.run()
