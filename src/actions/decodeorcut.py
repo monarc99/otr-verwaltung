@@ -8,7 +8,7 @@ import popen2
 import subprocess
 import urllib
 import ConfigParser
-from os.path import basename, join, dirname
+from os.path import basename, join, dirname, exists
 import threading
 
 import fileoperations
@@ -101,6 +101,12 @@ class DecodeOrCut(BaseAction):
         dialog.hide()         
         
         file_conclusions = self.__gui.dialog_conclusion.file_conclusions
+        
+        # remove local cutlists
+        if self.config.get('cut', 'delete_cutlists'):
+            for file_conclusion in file_conclusions:
+                if file_conclusion.cut.local_cutlist:
+                    fileoperations.remove_file(file_conclusion.cut.local_cutlist)
         
         # rate cutlists
         if cut:
@@ -240,6 +246,9 @@ class DecodeOrCut(BaseAction):
                 
                 if len(cutlists) == 0:
                     continue
+            
+            elif self.config.get('cut', 'cut_action') == Cut_action.LOCAL_CUTLIST:
+                cut_action = Cut_action.LOCAL_CUTLIST
                  
             else:            
                 # show dialog
@@ -251,6 +260,15 @@ class DecodeOrCut(BaseAction):
                 else:
                     self.__gui.dialog_cut.get_widget('radio_choose_cutlist').set_active(True)
 
+                # looking for a local cutlist
+                filename_cutlist = file_conclusion.uncut_avi + ".cutlist"
+                if exists(filename_cutlist):
+                    self.__gui.dialog_cut.get_widget('label_cutlist').set_markup("<b>%s</b>" % filename_cutlist)
+                    self.__gui.dialog_cut.get_widget('radio_local_cutlist').set_sensitive(True)
+                else:
+                    self.__gui.dialog_cut.get_widget('label_cutlist').set_markup("Keine lokale Cutlist gefunden.")
+                    self.__gui.dialog_cut.get_widget('radio_local_cutlist').set_sensitive(False)
+
                 # start looking for cutlists
                 self.__gui.dialog_cut.get_widget('treeview_cutlists').get_model().clear()                
                 self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
@@ -258,7 +276,6 @@ class DecodeOrCut(BaseAction):
                 self.cutlists_error = False
                 
                 def error_cb(error):            
-                    print "VCER"             
                     self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>%s</b>" % error)
                     self.cutlists_error = True
                      
@@ -293,7 +310,7 @@ class DecodeOrCut(BaseAction):
             
                 best_cutlist = cutlists_management.get_best_cutlist(cutlists)                 
                 
-                cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist, rename_by_schema)
+                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist, rename_by_schema)
 
                 if cut_avi == None:
                     file_conclusion.cut.status = Status.ERROR
@@ -301,10 +318,11 @@ class DecodeOrCut(BaseAction):
                 else:
                     file_conclusion.cut.status = Status.OK
                     file_conclusion.cut_avi = cut_avi
+                    file_conclusion.cut.local_cutlist = local_cutlist
                     file_conclusion.cut.cutlist = best_cutlist                            
                 
             elif cut_action == Cut_action.CHOOSE_CUTLIST:
-                cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist, rename_by_schema)
+                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist, rename_by_schema)
                 
                 if cut_avi == None:
                     file_conclusion.cut.status = Status.ERROR
@@ -312,7 +330,26 @@ class DecodeOrCut(BaseAction):
                 else:
                     file_conclusion.cut.status = Status.OK
                     file_conclusion.cut_avi = cut_avi
-                    file_conclusion.cut.cutlist = self.__gui.dialog_cut.chosen_cutlist         
+                    file_conclusion.cut.local_cutlist = local_cutlist
+                    file_conclusion.cut.cutlist = self.__gui.dialog_cut.chosen_cutlist
+
+            elif cut_action == Cut_action.LOCAL_CUTLIST:
+                filename_cutlist = file_conclusion.uncut_avi + ".cutlist"
+                
+                if not exists(filename_cutlist):
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden"
+                    continue
+               
+                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, filename_cutlist, rename_by_schema, local=True)
+                
+                if cut_avi == None:
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = error
+                else:
+                    file_conclusion.cut.status = Status.OK
+                    file_conclusion.cut_avi = cut_avi
+                    file_conclusion.cut.local_cutlist = local_cutlist
 
             elif cut_action == Cut_action.MANUALLY: # MANUALLY
                 command = "%s --load %s >>/dev/null" % (self.config.get('cut', 'avidemux'), file_conclusion.uncut_avi)
@@ -334,17 +371,24 @@ class DecodeOrCut(BaseAction):
         # after iterating over all items:
         return True
              
-    def cut_file_by_cutlist(self, filename, cutlist, rename_by_schema):
-        # download cutlist
-        url = self.config.get('cut', 'server') + "getfile.php?id=" + str(cutlist)
+    def cut_file_by_cutlist(self, filename, cutlist, rename_by_schema, local=False):
+        local_filename = ""
         
-        # save cutlist to folder
-        local_filename = join(self.config.get('folders', 'new_otrkeys'), basename(filename) + ".cutlist")
-        
-        try:
-            local_filename, headers = urllib.urlretrieve(url, local_filename)
-        except IOError:
-            return None, "Verbindungsprobleme"
+        if local:
+            local_filename = cutlist
+            
+        else:
+            # download cutlist
+            url = self.config.get('cut', 'server') + "getfile.php?id=" + str(cutlist)
+            
+            # save cutlist to folder
+            local_filename = filename + ".cutlist"
+            
+            try:
+                local_filename, headers = urllib.urlretrieve(url, local_filename)
+            except IOError:
+                return None, "Verbindungsprobleme"
+              
         
         config_parser = ConfigParser.ConfigParser()        
         config_parser.read(local_filename)
@@ -356,13 +400,13 @@ class DecodeOrCut(BaseAction):
            
             for count in range(noofcuts):
                 cuts[count] = (
-                    float(config_parser.get("Cut"+str(count), "Start")), 
-                    float(config_parser.get("Cut"+str(count), "Duration")))            
+                    float(config_parser.get("Cut" + str(count), "Start")), 
+                    float(config_parser.get("Cut" + str(count), "Duration")))            
             
-        except ConfigParser.NoSectionError, (ErrorNumber, ErrorMessage):
-            return None, "Fehler in Cutlist: " + ErrorMessage
-        except ConfigParser.NoOptionError, (ErrorNumber, ErrorMessage):
-            return None, "Fehler in Cutlist: " + ErrorMessage
+        except ConfigParser.NoSectionError, message:
+            return None, "Fehler in Cutlist: " + str(message)
+        except ConfigParser.NoOptionError, message:
+            return None, "Fehler in Cutlist: " + str(message)
         
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
@@ -426,6 +470,4 @@ class DecodeOrCut(BaseAction):
         fileoperations.remove_file('tmp.js')
         
         # successful
-        return cut_avi, None
-        
-    
+        return cut_avi, local_filename, None

@@ -65,11 +65,11 @@ class PreferencesWindow(BaseWindow):
                     'labelBestCutlist',
                     'labelChooseCutlist',
                     'labelManually',
-                    'labelDescAvidemux']
+                    'labelDescAvidemux',
+                    'labelLocalCutlist']
         for label in labels:
-            builder.get_object(label).modify_font(pango.FontDescription("8"))            
-        
-                  
+            builder.get_object(label).modify_font(pango.FontDescription("9"))            
+                         
         # fill combobox of player
         player_store = gtk.ListStore(str)
         player_store.append(["vlc"])
@@ -90,13 +90,13 @@ class PreferencesWindow(BaseWindow):
         avidemux_store = gtk.ListStore(str)
         avidemux_store.append(["avidemux"])
         avidemux_store.append(["avidemux2"])        
+        avidemux_store.append(["avidemux2_cli"]) 
         builder.get_object('comboboxAvidemux').set_model(avidemux_store)
         builder.get_object('comboboxAvidemux').set_text_column(0)
         builder.get_object('comboboxentry-avidemux').set_text(self.app.config.get('cut', 'avidemux'))
         
         # fill combobox servers
         server_store = gtk.ListStore(str)
-        server_store.append(["http://cutlist.de/"])
         server_store.append(["http://cutlist.mbod.net/"])
         server_store.append(["http://cutlist.at/"])
         builder.get_object('comboboxServer').set_model(server_store)
@@ -110,6 +110,9 @@ class PreferencesWindow(BaseWindow):
         builder.get_object('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
         builder.get_object('checkUseCutPlay').set_active(self.app.config.get('play', 'use_cut_play'))
         builder.get_object('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
+         
+        # cutlists tab
+        builder.get_object('check_delete_cutlists').set_active(self.app.config.get('cut', 'delete_cutlists'))
               
         # decode tab
         self.get_widget('filechooserDecoder').set_filename(self.app.config.get('decode', 'path'))  
@@ -124,9 +127,9 @@ class PreferencesWindow(BaseWindow):
         self.get_widget('entryPassword').set_visibility(False)
             
         self.get_widget('checkCorrect').set_active(self.app.config.get('decode', 'correct'))
-            
+                               
         # radio buttons on cut tab
-        radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually' ] # order is important!
+        radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually', 'radioLocalCutlist'] # order is important!
         builder.get_object(radiobuttons[self.app.config.get('cut', 'cut_action')]).set_active(True)
                
         # rename tab
@@ -165,7 +168,6 @@ class PreferencesWindow(BaseWindow):
         
         self.gui.main_window.get_widget('radioArchive').props.visible = status
         self.gui.main_window.get_widget('labelArchiveCount').props.visible = status
-        self.gui.main_window.get_widget('separator3').props.visible = status
                 
         self.gui.main_window.toolbar_buttons['archive'].props.visible = status 
                           
@@ -212,6 +214,10 @@ class PreferencesWindow(BaseWindow):
     def on_radioChooseCutlist_toggled(self, widget, data=None):
         if widget.get_active()==True:
             self.app.config.set('cut', 'cut_action', Cut_action.CHOOSE_CUTLIST)
+            
+    def on_radioLocalCutlist_toggled(self, widget, data=None):
+        if widget.get_active()==True:
+            self.app.config.set('cut', 'cut_action', Cut_action.LOCAL_CUTLIST)
                 
     def on_radioManually_toggled(self, widget, data=None):
         if widget.get_active()==True:
@@ -220,8 +226,12 @@ class PreferencesWindow(BaseWindow):
     def on_comboboxentry_avidemux_changed(self, widget, data=None):
         self.app.config.set('cut', 'avidemux', widget.get_text())
     
+    # cutlist tab    
     def on_comboboxentry_server_changed(self, widget, data=None):
         self.app.config.set('cut', 'server', widget.get_text())
+        
+    def on_check_delete_cutlists_toggled(self, widget, data=None):
+        self.app.config.set('cut', 'delete_cutlists', int(widget.get_active()))
         
     # play tab
     def on_comboboxentry_player_changed(self, widget, data=None):

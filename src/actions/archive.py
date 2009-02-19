@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os.path import basename
+from gtk import RESPONSE_OK
+from os.path import basename, join, isdir, dirname
+from os import listdir
 
+
+import fileoperations
 from baseaction import BaseAction
 
 class Archive(BaseAction):
@@ -57,7 +61,10 @@ class Archive(BaseAction):
                     new_name += '.avi'
             
                 new_name = join(dirname(f), new_name)
-                fileoperations.rename(f, new_name)
+                
+                if new_name != f:
+                    fileoperations.rename_file(f, new_name)
+    
                 fileoperations.move_file(new_name, target_folder)   
                 
                     

@@ -1,24 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#
-# OTR-Verwaltung 0.9 (Beta 1)
-# Copyright (C) 2008 Benjamin Elbers (elbersb@googlemail.com)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-
 from os.path import isfile
 import ConfigParser
 import datetime
@@ -98,7 +80,8 @@ class Config:
                 {
                     'avidemux':             self.__read_value('cut', 'avidemux', ''),
                     'server':               self.__read_value('cut', 'server', 'http://cutlist.de'),
-                    'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK))
+                    'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK)),
+                    'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1))
                 },
             'play':
                 {

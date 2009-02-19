@@ -1,24 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#
-# OTR-Verwaltung 0.9 (Beta 1)
-# Copyright (C) 2008 Benjamin Elbers (elbersb@googlemail.com)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-
 import sys
 from os import listdir, walk
 from os.path import join, isdir, exists
@@ -33,22 +15,29 @@ except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
 
-from log import Log
 
 if exists(join(sys.path[0], 'otrpath.py')):    
     f = open(join(sys.path[0], 'conf'), 'a')
     f.close()
     filename = join(sys.path[0], 'log')
+    
+    import otrpath
+    
+    from log import Log
     log = Log(True, filename)
     log.l("Log file created at", filename)
 else:
     sys.path.insert(0, "/usr/share/otr-verwaltung")
+    
+    import otrpath
     filename = otrpath.get_config_path('log')
+
+    from log import Log
     log = Log(False, filename)
     log.l("Log file created at", filename)
 
 # intern
-import otrpath
+
 from gui.gui import Gui
 from actions import actions
 from configparser import Config

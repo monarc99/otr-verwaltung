@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sat Feb 14 22:47:04 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Feb 19 19:26:56 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_cut">
     <property name="border_width">5</property>
@@ -15,7 +15,7 @@
         <child>
           <object class="GtkVBox" id="vbox9">
             <property name="visible">True</property>
-            <property name="spacing">7</property>
+            <property name="spacing">8</property>
             <child>
               <object class="GtkLabel" id="label_file">
                 <property name="visible">True</property>
@@ -53,39 +53,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="vbox18">
+              <object class="GtkTable" id="table9">
                 <property name="visible">True</property>
-                <child>
-                  <object class="GtkHBox" id="hbox14">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_choose_cutlist">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Cutlist selbst w&#xE4;hlen</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_best_cutlist</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_status">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="xpad">11</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Status&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
+                <property name="n_rows">2</property>
+                <property name="n_columns">2</property>
                 <child>
                   <object class="GtkTreeView" id="treeview_cutlists">
                     <property name="height_request">100</property>
@@ -93,13 +64,101 @@
                     <property name="can_focus">True</property>
                   </object>
                   <packing>
-                    <property name="position">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="x_padding">20</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="radio_choose_cutlist">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Cutlist selbst w&#xE4;hlen</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">radio_best_cutlist</property>
+                  </object>
+                  <packing>
+                    <property name="x_options">GTK_FILL</property>
+                    <property name="y_options">GTK_FILL</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_status">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="xpad">11</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Status&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="y_options">GTK_FILL</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkTable" id="table8">
+                <property name="visible">True</property>
+                <property name="n_rows">2</property>
+                <property name="n_columns">2</property>
+                <property name="column_spacing">2</property>
+                <property name="row_spacing">2</property>
+                <child>
+                  <object class="GtkRadioButton" id="radio_local_cutlist">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Lokale Cutlist benutzen</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">radio_best_cutlist</property>
+                  </object>
+                  <packing>
+                    <property name="right_attach">2</property>
+                    <property name="x_options">GTK_FILL</property>
+                    <property name="y_options">GTK_FILL</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label21">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">Datei:</property>
+                    <property name="wrap_mode">PANGO_WRAP_WORD_CHAR</property>
+                  </object>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="x_options">GTK_FILL</property>
+                    <property name="y_options">GTK_FILL</property>
+                    <property name="x_padding">20</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_cutlist">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">&lt;b&gt;label_cutlist&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                    <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -134,7 +193,7 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>

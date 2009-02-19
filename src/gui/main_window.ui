@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sat Feb 14 22:47:04 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Feb 19 19:26:56 2009 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -211,6 +211,7 @@
                             <signal handler="on_buttonClear_clicked" name="clicked"/>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
