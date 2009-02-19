@@ -59,6 +59,9 @@ install: build
 	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
 	cp *.py $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
 	
+	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/actions
+	cp actions/* $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/actions
+	
 	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/gui
 	cp gui/* $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/gui
 	
