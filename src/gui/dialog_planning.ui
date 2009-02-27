@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Feb 19 19:26:56 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Feb 27 18:49:56 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_planning">
-    <property name="border_width">5</property>
+    <property name="border_width">4</property>
     <property name="title" translatable="yes">Geplante Sendung</property>
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
@@ -12,7 +12,7 @@
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox9">
         <property name="visible">True</property>
-        <property name="spacing">2</property>
+        <property name="spacing">6</property>
         <child>
           <object class="GtkTable" id="table5">
             <property name="visible">True</property>
@@ -24,7 +24,8 @@
               <object class="GtkLabel" id="label_headline">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Neue Sendung hinzuf&#xFC;gen:</property>
+                <property name="label" translatable="yes">&lt;b&gt;Neue Sendung hinzuf&#xFC;gen:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
               </object>
               <packing>
                 <property name="right_attach">2</property>
@@ -87,6 +88,7 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
+                <property name="x_padding">3</property>
               </packing>
             </child>
             <child>
@@ -102,6 +104,7 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
+                <property name="x_padding">3</property>
               </packing>
             </child>
             <child>
@@ -119,6 +122,7 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
+                <property name="x_padding">3</property>
               </packing>
             </child>
             <child>
@@ -135,6 +139,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
+                    <property name="padding">3</property>
                   </packing>
                 </child>
                 <child>

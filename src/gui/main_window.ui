@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Feb 19 19:26:56 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Feb 27 18:49:56 2009 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -258,11 +258,14 @@
                         <child>
                           <object class="GtkEventBox" id="eventboxPlanningCurrentCount">
                             <property name="visible">True</property>
+                            <signal handler="on_eventboxPlanningCurrentCount_button_release_event" name="button_release_event"/>
                             <child>
                               <object class="GtkLabel" id="labelPlanningCurrentCount">
                                 <property name="width_request">30</property>
                                 <property name="height_request">30</property>
                                 <property name="visible">True</property>
+                                <property name="has_tooltip">True</property>
+                                <property name="tooltip_text">Anzahl bereits ausgestrahlter Sendungen</property>
                                 <property name="label" translatable="yes">?</property>
                                 <property name="use_underline">True</property>
                               </object>
@@ -508,20 +511,18 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow_files">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                  <object class="GtkEventBox" id="eventbox_search">
                     <child>
-                      <object class="GtkTreeView" id="treeview_files">
+                      <object class="GtkLabel" id="label_search">
+                        <property name="height_request">30</property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="level_indentation">3</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Suchergebnisse f&#xFC;r ...&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
                       </object>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -539,6 +540,24 @@
                   </object>
                   <packing>
                     <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow_files">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <child>
+                      <object class="GtkTreeView" id="treeview_files">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="level_indentation">3</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>

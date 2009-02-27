@@ -108,7 +108,6 @@ class PreferencesWindow(BaseWindow):
         builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config.get('folders', 'new_otrkeys'))
         builder.get_object('folderTrash').set_current_folder(self.app.config.get('folders', 'trash'))
         builder.get_object('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
-        builder.get_object('checkUseCutPlay').set_active(self.app.config.get('play', 'use_cut_play'))
         builder.get_object('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
          
         # cutlists tab
@@ -239,14 +238,7 @@ class PreferencesWindow(BaseWindow):
     
     def on_comboboxentry_mplayer_changed(self, widget, data=None):
         self.app.config.set('play', 'mplayer', widget.get_text())      
-       
-    def on_checkUseCutPlay_toggled(self, widget, data=None):       
-        self.app.config.set('play', 'use_cut_play', int(widget.get_active()))
-        
-        self.get_widget('comboboxMPlayer').set_sensitive(widget.get_active())
-                    
-        self.gui.main_window.toolbar_buttons['cut_play'].props.visible = widget.get_active()
-        
+               
     # rename tab   
     def on_check_rename_cut_toggled(self, widget, data=None):
         self.get_widget('entry_schema').set_sensitive(widget.get_active())

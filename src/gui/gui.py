@@ -26,7 +26,6 @@ except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
 
-
 from main_window import MainWindow
 from preferences_window import PreferencesWindow
 from dialog_archive import DialogArchive
@@ -50,7 +49,7 @@ class Gui:
         self.preferences_window = PreferencesWindow(app, self, self.main_window)
         self.dialog_archive = DialogArchive(self.main_window)
         self.dialog_conclusion = DialogConclusion(app, self.main_window)
-        self.dialog_cut = DialogCut(self, self.main_window)
+        self.dialog_cut = DialogCut(app, self, self.main_window)
         self.dialog_email_password = DialogEmailPassword(self.main_window)
         self.dialog_rename = DialogRename(self.main_window)
         self.dialog_planning = DialogPlanning(self, self.main_window)

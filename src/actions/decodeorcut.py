@@ -7,7 +7,6 @@ import base64
 import popen2
 import subprocess
 import urllib
-import ConfigParser
 from os.path import basename, join, dirname, exists
 import threading
 
@@ -94,7 +93,7 @@ class DecodeOrCut(BaseAction):
 
         # no more need for tasks view
         self.__gui.main_window.get_widget('eventbox_tasks').hide()
-            
+                    
         # show conclusion
         dialog = self.__gui.dialog_conclusion.build(file_conclusions, action)
         dialog.run()
@@ -102,24 +101,35 @@ class DecodeOrCut(BaseAction):
         
         file_conclusions = self.__gui.dialog_conclusion.file_conclusions
         
-        # remove local cutlists
-        if self.config.get('cut', 'delete_cutlists'):
-            for file_conclusion in file_conclusions:
-                if file_conclusion.cut.local_cutlist:
-                    fileoperations.remove_file(file_conclusion.cut.local_cutlist)
         
-        # rate cutlists
         if cut:
-            count = 0
-            for file_conclusion in file_conclusions:                    
-                if file_conclusion.cut.rating > -1:
-                    if cutlists_management.rate(file_conclusion.cut.cutlist, file_conclusion.cut.rating, self.config.get('cut', 'server')):
-                        count += 1
-            
-            if count == 1:
-                self.__gui.message_info_box("Es wurde 1 Cutlist bewertet!")
-            elif count > 1:
-                self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
+        
+            # move to trash if it's ok
+            for file_conclusion in file_conclusions:
+                if file_conclusion.cut.delete_uncut:
+                    # move to trash
+                    print file_conclusion.uncut_avi, " to trash"
+                    target = self.config.get('folders', 'trash')
+                    fileoperations.move_file(file_conclusion.uncut_avi, target)        
+        
+            # remove local cutlists      
+            if self.config.get('cut', 'delete_cutlists'):
+                for file_conclusion in file_conclusions:
+                    if file_conclusion.cut.local_cutlist:
+                        fileoperations.remove_file(file_conclusion.cut.local_cutlist)
+        
+            # rate cutlists
+            if cut:
+                count = 0
+                for file_conclusion in file_conclusions:                    
+                    if file_conclusion.cut.rating > -1:
+                        if cutlists_management.rate(file_conclusion.cut.cutlist, file_conclusion.cut.rating, self.config.get('cut', 'server')):
+                            count += 1
+                
+                if count == 1:
+                    self.__gui.message_info_box("Es wurde 1 Cutlist bewertet!")
+                elif count > 1:
+                    self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
              
      
     def decode(self, file_conclusions):          
@@ -235,16 +245,18 @@ class DecodeOrCut(BaseAction):
             if self.config.get('cut', 'cut_action') == Cut_action.MANUALLY:
                 cut_action = Cut_action.MANUALLY
 
-            elif self.config.get('cut', 'cut_action') == Cut_action.BEST_CUTLIST:
+            elif self.config.get('cut', 'cut_action') == Cut_action.BEST_CUTLIST:                
                 cut_action = Cut_action.BEST_CUTLIST
 
                 def error_cb(error):
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = error
-                    
-                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_avi, error_cb)
+
+                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_avi, self.config.get('cut', 'server'), error_cb)                           
                 
                 if len(cutlists) == 0:
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = "Keine Cutlists gefunden!"          
                     continue
             
             elif self.config.get('cut', 'cut_action') == Cut_action.LOCAL_CUTLIST:
@@ -252,6 +264,7 @@ class DecodeOrCut(BaseAction):
                  
             else:            
                 # show dialog
+                self.__gui.dialog_cut.filename = file_conclusion.uncut_avi
                 self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_avi))
                 self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'new_otrkeys'))
 
@@ -359,55 +372,29 @@ class DecodeOrCut(BaseAction):
                     pass
                     
                 file_conclusion.cut.status = Status.OK
-       
-                    
-            if file_conclusion.cut.status == Status.OK:            
-                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?, vor allem bei manuell!!!!!            
-                # action after cut
-                # move to trash
-                target = self.config.get('folders', 'trash')
-                fileoperations.move_file(file_conclusion.uncut_avi, target)
-        
+              
         # after iterating over all items:
         return True
              
     def cut_file_by_cutlist(self, filename, cutlist, rename_by_schema, local=False):
-        local_filename = ""
-        
-        if local:
-            local_filename = cutlist
-            
-        else:
-            # download cutlist
-            url = self.config.get('cut', 'server') + "getfile.php?id=" + str(cutlist)
-            
-            # save cutlist to folder
-            local_filename = filename + ".cutlist"
-            
-            try:
-                local_filename, headers = urllib.urlretrieve(url, local_filename)
-            except IOError:
-                return None, "Verbindungsprobleme"
               
-        
-        config_parser = ConfigParser.ConfigParser()        
-        config_parser.read(local_filename)
+        if local:
+            local_filename = cutlist            
+        else:                             
+            local_filename = filename + ".cutlist"
        
-        noofcuts = 0        
-        cuts = {}
+        # download cutlists     
         try:
-            noofcuts = int(config_parser.get("General", "NoOfCuts"))
-           
-            for count in range(noofcuts):
-                cuts[count] = (
-                    float(config_parser.get("Cut" + str(count), "Start")), 
-                    float(config_parser.get("Cut" + str(count), "Duration")))            
-            
-        except ConfigParser.NoSectionError, message:
-            return None, "Fehler in Cutlist: " + str(message)
-        except ConfigParser.NoOptionError, message:
-            return None, "Fehler in Cutlist: " + str(message)
+            cutlists_management.download_cutlist(cutlist, self.config.get('cut', 'server'), local_filename)
+        except IOError:
+            return None, None, "Verbindungsprobleme"  
+              
+        # get dictionary of cuts
+        cuts = cutlists_management.get_cuts_of_cutlist(local_filename)
         
+        if type(cuts) != list: # error occured
+            return None, None, "Fehler: cuts!=list (%s)" % cuts
+                  
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
         
@@ -421,7 +408,7 @@ class DecodeOrCut(BaseAction):
             'app.clearSegments();\n'
             ])
             
-        for count, (start, duration) in cuts.iteritems():
+        for count, start, duration in cuts:
             frame_start = start * 25   
             frame_duration = duration * 25
             f.write("app.addSegment(0, %s, %s);\n" %(str(int(frame_start)), str(int(frame_duration))))

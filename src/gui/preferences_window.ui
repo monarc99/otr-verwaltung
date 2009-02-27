@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Feb 19 19:26:56 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Feb 27 18:49:56 2009 -->
 <interface>
   <object class="GtkListStore" id="model1">
     <columns>
@@ -584,6 +584,7 @@
                     <property name="visible">True</property>
                     <property name="n_rows">3</property>
                     <property name="n_columns">2</property>
+                    <property name="column_spacing">5</property>
                     <property name="row_spacing">4</property>
                     <child>
                       <placeholder/>
@@ -710,26 +711,14 @@
                       <object class="GtkLabel" id="label23">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Ist der MPlayer installiert, kann OTR-Verwaltung Cutlisten aus dem Internet in ein Format umwandeln, das der MPlayer lesen kann. MPlayer &#xFC;berspringt dann beim Abspielen die herausgeschnittenen Teile.</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Testen von Cutlisten:&lt;/b&gt; Ist der MPlayer installiert, kann OTR-Verwaltung jeden Schnitt kurz anspielen, um die Qualit&#xE4;t zu &#xFC;berpr&#xFC;fen.
+&lt;b&gt;Geschnittenes Abspielen: &lt;/b&gt;Ist der MPlayer installiert, kann OTR-Verwaltung Cutlisten aus dem Internet in ein Format umwandeln, das der MPlayer lesen kann. MPlayer &#xFC;berspringt dann beim Abspielen die herausgeschnittenen Teile - ganz ohne zu Schneiden.</property>
+                        <property name="use_markup">True</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="checkUseCutPlay">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Geschnittenes Abspielen verwenden (Es wird die beste Cutlist verwendet)</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_checkUseCutPlay_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -760,7 +749,7 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="position">4</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>

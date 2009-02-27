@@ -3,25 +3,32 @@
 
 import xml.dom.minidom
 import urllib
+import ConfigParser
 
 import fileoperations
 
 def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):    
     size = fileoperations.get_size(filename)
     url = "%sgetxml.php?version=0.9.8.0&ofsb=%s" % (server, str(size))
-
+      
+    handle = urllib.urlopen(url)     
     try:
+        pass
         handle = urllib.urlopen(url)     
-    except IOError:       
-        if error_cb: error_cb("Verbindungsprobleme")
+    except IOError:  
+        if error_cb: 
+            error_cb("Verbindungsprobleme")
         return []
+
+    dom_cutlists = xml.dom.minidom.parse(handle)
+    handle.close()
+    dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
                     
     try:
-        dom_cutlists = xml.dom.minidom.parse(handle)
-        handle.close()
-        dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
+        pass
     except:
-        if error_cb: error_cb("Keine Cutlists gefunden")
+        if error_cb: 
+            error_cb("Keine Cutlists gefunden")
         return []
                     
     cutlists = []           
@@ -42,7 +49,8 @@ def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):
            __read_value(cutlist, "withtime"),
            __read_value(cutlist, "duration")]
                         
-        if cutlist_found_cb: cutlist_found_cb(cutlist_data)
+        if cutlist_found_cb: 
+            cutlist_found_cb(cutlist_data)
         cutlists.append(cutlist_data)
 
     return cutlists            
@@ -58,7 +66,34 @@ def __read_value(cutlist_element, node_name):
     
     if value == None:
         return ""               
+
+def download_cutlist(cutlist_id, server, filename):
+    # download cutlist
+    url = server + "getfile.php?id=" + str(cutlist_id)
             
+    filename, headers = urllib.urlretrieve(url, filename)
+  
+def get_cuts_of_cutlist(filename):    
+    config_parser = ConfigParser.ConfigParser()        
+    config_parser.read(filename)
+    
+    noofcuts = 0        
+    cuts = []
+    try:
+        noofcuts = int(config_parser.get("General", "NoOfCuts"))
+        
+        for count in range(noofcuts):
+            cuts.append((count,
+                         float(config_parser.get("Cut" + str(count), "Start")), 
+                         float(config_parser.get("Cut" + str(count), "Duration"))))            
+
+    except ConfigParser.NoSectionError, message:
+        return "Fehler in Cutlist: " + str(message)
+    except ConfigParser.NoOptionError, message:
+        return "Fehler in Cutlist: " + str(message)
+        
+    return cuts
+        
 def get_best_cutlist(cutlists):
     dic_cutlists = {}
     

@@ -64,6 +64,8 @@ class MainWindow(BaseWindow):
             'labelArchiveCount',
             'labelTrashCount',
 
+            'label_search',
+            'eventbox_search',
             'labelMessage',
             'scrolledwindow_planning',
             'treeview_planning',
@@ -238,13 +240,14 @@ class MainWindow(BaseWindow):
         for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
             builder.get_object(label).modify_font(pango.FontDescription("bold"))
 
-        # change background of tasks bar
-        eventbox = builder.get_object('eventbox_tasks')
-        cmap = eventbox.get_colormap()
-        colour = cmap.alloc_color("#FFF288")
-        style = eventbox.get_style().copy()
-        style.bg[gtk.STATE_NORMAL] = colour
-        eventbox.set_style(style)
+        # change background of tasks and searchbar
+        for eventbox in ['eventbox_tasks', 'eventbox_search']:
+            eventbox = builder.get_object(eventbox)
+            cmap = eventbox.get_colormap()
+            colour = cmap.alloc_color("#FFF288")
+            style = eventbox.get_style().copy()
+            style.bg[gtk.STATE_NORMAL] = colour
+            eventbox.set_style(style)
 
         # image cancel
         builder.get_object('image_cancel').set_from_file(otrpath.get_image_path('cancel.png'))
@@ -447,7 +450,12 @@ class MainWindow(BaseWindow):
         gtk.main_quit()
            
     def on_menuEditSearch_activate(self, widget, data=None):
-        self.get_widget('entry_search').grab_focus()
+        entry_search = self.get_widget('entry_search')
+        
+        if entry_search.get_text() == "Durchsuchen":
+            entry_search.set_text('')
+        
+        entry_search.grab_focus()
     
     # toolbar actions
     def on_toolbutton_clicked(self, button, action):                
@@ -477,21 +485,46 @@ class MainWindow(BaseWindow):
     def on_entry_search_changed(self, widget, data=None):
         search = widget.get_text()
 
+        self.do_search(search)
+    
+    def do_search(self, search):
         if search == "Durchsuchen" or search == "":
             self.app.stop_search()
+            
+            self.get_widget('eventbox_search').hide()
             
             for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
                 self.get_widget(label).set_text("")
         else:
+            self.get_widget('eventbox_search').show()
+            self.get_widget('label_search').set_markup("<b>Suchergebnisse für '%s'</b>" % search)
+        
             counts_of_section = self.app.start_search(search)
                   
             self.get_widget('labelPlanningCount').set_text(counts_of_section[Section.PLANNING])                  
             self.get_widget('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
             self.get_widget('labelUncutCount').set_text(counts_of_section[Section.AVI_UNCUT])
-            self.get_widget('labelCutCount').set_text(counts_of_section[Section.AVI_CUT])                            
+            self.get_widget('labelCutCount').set_text(counts_of_section[Section.AVI_CUT])     
             self.get_widget('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
             self.get_widget('labelTrashCount').set_text(counts_of_section[Section.TRASH])
        
     def on_eventbox_cancel_button_press_event(self, widget, data=None):
-        # TODO: Cancel 
+        # TODO: Cancel of cut and decode
         pass
+        
+    def on_eventboxPlanningCurrentCount_button_release_event(self, widget, data=None):
+        # show section
+        self.get_widget('radioPlanning').set_active(True)
+        
+        # select already broadcasted
+        selection = self.get_widget('treeview_planning').get_selection()
+        now = time.time()
+                
+        def foreach(model, path, iter, data=None):
+            index = model.get_value(iter, 0)
+            stamp = self.app.planned_broadcasts[index][1]
+
+            if stamp < now:
+                selection.select_iter(iter)
+
+        self.get_widget('treeview_planning').get_model().foreach(foreach)

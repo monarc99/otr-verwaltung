@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Feb 19 19:26:56 2009 -->
+<!--Generated with glade3 3.4.5 on Fri Feb 27 18:49:56 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_cut">
     <property name="border_width">5</property>
@@ -28,13 +28,36 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label3">
+              <object class="GtkHBox" id="hbox14">
                 <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Wie soll geschnitten werden?</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel" id="label3">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">Wie soll geschnitten werden?</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="button_show_cuts">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="label" translatable="yes">Schnitte anspielen</property>
+                    <signal handler="on_button_show_cuts_clicked" name="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="pack_type">GTK_PACK_END</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="expand">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -45,6 +68,7 @@
                 <property name="label" translatable="yes">Programm w&#xE4;hlt beste Cutlist</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
+                <signal handler="on_radio_best_cutlist_toggled" name="toggled"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -172,6 +196,7 @@
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radio_best_cutlist</property>
+                    <signal handler="on_radio_manually_toggled" name="toggled"/>
                   </object>
                   <packing>
                     <property name="fill">False</property>

@@ -79,14 +79,13 @@ class Config:
             'cut':
                 {
                     'avidemux':             self.__read_value('cut', 'avidemux', ''),
-                    'server':               self.__read_value('cut', 'server', 'http://cutlist.de'),
+                    'server':               self.__read_value('cut', 'server', 'http://cutlist.at'),
                     'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK)),
                     'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1))
                 },
             'play':
                 {
-                    'player':               self.__read_value('play', 'player', ''),
-                    'use_cut_play':         int(self.__read_value('play', 'use_cut_play', 0)),
+                    'player':               self.__read_value('play', 'player', ''),                    
                     'mplayer':              self.__read_value('play', 'mplayer', 'mplayer')
                 },
             'planning':

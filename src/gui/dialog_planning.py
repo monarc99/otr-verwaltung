@@ -55,7 +55,7 @@ class DialogPlanning(BaseWindow):
         builder.get_object('combobox_station').set_text_column(0)
             
     def run_new(self):       
-        self.get_widget('label_headline').set_text('Neue Sendung hinzufügen:')
+        self.get_widget('label_headline').set_markup('<b>Neue Sendung hinzufügen:</b>')
      
         dt = datetime.datetime.today()
         self.get_widget('calendar').select_month(dt.month - 1, dt.year)
@@ -67,7 +67,7 @@ class DialogPlanning(BaseWindow):
         return self.run()
         
     def run_edit(self, broadcast, stamp, station):
-        self.get_widget('label_headline').set_text('Sendung bearbeiten:')
+        self.get_widget('label_headline').set_markup('<b>Sendung bearbeiten:</b>')
            
         self.get_widget('entry_broadcast').set_text(broadcast)
 

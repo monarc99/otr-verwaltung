@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import gtk
+from os.path import join
 
 from basewindow import BaseWindow
 
 from constants import Cut_action
+import cutlists as cutlists_management
 
 class DialogCut(BaseWindow):
     
-    def __init__(self, gui, parent):
+    def __init__(self, app, gui, parent):
         self.gui = gui
+        self.app = app
     
         widgets = [
             'label_file',
@@ -22,7 +25,7 @@ class DialogCut(BaseWindow):
             'radio_manually',            
             'label_warning',
             
-            
+            'button_show_cuts',
             'treeview_cutlists',
             'label_status'
             ]
@@ -75,6 +78,8 @@ class DialogCut(BaseWindow):
         selection = treeview.get_selection()
         selection.connect('changed', self.on_selection_changed)
     
+        self.filename = ""
+    
     ###
     ### Convenience methods
     ###
@@ -85,6 +90,32 @@ class DialogCut(BaseWindow):
     ###
     ### Signal handlers
     ###
+    
+    def on_radio_manually_toggled(self, widget, data=None):
+        self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
+    
+    def on_radio_best_cutlist_toggled(self, widget, data=None):
+        self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
+        
+    def on_button_show_cuts_clicked(self, widget, data=None):
+        if self.get_widget('radio_local_cutlist').get_active():
+            local_filename = self.get_widget('label_cutlist').get_text()
+            
+        else:
+            treeselection = self.get_widget('treeview_cutlists').get_selection()  
+
+            if treeselection.count_selected_rows() == 0:                            
+                self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
+                return
+            
+            # retrieve id of chosen cutlist
+            (model, iter) = treeselection.get_selected()                   
+            cutlist_id = model.get_value(iter, 0)    
+            
+            local_filename = self.filename + ".cutlist"
+            cutlists_management.download_cutlist(cutlist_id, self.app.config.get('cut', 'server'), local_filename)
+            
+        self.app.show_cuts(self.filename, local_filename)
     
     def on_selection_changed(self, selection, data=None):     
         model, paths = selection.get_selected_rows()

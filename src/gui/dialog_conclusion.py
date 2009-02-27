@@ -25,14 +25,16 @@ class DialogConclusion(BaseWindow):
             'labelConclusionCut',
             'labelConclusionDecode',
             'checkbuttonRate',
-            'vboxRating',
-            'vboxButtons',
+            'vboxRating',           
+            'buttonConclusionPlay',
+            'check_delete_uncut',
+            'button_conclusion_play_cut',
             'radiobuttonRate0',
             'radiobuttonRate1',
             'radiobuttonRate2',
             'radiobuttonRate3',
             'radiobuttonRate4',
-            'radiobuttonRate5'
+            'radiobuttonRate5'            
             ]
         
         builder = self.create_builder("dialog_conclusion.ui")
@@ -61,6 +63,9 @@ class DialogConclusion(BaseWindow):
             self.get_widget('labelConclusionCutStatus').hide()
             self.get_widget('labelConclusionCut').hide()   
             self.get_widget('vboxRating').hide()
+            self.get_widget('check_delete_uncut').hide()
+            self.get_widget('button_conclusion_play_cut').hide()
+            
         elif self.action==Action.CUT:
             self.get_widget('labelConclusionDecodeStatus').hide()
             self.get_widget('labelConclusionDecode').hide()   
@@ -75,11 +80,11 @@ class DialogConclusion(BaseWindow):
     ###
      
     def __status_to_s(self, status):
-        if status==Status.OK:
+        if status == Status.OK:
             return "OK"
-        elif status==Status.ERROR:
+        elif status == Status.ERROR:
             return "Fehler"
-        elif status==Status.NOT_DONE:
+        elif status == Status.NOT_DONE:
             return "Nicht durchgeführt"
      
     ###
@@ -87,7 +92,7 @@ class DialogConclusion(BaseWindow):
     ###
              
     def on_buttonConclusionPlay_clicked(self, widget, data=None):    
-        if self.action==Action.DECODE or self.file_conclusions[self.conclusion_iter].cut.status != Status.OK:
+        if self.action == Action.DECODE or self.file_conclusions[self.conclusion_iter].cut.status != Status.OK:
             filename = self.file_conclusions[self.conclusion_iter].uncut_avi
         else:    
             filename = self.file_conclusions[self.conclusion_iter].cut_avi
@@ -95,18 +100,30 @@ class DialogConclusion(BaseWindow):
         self.app.perform_action(Action.PLAY, [filename])      
         
     def on_radiobuttonRating_toggled(self, widget, rate):
-        if widget.get_active()==True:            
+        if widget.get_active() == True:            
             self.file_conclusions[self.conclusion_iter].cut.rating = rate 
+    
+    def on_check_delete_uncut_toggled(self, widget, data=None):
+        print "set to: ", widget.get_active()
+        self.file_conclusions[self.conclusion_iter].cut.delete_uncut = widget.get_active()
        
     def on_checkbuttonRate_toggled(self, widget, data=None):
         status = widget.get_active()
 
-        if status==False:
+        if status == False:
             self.get_widget('radiobuttonRate0').set_active(True)
             self.file_conclusions[self.conclusion_iter].cut.rating = -1
         
         for radio in ['radiobuttonRate0', 'radiobuttonRate1', 'radiobuttonRate2', 'radiobuttonRate3', 'radiobuttonRate4', 'radiobuttonRate5' ]:
             self.get_widget(radio).set_sensitive(status)
+    
+    def on_button_conclusion_play_cut_clicked(self, widget, data=None):
+        file_conclusion = self.file_conclusions[self.conclusion_iter]
+    
+        if not file_conclusion.cut.local_cutlist:
+            print "Lokale Cutlist nicht vorhanden!"
+        else:
+            self.app.show_cuts(file_conclusion.uncut_avi, file_conclusion.cut.local_cutlist)
         
     def on_buttonBack_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter - 1)
@@ -120,10 +137,12 @@ class DialogConclusion(BaseWindow):
         # reset dialog        
         self.get_widget('labelCount').set_text("Zeige Datei %s/%s" % (self.conclusion_iter + 1, len(self.file_conclusions)))
         self.get_widget('vboxRating').hide()
-        self.get_widget('vboxButtons').hide()
+        self.get_widget('buttonConclusionPlay').hide()
+        self.get_widget('check_delete_uncut').hide()
+        self.get_widget('button_conclusion_play_cut').hide()
         
         # enable back-button?
-        if self.conclusion_iter==0:
+        if self.conclusion_iter == 0:
             self.get_widget('buttonBack').set_sensitive(False)
         else:
             self.get_widget('buttonBack').set_sensitive(True)
@@ -152,8 +171,8 @@ class DialogConclusion(BaseWindow):
             if message != "":
                 text += " (%s)" % message
             
-            if file_conclusion.decode.status==Status.OK:
-                self.get_widget('vboxButtons').show()
+            if file_conclusion.decode.status == Status.OK:
+                self.get_widget('buttonConclusionPlay').show()
                             
             self.get_widget('labelConclusionDecodeStatus').set_text(text)
         
@@ -165,20 +184,28 @@ class DialogConclusion(BaseWindow):
             if message != "":
                 text += " (%s)" % message
            
-            if file_conclusion.cut.cut_action != -1 and file_conclusion.cut.status==Status.OK:
+            # removed: file_conclusion.cut.cut_action != -1 and
+            if file_conclusion.cut.status == Status.OK:
+                
+                self.get_widget('check_delete_uncut').set_active(True)
+                file_conclusion.cut.delete_uncut = True
+                self.get_widget('check_delete_uncut').show()                
+                
                 if file_conclusion.cut.cut_action == Cut_action.MANUALLY:
                     text += ", Manuell geschnitten"
                 else:
                     text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist
-                    # enable rating options and play option
+                    # enable rating and play options
                     self.get_widget('vboxRating').show()
-                    self.get_widget('vboxButtons').show()
+                    self.get_widget('buttonConclusionPlay').show()
+                    self.get_widget('button_conclusion_play_cut').show()
                     
                     # already rated?
                     if file_conclusion.cut.rating > -1:                               
                         self.get_widget('checkbuttonRate').set_active(True)
                         self.get_widget('radiobuttonRate' + str(file_conclusion.cut.rating)).set_active(True)
                     else:
-                        self.get_widget('checkbuttonRate').set_active(False)
-                                       
+                        self.get_widget('checkbuttonRate').set_active(False)            
+             
+            print text                           
             self.get_widget('labelConclusionCutStatus').set_text(text) 
