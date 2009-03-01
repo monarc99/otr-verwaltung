@@ -8,12 +8,12 @@ import popen2
 import subprocess
 import urllib
 import os
-from os.path import basename, join, dirname, exists
+from os.path import basename, join, dirname, exists, splitext
 import threading
 
 import fileoperations
 from filesconclusion import FileConclusion
-from constants import Action, Cut_action, Save_Email_Password, Status
+from constants import Action, Cut_action, Save_Email_Password, Status, Format, Program
 from baseaction import BaseAction
 import cutlists as cutlists_management
 
@@ -66,8 +66,7 @@ class DecodeOrCut(BaseAction):
             self.__gui.main_window.get_widget('label_tasks').set_text('Schneiden')
             cut = True
         else:
-            self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren/Schneiden')
-            decode, cut = True, True
+            self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren/Schneiden')        
                                     
         # create file_conclusions array        
         file_conclusions = []
@@ -234,10 +233,6 @@ class DecodeOrCut(BaseAction):
         return True
             
     def cut(self, file_conclusions, action, rename_by_schema):                      
-        if self.config.get('cut', 'avidemux') == "":
-            self.__gui.message_error_box("Es ist kein Avidemux angegeben!")
-            return False        
-
         # now this method may not return "False"
         self.__gui.main_window.get_widget('eventbox_tasks').show()
         self.__gui.main_window.block_gui(True)  
@@ -379,20 +374,85 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut_avi = cut_avi
                     file_conclusion.cut.local_cutlist = local_cutlist
 
-            elif cut_action == Cut_action.MANUALLY: # MANUALLY
-                command = "%s --load %s >>/dev/null" % (self.config.get('cut', 'avidemux'), file_conclusion.uncut_avi)
-                avidemux = subprocess.Popen(command, shell=True)    
-                while avidemux.poll() == None:
-                    # wait
-                    pass
+            elif cut_action == Cut_action.MANUALLY: # MANUALLY                
+                error = self.cut_file_manually(file_conclusion.uncut_avi)
                     
-                file_conclusion.cut.status = Status.OK
+                if None == error:
+                    file_conclusion.cut.status = Status.OK
+                else:
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = error
               
         # after iterating over all items:
         return True
+
+    def __get_format(self, filename):        
+        root, extension = splitext(filename)
+            
+        if extension == '.avi':
+            if splitext(root)[1] == '.HQ':
+                return Format.HQ
+            else:
+                return Format.AVI
+        elif extension == '.mp4':
+            return Format.MP4
+        else:
+            return -1
+
+    def __get_program(self, filename):   
+        programs = { Format.AVI : self.config.get('cut', 'avi'),
+                     Format.HQ  : self.config.get('cut', 'hq'),
+                     Format.MP4 : self.config.get('cut', 'mp4') }
+                     
+        format = self.__get_format(filename)                 
+
+        if format < 0:
+            return -1, "Format konnte nicht bestimmt werden."
+                             
+        config_value = programs[format]
+        
+        if 'avidemux' in config_value:
+            return Program.AVIDEMUX, config_value
+        elif 'vdub' in config_value:
+            return Program.VIRTUALDUB, config_value
+        else:
+            return -2, "Programm konnte nicht bestimmt werden (%s)." % config_value
+   
+    def __generate_filename(self, filename, rename_by_schema):
+        # generate filename for a cut avi
+        if self.config.get('rename', 'rename_cut'):
+            directory = dirname(filename)
+            name = basename(filename)        
+            new_name = rename_by_schema(name)
+                    
+            cut_avi = join(directory, new_name)        
+        else:
+            cut_avi = filename[0:len(filename)-4] # remove .avi
+            cut_avi += "-cut.avi"
+            
+        return cut_avi
+   
+    def cut_file_manually(self, filename):
+        program, config_value = self.__get_program(filename)
+        if program < 0:
+            return config_value
+    
+        if program == Program.AVIDEMUX:
+            command = "%s --load %s" % (config_value, filename)
+            avidemux = subprocess.Popen(command, shell=True)    
+            while avidemux.poll() == None:
+                # wait
+                pass
+        else: # VIRTUALDUB
+            return "Virtualdub wird noch nicht unterstützt."
+        
+        return None
              
     def cut_file_by_cutlist(self, filename, cutlist, rename_by_schema, local=False):
-              
+        program, config_value = self.__get_program(filename)
+        if program < 0:
+            return None, None, config_value 
+            
         if local:
             local_filename = cutlist            
         else:                             
@@ -409,7 +469,16 @@ class DecodeOrCut(BaseAction):
         
         if type(cuts) != list: # error occured
             return None, None, "Fehler: cuts!=list (%s)" % cuts
-                  
+        
+        if program == Program.AVIDEMUX:
+            cut_avi = self.__cut_file_avidemux(filename, cuts, config_value, rename_by_schema)
+            
+        else: # VIRTUALDUB
+            cut_avi = self.__cut_file_virtualdub(filename, cuts, config_value, rename_by_schema)                      
+        
+        return cut_avi, local_filename, None
+
+    def __cut_file_avidemux(self, filename, cuts, config_value, rename_by_schema):
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
         
@@ -428,18 +497,8 @@ class DecodeOrCut(BaseAction):
             frame_duration = duration * 25
             f.write("app.addSegment(0, %s, %s);\n" %(str(int(frame_start)), str(int(frame_duration))))
 
-        # generate filename for a cut avi
-        if self.config.get('rename', 'rename_cut'):
-            directory = dirname(filename)
-            name = basename(filename)        
-            new_name = rename_by_schema(name)
-                    
-            cut_avi = join(directory, new_name)        
-        else:
-            cut_avi = filename[0:len(filename)-4] # remove .avi
-            cut_avi += "-cut.avi"
-           
-                   
+        cut_avi = self.__generate_filename(filename, rename_by_schema)
+                                
         f.writelines([
             '//** Postproc **\n',
             'app.video.setPostProc(3,3,0);\n',
@@ -463,13 +522,49 @@ class DecodeOrCut(BaseAction):
         f.close()
         
         # start avidemux:   
-        command = "%s --force-smart --run tmp.js --quit >>/dev/null" % self.config.get('cut', 'avidemux') # --nogui
+        command = "%s --force-smart --run tmp.js --quit >>/dev/null" % config_value # --nogui
         avidemux = subprocess.Popen(command, shell=True)
-        while avidemux.poll()==None:
+        while avidemux.poll() == None:
             while events_pending():
                 main_iteration(False)  
         
         fileoperations.remove_file('tmp.js')
         
-        # successful
-        return cut_avi, local_filename, None
+        return cut_avi
+        
+    def __cut_file_virtualdub(self, filename, cuts, config_value, rename_by_schema):
+        # make file for avidemux scripting engine
+        f = open("tmp.vcf", "w")
+        
+        f.writelines([
+            'VirtualDub.Open("%s");\n' % filename,
+            'VirtualDub.video.SetMode(0);\n',
+            'VirtualDub.subset.Clear();\n',            
+            ])
+            
+        for count, start, duration in cuts:
+            f.write("VirtualDub.subset.AddRange(%s, %s);\n" % (str(start * 25), str(duration * 25)))
+
+        cut_avi = self.__generate_filename(filename, rename_by_schema)
+                                
+        f.writelines([
+            'VirtualDub.SaveAVI("%s");\n' % cut_avi,
+            'VirtualDub.Close();'
+            ])
+
+        f.close()
+        
+        # start vdub
+        command = "%s /s tmp.vcf /x" % config_value
+
+        if os.name == 'posix':
+            command = "wineconsole " + command
+                
+        vdub = subprocess.Popen(command, shell=True)
+        while vdub.poll() == None:
+            while events_pending():
+                main_iteration(False)
+        
+        fileoperations.remove_file('tmp.vcf')
+        
+        return cut_avi

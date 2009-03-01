@@ -42,3 +42,12 @@ class Status:
     OK          = 0
     ERROR       = 1
     NOT_DONE    = 2
+    
+class Format:
+    AVI = 0
+    HQ  = 1
+    MP4 = 2
+    
+class Program:
+    AVIDEMUX    = 0
+    VIRTUALDUB  = 1

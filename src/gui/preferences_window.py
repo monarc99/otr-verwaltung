@@ -79,7 +79,7 @@ class PreferencesWindow(BaseWindow):
 
         # fill combobox of avi, hq, mp4
         avidemux = ["avidemux", "avidemux2", "avidemux2_cli", r"C:\Programme\Avidemux\avidemux.exe"]
-        virtualdub = [r"C:\Programme\VirtualDub\virtualdub.exe"]
+        virtualdub = [r"C:\Programme\VirtualDub\vdub.exe"]
         
         self.__set_model_from_list(builder.get_object('combobox_avi'), avidemux + virtualdub)
         builder.get_object('comboboxentry-avi').set_text(self.app.config.get('cut', 'avi'))
