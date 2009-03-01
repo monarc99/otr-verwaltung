@@ -11,21 +11,17 @@ def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):
     size = fileoperations.get_size(filename)
     url = "%sgetxml.php?version=0.9.8.0&ofsb=%s" % (server, str(size))
       
-    handle = urllib.urlopen(url)     
     try:
-        pass
         handle = urllib.urlopen(url)     
     except IOError:  
         if error_cb: 
             error_cb("Verbindungsprobleme")
         return []
-
-    dom_cutlists = xml.dom.minidom.parse(handle)
-    handle.close()
-    dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
-                    
+                   
     try:
-        pass
+        dom_cutlists = xml.dom.minidom.parse(handle)
+        handle.close()
+        dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
     except:
         if error_cb: 
             error_cb("Keine Cutlists gefunden")

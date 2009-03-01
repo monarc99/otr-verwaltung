@@ -64,43 +64,32 @@ class PreferencesWindow(BaseWindow):
                     'labelDescTrash',
                     'labelBestCutlist',
                     'labelChooseCutlist',
-                    'labelManually',
-                    'labelDescAvidemux',
+                    'labelManually',                    
                     'labelLocalCutlist']
         for label in labels:
             builder.get_object(label).modify_font(pango.FontDescription("9"))            
                          
         # fill combobox of player
-        player_store = gtk.ListStore(str)
-        player_store.append(["vlc"])
-        player_store.append(["totem"])
-        player_store.append(["mplayer"])
-        builder.get_object('comboboxPlayer').set_model(player_store)
-        builder.get_object('comboboxPlayer').set_text_column(0)
+        self.__set_model_from_list(builder.get_object('comboboxPlayer'), ["vlc", "totem", "mplayer"])
         builder.get_object('comboboxentry-player').set_text(self.app.config.get('play', 'player'))
         
         # fill combobox of mplayer
-        mplayer_store = gtk.ListStore(str)
-        mplayer_store.append(["mplayer"])
-        builder.get_object('comboboxMPlayer').set_model(mplayer_store)
-        builder.get_object('comboboxMPlayer').set_text_column(0)
+        self.__set_model_from_list(builder.get_object('comboboxMPlayer'), ["mplayer"])
         builder.get_object('comboboxentry-mplayer').set_text(self.app.config.get('play', 'mplayer'))
+
+        # fill combobox of avi, hq, mp4
+        avidemux = ["avidemux", "avidemux2", "avidemux2_cli", r"C:\Programme\Avidemux\avidemux.exe"]
+        virtualdub = [r"C:\Programme\VirtualDub\virtualdub.exe"]
         
-        # fill combobox avidemux
-        avidemux_store = gtk.ListStore(str)
-        avidemux_store.append(["avidemux"])
-        avidemux_store.append(["avidemux2"])        
-        avidemux_store.append(["avidemux2_cli"]) 
-        builder.get_object('comboboxAvidemux').set_model(avidemux_store)
-        builder.get_object('comboboxAvidemux').set_text_column(0)
-        builder.get_object('comboboxentry-avidemux').set_text(self.app.config.get('cut', 'avidemux'))
+        self.__set_model_from_list(builder.get_object('combobox_avi'), avidemux + virtualdub)
+        builder.get_object('comboboxentry-avi').set_text(self.app.config.get('cut', 'avi'))
+        self.__set_model_from_list(builder.get_object('combobox_hq'), virtualdub)
+        builder.get_object('comboboxentry-hq').set_text(self.app.config.get('cut', 'hq'))
+        self.__set_model_from_list(builder.get_object('combobox_mp4'), avidemux)
+        builder.get_object('comboboxentry-mp4').set_text(self.app.config.get('cut', 'mp4'))
         
         # fill combobox servers
-        server_store = gtk.ListStore(str)
-        server_store.append(["http://cutlist.mbod.net/"])
-        server_store.append(["http://cutlist.at/"])
-        builder.get_object('comboboxServer').set_model(server_store)
-        builder.get_object('comboboxServer').set_text_column(0)
+        self.__set_model_from_list(builder.get_object('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
         builder.get_object('comboboxentry-server').set_text(self.app.config.get('cut', 'server'))
         
         # fill values from config_dic
@@ -135,6 +124,24 @@ class PreferencesWindow(BaseWindow):
         builder.get_object('check_rename_cut').set_active(self.app.config.get('rename', 'rename_cut'))
         self.get_widget('entry_schema').set_sensitive(self.app.config.get('rename', 'rename_cut'))
         self.get_widget('entry_schema').set_text(self.app.config.get('rename', 'schema'))
+     
+    #
+    # Helper
+    # 
+        
+    def __set_model_from_list(self, cb, items):
+        """Setup a ComboBox or ComboBoxEntry based on a list of strings."""           
+        model = gtk.ListStore(str)
+        for i in items:
+            model.append([i])
+        cb.set_model(model)
+        if type(cb) == gtk.ComboBoxEntry:
+            cb.set_text_column(0)
+        elif type(cb) == gtk.ComboBox:
+            cell = gtk.CellRendererText()
+            cb.pack_start(cell, True)
+            cb.add_attribute(cell, 'text', 0)
+        
         
     #
     #  Signal handlers
@@ -222,8 +229,14 @@ class PreferencesWindow(BaseWindow):
         if widget.get_active()==True:
             self.app.config.set('cut', 'cut_action', Cut_action.MANUALLY)
 
-    def on_comboboxentry_avidemux_changed(self, widget, data=None):
-        self.app.config.set('cut', 'avidemux', widget.get_text())
+    def on_comboboxentry_avi_changed(self, widget, data=None):
+        self.app.config.set('cut', 'avi', widget.get_text())
+
+    def on_comboboxentry_hq_changed(self, widget, data=None):
+        self.app.config.set('cut', 'hq', widget.get_text())
+
+    def on_comboboxentry_mp4_changed(self, widget, data=None):
+        self.app.config.set('cut', 'mp4', widget.get_text())
     
     # cutlist tab    
     def on_comboboxentry_server_changed(self, widget, data=None):

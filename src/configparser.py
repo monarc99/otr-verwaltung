@@ -78,8 +78,10 @@ class Config:
                 },
             'cut':
                 {
-                    'avidemux':             self.__read_value('cut', 'avidemux', ''),
-                    'server':               self.__read_value('cut', 'server', 'http://cutlist.at'),
+                    'avi':                  self.__read_value('cut', 'avi', ''),
+                    'hq':                   self.__read_value('cut', 'hq', ''),
+                    'mp4':                  self.__read_value('cut', 'mp4', ''),
+                    'server':               self.__read_value('cut', 'server', 'http://cutlist.at/'),
                     'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK)),
                     'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1))
                 },

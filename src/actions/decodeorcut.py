@@ -7,6 +7,7 @@ import base64
 import popen2
 import subprocess
 import urllib
+import os
 from os.path import basename, join, dirname, exists
 import threading
 
@@ -133,7 +134,7 @@ class DecodeOrCut(BaseAction):
              
      
     def decode(self, file_conclusions):          
-        
+            
         # no decoder        
         if not "decode" in self.config.get('decode', 'path'): # no decoder specified
             # dialog box: no decoder
@@ -166,32 +167,46 @@ class DecodeOrCut(BaseAction):
             # update progress
             self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
                    
-            command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
+            curr_dir = ""      
+            if os.name == "posix":
+                command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
             
-            if self.config.get('decode', 'correct') == 0:
-                command += " -q"
-                                   
+                if self.config.get('decode', 'correct') == 0:
+                    command += " -q"
+            else: # windows
+         
+               # TODO: de-hack, use subprocess module and get rid of while events_pending()...
+               curr_dir = os.getcwd()   
+               os.chdir(dirname(self.config.get('decode', 'path')))
+
+               command = '%s -uotr %s -pwotr %s -f %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey)               
+               # Multidecoder.exe -uotr belbers@gmx.net -pwotr hasihas -f X:\Die_Simpsons.otrkey -c true -hide
+
             (pout, pin, perr) = popen2.popen3(command)
-            while True:
-                l = ""
-                while True:
-                    c = pout.read(1)
-                    if c == "\r" or c == "\n":
-                        break
-                    l += c
+            if os.name == "posix":
+               while True:
+                   l = ""
+                   while True:
+                       c = pout.read(1)
+                       if c == "\r" or c == "\n":
+                           break
+                       l += c
             
-                if not l:
-                    break
+                   if not l:
+                       break
             
-                try:      
-                    progress = int(l[10:13])                    
-                    # update progress
-                    self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
-                    
-                    while events_pending():
-                        main_iteration(False)
-                except ValueError:                
-                    pass
+                   try:      
+                       progress = int(l[10:13])                    
+                       # update progress
+                       self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
+                       
+                       while events_pending():
+                           main_iteration(False)
+                   except ValueError:                
+                       pass
+
+            if curr_dir:
+               os.chdir(curr_dir)
             
             # errors?
             errors = perr.readlines()

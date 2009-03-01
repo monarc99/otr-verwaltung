@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from os import listdir, walk
+import os
 from os.path import join, isdir, exists
 import re
 import subprocess
@@ -11,7 +11,8 @@ import time
 try:
     from gtk import gdk
     import gobject
-    gdk.threads_init()    
+    if os.name == "posix":
+        gdk.threads_init()    
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
@@ -157,7 +158,7 @@ class App:
         if path == "":      
             return text, []
         
-        files = [join(path, f) for f in listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
+        files = [join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
             
         return (text, files)
          
@@ -165,7 +166,7 @@ class App:
         text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config.get('folders', 'new_otrkeys')
         
-        files = [join(path, f) for f in listdir(path) if self.__uncut_video.match(f) and self.search(f)]
+        files = [join(path, f) for f in os.listdir(path) if self.__uncut_video.match(f) and self.search(f)]
             
         return (text, files)
         
@@ -177,7 +178,7 @@ class App:
         path = self.config.get('folders', 'new_otrkeys')
         
         files = []                
-        for f in listdir(path):
+        for f in os.listdir(path):
             if not self.__uncut_video.match(f):
                 if self.__cut_video.match(f):
                     if self.search(f):
@@ -189,7 +190,7 @@ class App:
         text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path = self.config.get('folders', 'trash')
                     
-        files = [join(path, f) for f in listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
+        files = [join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
                 
         return (text, files)
 
@@ -210,7 +211,7 @@ class App:
             dir = path
 
         files = []
-        files = listdir(dir)            
+        files = os.listdir(dir)            
 
         for file in files:
             full_path = join(dir, file)
@@ -316,7 +317,7 @@ class App:
          
         # archive 
         files = []       
-        for root, dirs, wfiles in walk(self.config.get('folders', 'archive')):
+        for root, dirs, wfiles in os.walk(self.config.get('folders', 'archive')):
             for f in wfiles:
                 # TODO: match all videos files
                 if f.endswith('.avi') and self.search(f):
