@@ -15,6 +15,7 @@ import fileoperations
 from filesconclusion import FileConclusion
 from constants import Action, Cut_action, Save_Email_Password, Status, Format, Program
 from baseaction import BaseAction
+import codec
 import cutlists as cutlists_management
 
 class GeneratorTask(object):
@@ -65,10 +66,10 @@ class DecodeOrCut(BaseAction):
         elif action == Action.CUT:
             self.__gui.main_window.get_widget('label_tasks').set_text('Schneiden')
             cut = True
-        else:
+        else: # decode and cut
             self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren/Schneiden')        
-                                    
-        # create file_conclusions array        
+            decode, cut = True, True
+                                       
         file_conclusions = []
             
         if decode:
@@ -441,10 +442,23 @@ class DecodeOrCut(BaseAction):
             command = "%s --load %s" % (config_value, filename)
             avidemux = subprocess.Popen(command, shell=True)    
             while avidemux.poll() == None:
-                # wait
                 pass
+                
         else: # VIRTUALDUB
-            return "Virtualdub wird noch nicht unterstützt."
+            # TODO: kind of a hack
+            curr_dir = os.getcwd()
+            os.chdir(dirname(config_value))
+            
+            if os.name == 'posix':
+                command = 'wine VirtualDub.exe'
+            else:
+                command = 'VirtualDub.exe'
+                
+            vdub = subprocess.Popen(command, shell=True)
+            while vdub.poll() == None:
+                pass
+            
+            os.chdir(curr_dir)
         
         return None
              
@@ -502,11 +516,13 @@ class DecodeOrCut(BaseAction):
         f.writelines([
             '//** Postproc **\n',
             'app.video.setPostProc(3,3,0);\n',
-            'app.video.setFps1000(25000);\n',
-            '\n',
-            '//** Video Codec conf **\n',
-            'app.video.codec("Copy","CQ=4","0");\n',
-            '\n',
+            'app.video.setFps1000(25000);\n'
+            ])
+            
+        if self.config.get('cut', 'smart'):
+            f.write('app.video.codec("Copy","CQ=4","0");\n')
+            
+        f.writelines([
             '//** Audio **\n',
             'app.audio.reset();\n',
             'app.audio.codec("copy",128,0,"");\n',
@@ -536,17 +552,31 @@ class DecodeOrCut(BaseAction):
         # make file for avidemux scripting engine
         f = open("tmp.vcf", "w")
         
-        f.writelines([
-            'VirtualDub.Open("%s");\n' % filename,
-            'VirtualDub.video.SetMode(0);\n',
-            'VirtualDub.subset.Clear();\n',            
-            ])
+        format = self.__get_format(filename)         
+        if format == Format.HQ:
+            comp_data = codec.GetCompDataHQ()
+        else:
+            comp_data = codec.GetCompDataAVI()
+        
+        f.write('VirtualDub.Open("%s");\n' % filename)
             
+        if self.config.get('cut', 'smart'):
+            f.writelines([               
+                'VirtualDub.video.SetMode(1);\n',
+                'VirtualDub.video.SetSmartRendering(1);\n',
+                'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
+                'VirtualDub.video.SetCompData(%s);\n' % comp_data                
+                ])
+        else:
+            f.write('VirtualDub.video.SetMode(0);\n')
+
+        f.write('VirtualDub.subset.Clear();\n')
+
         for count, start, duration in cuts:
             f.write("VirtualDub.subset.AddRange(%s, %s);\n" % (str(start * 25), str(duration * 25)))
 
         cut_avi = self.__generate_filename(filename, rename_by_schema)
-                                
+                            
         f.writelines([
             'VirtualDub.SaveAVI("%s");\n' % cut_avi,
             'VirtualDub.Close();'

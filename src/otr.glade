@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar  1 11:49:06 2009 -->
+<!--Generated with glade3 3.4.5 on Mon Mar  2 18:38:25 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -419,13 +419,14 @@
                     <child>
                       <widget class="GtkTable" id="table10">
                         <property name="visible">True</property>
-                        <property name="n_rows">4</property>
+                        <property name="n_rows">5</property>
                         <property name="n_columns">2</property>
                         <property name="column_spacing">12</property>
                         <property name="row_spacing">3</property>
                         <child>
                           <widget class="GtkComboBoxEntry" id="combobox_mp4">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="items" translatable="yes"></property>
                             <child internal-child="entry">
                               <widget class="GtkEntry" id="comboboxentry-mp4">
@@ -537,6 +538,22 @@
                             <property name="x_options">GTK_FILL</property>
                           </packing>
                         </child>
+                        <child>
+                          <widget class="GtkCheckButton" id="check_smart">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="label" translatable="yes">Smart Rendering aktivieren</property>
+                            <property name="response_id">0</property>
+                            <property name="draw_indicator">True</property>
+                            <signal name="toggled" handler="on_check_smart_toggled"/>
+                          </widget>
+                          <packing>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">4</property>
+                            <property name="bottom_attach">5</property>
+                            <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
                       </widget>
                       <packing>
                         <property name="right_attach">2</property>
@@ -568,17 +585,6 @@
                         <property name="right_attach">2</property>
                         <property name="top_attach">7</property>
                         <property name="bottom_attach">9</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator8">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                     <child>
@@ -638,6 +644,17 @@
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
                         <property name="x_options">GTK_FILL</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkHSeparator" id="hseparator8">
+                        <property name="visible">True</property>
+                      </widget>
+                      <packing>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                        <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
                   </widget>

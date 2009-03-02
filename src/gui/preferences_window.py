@@ -87,7 +87,7 @@ class PreferencesWindow(BaseWindow):
         builder.get_object('comboboxentry-hq').set_text(self.app.config.get('cut', 'hq'))
         self.__set_model_from_list(builder.get_object('combobox_mp4'), avidemux)
         builder.get_object('comboboxentry-mp4').set_text(self.app.config.get('cut', 'mp4'))
-        
+                
         # fill combobox servers
         self.__set_model_from_list(builder.get_object('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
         builder.get_object('comboboxentry-server').set_text(self.app.config.get('cut', 'server'))
@@ -98,6 +98,7 @@ class PreferencesWindow(BaseWindow):
         builder.get_object('folderTrash').set_current_folder(self.app.config.get('folders', 'trash'))
         builder.get_object('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
         builder.get_object('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
+        builder.get_object('check_smart').set_active(self.app.config.get('cut', 'smart'))
          
         # cutlists tab
         builder.get_object('check_delete_cutlists').set_active(self.app.config.get('cut', 'delete_cutlists'))
@@ -237,6 +238,9 @@ class PreferencesWindow(BaseWindow):
 
     def on_comboboxentry_mp4_changed(self, widget, data=None):
         self.app.config.set('cut', 'mp4', widget.get_text())
+   
+    def on_check_smart_toggled(self, widget, data=None):
+        self.app.config.set('cut', 'smart', int(widget.get_active()))
     
     # cutlist tab    
     def on_comboboxentry_server_changed(self, widget, data=None):
