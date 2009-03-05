@@ -22,6 +22,7 @@
 from os.path import join, isdir, basename
 import sys
 import time
+import webbrowser
 
 import gtk
 import pango
@@ -428,11 +429,18 @@ class MainWindow(BaseWindow):
 
                   
     def on_menuHelpAbout_activate(self, widget, data=None):
+
+        def open_website(dialog, url, data=None):
+            webbrowser.open(url)
+
+        gtk.about_dialog_set_url_hook(open_website)
+
         about_dialog = gtk.AboutDialog()        
         about_dialog.set_transient_for(self.gui.main_window.get_window())
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_name("OTR-Verwaltung")
-        about_dialog.set_version("0.5")
+        about_dialog.set_version("0.5.2")
+        about_dialog.set_website("http://code.google.com/p/otr-verwaltung/")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2008 Benjamin Elbers")
         about_dialog.set_authors(["Benjamin Elbers <elbersb@googlemail.com>"])
