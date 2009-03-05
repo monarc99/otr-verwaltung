@@ -179,8 +179,7 @@ class DecodeOrCut(BaseAction):
                curr_dir = os.getcwd()   
                os.chdir(dirname(self.config.get('decode', 'path')))
 
-               command = '%s -uotr %s -pwotr %s -f %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey)               
-               # Multidecoder.exe -uotr belbers@gmx.net -pwotr hasihas -f X:\Die_Simpsons.otrkey -c true -hide
+               command = '%s -uotr %s -pwotr %s -f %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey)                              
 
             (pout, pin, perr) = popen2.popen3(command)
             if os.name == "posix":
@@ -417,7 +416,7 @@ class DecodeOrCut(BaseAction):
         elif 'vdub' in config_value:
             return Program.VIRTUALDUB, config_value
         else:
-            return -2, "Programm konnte nicht bestimmt werden (%s)." % config_value
+            return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub (vdub.exe) und Avidemux unterstützt." % config_value
    
     def __generate_filename(self, filename, rename_by_schema):
         # generate filename for a cut avi
@@ -433,6 +432,34 @@ class DecodeOrCut(BaseAction):
             
         return cut_avi
    
+    def __get_aspect_ratio(self, filename):
+        """ Gets the aspect ratio of a movie using mplayer. 
+            Returns without error:              
+                       aspect_ratio, None
+                    with error:
+                       None, error_message """
+        
+        mplayer = self.config.get('play', 'mplayer')
+        
+        if not mplayer:
+            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Aspect Ratio benötigt."
+        
+        process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+           
+        while True:
+            line = process.stdout.readline()
+                    
+            if process.poll() != None:
+                return None, "Mplayer-Fehlermeldung: " + process.stderr.read()
+        
+            if "Aspe" in line:
+                if "1.78:1" in line or "0.56:1" in line:
+                    return "16:9", None
+                elif "1.33:1" in line:
+                    return "4:3", None
+                else:
+                    return None, "Aspekt konnte nicht bestimmt werden " + line
+       
     def cut_file_manually(self, filename):
         program, config_value = self.__get_program(filename)
         if program < 0:
@@ -450,7 +477,7 @@ class DecodeOrCut(BaseAction):
             os.chdir(dirname(config_value))
             
             if os.name == 'posix':
-                command = 'wine VirtualDub.exe'
+                command = 'wineconsole VirtualDub.exe'
             else:
                 command = 'VirtualDub.exe'
                 
@@ -487,8 +514,25 @@ class DecodeOrCut(BaseAction):
         if program == Program.AVIDEMUX:
             cut_avi = self.__cut_file_avidemux(filename, cuts, config_value, rename_by_schema)
             
-        else: # VIRTUALDUB
-            cut_avi = self.__cut_file_virtualdub(filename, cuts, config_value, rename_by_schema)                      
+        else: # VIRTUALDUB                
+            format = self.__get_format(filename)         
+
+            if format == Format.HQ:
+                aspect, error_message = self.__get_aspect_ratio(filename)
+                if not aspect:
+                    return None, None, error_message                     
+                    
+                if aspect == "16:9":
+                    comp_data = codec.get_comp_data_h264_169()
+                else:
+                    comp_data = codec.get_comp_data_h264_43()
+                    
+            elif format == Format.AVI:      
+                comp_data = codec.get_comp_data_dx50()
+            else:
+                return None, None, "Format nicht unterstützt (Nur Avi DX50 und HQ H264 sind möglich)."
+                
+            cut_avi = self.__cut_file_virtualdub(filename, cuts, comp_data, config_value, rename_by_schema)                      
         
         return cut_avi, local_filename, None
 
@@ -548,15 +592,9 @@ class DecodeOrCut(BaseAction):
         
         return cut_avi
         
-    def __cut_file_virtualdub(self, filename, cuts, config_value, rename_by_schema):
-        # make file for avidemux scripting engine
+    def __cut_file_virtualdub(self, filename, cuts, comp_data, config_value, rename_by_schema):
+        # make file for virtualdub scripting engine
         f = open("tmp.vcf", "w")
-        
-        format = self.__get_format(filename)         
-        if format == Format.HQ:
-            comp_data = codec.GetCompDataHQ()
-        else:
-            comp_data = codec.GetCompDataAVI()
         
         f.write('VirtualDub.Open("%s");\n' % filename)
             
