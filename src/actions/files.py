@@ -4,6 +4,7 @@
 from os import mkdir
 from os.path import dirname, join, isdir
 import fileoperations
+import re
 
 from baseaction import BaseAction
 
@@ -35,17 +36,23 @@ class RealDelete(BaseAction):
             message = "Es sind %s Dateien ausgewählt. Sollen diese Dateien " % len(filenames)
         
         if self.__gui.question_box(message + "endgültig gelöscht werden?"):
-            for f in filenames:
+            for f in filenames:           
                 fileoperations.remove_file(f)
 
 class Restore(BaseAction):
     def __init__(self, gui):
         self.update_list = True
         self.__gui = gui
+        self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
 
-    def do(self, filenames, new_otrkeys_folder):
+    def do(self, filenames, new_otrkeys_folder, uncut_avis_folder, cut_avis_folder):
         for f in filenames:
-            fileoperations.move_file(f, new_otrkeys_folder)
+            if f.endswith("otrkey"):
+                fileoperations.move_file(f, new_otrkeys_folder)
+            elif self.__uncut_video.match(f):                        
+                fileoperations.move_file(f, uncut_avis_folder)
+            else:
+                fileoperations.move_file(f, cut_avis_folder)
     
 class Rename(BaseAction):
     def __init__(self, gui):

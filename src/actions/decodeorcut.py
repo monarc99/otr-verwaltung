@@ -105,7 +105,7 @@ class DecodeOrCut(BaseAction):
         
         if cut:
         
-            # move to trash if it's ok
+            # move uncut avi to trash if it's ok            
             for file_conclusion in file_conclusions:
                 if file_conclusion.cut.delete_uncut:
                     # move to trash
@@ -169,7 +169,7 @@ class DecodeOrCut(BaseAction):
                    
             curr_dir = ""      
             if os.name == "posix":
-                command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'new_otrkeys'))
+                command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'uncut_avis'))
             
                 if self.config.get('decode', 'correct') == 0:
                     command += " -q"
@@ -179,7 +179,7 @@ class DecodeOrCut(BaseAction):
                curr_dir = os.getcwd()   
                os.chdir(dirname(self.config.get('decode', 'path')))
 
-               command = '%s -uotr %s -pwotr %s -f %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey)                              
+               command = '%s -uotr %s -pwotr %s -f %s -o %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey, self.config.get('folders', 'uncut_avis'))                              
 
             (pout, pin, perr) = popen2.popen3(command)
             if os.name == "posix":
@@ -220,10 +220,12 @@ class DecodeOrCut(BaseAction):
                                                             
             if len(errors) == 0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
-                file_conclusion.uncut_avi = file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]  
-                                  
-                # TODO: Verschieben auf nach dem zeigen der zusammenfassung?            
-                # move to trash
+                print self.config.get('folders', 'uncut_avis')
+                print file_conclusion.otrkey
+                print basename(file_conclusion.otrkey)[0:len(file_conclusion.otrkey)-7]
+                file_conclusion.uncut_avi = join(self.config.get('folders', 'uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
+                             
+                # move otrkey to trash
                 target = self.config.get('folders', 'trash')
                 fileoperations.move_file(file_conclusion.otrkey, target)
             else:            
@@ -276,7 +278,7 @@ class DecodeOrCut(BaseAction):
                 # show dialog
                 self.__gui.dialog_cut.filename = file_conclusion.uncut_avi
                 self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'new_otrkeys'))
+                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'cut_avis'))
 
                 if self.config.get('cut', 'cut_action') == Cut_action.ASK:
                     self.__gui.dialog_cut.get_widget('radio_best_cutlist').set_active(True)
@@ -399,15 +401,18 @@ class DecodeOrCut(BaseAction):
         else:
             return -1
 
-    def __get_program(self, filename):   
-        programs = { Format.AVI : self.config.get('cut', 'avi'),
-                     Format.HQ  : self.config.get('cut', 'hq'),
-                     Format.MP4 : self.config.get('cut', 'mp4') }
+    def __get_program(self, filename, manually=False):   
+        if manually:
+            programs = { Format.AVI : self.config.get('cut', 'man_avi'),
+                         Format.HQ  : self.config.get('cut', 'man_hq') }
+        else:
+            programs = { Format.AVI : self.config.get('cut', 'avi'),
+                         Format.HQ  : self.config.get('cut', 'hq') }
                      
         format = self.__get_format(filename)                 
 
         if format < 0:
-            return -1, "Format konnte nicht bestimmt werden."
+            return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt."
                              
         config_value = programs[format]
         
@@ -420,15 +425,17 @@ class DecodeOrCut(BaseAction):
    
     def __generate_filename(self, filename, rename_by_schema):
         # generate filename for a cut avi
-        if self.config.get('rename', 'rename_cut'):
-            directory = dirname(filename)
-            name = basename(filename)        
-            new_name = rename_by_schema(name)
-                    
-            cut_avi = join(directory, new_name)        
+        name = basename(filename)       
+        
+        if self.config.get('rename', 'rename_cut'):                         
+            new_name = rename_by_schema(name)                    
         else:
-            cut_avi = filename[0:len(filename)-4] # remove .avi
-            cut_avi += "-cut.avi"
+            #TODO: mp4 support
+            new_name = name[0:len(name)-4] # remove .avi
+            new_name += "-cut.avi"
+                    
+        cut_avi = join(self.config.get('folders', 'cut_avis'), new_name)        
+
             
         return cut_avi
    
@@ -465,7 +472,7 @@ class DecodeOrCut(BaseAction):
         if program < 0:
             return config_value
     
-        if program == Program.AVIDEMUX:
+        if program == Program.AVIDEMUX:       
             command = "%s --load %s" % (config_value, filename)
             avidemux = subprocess.Popen(command, shell=True)    
             while avidemux.poll() == None:
@@ -539,7 +546,7 @@ class DecodeOrCut(BaseAction):
     def __cut_file_avidemux(self, filename, cuts, config_value, rename_by_schema):
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
-        
+                    # --run script
         f.writelines([
             '//AD\n',
             'var app = new Avidemux();\n',
@@ -581,10 +588,20 @@ class DecodeOrCut(BaseAction):
 
         f.close()
         
-        # start avidemux:   
-        command = "%s --force-smart --run tmp.js --quit >>/dev/null" % config_value # --nogui
-        avidemux = subprocess.Popen(command, shell=True)
+        # start avidemux: 
+        command = "%s --force-smart --run tmp.js --quit" % config_value # --nogui
+        avidemux = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
+        
+        self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(.5)
+        
         while avidemux.poll() == None:
+        # TODO: make it happen
+#            line = avidemux.stderr.readline()
+#
+#            if "Done:" in line:
+#                progress = line[line.find(":") + 1 : line.find("%")]
+#                self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(int(progress) / 100.)
+            
             while events_pending():
                 main_iteration(False)  
         

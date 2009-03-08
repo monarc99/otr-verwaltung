@@ -15,7 +15,7 @@ class CutPlay(BaseAction):
         self.update_list = False
         self.__gui = gui
 
-    def do(self, filename, mplayer, new_otrkeys_folder, server, delete_cutlist):                
+    def do(self, filename, mplayer, temp_folder, server, delete_cutlist):                
         if not mplayer:
             self.__gui.message_error_box("Der MPlayer ist nicht angegeben!")
             return
@@ -54,7 +54,8 @@ class CutPlay(BaseAction):
         # make edl
         # http://www.mplayerhq.hu/DOCS/HTML/en/edl.html
         # [Begin Second] [End Second] [0=Skip/1=Mute]
-        f = open(join(new_otrkeys_folder, ".tmp.edl"), "w")
+        edl_filename = join(temp_folder, ".tmp.edl")
+        f = open(edl_filename, "w")
         
         f.write("0 %s 0\n" % (cuts[0][1] - 1))        
         
@@ -65,4 +66,4 @@ class CutPlay(BaseAction):
             else:
                 f.write("%s %s 0\n" % (end, (cuts[count+1][1] - 1)))
         
-        p = subprocess.Popen([mplayer, "-edl", join(new_otrkeys_folder, ".tmp.edl"), filename])
+        p = subprocess.Popen([mplayer, "-edl", edl_filename, filename])

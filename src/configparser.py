@@ -64,7 +64,9 @@ class Config:
                 },
             'folders':               
                 {
-                    'new_otrkeys':          self.__read_value('folders', 'new_otrkeys', ''),                    
+                    'new_otrkeys':          self.__read_value('folders', 'new_otrkeys', ''),
+                    'uncut_avis':           self.__read_value('folders', 'uncut_avis', ''),
+                    'cut_avis':             self.__read_value('folders', 'cut_avis', ''),
                     'trash':                self.__read_value('folders', 'trash', ''),
                     'archive':              self.__read_value('folders', 'archive', '')
                 },
@@ -81,6 +83,9 @@ class Config:
                     'avi':                  self.__read_value('cut', 'avi', ''),
                     'hq':                   self.__read_value('cut', 'hq', ''),
                     'mp4':                  self.__read_value('cut', 'mp4', ''),
+                    'man_avi':              self.__read_value('cut', 'man_avi', ''),
+                    'man_hq':               self.__read_value('cut', 'man_hq', ''),
+                    'man_mp4':              self.__read_value('cut', 'man_mp4', ''),
                     'server':               self.__read_value('cut', 'server', 'http://cutlist.at/'),
                     'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK)),
                     'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1)),
@@ -101,6 +106,12 @@ class Config:
                     'schema':               self.__read_value('rename', 'schema', '{titel} vom {tag}. {MONAT} {jahr}, {stunde}:{minute} ({sender})'),            
                 }
         }
+               
+        if config_dic['folders']['new_otrkeys'] != '' and config_dic['folders']['uncut_avis'] == '':
+            config_dic['folders']['uncut_avis'] = config_dic['folders']['new_otrkeys']
+        
+        if config_dic['folders']['new_otrkeys'] != '' and config_dic['folders']['cut_avis'] == '':
+            config_dic['folders']['cut_avis'] = config_dic['folders']['new_otrkeys']
         
         return config_dic
       

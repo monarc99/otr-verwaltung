@@ -164,7 +164,7 @@ class App:
          
     def section_avi_uncut(self):
         text = "Diese Dateien wurden noch nicht geschnitten."
-        path = self.config.get('folders', 'new_otrkeys')
+        path = self.config.get('folders', 'uncut_avis')
         
         files = [join(path, f) for f in os.listdir(path) if self.__uncut_video.match(f) and self.search(f)]
             
@@ -175,7 +175,7 @@ class App:
         if self.config.get('common', 'use_archive'):
             text += " Sie können ins Archiv verschoben werden."
                 
-        path = self.config.get('folders', 'new_otrkeys')
+        path = self.config.get('folders', 'cut_avis')
         
         files = []                
         for f in os.listdir(path):
@@ -380,10 +380,10 @@ class App:
         if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]: action.do(chosen_action, filenames, self.config, self.rename_by_schema)
         elif chosen_action == Action.RENAME: action.do(filenames)
         elif chosen_action == Action.REAL_DELETE: action.do(filenames)
-        elif chosen_action == Action.RESTORE: action.do(filenames, self.config.get('folders', 'new_otrkeys'))
+        elif chosen_action == Action.RESTORE: action.do(filenames, self.config.get('folders', 'new_otrkeys'), self.config.get('folders', 'uncut_avis'), self.config.get('folders', 'cut_avis'))
         elif chosen_action == Action.DELETE: action.do(filenames, self.config.get('folders', 'trash'))
         elif chosen_action == Action.PLAY: action.do(filenames[0], self.config.get('play', 'player'))
-        elif chosen_action == Action.CUT_PLAY: action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'new_otrkeys'), self.config.get('cut', 'server'), self.config.get('cut', 'delete_cutlists'))            
+        elif chosen_action == Action.CUT_PLAY: action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'uncut_avis'), self.config.get('cut', 'server'), self.config.get('cut', 'delete_cutlists'))            
         elif chosen_action == Action.PLAN_REMOVE: action.do(broadcasts, self.planned_broadcasts) 
         elif chosen_action == Action.PLAN_SEARCH: action.do(broadcasts, self.planned_broadcasts)            
         elif chosen_action == Action.PLAN_ADD: action.do(self.planned_broadcasts)
@@ -408,7 +408,7 @@ class App:
             self.__gui.message_error_box(cuts)
             return
             
-        diff = 5
+        diff = 10
         
         f_edl = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "w")
         f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")
@@ -443,20 +443,66 @@ class App:
                 sub_count += 1
                 f_sub.write("%s\n" % sub_count)
                 f_sub.write("%s --> %s\n" % (self.format_seconds(start-diff+second), self.format_seconds(start-diff+second+1)))
-                f_sub.write("Noch %s Sekunden...\n\n" % str(diff - second))            
+                f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))            
                 
             for second in range(diff):
                 sub_count += 1
                 f_sub.write("%s\n" % sub_count)
                 f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
-                f_sub.write("Noch %s Sekunden...\n\n" % str(diff - second))
+                f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
             
         f_edl.write("50000 0")
         
         f_edl.close()
         f_sub.close()
             
-        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-edl", join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "-sub", join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), avi_filename])
+        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-osdlevel", "3", "-edl", join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "-sub", join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), avi_filename])
+    
+    def show_cuts_after_cut(self, avi_filename, cutlist_filename):
+        cuts = cutlists_management.get_cuts_of_cutlist(cutlist_filename)
+
+        if type(cuts) != list: # error occured
+            self.__gui.message_error_box(cuts)
+            return
+            
+        diff = 10
+        
+        f_edl = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "w")
+        f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")
+
+        #     Start          Duration
+        # 0  286.177737     631.462533
+        # 1  1452.4505715   528.5813674
+
+        # 0 283.24 0
+        # 289.24 914.6 0
+        # 920.6 1449.12 0
+        # 1455.12 1977.84 0
+        # 1983.84 50000 0
+
+        # 1
+        # 00:00:10,000 --> 00:00:11,000
+        # Noch 5 Sekunden
+    
+        length = 0
+        sub_count = 0
+                        
+        for count, start, duration in cuts:
+            f_edl.write("%s %s 0\n" % (diff + length, length + duration - diff))
+            length += duration
+            
+            # vor dem schnitt:
+            for second in range(diff):
+                sub_count += 1
+                f_sub.write("%s\n" % sub_count)
+                f_sub.write("%s --> %s\n" % (self.format_seconds(length - diff + second), self.format_seconds(length - diff + second + 1)))
+                f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))                      
+
+        
+        f_edl.close()
+        f_sub.close()
+            
+        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-osdlevel", "3", "-edl", join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "-sub", join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), avi_filename])    
     
     def format_seconds(self, seconds):
         hrs = seconds / 3600       

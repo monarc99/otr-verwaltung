@@ -123,7 +123,7 @@ class DialogConclusion(BaseWindow):
         if not file_conclusion.cut.local_cutlist:
             print "Lokale Cutlist nicht vorhanden!"
         else:
-            self.app.show_cuts(file_conclusion.uncut_avi, file_conclusion.cut.local_cutlist)
+            self.app.show_cuts_after_cut(file_conclusion.cut_avi, file_conclusion.cut.local_cutlist)
         
     def on_buttonBack_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter - 1)

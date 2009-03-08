@@ -12,7 +12,8 @@ def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):
     url = "%sgetxml.php?version=0.9.8.0&ofsb=%s" % (server, str(size))
       
     try:
-        handle = urllib.urlopen(url)     
+        handle = urllib.urlopen(url)
+        urllib.urlretrieve(url, '/home/benjamin/f')     
     except IOError:  
         if error_cb: 
             error_cb("Verbindungsprobleme")
@@ -43,10 +44,14 @@ def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):
            __read_value(cutlist, "filename"),
            __read_value(cutlist, "withframes"),
            __read_value(cutlist, "withtime"),
-           __read_value(cutlist, "duration")]
-                        
+           __read_value(cutlist, "duration"),
+           __read_value(cutlist, "errors"),
+           __read_value(cutlist, "othererrordescription"),
+           __read_value(cutlist, "downloadcount")]
+                                   
         if cutlist_found_cb: 
             cutlist_found_cb(cutlist_data)
+            
         cutlists.append(cutlist_data)
 
     return cutlists            
@@ -70,8 +75,12 @@ def download_cutlist(cutlist_id, server, filename):
     filename, headers = urllib.urlretrieve(url, filename)
   
 def get_cuts_of_cutlist(filename):    
-    config_parser = ConfigParser.ConfigParser()        
-    config_parser.read(filename)
+    config_parser = ConfigParser.SafeConfigParser()        
+    
+    try:
+        config_parser.read(filename)
+    except ConfigParser.ParsingError:
+        print "Malformed cutlist: ", error
     
     noofcuts = 0        
     cuts = []

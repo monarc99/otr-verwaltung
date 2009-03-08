@@ -20,6 +20,7 @@
 #
 
 import base64
+import os
 
 import gtk
 import pango
@@ -61,6 +62,8 @@ class PreferencesWindow(BaseWindow):
         
         # preferences fonts (little explanations)
         labels = [  'labelDescNewOtrkeys',
+                    'labelDescUncutAvis',
+                    'labelDescCutAvis',
                     'labelDescTrash',
                     'labelBestCutlist',
                     'labelChooseCutlist',
@@ -78,15 +81,28 @@ class PreferencesWindow(BaseWindow):
         builder.get_object('comboboxentry-mplayer').set_text(self.app.config.get('play', 'mplayer'))
 
         # fill combobox of avi, hq, mp4
-        avidemux = ["avidemux", "avidemux2", "avidemux2_cli", r"C:\Programme\Avidemux\avidemux.exe"]
-        virtualdub = [r"C:\Programme\VirtualDub\vdub.exe"]
-        
+        if os.name == "posix":
+            avidemux = ["avidemux", "avidemux2_cli"]
+            avidemux_man = ["avidemux"]
+            virtualdub = [r"/pfad/zu/vdub.exe"]
+            virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
+        else:
+            avidemux = [r"C:\Programme\Avidemux\avidemux.exe"]
+            avidemux_man = [r"C:\Programme\Avidemux\avidemux.exe"]
+            virtualdub = [r"C:\Programme\VirtualDub\vdub.exe"]
+            virtualdub_man = [r"C:\Programme\VirtualDub\VirtualDub.exe"]
+
+        # avi + hq        
         self.__set_model_from_list(builder.get_object('combobox_avi'), avidemux + virtualdub)
         builder.get_object('comboboxentry-avi').set_text(self.app.config.get('cut', 'avi'))
         self.__set_model_from_list(builder.get_object('combobox_hq'), virtualdub)
         builder.get_object('comboboxentry-hq').set_text(self.app.config.get('cut', 'hq'))
-        self.__set_model_from_list(builder.get_object('combobox_mp4'), avidemux)
-        builder.get_object('comboboxentry-mp4').set_text(self.app.config.get('cut', 'mp4'))
+    
+        # man_avi + man_avidemux
+        self.__set_model_from_list(builder.get_object('combobox_man_avi'), avidemux_man + virtualdub_man)
+        builder.get_object('comboboxentry-man_avi').set_text(self.app.config.get('cut', 'man_avi'))
+        self.__set_model_from_list(builder.get_object('combobox_man_hq'), virtualdub_man)
+        builder.get_object('comboboxentry-man_hq').set_text(self.app.config.get('cut', 'man_hq'))
                 
         # fill combobox servers
         self.__set_model_from_list(builder.get_object('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
@@ -96,6 +112,8 @@ class PreferencesWindow(BaseWindow):
         # folder choosers on folders tab           
         builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config.get('folders', 'new_otrkeys'))
         builder.get_object('folderTrash').set_current_folder(self.app.config.get('folders', 'trash'))
+        builder.get_object('folderUncutAvis').set_current_folder(self.app.config.get('folders', 'uncut_avis'))
+        builder.get_object('folderCutAvis').set_current_folder(self.app.config.get('folders', 'cut_avis'))
         builder.get_object('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
         builder.get_object('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
         builder.get_object('check_smart').set_active(self.app.config.get('cut', 'smart'))
@@ -166,6 +184,14 @@ class PreferencesWindow(BaseWindow):
     def on_folderTrash_current_folder_changed(self, widget, data=None):
         self.app.config.set('folders', 'trash', widget.get_filename())
         self.app.show_section(self.app.section)
+        
+    def on_folderUncutAvis_current_folder_changed(self, widget, data=None):
+        self.app.config.set('folders', 'uncut_avis', widget.get_filename())
+        self.app.show_section(self.app.section)
+
+    def on_folderCutAvis_current_folder_changed(self, widget, data=None):
+        self.app.config.set('folders', 'cut_avis', widget.get_filename())
+        self.app.show_section(self.app.section)
 
     def on_preferences_checkArchive_toggled(self, widget, data=None):          
         status = widget.get_active()
@@ -225,7 +251,7 @@ class PreferencesWindow(BaseWindow):
     def on_radioLocalCutlist_toggled(self, widget, data=None):
         if widget.get_active()==True:
             self.app.config.set('cut', 'cut_action', Cut_action.LOCAL_CUTLIST)
-                
+
     def on_radioManually_toggled(self, widget, data=None):
         if widget.get_active()==True:
             self.app.config.set('cut', 'cut_action', Cut_action.MANUALLY)
@@ -235,10 +261,13 @@ class PreferencesWindow(BaseWindow):
 
     def on_comboboxentry_hq_changed(self, widget, data=None):
         self.app.config.set('cut', 'hq', widget.get_text())
+        
+    def on_comboboxentry_man_avi_changed(self, widget, data=None):
+        self.app.config.set('cut', 'man_avi', widget.get_text())
 
-    def on_comboboxentry_mp4_changed(self, widget, data=None):
-        self.app.config.set('cut', 'mp4', widget.get_text())
-   
+    def on_comboboxentry_man_hq_changed(self, widget, data=None):
+        self.app.config.set('cut', 'man_hq', widget.get_text())
+
     def on_check_smart_toggled(self, widget, data=None):
         self.app.config.set('cut', 'smart', int(widget.get_active()))
     

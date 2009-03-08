@@ -54,24 +54,24 @@ class DialogCut(BaseWindow):
             str, # 8 filename
             str, # 9 withframes
             str, # 10 withtime
-            str  # 11 duration
+            str, # 11 duration
+            str, # 12 errors
+            str, # 13 othererrordescription
+            str, # 14 downloadcount
             )             
+        
         treeview.set_model(store)
             
         # create the TreeViewColumns to display the data
-        column_names = ['Autor', 'Autorenwertung', 'Benutzerwertung', 'Benutzerkommentar' ]
-        tvcolumns = [None] * len(column_names)
+        column_names = [(0, "ID"), (1, "Autor"), (2, "Autorwertung"), (3, "Benutzerwertung"), (4, "Anzahl d. Wertungen"), (5, "Anzahl d. Schnitte"),
+         (6, "Eigentlicher Inhalt"), (7, "Kommentar"), (8, "Dateiname"), (11, "Dauer in s"), (12, "Fehler"), (13, "Fehlerbeschr."), (14, "Anzahl Heruntergeladen") ]
         
         renderer_left = gtk.CellRendererText()
         renderer_left.set_property('xalign', 0.0) 
-
-        tvcolumns[0] = gtk.TreeViewColumn(column_names[0], renderer_left, text=1)
-        tvcolumns[1] = gtk.TreeViewColumn(column_names[1], renderer_left, text=2)       
-        tvcolumns[2] = gtk.TreeViewColumn(column_names[2], renderer_left, text=3)
-        tvcolumns[3] = gtk.TreeViewColumn(column_names[3], renderer_left, text=7)        
               
         # append the columns
-        for col in tvcolumns:
+        for index, text in column_names:
+            col = gtk.TreeViewColumn(text, renderer_left, text=index)
             col.set_resizable(True)        
             treeview.append_column(col)
             

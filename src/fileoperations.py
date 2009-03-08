@@ -4,6 +4,7 @@
 import gtk
 
 import os
+import shutil
 from os.path import join, basename, exists
 
 # TODO: Achten auf :/\* etc. in Dateiname!
@@ -29,7 +30,7 @@ def remove_file(filename):
 def rename_file(old_filename, new_filename):
 
     if old_filename == new_filename:
-        error("Umbenennen: Die beiden Dateinamen stimmen überein. Dies ist vermutlich ein Bug! (%s)" % old_filename)
+        error("Umbenennen: Die beiden Dateinamen stimmen überein! (%s)" % old_filename)
         return
 
     count = 1
@@ -41,10 +42,16 @@ def rename_file(old_filename, new_filename):
     try:
         os.rename(old_filename, new_filename)
     except Exception, e:
-        error("Fehler beim Umbenennen/Verschieben von %s nach %s (%s)." % (old_filename, new_filename, e))
+        error("Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))
 
 def move_file(filename, target):
-    rename_file(filename, join(target, basename(filename)))
+    try:
+        os.rename(filename, join(target, basename(filename)))
+    except OSError, e:
+        try:
+            shutil.move(filename, target)
+        except Exception:
+            error("Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
 
 def get_size(filename):
     """ Returns a file's size."""
