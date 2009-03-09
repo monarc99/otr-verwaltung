@@ -418,10 +418,10 @@ class DecodeOrCut(BaseAction):
         
         if 'avidemux' in config_value:
             return Program.AVIDEMUX, config_value
-        elif 'vdub' in config_value:
+        elif 'vdub' in config_value or 'VirtualDub' in config_value:
             return Program.VIRTUALDUB, config_value
         else:
-            return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub (vdub.exe) und Avidemux unterstützt." % config_value
+            return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value
    
     def __generate_filename(self, filename, rename_by_schema):
         # generate filename for a cut avi
@@ -435,7 +435,6 @@ class DecodeOrCut(BaseAction):
             new_name += "-cut.avi"
                     
         cut_avi = join(self.config.get('folders', 'cut_avis'), new_name)        
-
             
         return cut_avi
    
@@ -468,13 +467,19 @@ class DecodeOrCut(BaseAction):
                     return None, "Aspekt konnte nicht bestimmt werden " + line
        
     def cut_file_manually(self, filename):
-        program, config_value = self.__get_program(filename)
+        program, config_value = self.__get_program(filename, manually=True)
+        
         if program < 0:
             return config_value
     
         if program == Program.AVIDEMUX:       
-            command = "%s --load %s" % (config_value, filename)
-            avidemux = subprocess.Popen(command, shell=True)    
+            command = [config_value, "--load", filename]
+
+            try:                   
+                avidemux = subprocess.Popen(command)
+            except OSError:
+                return "Avidemux konnte nicht aufgerufen werden: " + config_value
+                
             while avidemux.poll() == None:
                 pass
                 
@@ -488,13 +493,17 @@ class DecodeOrCut(BaseAction):
             else:
                 command = 'VirtualDub.exe'
                 
-            vdub = subprocess.Popen(command, shell=True)
+            try:                   
+               vdub = subprocess.Popen(command, shell=True)
+            except OSError:
+                return "Virtualdub konnte nicht aufgerufen werden: " + config_value
+
             while vdub.poll() == None:
                 pass
             
-            os.chdir(curr_dir)
+            os.chdir(curr_dir)            
         
-        return None
+        return
              
     def cut_file_by_cutlist(self, filename, cutlist, rename_by_schema, local=False):
         program, config_value = self.__get_program(filename)
@@ -517,9 +526,9 @@ class DecodeOrCut(BaseAction):
         
         if type(cuts) != list: # error occured
             return None, None, "Fehler: cuts!=list (%s)" % cuts
-        
+                
         if program == Program.AVIDEMUX:
-            cut_avi = self.__cut_file_avidemux(filename, cuts, config_value, rename_by_schema)
+            cut_avi, error = self.__cut_file_avidemux(filename, cuts, config_value, rename_by_schema)
             
         else: # VIRTUALDUB                
             format = self.__get_format(filename)         
@@ -539,14 +548,17 @@ class DecodeOrCut(BaseAction):
             else:
                 return None, None, "Format nicht unterstützt (Nur Avi DX50 und HQ H264 sind möglich)."
                 
-            cut_avi = self.__cut_file_virtualdub(filename, cuts, comp_data, config_value, rename_by_schema)                      
-        
-        return cut_avi, local_filename, None
+            cut_avi, error = self.__cut_file_virtualdub(filename, cuts, comp_data, config_value, rename_by_schema)                      
+            
+        if error:
+            return None, None, error
+        else:
+            return cut_avi, local_filename, None
 
     def __cut_file_avidemux(self, filename, cuts, config_value, rename_by_schema):
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
-                    # --run script
+                    
         f.writelines([
             '//AD\n',
             'var app = new Avidemux();\n',
@@ -589,8 +601,10 @@ class DecodeOrCut(BaseAction):
         f.close()
         
         # start avidemux: 
-        command = "%s --force-smart --run tmp.js --quit" % config_value # --nogui
-        avidemux = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
+        try:
+            avidemux = subprocess.Popen([config_value, "--force-smart", "--run", "tmp.js", "--quit"])
+        except OSError:
+            return None, "Avidemux konnte nicht aufgerufen werden: " + config_value
         
         self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(.5)
         
@@ -607,7 +621,7 @@ class DecodeOrCut(BaseAction):
         
         fileoperations.remove_file('tmp.js')
         
-        return cut_avi
+        return cut_avi, None
         
     def __cut_file_virtualdub(self, filename, cuts, comp_data, config_value, rename_by_schema):
         # make file for virtualdub scripting engine
@@ -644,12 +658,16 @@ class DecodeOrCut(BaseAction):
 
         if os.name == 'posix':
             command = "wineconsole " + command
-                
-        vdub = subprocess.Popen(command, shell=True)
+        
+        try:     
+            vdub = subprocess.Popen(command, shell=True)
+        except OSError:
+            return None, "Vdub konnte nicht aufgerufen werden: " + config_value
+            
         while vdub.poll() == None:
             while events_pending():
                 main_iteration(False)
         
         fileoperations.remove_file('tmp.vcf')
         
-        return cut_avi
+        return cut_avi, None

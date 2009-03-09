@@ -13,7 +13,6 @@ def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):
       
     try:
         handle = urllib.urlopen(url)
-        urllib.urlretrieve(url, '/home/benjamin/f')     
     except IOError:  
         if error_cb: 
             error_cb("Verbindungsprobleme")

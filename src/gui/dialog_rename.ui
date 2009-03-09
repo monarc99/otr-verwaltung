@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sun Mar  8 16:23:04 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Mar  8 20:51:22 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_rename">
     <property name="border_width">5</property>
