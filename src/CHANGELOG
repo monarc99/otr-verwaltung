@@ -1,0 +1,19 @@
+0.5.6
+    * Meldung beim Dekodieren ändern, wenn Verifizieren angestellt ist
+
+0.5.5
+    * Schneiden mit lokalen Cutlist geht wieder
+    * Fehler im Cutlist-Format werden nun wirklich abgefangen
+    * Vorhandene Cutlists werden nicht mehr überschrieben
+
+0.5.4
+    * Bugfix-Release
+
+0.5.3
+    * Statt "Ungeschnittene Datei löschen" heisst der Text nun "... in den Müll verschieben"
+    * Es gibt nun eigene Einstellungen für manuelles Schneiden (siehe auch Häufige Fragen)
+    * ... und damit auch Support für avidemux_cli. Momentan wird allerdings der Fortschritt noch nicht ausgelesen. Also: auch wenn kein Fortschritt erscheint, er tut trotzdem was!
+    * Neue, eigene Ordner für ungeschnittene und geschnittene Dateien. Da sind bestimmt noch Bugs. Also gerne ausprobieren!!
+    * Verschieben über Partitionsgrenzen möglich
+    * Vor dem Schneiden werden alle Information der Cutlist angezeigt (Noch nicht: nach dem Schneiden)
+    * Nach dem Schneiden kann man die Schnitte des geschnittenen Films kontrollieren
