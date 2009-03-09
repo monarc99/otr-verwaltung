@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Sun Mar  8 20:51:22 2009 -->
+<!--Generated with glade3 3.4.5 on Mon Mar  9 20:46:14 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_planning">
     <property name="border_width">4</property>
@@ -20,111 +20,6 @@
             <property name="n_columns">2</property>
             <property name="column_spacing">3</property>
             <property name="row_spacing">3</property>
-            <child>
-              <object class="GtkLabel" id="label_headline">
-                <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">&lt;b&gt;Neue Sendung hinzuf&#xFC;gen:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="right_attach">2</property>
-                <property name="y_options">GTK_EXPAND</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label25">
-                <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Name der Sendung:</property>
-              </object>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-                <property name="y_options">GTK_EXPAND</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label25_">
-                <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="yalign">0</property>
-                <property name="label" translatable="yes">Datum:</property>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label28">
-                <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Uhrzeit:</property>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label29">
-                <property name="visible">True</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Sender:</property>
-              </object>
-              <packing>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_broadcast">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-                <property name="x_padding">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkCalendar" id="calendar">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="year">2008</property>
-                <property name="month">11</property>
-                <property name="day">31</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-                <property name="x_padding">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxEntry" id="combobox_station">
-                <property name="visible">True</property>
-                <child internal-child="entry">
-                  <object class="GtkEntry" id="comboboxentry_station">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-                <property name="x_padding">3</property>
-              </packing>
-            </child>
             <child>
               <object class="GtkHBox" id="hbox13">
                 <property name="visible">True</property>
@@ -151,6 +46,111 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxEntry" id="combobox_station">
+                <property name="visible">True</property>
+                <child internal-child="entry">
+                  <object class="GtkEntry" id="comboboxentry_station">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+                <property name="x_padding">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCalendar" id="calendar">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="year">2008</property>
+                <property name="month">11</property>
+                <property name="day">31</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="x_padding">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_broadcast">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="x_padding">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label29">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Sender:</property>
+              </object>
+              <packing>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label28">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Uhrzeit:</property>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label25_">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="yalign">0</property>
+                <property name="label" translatable="yes">Datum:</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label25">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Name der Sendung:</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="y_options">GTK_EXPAND</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_headline">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">&lt;b&gt;Neue Sendung hinzuf&#xFC;gen:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="right_attach">2</property>
+                <property name="y_options">GTK_EXPAND</property>
               </packing>
             </child>
           </object>

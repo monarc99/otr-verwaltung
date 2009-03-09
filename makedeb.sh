@@ -1,7 +1,12 @@
 #!/bin/sh
 
+# RELEASE:
+# - hier Versionsnummer ändern
+# - im About-Dialog -"-
+# - Update im OTR-Forum
+
 name='otr-verwaltung';
-version='0.4';
+version='0.5.5';
 
 rm $name-$version.orig.tar.gz
 rm -r $name-$version
@@ -54,13 +59,14 @@ Homepage: <insert the upstream URL, if relevant>
 Package: otr-verwaltung
 Architecture: all
 Depends: python, python-gtk2
-Description: Manages otrkeys and avis from onlinetvrecorder.com
- Manages otrkeys and avis from onlinetvrecorder.com
- Feature list:
-    - Decode otrkey files
-    - Cut avi files with avidemux by cutlists
-    - Organize your files by undecoded, decoded, cut, ...
-    - Keep track of files you want to download later
+Description: Dateien von onlinetvrecorder.com verwalten:
+    - otrkey-Dateien dekodieren
+    - avi-Dateien (DivX und HQ) mit Cutlists schneiden (Avidemux und Virtualdub, auch unter Linux!)
+    - Cutlists nach dem Schneiden bewerten
+    - avi-Dateien mit Hilfe von EDL-Dateien geschnitten abspielen
+    - Schnitte vorher mit dem Mplayer betrachten
+    - Viele Dateien gleichzeitig verarbeiten
+    - u. v. m.
 EOF
 
 cp ../../rules rules

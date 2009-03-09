@@ -168,42 +168,57 @@ class DecodeOrCut(BaseAction):
             # update progress
             self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
                    
+            verify = True
+                   
             curr_dir = ""      
             if os.name == "posix":
                 command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decode', 'path'), file_conclusion.otrkey, email, password, self.config.get('folders', 'uncut_avis'))
             
                 if self.config.get('decode', 'correct') == 0:
+                    verify = False
                     command += " -q"
+            
             else: # windows
-         
-               # TODO: de-hack, use subprocess module and get rid of while events_pending()...
-               curr_dir = os.getcwd()   
-               os.chdir(dirname(self.config.get('decode', 'path')))
+                verify = False
+               
+                # TODO: de-hack, use subprocess module and get rid of while events_pending()...
+                curr_dir = os.getcwd()   
+                os.chdir(dirname(self.config.get('decode', 'path')))
 
-               command = '%s -uotr %s -pwotr %s -f %s -o %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey, self.config.get('folders', 'uncut_avis'))                              
+                command = '%s -uotr %s -pwotr %s -f %s -o %s -c true -hide' % (basename(self.config.get('decode', 'path')), email, password, file_conclusion.otrkey, self.config.get('folders', 'uncut_avis'))                              
 
             (pout, pin, perr) = popen2.popen3(command)
             if os.name == "posix":
-               while True:
-                   l = ""
-                   while True:
-                       c = pout.read(1)
-                       if c == "\r" or c == "\n":
-                           break
-                       l += c
+                while True:
+                    l = ""
+                    while True:
+                        c = pout.read(1)
+                        if c == "\r" or c == "\n":
+                            break
+                        l += c
             
-                   if not l:
-                       break
+                    if not l:
+                        break
             
-                   try:      
-                       progress = int(l[10:13])                    
-                       # update progress
-                       self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
-                       
-                       while events_pending():
-                           main_iteration(False)
-                   except ValueError:                
-                       pass
+                    try:                             
+                        if verify:   
+                            file_count = count + 1, len(file_conclusions)
+                                                           
+                            if "input" in l:
+                                self.__gui.main_window.get_widget('label_tasks').set_text("Eingabedatei %s/%s kontrollieren" % file_count)
+                            elif "output" in l:
+                                self.__gui.main_window.get_widget('label_tasks').set_text("Ausgabedatei %s/%s kontrollieren" % file_count)
+                            elif "Decoding" in l:
+                                self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % file_count)
+                                                           
+                        progress = int(l[10:13])                    
+                        # update progress
+                        self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
+                        
+                        while events_pending():
+                            main_iteration(False)
+                    except ValueError:                
+                        pass
 
             if curr_dir:
                os.chdir(curr_dir)

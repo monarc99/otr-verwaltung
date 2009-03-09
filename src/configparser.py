@@ -44,7 +44,7 @@ class Config:
         self.__config_dic[section][option] = value
 
     def __read(self):
-        """ read config file, if exists, otherwise, use default value """
+        """ read config file, if exists, otherwise, use default values """
         
         if isfile(self.__config_file):
             try:           
@@ -112,7 +112,7 @@ class Config:
         
         if config_dic['folders']['new_otrkeys'] != '' and config_dic['folders']['cut_avis'] == '':
             config_dic['folders']['cut_avis'] = config_dic['folders']['new_otrkeys']
-        
+               
         return config_dic
       
     def __read_value(self, section, option, default):
