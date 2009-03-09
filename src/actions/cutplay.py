@@ -31,13 +31,11 @@ class CutPlay(BaseAction):
             
         best_cutlist = cutlists_management.get_best_cutlist(cutlists)
                 
-        # download cutlist and save it        
-        local_filename = filename + ".cutlist"
-        
-        try:
-            cutlists_management.download_cutlist(best_cutlist, server, local_filename)  
-        except IOError:
-            self.__gui.message_error_box("Verbindungsprobleme")
+        # download cutlist and save it               
+        local_filename, error = cutlists_management.download_cutlist(best_cutlist, server, filename)  
+                
+        if not local_filename:      
+            self.__gui.message_error_box("Konnte Cutlist nicht herunterladen (%s). " % local_filename)
             return
         
         # get cuts

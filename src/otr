@@ -319,7 +319,7 @@ class App:
         files = []       
         for root, dirs, wfiles in os.walk(self.config.get('folders', 'archive')):
             for f in wfiles:
-                # TODO: match all videos files
+                # TODO: match all videos files mp4, usw.
                 if f.endswith('.avi') and self.search(f):
                     files += [join(root, f)]
 
@@ -402,6 +402,8 @@ class App:
             
      
     def show_cuts(self, avi_filename, cutlist_filename):
+        print cutlist_filename
+        
         cuts = cutlists_management.get_cuts_of_cutlist(cutlist_filename)
 
         if type(cuts) != list: # error occured

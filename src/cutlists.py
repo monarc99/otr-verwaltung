@@ -4,6 +4,7 @@
 import xml.dom.minidom
 import urllib
 import ConfigParser
+import os.path
 
 import fileoperations
 
@@ -67,18 +68,38 @@ def __read_value(cutlist_element, node_name):
     if value == None:
         return ""               
 
-def download_cutlist(cutlist_id, server, filename):
+def download_cutlist(cutlist_id, server, avi_filename):
+    """ Downloads a cutlist to the folder where avi_filename is. 
+        Checks whether cutlist already exists.
+        Returns a tuple:
+            local filename of cutlist, error message. """
+    
+    local_filename = avi_filename
+    count = 0
+    
+    while os.path.exists(local_filename + ".cutlist"):
+        count += 1
+        local_filename = "%s.%s" % (avi_filename, str(count))
+    
+    local_filename += ".cutlist"
+    
     # download cutlist
     url = server + "getfile.php?id=" + str(cutlist_id)
-            
-    filename, headers = urllib.urlretrieve(url, filename)
+    
+    try:        
+        local_filename, headers = urllib.urlretrieve(url, local_filename)
+    except IOError, error:
+        return None, "Cutlist konnte nicht heruntergeladen werden (%s)." % error
+        
+    return local_filename, None
+    
   
 def get_cuts_of_cutlist(filename):    
     config_parser = ConfigParser.SafeConfigParser()        
     
     try:
         config_parser.read(filename)
-    except ConfigParser.ParsingError:
+    except ConfigParser.ParsingError, error:
         print "Malformed cutlist: ", error
     
     noofcuts = 0        

@@ -194,9 +194,15 @@ class DialogConclusion(BaseWindow):
                 if file_conclusion.cut.cut_action == Cut_action.MANUALLY:
                     text += ", Manuell geschnitten"
                 else:
-                    text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist
-                    # enable rating and play options
-                    self.get_widget('vboxRating').show()
+                    if file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST: 
+                        text += ", Mit lokaler Cutlist geschnitten"
+                    else:
+                        text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist 
+                        
+                        self.get_widget('vboxRating').show()                
+
+
+                    # enable play options
                     self.get_widget('buttonConclusionPlay').show()
                     self.get_widget('button_conclusion_play_cut').show()
                     

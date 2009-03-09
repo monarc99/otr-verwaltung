@@ -8,6 +8,7 @@ from basewindow import BaseWindow
 
 from constants import Cut_action
 import cutlists as cutlists_management
+import fileoperations
 
 class DialogCut(BaseWindow):
     
@@ -111,11 +112,17 @@ class DialogCut(BaseWindow):
             # retrieve id of chosen cutlist
             (model, iter) = treeselection.get_selected()                   
             cutlist_id = model.get_value(iter, 0)    
+                        
+            local_filename, error = cutlists_management.download_cutlist(cutlist_id, self.app.config.get('cut', 'server'), self.filename)
             
-            local_filename = self.filename + ".cutlist"
-            cutlists_management.download_cutlist(cutlist_id, self.app.config.get('cut', 'server'), local_filename)
+            if not local_filename:
+                self.gui.message_error_box(error)
+                return
             
         self.app.show_cuts(self.filename, local_filename)
+        
+        # delete cutlist
+        fileoperations.remove_file(local_filename)
     
     def on_selection_changed(self, selection, data=None):     
         model, paths = selection.get_selected_rows()

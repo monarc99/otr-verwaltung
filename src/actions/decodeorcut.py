@@ -10,6 +10,7 @@ import urllib
 import os
 from os.path import basename, join, dirname, exists, splitext
 import threading
+import time
 
 import fileoperations
 from filesconclusion import FileConclusion
@@ -513,14 +514,14 @@ class DecodeOrCut(BaseAction):
         if local:
             local_filename = cutlist            
         else:                             
-            local_filename = filename + ".cutlist"
+            # download cutlists     
+            local_filename, error = cutlists_management.download_cutlist(cutlist, self.config.get('cut', 'server'), filename)
+
+            if not local_filename:
+                return None, None, "Konnte Cutlist nicht herunterladen (%s)." % error
        
-        # download cutlists     
-        try:
-            cutlists_management.download_cutlist(cutlist, self.config.get('cut', 'server'), local_filename)
-        except IOError:
-            return None, None, "Verbindungsprobleme"  
-              
+        print "local_filename: ", local_filename
+       
         # get dictionary of cuts
         cuts = cutlists_management.get_cuts_of_cutlist(local_filename)
         
@@ -602,7 +603,7 @@ class DecodeOrCut(BaseAction):
         
         # start avidemux: 
         try:
-            avidemux = subprocess.Popen([config_value, "--force-smart", "--run", "tmp.js", "--quit"])
+            avidemux = subprocess.Popen([config_value, "--force-smart", "--run", "tmp.js", "--quit"], stderr=subprocess.PIPE)
         except OSError:
             return None, "Avidemux konnte nicht aufgerufen werden: " + config_value
         
@@ -610,14 +611,15 @@ class DecodeOrCut(BaseAction):
         
         while avidemux.poll() == None:
         # TODO: make it happen
+#            time.sleep(1)
 #            line = avidemux.stderr.readline()
 #
 #            if "Done:" in line:
 #                progress = line[line.find(":") + 1 : line.find("%")]
 #                self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(int(progress) / 100.)
-            
+#            
             while events_pending():
-                main_iteration(False)  
+                main_iteration(False)
         
         fileoperations.remove_file('tmp.js')
         
