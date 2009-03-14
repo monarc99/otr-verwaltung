@@ -9,6 +9,7 @@ import subprocess
 import time
 
 try:
+    from gtk import events_pending, main_iteration
     from gtk import gdk
     import gobject
     if os.name == "posix":
@@ -366,13 +367,22 @@ class App:
 
         if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD]:
             if len(broadcasts) == 0 and chosen_action != Action.PLAN_ADD:
-                self.__gui.message_info_box("Es ist keine Sendung markiert!")   
-                return
+                if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
+                    broadcasts = []                    
+
+                    def foreach(model, path, iter, broadcasts):
+                        broadcasts += [iter]
+
+                    self.__gui.main_window.get_widget('treeview_planning').get_model().foreach(foreach, broadcasts)
+                else:
+                    return
 
         elif filenames != None:
             if len(filenames) == 0 and chosen_action != Action.NEW_FOLDER:
-                self.__gui.message_info_box("Es ist keine Datei markiert!")     
-                return           
+                if self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
+                    filenames = [row[0] for row in self.__gui.main_window.get_widget('treeview_files').get_model()]
+                else:
+                    return
            
         action = actions.get_action(chosen_action, self.__gui)            
                
@@ -383,7 +393,7 @@ class App:
         elif chosen_action == Action.RESTORE: action.do(filenames, self.config.get('folders', 'new_otrkeys'), self.config.get('folders', 'uncut_avis'), self.config.get('folders', 'cut_avis'))
         elif chosen_action == Action.DELETE: action.do(filenames, self.config.get('folders', 'trash'))
         elif chosen_action == Action.PLAY: action.do(filenames[0], self.config.get('play', 'player'))
-        elif chosen_action == Action.CUT_PLAY: action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'uncut_avis'), self.config.get('cut', 'server'), self.config.get('cut', 'delete_cutlists'))            
+        elif chosen_action == Action.CUT_PLAY: action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'uncut_avis'), self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), self.config.get('cut', 'delete_cutlists'))            
         elif chosen_action == Action.PLAN_REMOVE: action.do(broadcasts, self.planned_broadcasts) 
         elif chosen_action == Action.PLAN_SEARCH: action.do(broadcasts, self.planned_broadcasts)            
         elif chosen_action == Action.PLAN_ADD: action.do(self.planned_broadcasts)
@@ -400,111 +410,90 @@ class App:
             self.__gui.main_window.do_search(self.__search_text)
             self.show_section(self.section)
             
-     
-    def show_cuts(self, avi_filename, cutlist_filename):
-        print cutlist_filename
-        
+    
+    def __show(self, cutlist_filename, avi_filename, edl_subtitles_cb):
         cuts = cutlists_management.get_cuts_of_cutlist(cutlist_filename)
-
+                
         if type(cuts) != list: # error occured
             self.__gui.message_error_box(cuts)
             return
-            
-        diff = 10
         
         f_edl = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "w")
-        f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")
-
-        #     Start          Duration
-        # 0  286.177737     631.462533
-        # 1  1452.4505715   528.5813674
-
-        # 0 283.24 0
-        # 289.24 914.6 0
-        # 920.6 1449.12 0
-        # 1455.12 1977.84 0
-        # 1983.84 50000 0
-
-        # 1
-        # 00:00:10,000 --> 00:00:11,000
-        # Noch 5 Sekunden
-
-        sub_count = 0
-
-        f_edl.write("0 ")
+        f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")    
         
-
-        for count, start, duration in cuts:
-            end = start + duration
-
-            f_edl.write("%s 0\n" % (start - diff))
-            f_edl.write("%s %s 0\n" % (start + diff, end - diff))
-            f_edl.write("%s " % (end + diff))
-
-            for second in range(diff):
-                sub_count += 1
-                f_sub.write("%s\n" % sub_count)
-                f_sub.write("%s --> %s\n" % (self.format_seconds(start-diff+second), self.format_seconds(start-diff+second+1)))
-                f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))            
-                
-            for second in range(diff):
-                sub_count += 1
-                f_sub.write("%s\n" % sub_count)
-                f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
-                f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
-            
-        f_edl.write("50000 0")
+        edl_subtitles_cb(f_edl, f_sub, cuts)        
         
         f_edl.close()
         f_sub.close()
+        
+        f_edl = join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl")
+        f_sub = join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub")
             
-        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-osdlevel", "3", "-edl", join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "-sub", join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), avi_filename])
+        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, avi_filename])
+       
+        # wait
+        while p.poll() == None:
+            while events_pending():
+                main_iteration(False)
+                
+        fileoperations.remove_file(f_edl)
+        fileoperations.remove_file(f_sub)
+        
+    def show_cuts(self, avi_filename, cutlist_filename):       
+        
+        def edl_subtitles_cb(f_edl, f_sub, cuts):            
+            diff = 10
+            
+            sub_count = 0
+
+            f_edl.write("0 ")      
+
+            for count, start, duration in cuts:
+                end = start + duration
+
+                f_edl.write("%s 0\n" % (start - diff))
+                f_edl.write("%s %s 0\n" % (start + diff, end - diff))
+                f_edl.write("%s " % (end + diff))
+
+                for second in range(diff):
+                    sub_count += 1
+                    f_sub.write("%s\n" % sub_count)
+                    f_sub.write("%s --> %s\n" % (self.format_seconds(start-diff+second), self.format_seconds(start-diff+second+1)))
+                    f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))            
+                    
+                for second in range(diff):
+                    sub_count += 1
+                    f_sub.write("%s\n" % sub_count)
+                    f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
+                    f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
+                
+            f_edl.write("50000 0")
+            
+           
+        self.__show(cutlist_filename, avi_filename, edl_subtitles_cb)    
+        
     
     def show_cuts_after_cut(self, avi_filename, cutlist_filename):
-        cuts = cutlists_management.get_cuts_of_cutlist(cutlist_filename)
-
-        if type(cuts) != list: # error occured
-            self.__gui.message_error_box(cuts)
-            return
-            
-        diff = 10
         
-        f_edl = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "w")
-        f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")
-
-        #     Start          Duration
-        # 0  286.177737     631.462533
-        # 1  1452.4505715   528.5813674
-
-        # 0 283.24 0
-        # 289.24 914.6 0
-        # 920.6 1449.12 0
-        # 1455.12 1977.84 0
-        # 1983.84 50000 0
-
-        # 1
-        # 00:00:10,000 --> 00:00:11,000
-        # Noch 5 Sekunden
-    
-        length = 0
-        sub_count = 0
-                        
-        for count, start, duration in cuts:
-            f_edl.write("%s %s 0\n" % (diff + length, length + duration - diff))
-            length += duration
+        def edl_subtitles_cb(f_edl, f_sub, cuts):                    
+            diff = 10
             
-            # vor dem schnitt:
-            for second in range(diff):
-                sub_count += 1
-                f_sub.write("%s\n" % sub_count)
-                f_sub.write("%s --> %s\n" % (self.format_seconds(length - diff + second), self.format_seconds(length - diff + second + 1)))
-                f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))                      
+            length = 0
+            sub_count = 0
+                            
+            for count, start, duration in cuts:
+                f_edl.write("%s %s 0\n" % (diff + length, length + duration - diff))
+                length += duration
+                
+                # vor dem schnitt:
+                for second in range(diff):
+                    sub_count += 1
+                    f_sub.write("%s\n" % sub_count)
+                    f_sub.write("%s --> %s\n" % (self.format_seconds(length - diff + second), self.format_seconds(length - diff + second + 1)))
+                    f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))                      
 
-        
-        f_edl.close()
-        f_sub.close()
-            
-        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-osdlevel", "3", "-edl", join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "-sub", join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), avi_filename])    
+
+        self.__show(cutlist_filename, avi_filename, edl_subtitles_cb)    
     
     def format_seconds(self, seconds):
         hrs = seconds / 3600       
@@ -514,8 +503,7 @@ class App:
         ms = int(seconds) - seconds
         
         return "%02d:%02d:%02d,%03d" % (hrs, mins, secs, ms)
-            
-          
+                      
     def run(self):
         self.__gui.main_window.show()      
 

@@ -15,7 +15,7 @@ class CutPlay(BaseAction):
         self.update_list = False
         self.__gui = gui
 
-    def do(self, filename, mplayer, temp_folder, server, delete_cutlist):                
+    def do(self, filename, mplayer, temp_folder, server, choose_cutlists_by, delete_cutlist):                
         if not mplayer:
             self.__gui.message_error_box("Der MPlayer ist nicht angegeben!")
             return
@@ -24,7 +24,7 @@ class CutPlay(BaseAction):
         def error_cb(error):
             self.__gui.message_error_box(error)
         
-        cutlists = cutlists_management.download_cutlists(filename, server, error_cb) 
+        cutlists = cutlists_management.download_cutlists(filename, server, choose_cutlists_by, error_cb) 
         
         if len(cutlists) == 0:            
             return

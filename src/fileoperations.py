@@ -34,12 +34,12 @@ def rename_file(old_filename, new_filename):
         return
 
     count = 1
-    while exists(new_filename):                
+    while exists(new_filename):                  
         new_filename = new_filename.split('.')
         new_filename = "".join(new_filename[0:len(new_filename)-1]) + "." + str(count) + "." + new_filename[len(new_filename)-1]
         count += 1
-    
-    try:
+        
+    try:        
         os.rename(old_filename, new_filename)
     except Exception, e:
         error("Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))

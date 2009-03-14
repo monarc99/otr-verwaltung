@@ -8,10 +8,16 @@ import os.path
 
 import fileoperations
 
-def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):    
+def download_cutlists(filename, server, choose_cutlists_by, error_cb=None, cutlist_found_cb=None):    
     size = fileoperations.get_size(filename)
-    url = "%sgetxml.php?version=0.9.8.0&ofsb=%s" % (server, str(size))
+
+    if choose_cutlists_by == 0: # by size
+        url = "%sgetxml.php?ofsb=%s" % (server, str(size))
+    else: # by name
+        url = "%sgetxml.php?name=%s" % (server, os.path.basename(filename))
       
+    print url
+        
     try:
         handle = urllib.urlopen(url)
     except IOError:  
@@ -47,7 +53,10 @@ def download_cutlists(filename, server, error_cb=None, cutlist_found_cb=None):
            __read_value(cutlist, "duration"),
            __read_value(cutlist, "errors"),
            __read_value(cutlist, "othererrordescription"),
-           __read_value(cutlist, "downloadcount")]
+           __read_value(cutlist, "downloadcount"),
+           __read_value(cutlist, "autoname"),
+           __read_value(cutlist, "filename_original")
+           ]
                                    
         if cutlist_found_cb: 
             cutlist_found_cb(cutlist_data)
@@ -92,7 +101,6 @@ def download_cutlist(cutlist_id, server, avi_filename):
         return None, "Cutlist konnte nicht heruntergeladen werden (%s)." % error
         
     return local_filename, None
-    
   
 def get_cuts_of_cutlist(filename):    
     config_parser = ConfigParser.SafeConfigParser()        
@@ -118,6 +126,7 @@ def get_cuts_of_cutlist(filename):
         return "Fehler in Cutlist: " + str(message)
         
     return cuts
+          
         
 def get_best_cutlist(cutlists):
     dic_cutlists = {}
@@ -139,7 +148,7 @@ def get_best_cutlist(cutlists):
     sort_cutlists = dic_cutlists.items()
     sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
                     
-    return sort_cutlists[0][0] # get first (=the best) cutlist; from the tuple, get the first (id) item
+    return sort_cutlists[0] # get first (=the best) cutlist; from the tuple
     
 def rate(cutlist, rating, server):
     url = "%srate.php?version=0.9.8.0&rate=%s&rating=%s" % (server, cutlist, rating)

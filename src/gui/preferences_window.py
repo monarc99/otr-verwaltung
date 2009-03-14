@@ -40,7 +40,6 @@ class PreferencesWindow(BaseWindow):
             # Speicherorte
             'folderArchive',
             # Dekodieren
-            'filechooserDecoder',
             'entryEMail',
             'entryPassword',      
             'checkCorrect',
@@ -73,11 +72,21 @@ class PreferencesWindow(BaseWindow):
             builder.get_object(label).modify_font(pango.FontDescription("9"))            
                          
         # fill combobox of player
-        self.__set_model_from_list(builder.get_object('comboboxPlayer'), ["vlc", "totem", "mplayer"])
+        if os.name == "posix":
+            players = ["vlc", "totem", "mplayer"]
+        else:
+            players = [r"X:\Pfad\zu\vlc.exe", r"X:\Pfad\zu\wmp.exe"]
+        
+        self.__set_model_from_list(builder.get_object('comboboxPlayer'), players)
         builder.get_object('comboboxentry-player').set_text(self.app.config.get('play', 'player'))
         
         # fill combobox of mplayer
-        self.__set_model_from_list(builder.get_object('comboboxMPlayer'), ["mplayer"])
+        if os.name == "posix":
+            mplayers = ["mplayer"]
+        else:
+            mplayers = [r"X:\Pfad\zu\mplayer.exe"]
+
+        self.__set_model_from_list(builder.get_object('comboboxMPlayer'), mplayers)
         builder.get_object('comboboxentry-mplayer').set_text(self.app.config.get('play', 'mplayer'))
 
         # fill combobox of avi, hq, mp4
@@ -120,9 +129,15 @@ class PreferencesWindow(BaseWindow):
          
         # cutlists tab
         builder.get_object('check_delete_cutlists').set_active(self.app.config.get('cut', 'delete_cutlists'))
+        
+        # choose cutlists by size or filename
+        value = bool(self.app.config.get('cut', 'choose_cutlists_by')) # 0=size, 1=filename
+        builder.get_object('radio_size').set_active(not value) 
+        builder.get_object('radio_filename').set_active(value)
               
         # decode tab
-        self.get_widget('filechooserDecoder').set_filename(self.app.config.get('decode', 'path'))  
+        builder.get_object('entry_decoder').set_text(self.app.config.get('decode', 'path'))
+        
         if self.app.config.get('decode', 'save_email_password') == Save_Email_Password.DONT_SAVE:
             builder.get_object('radioDontSave').set_active(True)
             self.on_radioDontSave_toggled(builder.get_object('radioDontSave'))
@@ -130,7 +145,8 @@ class PreferencesWindow(BaseWindow):
             builder.get_object('radioSave').set_active(True)
             self.get_widget('entryEMail').set_text(self.app.config.get('decode', 'email'))
             self.get_widget('entryPassword').set_text(base64.b64decode(self.app.config.get('decode', 'password')))
-           
+        
+                   
         self.get_widget('entryPassword').set_visibility(False)
             
         self.get_widget('checkCorrect').set_active(self.app.config.get('decode', 'correct'))
@@ -166,6 +182,15 @@ class PreferencesWindow(BaseWindow):
     #  Signal handlers
     #
     
+    def on_button_set_file_clicked(self, entry, data=None):    
+        chooser = gtk.FileChooserDialog(title="Datei auswählen",
+                                        action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                        buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+                                        
+        if chooser.run() == gtk.RESPONSE_OK:
+            entry.set_text(chooser.get_filename())
+    
+        chooser.destroy()
     
     def on_preferences_buttonClose_clicked(self, widget, data=None):    
         self.hide()    
@@ -209,8 +234,8 @@ class PreferencesWindow(BaseWindow):
         self.app.show_section(self.app.section)
                 
     # decode tab
-    def on_filechooserDecoder_file_set(self, widget, data=None):
-        self.app.config.set('decode', 'path', widget.get_filename())
+    def on_entry_decoder_changed(self, widget, data=None):
+        self.app.config.set('decode', 'path', widget.get_text())
     
     def on_radioDontSave_toggled(self, widget, data=None):
         if widget.get_active() == True:
@@ -277,7 +302,15 @@ class PreferencesWindow(BaseWindow):
         
     def on_check_delete_cutlists_toggled(self, widget, data=None):
         self.app.config.set('cut', 'delete_cutlists', int(widget.get_active()))
-        
+      
+    def on_radio_size_toggled(self, widget, data=None):
+        if widget.get_active():
+            self.app.config.set('cut', 'choose_cutlists_by', 0)
+            
+    def on_radio_filename_toggled(self, widget, data=None):
+        if widget.get_active():
+            self.app.config.set('cut', 'choose_cutlists_by', 1)        
+            
     # play tab
     def on_comboboxentry_player_changed(self, widget, data=None):
         self.app.config.set('play', 'player', widget.get_text())

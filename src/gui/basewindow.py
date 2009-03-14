@@ -63,9 +63,9 @@ class BaseWindow:
             files - String of file/List of files. """
                 
         builder = gtk.Builder()
-        if type(files)==str:
+        if type(files) == str:
             builder.add_from_file(self.__path(files))
-        elif type(files)==list:
+        elif type(files) == list:
             for builder_file in files:
                 builder.add_from_file(self.__path(builder_file))
         else:

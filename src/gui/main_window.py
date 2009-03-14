@@ -439,7 +439,9 @@ class MainWindow(BaseWindow):
         about_dialog.set_transient_for(self.gui.main_window.get_window())
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_name("OTR-Verwaltung")
-        about_dialog.set_version("0.5.5")
+        
+        version = open(otrpath.get_path("VERSION"), 'r')        
+        about_dialog.set_version(version.read().strip())
         about_dialog.set_website("http://code.google.com/p/otr-verwaltung/")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2008 Benjamin Elbers")

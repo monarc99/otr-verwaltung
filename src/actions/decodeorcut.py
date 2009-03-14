@@ -88,7 +88,7 @@ class DecodeOrCut(BaseAction):
             
         # cut files
         if cut:
-            if self.cut(file_conclusions, action, rename_by_schema) == False: 
+            if self.cut(file_conclusions, action) == False: 
                 return
 
         self.__gui.main_window.block_gui(False)
@@ -97,14 +97,40 @@ class DecodeOrCut(BaseAction):
         self.__gui.main_window.get_widget('eventbox_tasks').hide()
                     
         # show conclusion
-        dialog = self.__gui.dialog_conclusion.build(file_conclusions, action)
+        dialog = self.__gui.dialog_conclusion.build(file_conclusions, action, rename_by_schema, self.config.get('rename', 'rename_cut'))
         dialog.run()
         dialog.hide()         
         
-        file_conclusions = self.__gui.dialog_conclusion.file_conclusions
-        
+        file_conclusions = self.__gui.dialog_conclusion.file_conclusions        
         
         if cut:
+                      
+            # rename
+            for file_conclusion in file_conclusions:
+           
+                rename = file_conclusion.cut.rename
+                                         
+                if rename != None:                   
+                    
+                    # TODO: mp4 support
+                
+                    if 0 == rename: # no rename
+                        continue
+                        
+                    elif 1 == rename: # otr rename                               
+                        new_name = rename_by_schema(basename(file_conclusion.uncut_avi))
+                
+                    elif 2 == rename: # filename rename
+                        new_name = file_conclusion.cut.cutlist[8] + ".avi"
+                        
+                    elif 3 == rename: # filename_original rename
+                        new_name = file_conclusion.cut.cutlist[16] + ".avi"
+                        
+                    elif 4 == rename: # autoname rename
+                        new_name = file_conclusion.cut.cutlist[15] + ".avi"                    
+                
+                    new_filename = join(self.config.get('folders', 'cut_avis'), new_name)        
+                    fileoperations.rename_file(file_conclusion.cut_avi, new_filename)                
         
             # move uncut avi to trash if it's ok            
             for file_conclusion in file_conclusions:
@@ -250,7 +276,7 @@ class DecodeOrCut(BaseAction):
                 
         return True
             
-    def cut(self, file_conclusions, action, rename_by_schema):                      
+    def cut(self, file_conclusions, action):                      
         # now this method may not return "False"
         self.__gui.main_window.get_widget('eventbox_tasks').show()
         self.__gui.main_window.block_gui(True)  
@@ -280,7 +306,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = error
 
-                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_avi, self.config.get('cut', 'server'), error_cb)                           
+                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_avi, self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), error_cb)                           
                 
                 if len(cutlists) == 0:
                     file_conclusion.cut.status = Status.ERROR
@@ -328,7 +354,7 @@ class DecodeOrCut(BaseAction):
                     if not self.cutlists_error:
                         self.__gui.dialog_cut.get_widget('label_status').set_markup("")
                
-                GeneratorTask(cutlists_management.download_cutlists, cutlist_found_cb, completed).start(file_conclusion.uncut_avi, self.config.get('cut', 'server'), error_cb)
+                GeneratorTask(cutlists_management.download_cutlists, cutlist_found_cb, completed).start(file_conclusion.uncut_avi, self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), error_cb)
                 
                 response = self.__gui.dialog_cut.run()                
                 self.__gui.dialog_cut.hide()
@@ -351,7 +377,9 @@ class DecodeOrCut(BaseAction):
             
                 best_cutlist = cutlists_management.get_best_cutlist(cutlists)                 
                 
-                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist, rename_by_schema)
+                best_cutlist_id = best_cutlist[0]
+                
+                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist_id)
 
                 if cut_avi == None:
                     file_conclusion.cut.status = Status.ERROR
@@ -363,7 +391,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.cutlist = best_cutlist                            
                 
             elif cut_action == Cut_action.CHOOSE_CUTLIST:
-                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist, rename_by_schema)
+                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist[0])
                 
                 if cut_avi == None:
                     file_conclusion.cut.status = Status.ERROR
@@ -379,10 +407,10 @@ class DecodeOrCut(BaseAction):
                 
                 if not exists(filename_cutlist):
                     file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden"
+                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
                     continue
                
-                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, filename_cutlist, rename_by_schema, local=True)
+                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, filename_cutlist, local=True)
                 
                 if cut_avi == None:
                     file_conclusion.cut.status = Status.ERROR
@@ -413,6 +441,8 @@ class DecodeOrCut(BaseAction):
             else:
                 return Format.AVI
         elif extension == '.mp4':
+            # TODO: mp4 support
+            return -1
             return Format.MP4
         else:
             return -1
@@ -439,17 +469,14 @@ class DecodeOrCut(BaseAction):
         else:
             return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value
    
-    def __generate_filename(self, filename, rename_by_schema):
+    def __generate_filename(self, filename):
         # generate filename for a cut avi
-        name = basename(filename)       
+        name = basename(filename)
         
-        if self.config.get('rename', 'rename_cut'):                         
-            new_name = rename_by_schema(name)                    
-        else:
-            #TODO: mp4 support
-            new_name = name[0:len(name)-4] # remove .avi
-            new_name += "-cut.avi"
-                    
+        #TODO: mp4 support
+        new_name = name[0:len(name)-4] # remove .avi
+        new_name += "-cut.avi"
+                
         cut_avi = join(self.config.get('folders', 'cut_avis'), new_name)        
             
         return cut_avi
@@ -521,7 +548,7 @@ class DecodeOrCut(BaseAction):
         
         return
              
-    def cut_file_by_cutlist(self, filename, cutlist, rename_by_schema, local=False):
+    def cut_file_by_cutlist(self, filename, cutlist, local=False):
         program, config_value = self.__get_program(filename)
         if program < 0:
             return None, None, config_value 
@@ -542,9 +569,9 @@ class DecodeOrCut(BaseAction):
         
         if type(cuts) != list: # error occured
             return None, None, "Fehler: cuts!=list (%s)" % cuts
-                
+        
         if program == Program.AVIDEMUX:
-            cut_avi, error = self.__cut_file_avidemux(filename, cuts, config_value, rename_by_schema)
+            cut_avi, error = self.__cut_file_avidemux(filename, cuts, config_value)
             
         else: # VIRTUALDUB                
             format = self.__get_format(filename)         
@@ -564,14 +591,14 @@ class DecodeOrCut(BaseAction):
             else:
                 return None, None, "Format nicht unterstützt (Nur Avi DX50 und HQ H264 sind möglich)."
                 
-            cut_avi, error = self.__cut_file_virtualdub(filename, cuts, comp_data, config_value, rename_by_schema)                      
+            cut_avi, error = self.__cut_file_virtualdub(filename, cuts, comp_data, config_value)                      
             
         if error:
             return None, None, error
         else:
             return cut_avi, local_filename, None
 
-    def __cut_file_avidemux(self, filename, cuts, config_value, rename_by_schema):
+    def __cut_file_avidemux(self, filename, cuts, config_value):
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
                     
@@ -590,7 +617,7 @@ class DecodeOrCut(BaseAction):
             frame_duration = duration * 25
             f.write("app.addSegment(0, %s, %s);\n" %(str(int(frame_start)), str(int(frame_duration))))
 
-        cut_avi = self.__generate_filename(filename, rename_by_schema)
+        cut_avi = self.__generate_filename(filename)
                                 
         f.writelines([
             '//** Postproc **\n',
@@ -640,7 +667,7 @@ class DecodeOrCut(BaseAction):
         
         return cut_avi, None
         
-    def __cut_file_virtualdub(self, filename, cuts, comp_data, config_value, rename_by_schema):
+    def __cut_file_virtualdub(self, filename, cuts, comp_data, config_value):
         # make file for virtualdub scripting engine
         f = open("tmp.vcf", "w")
         
@@ -661,7 +688,7 @@ class DecodeOrCut(BaseAction):
         for count, start, duration in cuts:
             f.write("VirtualDub.subset.AddRange(%s, %s);\n" % (str(start * 25), str(duration * 25)))
 
-        cut_avi = self.__generate_filename(filename, rename_by_schema)
+        cut_avi = self.__generate_filename(filename)
                             
         f.writelines([
             'VirtualDub.SaveAVI("%s");\n' % cut_avi,

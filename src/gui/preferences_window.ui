@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Mon Mar  9 20:46:14 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Mar 14 19:35:14 2009 -->
 <interface>
   <object class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -278,6 +278,35 @@
                     <property name="n_columns">2</property>
                     <property name="row_spacing">11</property>
                     <child>
+                      <object class="GtkHBox" id="hbox3">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkEntry" id="entry_decoder">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <signal handler="on_entry_decoder_changed" name="changed"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button_set_file">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">...</property>
+                            <signal handler="on_button_set_file_clicked" name="clicked" object="entry_decoder"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkCheckButton" id="checkCorrect">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -326,17 +355,6 @@
                         <property name="right_attach">2</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_EXPAND</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFileChooserButton" id="filechooserDecoder">
-                        <property name="visible">True</property>
-                        <signal handler="on_filechooserDecoder_file_set" name="file_set"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
@@ -496,70 +514,6 @@
                         <property name="column_spacing">12</property>
                         <property name="row_spacing">3</property>
                         <child>
-                          <object class="GtkComboBoxEntry" id="combobox_man_mp4">
-                            <child internal-child="entry">
-                              <object class="GtkEntry" id="comboboxentry-man_mp4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
-                            <property name="top_attach">3</property>
-                            <property name="bottom_attach">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkComboBoxEntry" id="combobox_man_hq">
-                            <property name="visible">True</property>
-                            <child internal-child="entry">
-                              <object class="GtkEntry" id="comboboxentry-man_hq">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <signal handler="on_comboboxentry_man_hq_changed" name="changed"/>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkComboBoxEntry" id="combobox_man_avi">
-                            <property name="visible">True</property>
-                            <child internal-child="entry">
-                              <object class="GtkEntry" id="comboboxentry-man_avi">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <signal handler="on_comboboxentry_man_avi_changed" name="changed"/>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label39">
-                            <property name="visible">True</property>
-                            <property name="xalign">0</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Manuell schneiden mit...&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkLabel" id="label16">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
@@ -574,59 +528,9 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBoxEntry" id="combobox_mp4">
-                            <child internal-child="entry">
-                              <object class="GtkEntry" id="comboboxentry-mp4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">3</property>
-                            <property name="bottom_attach">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkComboBoxEntry" id="combobox_hq">
-                            <property name="visible">True</property>
-                            <child internal-child="entry">
-                              <object class="GtkEntry" id="comboboxentry-hq">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <signal handler="on_comboboxentry_hq_changed" name="changed"/>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkComboBoxEntry" id="combobox_avi">
-                            <property name="visible">True</property>
-                            <child internal-child="entry">
-                              <object class="GtkEntry" id="comboboxentry-avi">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <signal handler="on_comboboxentry_avi_changed" name="changed"/>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkLabel" id="label38">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">mp4</property>
                           </object>
@@ -696,6 +600,234 @@
                             <property name="top_attach">4</property>
                             <property name="bottom_attach">5</property>
                             <property name="x_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label39">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Manuell schneiden mit...&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox16">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkComboBoxEntry" id="combobox_avi">
+                                <property name="visible">True</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="comboboxentry-avi">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <signal handler="on_comboboxentry_avi_changed" name="changed"/>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="button_set_file1">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="label" translatable="yes">...</property>
+                                <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-avi"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox17">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkComboBoxEntry" id="combobox_hq">
+                                <property name="visible">True</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="comboboxentry-hq">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <signal handler="on_comboboxentry_hq_changed" name="changed"/>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="button_set_file2">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="label" translatable="yes">...</property>
+                                <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-hq"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox18">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkComboBoxEntry" id="combobox_mp4">
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="comboboxentry-mp4">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="button_set_file3">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="label" translatable="yes">...</property>
+                                <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-mp4"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox19">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkComboBoxEntry" id="combobox_man_avi">
+                                <property name="visible">True</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="comboboxentry-man_avi">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <signal handler="on_comboboxentry_man_avi_changed" name="changed"/>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="button_set_file4">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="label" translatable="yes">...</property>
+                                <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-man_avi"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox20">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkComboBoxEntry" id="combobox_man_hq">
+                                <property name="visible">True</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="comboboxentry-man_hq">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <signal handler="on_comboboxentry_man_hq_changed" name="changed"/>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="button_set_file5">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="label" translatable="yes">...</property>
+                                <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-man_hq"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox21">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkComboBoxEntry" id="combobox_man_mp4">
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <child internal-child="entry">
+                                  <object class="GtkEntry" id="comboboxentry-man_mp4">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="button_set_file6">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="label" translatable="yes">...</property>
+                                <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-man_mp4"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
                           </packing>
                         </child>
                       </object>
@@ -825,30 +957,9 @@
                   <object class="GtkTable" id="table1">
                     <property name="visible">True</property>
                     <property name="n_rows">3</property>
-                    <property name="n_columns">2</property>
+                    <property name="n_columns">3</property>
                     <property name="column_spacing">5</property>
                     <property name="row_spacing">4</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="check_delete_cutlists">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Cutlisten nach dem Schneiden l&#xF6;schen</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal handler="on_check_delete_cutlists_toggled" name="toggled"/>
-                      </object>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkComboBoxEntry" id="comboboxServer">
                         <property name="visible">True</property>
@@ -862,7 +973,7 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
+                        <property name="right_attach">3</property>
                         <property name="y_options">GTK_EXPAND</property>
                       </packing>
                     </child>
@@ -875,6 +986,65 @@
                       <packing>
                         <property name="x_options">GTK_FILL</property>
                         <property name="y_options">GTK_EXPAND</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="check_delete_cutlists">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Cutlisten nach dem Schneiden l&#xF6;schen</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal handler="on_check_delete_cutlists_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="right_attach">3</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label43">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Cutlists ausw&#xE4;hlen nach...</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_size">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Gr&#xF6;&#xDF;e der Datei (empfohlen)</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal handler="on_radio_size_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_filename">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Dateiname</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_size</property>
+                        <signal handler="on_radio_filename_toggled" name="toggled"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                   </object>
@@ -926,6 +1096,19 @@
                           </object>
                           <packing>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button_set_fil">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">...</property>
+                            <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-player"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -980,6 +1163,19 @@
                           </object>
                           <packing>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button_set_fi">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">...</property>
+                            <signal handler="on_button_set_file_clicked" name="clicked" object="comboboxentry-mplayer"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>

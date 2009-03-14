@@ -89,7 +89,8 @@ class Config:
                     'server':               self.__read_value('cut', 'server', 'http://cutlist.at/'),
                     'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK)),
                     'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1)),
-                    'smart':                int(self.__read_value('cut', 'smart', 1))
+                    'smart':                int(self.__read_value('cut', 'smart', 1)),
+                    'choose_cutlists_by':   int(self.__read_value('cut', 'choose_cutlists_by', 0)) # 0=size, 1=filename
                 },
             'play':
                 {

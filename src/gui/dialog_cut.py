@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import gtk
-from os.path import join
+from os.path import join, basename
 
 from basewindow import BaseWindow
 
 from constants import Cut_action
 import cutlists as cutlists_management
 import fileoperations
+import otrpath
 
 class DialogCut(BaseWindow):
     
@@ -37,10 +38,13 @@ class DialogCut(BaseWindow):
 
         self.__setup_widgets()
         
+        self.cutlists = []        
         self.chosen_cutlist = None
         
     def __setup_widgets(self):   
-       
+        # warning sign
+        self.pixbuf_warning = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('error.png'))      
+               
         # setup the file treeview
         treeview = self.get_widget('treeview_cutlists')
         store = gtk.ListStore(
@@ -59,20 +63,41 @@ class DialogCut(BaseWindow):
             str, # 12 errors
             str, # 13 othererrordescription
             str, # 14 downloadcount
+            str, # 15 autoname
+            str, # 16 filename_original            
+            bool # 17 errors?
             )             
         
         treeview.set_model(store)
             
         # create the TreeViewColumns to display the data
-        column_names = [(0, "ID"), (1, "Autor"), (2, "Autorwertung"), (3, "Benutzerwertung"), (4, "Anzahl d. Wertungen"), (5, "Anzahl d. Schnitte"),
-         (6, "Eigentlicher Inhalt"), (7, "Kommentar"), (8, "Dateiname"), (11, "Dauer in s"), (12, "Fehler"), (13, "Fehlerbeschr."), (14, "Anzahl Heruntergeladen") ]
+        column_names = [
+            (0, "ID"),
+            (1, "Autor"),
+            (2, "Autorwertung"),
+            (3, "Benutzerwertung"),
+            (4, "Anzahl d. Wertungen"),
+            (7, "Kommentar"),
+            (12, "Fehler"),
+            (13, "Fehlerbeschr."),
+            (6, "Eigentlicher Inhalt"),
+            (5, "Anzahl d. Schnitte"),            
+            (8, "Dateiname"),
+            (11, "Dauer in s"),
+            (14, "Anzahl Heruntergeladen") ]
         
         renderer_left = gtk.CellRendererText()
         renderer_left.set_property('xalign', 0.0) 
               
+        cell_renderer_pixbuf = gtk.CellRendererPixbuf()
+        col = gtk.TreeViewColumn('', cell_renderer_pixbuf)
+        col.set_cell_data_func(cell_renderer_pixbuf, self.warning_pixbuf)
+        treeview.append_column(col)      
+              
         # append the columns
-        for index, text in column_names:
-            col = gtk.TreeViewColumn(text, renderer_left, text=index)
+        for count, (index, text) in enumerate(column_names):                         
+            col = gtk.TreeViewColumn(text, renderer_left, markup=index)
+
             col.set_resizable(True)        
             treeview.append_column(col)
             
@@ -81,11 +106,48 @@ class DialogCut(BaseWindow):
     
         self.filename = ""
     
+    def warning_pixbuf(self, column, cell, model, iter):
+        errors = model.get_value(iter, 17)
+        
+        if errors:
+            cell.set_property('pixbuf', self.pixbuf_warning)
+        else:
+            cell.set_property('pixbuf', None)
+    
     ###
     ### Convenience methods
     ###
             
-    def add_cutlist(self, data):
+    def add_cutlist(self, data):               
+        self.cutlists.append(data)
+
+        data = list(data)
+      
+        errors = {
+           "100000" : "Fehlender Beginn", 
+           "010000" : "Fehlendes Ende",
+           "001000" : "Kein Video",
+           "000100" : "Kein Audio",
+           "000010" : "Anderer Fehler",
+           "000001" : "Falscher Inhalt/EPG-Error"
+        }
+      
+        if data[12] in errors.keys():
+            data[12] = errors[data[12]]
+        else:
+            data[12] = ''     
+        
+        if data[6] or data[12] or data[13]:
+            data.append(True)
+        else:
+            data.append(False)
+        
+        data[2] = "<b>%s</b>" % data[2]
+        data[3] = "<b>%s</b>" % data[3]
+        data[6] = "<span foreground='red'>%s</span>" % data[6]
+        data[12] = "<span foreground='red'>%s</span>" % data[12]
+        data[13] = "<span foreground='red'>%s</span>" % data[13]
+        
         self.get_widget('treeview_cutlists').get_model().append(data)  
        
     ###
@@ -142,9 +204,13 @@ class DialogCut(BaseWindow):
 
             # retrieve id of chosen cutlist
             (model, iter) = treeselection.get_selected()                   
-            self.chosen_cutlist = model.get_value(iter, 0)
+            cutlist_id = model.get_value(iter, 0)
         
-            self.get_window().response(Cut_action.CHOOSE_CUTLIST)
+            for data in self.cutlists:
+                if data[0] == cutlist_id:
+                    self.chosen_cutlist = data
+                    self.get_window().response(Cut_action.CHOOSE_CUTLIST)
+                    return
             
         elif self.get_widget('radio_local_cutlist').get_active() == True:
             self.get_window().response(Cut_action.LOCAL_CUTLIST)

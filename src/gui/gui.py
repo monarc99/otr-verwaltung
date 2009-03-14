@@ -35,14 +35,12 @@ from dialog_email_password import DialogEmailPassword
 from dialog_rename import DialogRename
 from dialog_planning import DialogPlanning
 
+import otrpath
+
 class Gui:
     def __init__(self, app):
         self.app = app
-    
-        # TODO: icons setzen, aber wo?
-        # for window in self.windows:
-        #   self.windows[window].set_icon(gtk.gdk.pixbuf_new_from_file(self.get_image_path('icon3.png')))      
-        
+           
         # TODO: einheitliches benennungsschema für widgets: MainWindow oder main_window
         # TODO: signal-methoden mit präfix __: def on_button_clicked -> def __on_button_clicked?
         self.main_window = MainWindow(app, self)
@@ -53,6 +51,10 @@ class Gui:
         self.dialog_email_password = DialogEmailPassword(self.main_window)
         self.dialog_rename = DialogRename(self.main_window)
         self.dialog_planning = DialogPlanning(self, self.main_window)
+
+        # TODO: icons setzen, aber wo?
+        for window in [self.main_window]:
+            window.get_window().set_icon(gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('icon3.png')))      
 
     def run(self):
         gtk.main()

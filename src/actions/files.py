@@ -70,6 +70,8 @@ class Rename(BaseAction):
                     new_name += '.avi'
                     
                 fileoperations.rename_file(f, new_name)
+        else:
+            self.update_list = False
 
 class NewFolder(BaseAction):
     def __init__(self, gui):

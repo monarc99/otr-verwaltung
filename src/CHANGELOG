@@ -1,5 +1,12 @@
 0.5.6
-    * Meldung beim Dekodieren ändern, wenn Verifizieren angestellt ist
+    * Meldung beim Dekodieren wurde geändert, wenn Verifizieren angestellt ist
+    * EPG-Fehler etc. werden bei der Cutlist-Anzeige deutlicher dargestellt
+    * Statt Fehler-Codes wird der zugeordnete Text angezeigt
+    * Cutlist über Dateigröße oder Dateinamen herunterladen
+    * .tmp.edl und .tmp.sub nach dem Anzeigen der Schnitte löschen
+    * Wenn keine Datei ausgewählt wurde, wird gefragt, ob alle verarbeitet werden sollen
+    * Durchsuchen-Buttons für Programme in den Einstellungen
+    * Dateinamen aus Cutlist zum Umbenennen benutzen (nicht bei lokalen Cutlist)
 
 0.5.5
     * Schneiden mit lokalen Cutlist geht wieder
@@ -11,7 +18,7 @@
 
 0.5.3
     * Statt "Ungeschnittene Datei löschen" heisst der Text nun "... in den Müll verschieben"
-    * Es gibt nun eigene Einstellungen für manuelles Schneiden (siehe auch Häufige Fragen)
+    * Es gibt nun eigene Einstellungen für manuelles Schneiden
     * ... und damit auch Support für avidemux_cli. Momentan wird allerdings der Fortschritt noch nicht ausgelesen. Also: auch wenn kein Fortschritt erscheint, er tut trotzdem was!
     * Neue, eigene Ordner für ungeschnittene und geschnittene Dateien. Da sind bestimmt noch Bugs. Also gerne ausprobieren!!
     * Verschieben über Partitionsgrenzen möglich

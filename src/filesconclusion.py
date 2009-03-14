@@ -17,8 +17,9 @@ class Cut:
         self.cutlist = -1
         self.rating = -1
         self.local_cutlist = ""
+        self.rename = None
         
-        self.delete_uncut = False
+        self.delete_uncut = True
 
 class FileConclusion:
     def __init__(self, action, otrkey="", uncut_avi=""):
