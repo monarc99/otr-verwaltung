@@ -439,6 +439,7 @@ class MainWindow(BaseWindow):
         about_dialog.set_transient_for(self.gui.main_window.get_window())
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_name("OTR-Verwaltung")
+        about_dialog.set_logo(gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('icon3.png')))
         
         version = open(otrpath.get_path("VERSION"), 'r')        
         about_dialog.set_version(version.read().strip())
