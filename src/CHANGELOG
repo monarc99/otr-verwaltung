@@ -1,3 +1,7 @@
+0.5.7
+    * neues Icon 
+    * neue Einstellungen für ffdshow, um Header-Informationen zu erhalten
+
 0.5.6
     * Meldung beim Dekodieren wurde geändert, wenn Verifizieren angestellt ist
     * EPG-Fehler etc. werden bei der Cutlist-Anzeige deutlicher dargestellt

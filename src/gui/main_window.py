@@ -447,7 +447,6 @@ class MainWindow(BaseWindow):
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2008 Benjamin Elbers")
         about_dialog.set_authors(["Benjamin Elbers <elbersb@googlemail.com>"])
-        about_dialog.set_logo_icon_name(gtk.STOCK_EDIT)            
         about_dialog.run()
         about_dialog.destroy()
     

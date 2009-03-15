@@ -531,6 +531,8 @@ class DecodeOrCut(BaseAction):
             curr_dir = os.getcwd()
             os.chdir(dirname(config_value))
             
+            # TODO: load with processing settings!!
+            
             if os.name == 'posix':
                 command = 'wineconsole VirtualDub.exe'
             else:

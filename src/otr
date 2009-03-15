@@ -367,20 +367,26 @@ class App:
 
         if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD]:
             if len(broadcasts) == 0 and chosen_action != Action.PLAN_ADD:
-                if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
-                    broadcasts = []                    
+                if len(self.__gui.main_window.get_widget('treeview_planning').get_model()) > 0:
+                    if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
+                        broadcasts = []                    
 
-                    def foreach(model, path, iter, broadcasts):
-                        broadcasts += [iter]
+                        def foreach(model, path, iter, broadcasts):
+                            broadcasts += [iter]
 
-                    self.__gui.main_window.get_widget('treeview_planning').get_model().foreach(foreach, broadcasts)
+                        self.__gui.main_window.get_widget('treeview_planning').get_model().foreach(foreach, broadcasts)
+                    else:
+                        return
                 else:
                     return
 
         elif filenames != None:
             if len(filenames) == 0 and chosen_action != Action.NEW_FOLDER:
-                if self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
-                    filenames = [row[0] for row in self.__gui.main_window.get_widget('treeview_files').get_model()]
+                if len(self.__gui.main_window.get_widget('treeview_files').get_model()) > 0:
+                    if self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
+                        filenames = [row[0] for row in self.__gui.main_window.get_widget('treeview_files').get_model()]
+                    else:
+                        return
                 else:
                     return
            
