@@ -219,7 +219,7 @@ class DialogConclusion(BaseWindow):
                 self.get_widget('check_delete_uncut').set_active(file_conclusion.cut.delete_uncut)
                 
                 if file_conclusion.cut.cut_action == Cut_action.MANUALLY:
-                    text += ", Manuell geschnitten"
+                    text = "Manuell geschnitten"
                 else:
                     if file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST: 
                         text += ", Mit lokaler Cutlist geschnitten"                       

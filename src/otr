@@ -22,22 +22,9 @@ except:
 if exists(join(sys.path[0], 'otrpath.py')):    
     f = open(join(sys.path[0], 'conf'), 'a')
     f.close()
-    filename = join(sys.path[0], 'log')
-    
-    import otrpath
-    
-    from log import Log
-    log = Log(True, filename)
 else:
     sys.path.insert(0, "/usr/share/otr-verwaltung")
     
-    import otrpath
-    filename = otrpath.get_config_path('log')
-
-    from log import Log
-    log = Log(False, filename)
-
-log.l("Log file created at", filename)
 
 # intern
 from gui.gui import Gui
@@ -46,6 +33,7 @@ from configparser import Config
 import fileoperations
 import cutlists as cutlists_management
 from constants import Section, Action
+import otrpath
 
 class App:
     

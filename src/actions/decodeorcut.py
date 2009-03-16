@@ -527,26 +527,11 @@ class DecodeOrCut(BaseAction):
                 pass
                 
         else: # VIRTUALDUB
-            # TODO: kind of a hack
-            curr_dir = os.getcwd()
-            os.chdir(dirname(config_value))
             
-            # TODO: load with processing settings!!
+            cut_avi, error = self.__cut_file_virtualdub(filename, config_value, cuts=None, manually=True)
             
-            if os.name == 'posix':
-                command = 'wineconsole VirtualDub.exe'
-            else:
-                command = 'VirtualDub.exe'
-                
-            try:                   
-               vdub = subprocess.Popen(command, shell=True)
-            except OSError:
-                return "Virtualdub konnte nicht aufgerufen werden: " + config_value
-
-            while vdub.poll() == None:
-                pass
-            
-            os.chdir(curr_dir)            
+            if error != None:
+                return error
         
         return
              
@@ -573,34 +558,17 @@ class DecodeOrCut(BaseAction):
             return None, None, "Fehler: cuts!=list (%s)" % cuts
         
         if program == Program.AVIDEMUX:
-            cut_avi, error = self.__cut_file_avidemux(filename, cuts, config_value)
+            cut_avi, error = self.__cut_file_avidemux(filename, config_value, cuts)
             
-        else: # VIRTUALDUB                
-            format = self.__get_format(filename)         
-
-            if format == Format.HQ:
-                aspect, error_message = self.__get_aspect_ratio(filename)
-                if not aspect:
-                    return None, None, error_message                     
-                    
-                if aspect == "16:9":
-                    comp_data = codec.get_comp_data_h264_169()
-                else:
-                    comp_data = codec.get_comp_data_h264_43()
-                    
-            elif format == Format.AVI:      
-                comp_data = codec.get_comp_data_dx50()
-            else:
-                return None, None, "Format nicht unterstützt (Nur Avi DX50 und HQ H264 sind möglich)."
-                
-            cut_avi, error = self.__cut_file_virtualdub(filename, cuts, comp_data, config_value)                      
+        else: # VIRTUALDUB                              
+            cut_avi, error = self.__cut_file_virtualdub(filename, config_value, cuts)
             
         if error:
             return None, None, error
         else:
             return cut_avi, local_filename, None
 
-    def __cut_file_avidemux(self, filename, cuts, config_value):
+    def __cut_file_avidemux(self, filename, config_value, cuts):
         # make file for avidemux scripting engine
         f = open("tmp.js", "w")
                     
@@ -669,11 +637,34 @@ class DecodeOrCut(BaseAction):
         
         return cut_avi, None
         
-    def __cut_file_virtualdub(self, filename, cuts, comp_data, config_value):
+    def __cut_file_virtualdub(self, filename, config_value, cuts=None, manually=False):
+        format = self.__get_format(filename)         
+
+        if format == Format.HQ:
+            aspect, error_message = self.__get_aspect_ratio(filename)
+            if not aspect:
+                return None, error_message                     
+                
+            if aspect == "16:9":
+                comp_data = codec.get_comp_data_h264_169()
+            else:
+                comp_data = codec.get_comp_data_h264_43()
+                
+        elif format == Format.AVI:      
+            comp_data = codec.get_comp_data_dx50()
+        else:
+            return None, "Format nicht unterstützt (Nur Avi DX50 und HQ H264 sind möglich)."
+        
         # make file for virtualdub scripting engine
+        if manually:
+            # TODO: kind of a hack
+            curr_dir = os.getcwd()
+            os.chdir(dirname(config_value))
+        
         f = open("tmp.vcf", "w")
         
-        f.write('VirtualDub.Open("%s");\n' % filename)
+        if not manually:
+            f.write('VirtualDub.Open("%s");\n' % filename)
             
         if self.config.get('cut', 'smart'):
             f.writelines([               
@@ -687,33 +678,46 @@ class DecodeOrCut(BaseAction):
 
         f.write('VirtualDub.subset.Clear();\n')
 
-        for count, start, duration in cuts:
-            f.write("VirtualDub.subset.AddRange(%s, %s);\n" % (str(start * 25), str(duration * 25)))
+        if not manually:
+            for count, start, duration in cuts:
+                f.write("VirtualDub.subset.AddRange(%s, %s);\n" % (str(start * 25), str(duration * 25)))
 
-        cut_avi = self.__generate_filename(filename)
-                            
-        f.writelines([
-            'VirtualDub.SaveAVI("%s");\n' % cut_avi,
-            'VirtualDub.Close();'
-            ])
+            cut_avi = self.__generate_filename(filename)
+                                
+            f.writelines([
+                'VirtualDub.SaveAVI("%s");\n' % cut_avi,
+                'VirtualDub.Close();'
+                ])
 
         f.close()
         
         # start vdub
-        command = "%s /s tmp.vcf /x" % config_value
+        if not exists(config_value):
+            return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
+        
+        if manually: 
+            win_filename = "Z:" + filename.replace(r"/", r"\\")
+            command = 'VirtualDub.exe /s tmp.vcf "%s"' % win_filename
+        else:
+            command = "%s /s tmp.vcf /x" % config_value
 
         if os.name == 'posix':
-            command = "wineconsole " + command
+            command = "wineconsole " + command               
         
+        print command
         try:     
             vdub = subprocess.Popen(command, shell=True)
         except OSError:
-            return None, "Vdub konnte nicht aufgerufen werden: " + config_value
+            return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
             
-        while vdub.poll() == None:
+        while vdub.poll() == None:            
             while events_pending():
                 main_iteration(False)
         
-        fileoperations.remove_file('tmp.vcf')
+       # fileoperations.remove_file('tmp.vcf')
         
+        if manually:
+            os.chdir(curr_dir)            
+            return None, None        
+
         return cut_avi, None
