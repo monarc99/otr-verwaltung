@@ -129,6 +129,7 @@ class PreferencesWindow(BaseWindow):
          
         # cutlists tab
         builder.get_object('check_delete_cutlists').set_active(self.app.config.get('cut', 'delete_cutlists'))
+        builder.get_object('entry_username').set_text(self.app.config.get('cut', 'cutlist_username'))
         
         # choose cutlists by size or filename
         value = bool(self.app.config.get('cut', 'choose_cutlists_by')) # 0=size, 1=filename
@@ -310,6 +311,9 @@ class PreferencesWindow(BaseWindow):
     def on_radio_filename_toggled(self, widget, data=None):
         if widget.get_active():
             self.app.config.set('cut', 'choose_cutlists_by', 1)        
+    
+    def on_entry_username_changed(self, widget, data=None):
+        self.app.config.set('cut', 'cutlist_username', widget.get_text())
             
     # play tab
     def on_comboboxentry_player_changed(self, widget, data=None):

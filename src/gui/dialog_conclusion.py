@@ -45,7 +45,27 @@ class DialogConclusion(BaseWindow):
             'radio_otr_rename',
             'radio_filename_rename',
             'radio_filename_original_rename',
-            'radio_autoname_rename'
+            'radio_autoname_rename',
+            
+            # create cutlist
+            'vbox_create_cutlist',
+            'hbox_create_cutlist',            
+            'check_create_cutlist',
+            'label_create_cutlist_error',
+            'radio_create_rate_0',
+            'radio_create_rate_1',
+            'radio_create_rate_2',
+            'radio_create_rate_3',
+            'radio_create_rate_4',
+            'radio_create_rate_5',
+            'check_wrong_content',
+            'entry_actual_content',
+            'check_missing_beginning',
+            'check_missing_ending',
+            'check_other_error',
+            'entry_other_error_description',
+            'entry_suggested',
+            'entry_comment'
             ]
         
         builder = self.create_builder("dialog_conclusion.ui")
@@ -53,12 +73,20 @@ class DialogConclusion(BaseWindow):
         BaseWindow.__init__(self, builder, "dialog_conclusion", widgets, parent)
                 
         # setup widgets
+
+        # cutlist rating
         for radio in range(6):
             name = "radiobuttonRate" + str(radio)
             self.get_widget(name).connect('toggled', self.on_radiobuttonRating_toggled, radio)
             self.get_widget(name).set_sensitive(False)
+     
         
+        # cutlist create rating
+        for radio in range(6):
+            name = "radio_create_rate_" + str(radio)
+            self.get_widget(name).connect('toggled', self.on_radio_create_rate_toggled, radio)
         
+        # rename buttons
         self.rename_radio_buttons = ['radio_no_rename', 'radio_otr_rename', 'radio_filename_rename', 'radio_filename_original_rename', 'radio_autoname_rename' ]
 
         for radio in range(5):            
@@ -92,6 +120,7 @@ class DialogConclusion(BaseWindow):
         self.file_conclusions = file_conclusions
                 
         self.show_conclusion(0)       
+        
         return dialog        
      
     ###
@@ -149,6 +178,50 @@ class DialogConclusion(BaseWindow):
             self.file_conclusions[self.conclusion_iter].cut.rename = radio_count       
             print self.file_conclusions[self.conclusion_iter].cut.rename
         
+    #
+    # Create Cutlist
+    #
+
+    def on_check_create_cutlist_toggled(self, widget, data=None):       
+        print "set create_cutlist to ", widget.get_active()
+        self.file_conclusions[self.conclusion_iter].cut.create_cutlist = widget.get_active()
+
+        self.get_widget('hbox_create_cutlist').set_sensitive(widget.get_active())
+
+    def on_radio_create_rate_toggled(self, widget, radio_count):
+        if widget.get_active():
+            file_conclusion = self.file_conclusions[self.conclusion_iter]
+            
+            file_conclusion.cut.cutlist_information['rating'] = radio_count   
+
+    def on_check_wrong_content_toggled(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['wrong_content'] = widget.get_active()
+
+    def on_entry_actual_content_changed(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['actual_content'] = widget.get_text()
+
+    def on_check_missing_beginning_toggled(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['missing_beginning'] = widget.get_active()
+
+    def on_check_missing_ending_toggled(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['missing_ending'] = widget.get_active()
+
+    def on_check_other_error_toggled(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['other_error'] = widget.get_active()
+
+    def on_entry_other_error_description_changed(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['other_error_description'] = widget.get_text()
+
+    def on_entry_suggested_changed(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['suggested'] = widget.get_text()
+
+    def on_entry_comment_changed(self, widget, data=None):
+        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['comment'] = widget.get_text()
+    
+    #
+    # Controls
+    #
+
     def on_buttonBack_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter - 1)
     
@@ -166,6 +239,7 @@ class DialogConclusion(BaseWindow):
         self.get_widget('check_delete_uncut').hide()
         self.get_widget('button_conclusion_play_cut').hide()
         self.get_widget('table_rename').hide()
+        self.get_widget('vbox_create_cutlist').hide()
         
         # enable back-button?
         if self.conclusion_iter == 0:
@@ -220,6 +294,42 @@ class DialogConclusion(BaseWindow):
                 
                 if file_conclusion.cut.cut_action == Cut_action.MANUALLY:
                     text = "Manuell geschnitten"
+                    
+                    self.get_widget('vbox_create_cutlist').show()
+                    
+                    if file_conclusion.cut.cutlist_cuts == None: # cannot create cutlist!
+                        self.get_widget('hbox_create_cutlist').hide()
+                        self.get_widget('label_create_cutlist_error').set_text(file_conclusion.cut.create_cutlist_error)
+                        self.get_widget('check_create_cutlist').set_sensitive(False)
+                        self.get_widget('check_create_cutlist').set_active(False)
+
+                    else:                        
+                        # can create cutlist
+                        self.get_widget('hbox_create_cutlist').show()
+                        self.get_widget('label_create_cutlist_error').set_text("")
+                        self.get_widget('check_create_cutlist').set_sensitive(True)
+                        self.get_widget('check_create_cutlist').set_active(file_conclusion.cut.create_cutlist)
+
+                        if file_conclusion.cut.create_cutlist:
+                            self.get_widget('hbox_create_cutlist').set_sensitive(True)                            
+                        
+                            # fill values
+                            v = file_conclusion.cut.cutlist_information
+                            
+                            rating = v['rating']
+                            self.get_widget('radio_create_rate_' + str(rating)).set_active(True)
+                            
+                            self.get_widget('check_wrong_content').set_active(v['wrong_content'])
+                            self.get_widget('entry_actual_content').set_text(v['actual_content'])
+                            self.get_widget('check_missing_beginning').set_active(v['missing_beginning'])
+                            self.get_widget('check_missing_ending').set_active(v['missing_ending'])
+                            self.get_widget('check_other_error').set_active(v['other_error'])
+                            self.get_widget('entry_other_error_description').set_text(v['other_error_description'])
+                            self.get_widget('entry_suggested').set_text(v['suggested'])
+                            self.get_widget('entry_comment').set_text(v['comment'])
+                        else:
+                            self.get_widget('hbox_create_cutlist').set_sensitive(False)
+                                                               
                 else:
                     if file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST: 
                         text += ", Mit lokaler Cutlist geschnitten"                       

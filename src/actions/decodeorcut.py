@@ -18,6 +18,7 @@ from constants import Action, Cut_action, Save_Email_Password, Status, Format, P
 from baseaction import BaseAction
 import codec
 import cutlists as cutlists_management
+import otrpath
 
 class GeneratorTask(object):
    def __init__(self, generator, loop_callback, complete_callback=None):
@@ -104,6 +105,80 @@ class DecodeOrCut(BaseAction):
         file_conclusions = self.__gui.dialog_conclusion.file_conclusions        
         
         if cut:
+             
+            # create cutlists
+            cutlists = []
+            
+            for file_conclusion in file_conclusions:
+                if file_conclusion.cut.create_cutlist:  
+
+                    filename = file_conclusion.uncut_avi + ".cutlist"                    
+                    print "Cutlist-Dateiname: ", filename
+
+                    if "VirtualDub" in file_conclusion.cut.executable:
+                        app_name = "VirtualDub"
+                    else:
+                        app_name = "Avidemux"
+                                               
+                    try:                        
+                        cutlist = open(filename, 'w')
+                                                  
+                        cutlist.writelines([
+                            "[General]\n",
+                            "Application=OTR-Verwaltung\n",
+                            "Version=%s\n" % open(otrpath.get_path("VERSION"), 'r').read().strip(),
+                            "comment1=The following parts of the movie will be kept, the rest will be cut out.\n",
+                            "ApplyToFile=%s\n" % basename(file_conclusion.uncut_avi),
+                            "OriginalFileSizeBytes=%s\n" % str(fileoperations.get_size(file_conclusion.uncut_avi)),
+                            "FramesPerSecond=25\n",
+                            "IntendedCutApplicationName=%s\n" % app_name,
+                            "IntendedCutApplication=%s\n" % file_conclusion.cut.executable,
+                            "IntendedCutApplicationVersion=\n",
+                            "VDUseSmartRendering=%s\n" % str(int(self.config.get('cut', 'smart'))),
+                            "VDSmartRenderingCodecFourCC=0x53444646\n",
+                            "VDSmartRenderingCodecVersion=0x00000000\n",
+                            "NoOfCuts=%s\n" % str(len(file_conclusion.cut.cutlist_cuts)),
+                            "comment2=All values are given in seconds.\n",
+                            "\n",
+                            "[Info]\n",
+                            "Author=%s\n" % self.config.get('cut', 'cutlist_username'),
+                            "RatingByAuthor=%s\n" % str(file_conclusion.cut.cutlist_information['rating']),
+                            "EPGError=%s\n" % str(int(file_conclusion.cut.cutlist_information['wrong_content'])),
+                            "ActualContent=%s\n" % str(file_conclusion.cut.cutlist_information['actual_content']),
+                            "MissingBeginning=%s\n" % str(int(file_conclusion.cut.cutlist_information['missing_beginning'])),
+                            "MissingEnding=%s\n" % str(int(file_conclusion.cut.cutlist_information['missing_ending'])),
+                            "MissingVideo=0\n",
+                            "MissingAudio=0\n",
+                            "OtherError=%s\n" % str(int(file_conclusion.cut.cutlist_information['other_error'])),
+                            "OtherErrorDescription=%s\n" % str(file_conclusion.cut.cutlist_information['other_error_description']),
+                            "SuggestedMovieName=%s\n" % str(file_conclusion.cut.cutlist_information['suggested']),
+                            "UserComment=%s\n" % str(file_conclusion.cut.cutlist_information['comment']),
+                            "\n"
+                        ])
+                       
+                        for count, start, duration in file_conclusion.cut.cutlist_cuts:
+                            print start
+                            print duration
+
+                            cutlist.writelines([
+                                "[Cut%s]\n" % str(count),
+                                "Start=%s\n" % str(start),
+                                "Duration=%s\n" % str(duration),
+                                "\n"
+                            ])                       
+                                                               
+                    except IOError:
+                        self.__gui.message_error_box("Konnte Cutlist-Datei nicht erstellen: " + filename)
+                        continue                       
+                    finally:
+                        cutlist.close()
+                        
+                    cutlists.append(filename)
+                    
+            if len(cutlists) > 0:
+                if self.__gui.question_box("Soll(en) %s Cutlist(en) hochgeladen werden?" % len(cutlists)):
+                    for cutlist in cutlists:
+                        print cutlist, " HOCHLADEN!"
                       
             # rename
             for file_conclusion in file_conclusions:
@@ -420,14 +495,21 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut_avi = cut_avi
                     file_conclusion.cut.local_cutlist = local_cutlist
 
-            elif cut_action == Cut_action.MANUALLY: # MANUALLY                
-                error = self.cut_file_manually(file_conclusion.uncut_avi)
+            elif cut_action == Cut_action.MANUALLY: # MANUALLY                               
+                error_code, error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_avi)
                     
-                if None == error:
-                    file_conclusion.cut.status = Status.OK
-                else:
+                if error_code < 0:
+                    file_conclusion.cut.status = Status.OK  
+                    file_conclusion.cut.create_cutlist = True            
+                    file_conclusion.cut.cutlist_cuts = cuts
+                    file_conclusion.cut.executable = basename(executable)
+                elif error_code == 1:
                     file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error
+                    file_conclusion.cut.message = error_message
+                elif error_code == 2:                    
+                    file_conclusion.cut.status = Status.OK                    
+                    file_conclusion.cut.create_cutlist_error = error_message
+                    
               
         # after iterating over all items:
         return True
@@ -508,12 +590,73 @@ class DecodeOrCut(BaseAction):
                     return "4:3", None
                 else:
                     return None, "Aspekt konnte nicht bestimmt werden " + line
+    
+    def __create_cutlist_avidemux(self, filename):
+        """ returns: cuts, error_message """
+        
+        try:
+            f = open(filename, 'r')
+        except IOError:
+            return None, "Konnte %s nicht finden, um Cutlist zu erstellen." % filename
+
+        cuts = [] # (count, start, duration)
+        count = 0
+
+        for line in f.readlines():
+            if "app.addSegment" in line:
+                try:
+                    null, start, duration = line[line.index('(') + 1 : line.index(')')].split(',')
+                except (IndexError, ValueError), message:
+                    return None, "Konnte Schnitte nicht lesen, um Cutlist zu erstellen. (%s)" % message
+                
+                # convert to seconds (avidemux uses frames)
+                cuts.append((count, int(start) / 25., int(duration) / 25.))
+                
+                count += 1
+
+        fileoperations.remove_file(filename)
+
+        return cuts, None       
+        
+    def __create_cutlist_virtualdub(self, filename):
+        """ returns: cuts, error_message """
+        
+        try:
+            f = open(filename, 'r')
+        except IOError:
+            return None, "Konnte %s nicht finden, um Cutlist zu erstellen." % filename
+
+        cuts = [] # (count, start, duration)
+        count = 0
+
+        for line in f.readlines():
+            if "VirtualDub.subset.AddRange" in line:
+                try:
+                    start, duration = line[line.index('(') + 1 : line.index(')')].split(',')
+                except (IndexError, ValueError), message:
+                    return None, "Konnte Schnitte nicht lesen, um Cutlist zu erstellen. (%s)" % message
+                
+                cuts.append((count, int(start) / 25., int(duration) / 25. ))
+                
+                count += 1
+
+        fileoperations.remove_file(filename)
+
+        return cuts, None       
        
     def cut_file_manually(self, filename):
+        """ Cuts a file manually with Avidemux or VirtualDub and gets cuts from
+            possibly created project files. 
+            returns: error_code, error_message, cuts, executable
+
+            error_code: -1 - no error
+                         1 - program (avidemux/VirtualDub) error 
+                         2 - could not get cuts """
+        
         program, config_value = self.__get_program(filename, manually=True)
         
         if program < 0:
-            return config_value
+            return 1, config_value, None, None
     
         if program == Program.AVIDEMUX:       
             command = [config_value, "--load", filename]
@@ -521,19 +664,26 @@ class DecodeOrCut(BaseAction):
             try:                   
                 avidemux = subprocess.Popen(command)
             except OSError:
-                return "Avidemux konnte nicht aufgerufen werden: " + config_value
+                return 1, "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
                 
             while avidemux.poll() == None:
                 pass
                 
+            cuts, cutlist_error = self.__create_cutlist_avidemux(join(self.config.get('folders', 'uncut_avis'), "cutlist.js"))
+                        
         else: # VIRTUALDUB
             
-            cut_avi, error = self.__cut_file_virtualdub(filename, config_value, cuts=None, manually=True)
+            cut_avi_is_none, error = self.__cut_file_virtualdub(filename, config_value, cuts=None, manually=True)
             
             if error != None:
-                return error
+                return 1, error, None, None
+                
+            cuts, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('folders', 'uncut_avis'), "cutlist.vcf"))
         
-        return
+        if cutlist_error != None:            
+            return 2, cutlist_error, None, config_value
+        else:
+            return -1, None, cuts, config_value
              
     def cut_file_by_cutlist(self, filename, cutlist, local=False):
         program, config_value = self.__get_program(filename)

@@ -425,9 +425,7 @@ class MainWindow(BaseWindow):
     #
     #  Signal handlers
     #
-    
-
-                  
+                      
     def on_menuHelpAbout_activate(self, widget, data=None):
 
         def open_website(dialog, url, data=None):

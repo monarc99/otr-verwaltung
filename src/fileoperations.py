@@ -54,7 +54,7 @@ def move_file(filename, target):
             error("Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
 
 def get_size(filename):
-    """ Returns a file's size."""
+    """ Returns a file's size in bytes."""
     filestat = os.stat(filename)
     size = filestat.st_size
     
