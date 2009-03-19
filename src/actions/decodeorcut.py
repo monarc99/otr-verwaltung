@@ -178,6 +178,7 @@ class DecodeOrCut(BaseAction):
             if len(cutlists) > 0:
                 if self.__gui.question_box("Soll(en) %s Cutlist(en) hochgeladen werden?" % len(cutlists)):
                     for cutlist in cutlists:
+                        # curl -F userfile[]=@$1 -F MAX_FILE_SIZE=10000000 -F confirm=true -F type=blank -F userid=$2 -F version=1 "$CutListAT/index.php?upload=2"
                         print cutlist, " HOCHLADEN!"
                       
             # rename

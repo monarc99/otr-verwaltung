@@ -3,6 +3,7 @@
     * neue Einstellungen für ffdshow, um Header-Informationen zu erhalten (Dank an monarc!)
     * ffdshow-Einstellungen werden auch beim manuellen Schneiden mit VirtualDub geladen
     * Cutlisten erstellen mit Avidemux und VirtualDub (bis jetzt ohne viele Optionen, bitte Vorschläge machen!)
+    * Auf-Update-Prüfen-Funktion
 
 0.5.6
     * Meldung beim Dekodieren wurde geändert, wenn Verifizieren angestellt ist
