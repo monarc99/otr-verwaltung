@@ -838,8 +838,11 @@ class DecodeOrCut(BaseAction):
         if manually:
             # TODO: kind of a hack
             curr_dir = os.getcwd()
-            os.chdir(dirname(config_value))
-        
+            try:
+                os.chdir(dirname(config_value))
+            except OSError:        
+                return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
+    
         f = open("tmp.vcf", "w")
         
         if not manually:
