@@ -431,18 +431,12 @@ class MainWindow(BaseWindow):
         current_version = open(otrpath.get_path("VERSION"), 'r').read().strip()
     
         try:
-            svn_version = urllib.urlopen('http://otr-verwaltung.googlecode.com/svn/trunk/src/STABLEVERSION').read().strip()
-        except IOError, AssertionError:
+           svn_version = urllib.urlopen('http://otr-verwaltung.googlecode.com/svn/trunk/src/STABLEVERSION').read().strip()
+        except IOError:
             self.gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
             return
         
-        print svn_version
-        
-        current_version = current_version.split(".")   # 0.5.4
-        svn_version = svn_version(".")                 # 1.0.0, 0.5.7
-        
-        if svn_version[0] > current_version[0] or svn_version[1] > current_version[1] or svn_version[2] > current_version[2]:
-            self.gui.message_info_box("Es steht eine neue Version bereit: %s\n\n(Ihre Version ist %s.)" % (svn_version, current_version))            
+        self.gui.message_info_box("Ihre Version ist:\n%s\n\nAktuelle Version ist:\n%s" % (current_version, svn_version))            
 
                       
     def on_menuHelpAbout_activate(self, widget, data=None):

@@ -175,11 +175,21 @@ class DecodeOrCut(BaseAction):
                         
                     cutlists.append(filename)
                     
-            if len(cutlists) > 0:
+            if len(cutlists) > 0:                
                 if self.__gui.question_box("Soll(en) %s Cutlist(en) hochgeladen werden?" % len(cutlists)):
+                    errors = 0
+                    
+                    userid = self.config.get('cut', 'cutlist_hash')
+
                     for cutlist in cutlists:
-                        # curl -F userfile[]=@$1 -F MAX_FILE_SIZE=10000000 -F confirm=true -F type=blank -F userid=$2 -F version=1 "$CutListAT/index.php?upload=2"
-                        print cutlist, " HOCHLADEN!"
+                        message = cutlists_management.upload_cutlist(cutlist, userid)
+                        if None != message:
+                            # fehler
+                            self.__gui.message_error_box("Fehler beim Hochladen der Cutlist:\n" + message)
+                            errors += 1
+                            
+                    count = len(cutlists)
+                    self.__gui.message_info_box("Es wurden %s/%s Cutlisten hochgeladen!" % (str(count - errors), str(count)))                      
                       
             # rename
             for file_conclusion in file_conclusions:
@@ -233,7 +243,7 @@ class DecodeOrCut(BaseAction):
                 if count == 1:
                     self.__gui.message_info_box("Es wurde 1 Cutlist bewertet!")
                 elif count > 1:
-                    self.__gui.message_info_box("Es wurden %s Cutlisten bewertet!" % count)
+                    self.__gui.message_info_box("Es wurde(n) %s Cutlist(en) bewertet!" % count)
              
      
     def decode(self, file_conclusions):          
@@ -615,6 +625,9 @@ class DecodeOrCut(BaseAction):
                 
                 count += 1
 
+        if len(cuts) == 0:
+            return None, "Konnte keine Schnitte finden!"
+
         fileoperations.remove_file(filename)
 
         return cuts, None       
@@ -641,6 +654,9 @@ class DecodeOrCut(BaseAction):
                 
                 count += 1
 
+        if len(cuts) == 0:
+            return None, "Konnte keine Schnitte finden!"
+
         fileoperations.remove_file(filename)
 
         return cuts, None       
@@ -660,7 +676,19 @@ class DecodeOrCut(BaseAction):
             return 1, config_value, None, None
     
         if program == Program.AVIDEMUX:       
-            command = [config_value, "--load", filename]
+            script_filename = filename + ".js"
+            
+            f = open(script_filename, "w")
+            
+            f.writelines([
+                '//AD\n',
+                'var app = new Avidemux();\n',
+                'app.load("%s");\n' % filename
+            ])
+            
+            f.close()
+            
+            command = [config_value, "--run", script_filename]
 
             try:                   
                 avidemux = subprocess.Popen(command)
@@ -670,7 +698,7 @@ class DecodeOrCut(BaseAction):
             while avidemux.poll() == None:
                 pass
                 
-            cuts, cutlist_error = self.__create_cutlist_avidemux(join(self.config.get('folders', 'uncut_avis'), "cutlist.js"))
+            cuts, cutlist_error = self.__create_cutlist_avidemux(join(self.config.get('folders', 'uncut_avis'), script_filename))                      
                         
         else: # VIRTUALDUB
             
@@ -865,7 +893,7 @@ class DecodeOrCut(BaseAction):
             while events_pending():
                 main_iteration(False)
         
-       # fileoperations.remove_file('tmp.vcf')
+        fileoperations.remove_file('tmp.vcf')
         
         if manually:
             os.chdir(curr_dir)            

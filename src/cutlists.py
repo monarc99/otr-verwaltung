@@ -5,8 +5,47 @@ import xml.dom.minidom
 import urllib
 import ConfigParser
 import os.path
+import httplib
 
 import fileoperations
+
+def upload_cutlist(filename, userid):
+    # http://code.activestate.com/recipes/146306/
+
+    boundary = '----------ThIs_Is_tHe_bouNdaRY_$'
+
+    lines = [
+        '--' + boundary,
+        'Content-Disposition: form-data; name="userid"',
+        '',
+        'userid',
+        '--' + boundary,
+        'Content-Disposition: form-data; name="userfile[]"; filename="%s"' % filename,
+        '',
+        open(filename, 'r').read(),
+        '--' + boundary + '--',
+        ''
+    ]
+
+    body = '\r\n'.join(lines)
+
+    connection = httplib.HTTPConnection("www.cutlist.at", 80)
+    
+    headers = {
+        'Content-Type': 'multipart/form-data; boundary=%s' % boundary
+    }
+
+    try:
+        connection.request('POST', "/index.php?upload=2", body, headers)
+    except Exception, error_message:
+       return error_message  
+    
+    response = connection.getresponse()
+
+    response_content =  response.read()
+
+    if 'erfolgreich' in response_content:
+        return None
 
 def download_cutlists(filename, server, choose_cutlists_by, error_cb=None, cutlist_found_cb=None):    
     size = fileoperations.get_size(filename)

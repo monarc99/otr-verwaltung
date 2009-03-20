@@ -5,6 +5,7 @@ from os.path import isfile
 import ConfigParser
 import datetime
 import sys
+import time, md5
 
 from constants import Save_Email_Password, Cut_action
 
@@ -91,7 +92,8 @@ class Config:
                     'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1)),
                     'smart':                int(self.__read_value('cut', 'smart', 1)),
                     'choose_cutlists_by':   int(self.__read_value('cut', 'choose_cutlists_by', 0)), # 0=size, 1=filename
-                    'cutlist_username':     self.__read_value('cut', 'cutlist_username', '')
+                    'cutlist_username':     self.__read_value('cut', 'cutlist_username', ''),
+                    'cutlist_hash':         self.__read_value('cut', 'cutlist_hash', self.create_hash())
                 },
             'play':
                 {
@@ -117,6 +119,11 @@ class Config:
                
         return config_dic
       
+    def create_hash(self):
+        checksum = md5.new(str(time.time()))
+        return checksum.hexdigest()[0:20]
+        
+        
     def __read_value(self, section, option, default):
         """ Reads values from the ConfigParser object. If the
             file doesn't exist or is corrupt, use the default
