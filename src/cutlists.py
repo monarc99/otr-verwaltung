@@ -9,59 +9,220 @@ import httplib
 
 import fileoperations
 
-def upload_cutlist(filename, userid):
-    # http://code.activestate.com/recipes/146306/
-
-    boundary = '----------ThIs_Is_tHe_bouNdaRY_$'
-
-    lines = [
-        '--' + boundary,
-        'Content-Disposition: form-data; name="userid"',
-        '',
-        'userid',
-        '--' + boundary,
-        'Content-Disposition: form-data; name="userfile[]"; filename="%s"' % filename,
-        '',
-        open(filename, 'r').read(),
-        '--' + boundary + '--',
-        ''
-    ]
-
-    body = '\r\n'.join(lines)
-
-    connection = httplib.HTTPConnection("www.cutlist.at", 80)
+class Cutlist:
     
-    headers = {
-        'Content-Type': 'multipart/form-data; boundary=%s' % boundary
-    }
-
-    try:
-        connection.request('POST', "/index.php?upload=2", body, headers)
-    except Exception, error_message:
-       return error_message  
+    def __init__(self):
     
-    response = connection.getresponse()
+        # cutlist.at xml-output
+        self.id = 0
+        self.author = ''
+        self.ratingbyauthor = 0
+        self.rating = 0
+        self.ratingcount = 0
+        self.countcuts = 0        # !!! 
+        self.actualcontent = ''
+        self.usercomment = ''
+        self.filename = ''
+        self.withframes = 0
+        self.withtime = 0
+        self.duration = ''
+        self.errors = ''
+        self.othererrordescription = ''
+        self.downloadcount = 0
+        self.autoname = ''
+        self.filename_original = ''
 
-    response_content =  response.read()
+        # additions in cutlist file
+        self.wrong_content = 0
+        self.missing_beginning = 0
+        self.missing_ending = 0
+        self.other_error = 0
+        self.suggested_filename = ''
+        self.intended_app = ''
+        self.intended_version = ''
+        self.smart = 0
 
-    if 'erfolgreich' in response_content:
-        return None
+        # own additions
+        self.errors = False
+        self.cuts = [] # (count, start, duration) list
+        self.local_filename = None
+        
+  
+    def upload(self, userid):
+        """ Uploads a cutlist to cutlist.at "
+            Upload code from:  http://code.activestate.com/recipes/146306/ 
+            
+            Returns: error message, otherwise None """
+       
+        boundary = '----------ThIs_Is_tHe_bouNdaRY_$'
+
+        lines = [
+            '--' + boundary,
+            'Content-Disposition: form-data; name="userid"',
+            '',
+            userid,
+            '--' + boundary,
+            'Content-Disposition: form-data; name="userfile[]"; filename="%s"' % self.local_filename,
+            '',
+            open(self.local_filename, 'r').read(),
+            '--' + boundary + '--',
+            '']
+
+        body = '\r\n'.join(lines)
+
+        connection = httplib.HTTPConnection("www.cutlist.at", 80)        
+        headers = { 'Content-Type': 'multipart/form-data; boundary=%s' % boundary }
+
+        try:
+            connection.request('POST', "/index.php?upload=2", body, headers)
+        except Exception, error_message:
+           return error_message       
+
+        if 'erfolgreich' in connection.getresponse().read():
+            return None
+
+    def download(self, server, avi_filename):
+        """ Downloads a cutlist to the folder where avi_filename is. 
+            Checks whether cutlist already exists.
+            
+            Returns: error message, otherwise None """
+        
+        self.local_filename = avi_filename
+        count = 0
+        
+        while os.path.exists(self.local_filename + ".cutlist"):
+            count += 1
+            self.local_filename = "%s.%s" % (avi_filename, str(count))
+        
+        self.local_filename += ".cutlist"
+        
+        # download cutlist
+        url = server + "getfile.php?id=" + str(self.id)
+        
+        try:        
+            self.local_filename, headers = urllib.urlretrieve(url, self.local_filename)
+        except IOError, error:
+            return "Cutlist konnte nicht heruntergeladen werden (%s)." % error
+      
+    def read_cuts(self):
+        """ Reads cuts from local_filename.
+            
+            Returns: error message, otherwise None """
+        
+        config_parser = ConfigParser.SafeConfigParser()        
+         
+        try:            
+            config_parser.read(self.local_filename)
+
+            noofcuts = int(config_parser.get("General", "NoOfCuts"))
+                   
+            for count in range(noofcuts):
+                self.cuts.append((count,
+                                  float(config_parser.get("Cut" + str(count), "Start")), 
+                                  float(config_parser.get("Cut" + str(count), "Duration"))))            
+
+        except ConfigParser.ParsingError, message:
+            print "Malformed cutlist: ", message
+        except ConfigParser.NoSectionError, message:
+            return "Fehler in Cutlist: " + str(message)
+        except ConfigParser.NoOptionError, message:
+            return "Fehler in Cutlist: " + str(message)
+                
+    def rate(self, rating, server):
+        """ Rates a cutlist. 
+            
+            Returns: True for success."""
+            
+        url = "%srate.php?rate=%s&rating=%s" % (server, self.id, rating)
+
+        try:
+            print url
+            urllib.urlopen(url)                                 
+            return True
+        except IOError, e:
+            print e
+            return False
+
+    def write_local_cutlist(self, uncut_avi, intended_app_name, my_rating):
+        """ Writes a cutlist file to the instance's local_filename. """
+    
+        try:                        
+            cutlist = open(self.local_filename, 'w')
+                                        
+            cutlist.writelines([
+                "[General]\n",
+                "Application=OTR-Verwaltung\n",
+                "Version=%s\n" % self.intended_version,
+                "comment1=The following parts of the movie will be kept, the rest will be cut out.\n",
+                "ApplyToFile=%s\n" % os.path.basename(uncut_avi),
+                "OriginalFileSizeBytes=%s\n" % str(fileoperations.get_size(uncut_avi)),
+                "FramesPerSecond=25\n",
+                "IntendedCutApplicationName=%s\n" % intended_app_name,
+                "IntendedCutApplication=%s\n" % self.intended_app,
+                "IntendedCutApplicationVersion=\n",
+                "VDUseSmartRendering=%s\n" % str(int(self.smart)),
+                "VDSmartRenderingCodecFourCC=0x53444646\n",
+                "VDSmartRenderingCodecVersion=0x00000000\n",
+                "NoOfCuts=%s\n" % str(len(self.cuts)),
+                "comment2=All values are given in seconds.\n",
+                "\n",
+                "[Info]\n",
+                "Author=%s\n" % self.author,
+                "RatingByAuthor=%s\n" % str(self.ratingbyauthor),
+                "EPGError=%s\n" % str(int(self.wrong_content)),
+                "ActualContent=%s\n" % str(self.actualcontent),
+                "MissingBeginning=%s\n" % str(int(self.missing_beginning)),
+                "MissingEnding=%s\n" % str(int(self.missing_ending)),
+                "MissingVideo=0\n",
+                "MissingAudio=0\n",
+                "OtherError=%s\n" % str(int(self.other_error)),
+                "OtherErrorDescription=%s\n" % str(self.othererrordescription),
+                "SuggestedMovieName=%s\n" % str(self.suggested_filename),
+                "UserComment=%s\n" % str(self.usercomment),
+                "\n"
+            ])
+            
+            for count, start, duration in self.cuts:
+                cutlist.writelines([
+                    "[Cut%s]\n" % str(count),
+                    "Start=%s\n" % str(start),
+                    "Duration=%s\n" % str(duration),
+                    "\n"
+                ])                       
+                                                    
+        except IOError:
+            print "Konnte Cutlist-Datei nicht erstellen: " + filename            
+        finally:
+            cutlist.close()
+
+#
+#
+# Other methods
+#
+#
+#
 
 def download_cutlists(filename, server, choose_cutlists_by, error_cb=None, cutlist_found_cb=None):    
-    size = fileoperations.get_size(filename)
+    """ Downloads all cutlists for the given file. 
+            filename            - movie filename
+            server              - cutlist server
+            choose_cutlists_by  - 0 by size, 1 by name
+            error_cb            - callback: an error occurs (message)
+            cutlist_found_cb    - callback: a cutlist is found (Cutlist instance)
+        
+        Returns: a list of Cutlist instances    
+    """
 
     if choose_cutlists_by == 0: # by size
+        size = fileoperations.get_size(filename)
         url = "%sgetxml.php?ofsb=%s" % (server, str(size))
     else: # by name
         url = "%sgetxml.php?name=%s" % (server, os.path.basename(filename))
-      
-    print url
-        
+              
     try:
         handle = urllib.urlopen(url)
     except IOError:  
-        if error_cb: 
-            error_cb("Verbindungsprobleme")
+        if error_cb: error_cb("Verbindungsprobleme")
         return []
                    
     try:
@@ -69,132 +230,51 @@ def download_cutlists(filename, server, choose_cutlists_by, error_cb=None, cutli
         handle.close()
         dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
     except:
-        if error_cb: 
-            error_cb("Keine Cutlists gefunden")
+        if error_cb: error_cb("Keine Cutlists gefunden")
         return []
                     
     cutlists = []           
         
     for cutlist in dom_cutlists:
-                                                                        
-        cutlist_data = [
-           __read_value(cutlist, "id"),
-           __read_value(cutlist, "author"),
-           __read_value(cutlist, "ratingbyauthor"),
-           __read_value(cutlist, "rating"),
-           __read_value(cutlist, "ratingcount"),
-           __read_value(cutlist, "cuts"),
-           __read_value(cutlist, "actualcontent"),
-           __read_value(cutlist, "usercomment"),
-           __read_value(cutlist, "filename"),
-           __read_value(cutlist, "withframes"),
-           __read_value(cutlist, "withtime"),
-           __read_value(cutlist, "duration"),
-           __read_value(cutlist, "errors"),
-           __read_value(cutlist, "othererrordescription"),
-           __read_value(cutlist, "downloadcount"),
-           __read_value(cutlist, "autoname"),
-           __read_value(cutlist, "filename_original")
-           ]
+                                                                               
+        c = Cutlist()
+                
+        c.id                        = __read_value(cutlist, "id")
+        c.author                    = __read_value(cutlist, "author")
+        c.ratingbyauthor            = __read_value(cutlist, "ratingbyauthor")
+        c.rating                    = __read_value(cutlist, "rating")
+        c.ratingcount               = __read_value(cutlist, "ratingcount")
+        c.countcuts                 = __read_value(cutlist, "cuts")
+        c.actualcontent             = __read_value(cutlist, "actualcontent")
+        c.usercomment               = __read_value(cutlist, "usercomment")
+        c.filename                  = __read_value(cutlist, "filename")
+        c.withframes                = __read_value(cutlist, "withframes")
+        c.withtime                  = __read_value(cutlist, "withtime")
+        c.duration                  = __read_value(cutlist, "duration")
+        c.errors                    = __read_value(cutlist, "errors")
+        c.othererrordescription     = __read_value(cutlist, "othererrordescription")
+        c.downloadcount             = __read_value(cutlist, "downloadcount")
+        c.autoname                  = __read_value(cutlist, "autoname")
+        c.filename_original         = __read_value(cutlist, "filename_original")
+           
                                    
-        if cutlist_found_cb: 
-            cutlist_found_cb(cutlist_data)
+        if cutlist_found_cb: cutlist_found_cb(c)
             
-        cutlists.append(cutlist_data)
+        cutlists.append(c)
 
     return cutlists            
 
 def __read_value(cutlist_element, node_name):
-    value = None
     try:
         elements = cutlist_element.getElementsByTagName(node_name)
         for node in elements[0].childNodes:
             return node.nodeValue
     except:
-        return ""
-    
-    if value == None:
-        return ""               
-
-def download_cutlist(cutlist_id, server, avi_filename):
-    """ Downloads a cutlist to the folder where avi_filename is. 
-        Checks whether cutlist already exists.
-        Returns a tuple:
-            local filename of cutlist, error message. """
-    
-    local_filename = avi_filename
-    count = 0
-    
-    while os.path.exists(local_filename + ".cutlist"):
-        count += 1
-        local_filename = "%s.%s" % (avi_filename, str(count))
-    
-    local_filename += ".cutlist"
-    
-    # download cutlist
-    url = server + "getfile.php?id=" + str(cutlist_id)
-    
-    try:        
-        local_filename, headers = urllib.urlretrieve(url, local_filename)
-    except IOError, error:
-        return None, "Cutlist konnte nicht heruntergeladen werden (%s)." % error
+        return ''
         
-    return local_filename, None
-  
-def get_cuts_of_cutlist(filename):    
-    config_parser = ConfigParser.SafeConfigParser()        
-    
-    try:
-        config_parser.read(filename)
-    except ConfigParser.ParsingError, error:
-        print "Malformed cutlist: ", error
-    
-    noofcuts = 0        
-    cuts = []
-    try:
-        noofcuts = int(config_parser.get("General", "NoOfCuts"))
-        
-        for count in range(noofcuts):
-            cuts.append((count,
-                         float(config_parser.get("Cut" + str(count), "Start")), 
-                         float(config_parser.get("Cut" + str(count), "Duration"))))            
-
-    except ConfigParser.NoSectionError, message:
-        return "Fehler in Cutlist: " + str(message)
-    except ConfigParser.NoOptionError, message:
-        return "Fehler in Cutlist: " + str(message)
-        
-    return cuts
-          
+    return ''
+         
         
 def get_best_cutlist(cutlists):
-    dic_cutlists = {}
-    
-    for cutlist in cutlists:                          
-        ratingbyauthor = cutlist[2]
-        userrating = cutlist[3]
-        ratingcount = cutlist[4]                            
-
-        if ratingbyauthor == "":
-            rating = userrating
-        elif userrating == "":
-            rating = ratingbyauthor
-        else:
-            rating = float(ratingbyauthor) * 0.3 + float(userrating) * 0.7
-
-        dic_cutlists[cutlist[0]] = rating
-    
-    sort_cutlists = dic_cutlists.items()
-    sort_cutlists.sort(key=lambda x: x[1], reverse=True) # first is the best
-                    
-    return sort_cutlists[0] # get first (=the best) cutlist; from the tuple
-    
-def rate(cutlist, rating, server):
-    url = "%srate.php?version=0.9.8.0&rate=%s&rating=%s" % (server, cutlist, rating)
-
-    try:
-        urllib.urlopen(url)                                 
-        return True
-    except IOError, e:
-        print e
-        return False
+    # cutlist.at returns the best cutlist at first
+    return cutlists[0]

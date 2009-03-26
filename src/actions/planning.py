@@ -59,7 +59,7 @@ class Remove(BaseAction):
             
             self.__gui.main_window.broadcasts_badge()            
             
-class Search(BaseAction):    
+class Search(BaseAction):
     def __init__(self, gui):
         self.update_list = True
         self.__gui = gui
@@ -70,7 +70,7 @@ class Search(BaseAction):
             title, stamp, station = planned_broadcasts[index]
                         
             # build string: Titanic_08.12.24_20-15_pro7_
-            string = title.replace(' ', '_') + '_'
+            string = title.replace(' ', '_') + ' '
             string += time.strftime("%y.%m.%d_%H-%M", time.localtime(stamp)) + "_"
             string += station + "_"
             

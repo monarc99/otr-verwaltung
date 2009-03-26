@@ -1,27 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#
-# OTR-Verwaltung 0.9 (Beta 1)
-# Copyright (C) 2008 Benjamin Elbers (elbersb@googlemail.com)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-
 try:
     import gtk
-    import pygtk
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
@@ -52,7 +33,6 @@ class Gui:
         self.dialog_rename = DialogRename(self.main_window)
         self.dialog_planning = DialogPlanning(self, self.main_window)
 
-        # TODO: icons setzen, aber wo?
         for window in [self.main_window]:
             window.get_window().set_icon(gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('icon3.png')))      
 

@@ -61,7 +61,8 @@ class Config:
             'common':
                 {
                     'activate_cut':         int(self.__read_value('common', 'activate_cut', 1)),
-                    'use_archive':          int(self.__read_value('common', 'use_archive', 0))                    
+                    'use_archive':          int(self.__read_value('common', 'use_archive', 0)),
+                    'show_details':         int(self.__read_value('common', 'show_details', 0))                
                 },
             'folders':               
                 {

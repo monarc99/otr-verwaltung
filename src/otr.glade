@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Thu Mar 19 14:47:51 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Mar 26 15:37:04 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -327,7 +327,9 @@
                       <widget class="GtkLabel" id="label4">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Pfad zum Dekoder:</property>
+                        <property name="label" translatable="yes">Pfad zum Dekoder:
+(otrdecoder oder MultiDecoder.exe)</property>
+                        <property name="wrap">True</property>
                       </widget>
                       <packing>
                         <property name="y_options">GTK_EXPAND</property>
@@ -1803,7 +1805,7 @@
                   <widget class="GtkRadioButton" id="radiobuttonRate0">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">0 - Test</property>
+                    <property name="label" translatable="yes">0 - "Dummy"/keine Cutlist</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
@@ -1816,7 +1818,7 @@
                   <widget class="GtkRadioButton" id="radiobuttonRate1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">1 - Anfang und Ende geschnitten</property>
+                    <property name="label" translatable="yes">1 - Anfang und Ende grob geschnitten</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
@@ -1830,7 +1832,7 @@
                   <widget class="GtkRadioButton" id="radiobuttonRate2">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">2 - +/-  5 Sekunden</property>
+                    <property name="label" translatable="yes">2 - Anfang und Ende halbwegs genau geschnitten</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
@@ -1844,7 +1846,8 @@
                   <widget class="GtkRadioButton" id="radiobuttonRate3">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">3 - +/- 1 Sekunde</property>
+                    <property name="label" translatable="yes">3 - Schnitte sind annehmbar und
+ die Werbung wurde entfernt</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
@@ -1858,7 +1861,8 @@
                   <widget class="GtkRadioButton" id="radiobuttonRate4">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">4 - Framegenau</property>
+                    <property name="label" translatable="yes">4 - doppelte Szenen wurden nicht entfernt 
+ oder es sind schönere Schnitte möglich</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
@@ -1872,7 +1876,8 @@
                   <widget class="GtkRadioButton" id="radiobuttonRate5">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">5 - Framegenau und keine doppelten Szenen</property>
+                    <property name="label" translatable="yes">5 - sämtliches unerwünschtes Material 
+ wurde framegenau entfernt</property>
                     <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
@@ -2220,7 +2225,7 @@
                           <widget class="GtkRadioButton" id="radio_create_rate_0">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">0 - Test</property>
+                            <property name="label" translatable="yes">0 - "Dummy"/keine Cutlist</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
@@ -2234,7 +2239,7 @@
                           <widget class="GtkRadioButton" id="radio_create_rate_1">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">1 - Anfang und Ende geschnitten</property>
+                            <property name="label" translatable="yes">1 - Anfang und Ende grob geschnitten</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
@@ -2249,7 +2254,7 @@
                           <widget class="GtkRadioButton" id="radio_create_rate_2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">2 - +/-  5 Sekunden</property>
+                            <property name="label" translatable="yes">2 - Anfang und Ende halbwegs genau geschnitten</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
@@ -2264,7 +2269,8 @@
                           <widget class="GtkRadioButton" id="radio_create_rate_3">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">3 - +/- 1 Sekunde</property>
+                            <property name="label" translatable="yes">3 - Schnitte sind annehmbar und
+ die Werbung wurde entfernt</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
@@ -2279,7 +2285,8 @@
                           <widget class="GtkRadioButton" id="radio_create_rate_4">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">4 - Framegenau</property>
+                            <property name="label" translatable="yes">4 - doppelte Szenen wurden nicht entfernt
+ oder es sind schönere Schnitte möglich</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
@@ -2294,7 +2301,8 @@
                           <widget class="GtkRadioButton" id="radio_create_rate_5">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">5 - Framegenau und keine doppelten Szenen</property>
+                            <property name="label" translatable="yes">5 - sämtliches unerwünschtes Material 
+ wurde framegenau entfernt</property>
                             <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
@@ -2808,19 +2816,36 @@
               <widget class="GtkVBox" id="vbox11">
                 <property name="visible">True</property>
                 <child>
-                  <widget class="GtkRadioButton" id="radio_manually">
+                  <widget class="GtkHBox" id="hbox25">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Manuell schneiden (und Cutlist erstellen)</property>
-                    <property name="response_id">0</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">radio_best_cutlist</property>
-                    <signal name="toggled" handler="on_radio_manually_toggled"/>
+                    <child>
+                      <widget class="GtkRadioButton" id="radio_manually">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Manuell schneiden</property>
+                        <property name="response_id">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_best_cutlist</property>
+                        <signal name="toggled" handler="on_radio_manually_toggled"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label54">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes"> (und &lt;b&gt;Cutlist erstellen&lt;/b&gt;)</property>
+                        <property name="use_markup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
-                  <packing>
-                    <property name="fill">False</property>
-                  </packing>
                 </child>
                 <child>
                   <widget class="GtkLabel" id="label_warning">
@@ -3023,6 +3048,26 @@
               </widget>
             </child>
             <child>
+              <widget class="GtkMenuItem" id="menuView">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_Ansicht</property>
+                <property name="use_underline">True</property>
+                <child>
+                  <widget class="GtkMenu" id="menu4">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkCheckMenuItem" id="menuViewDetails">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Details</property>
+                        <property name="use_underline">True</property>
+                        <signal name="toggled" handler="on_menuViewDetails_toggled"/>
+                      </widget>
+                    </child>
+                  </widget>
+                </child>
+              </widget>
+            </child>
+            <child>
               <widget class="GtkMenuItem" id="menuHelp">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Hilfe</property>
@@ -3031,15 +3076,26 @@
                   <widget class="GtkMenu" id="menu3">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkImageMenuItem" id="menu_check_update">
+                      <widget class="GtkImageMenuItem" id="menuHelpHelp">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">gtk-help</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menuHelpHelp_activate"/>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkSeparatorMenuItem" id="&lt;Trennlinie&gt;">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">menuitem1</property>
+                        <property name="use_underline">True</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkMenuItem" id="menu_check_update">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Auf Update prüfen</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_menu_check_update_activate"/>
-                        <child internal-child="image">
-                          <widget class="GtkImage" id="menu-item-image1">
-                          </widget>
-                        </child>
                       </widget>
                     </child>
                     <child>
@@ -3160,401 +3216,533 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkHPaned" id="hpaned1">
+          <widget class="GtkVBox" id="vbox3">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="position">240</property>
-            <property name="position_set">True</property>
             <child>
-              <widget class="GtkEventBox" id="eventboxSidebar">
-                <property name="width_request">240</property>
+              <widget class="GtkHPaned" id="hpaned1">
                 <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="position">240</property>
+                <property name="position_set">True</property>
                 <child>
-                  <widget class="GtkVBox" id="vbox3">
+                  <widget class="GtkEventBox" id="eventboxSidebar">
+                    <property name="width_request">240</property>
                     <property name="visible">True</property>
-                    <property name="border_width">8</property>
-                    <property name="spacing">4</property>
                     <child>
-                      <widget class="GtkHBox" id="hbox4">
+                      <widget class="GtkVBox" id="vbox6">
                         <property name="visible">True</property>
+                        <property name="border_width">8</property>
+                        <property name="spacing">4</property>
                         <child>
-                          <widget class="GtkEntry" id="entry_search">
+                          <widget class="GtkHBox" id="hbox4">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="text" translatable="yes">Durchsuchen</property>
-                            <signal name="changed" handler="on_entry_search_changed"/>
-                            <signal name="button_press_event" handler="on_entry_search_button_press_event"/>
-                            <signal name="focus_out_event" handler="on_entry_search_focus_out_event"/>
+                            <child>
+                              <widget class="GtkEntry" id="entry_search">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">Durchsuchen</property>
+                                <signal name="changed" handler="on_entry_search_changed"/>
+                                <signal name="button_press_event" handler="on_entry_search_button_press_event"/>
+                                <signal name="focus_out_event" handler="on_entry_search_focus_out_event"/>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkButton" id="buttonClear">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="response_id">0</property>
+                                <signal name="clicked" handler="on_buttonClear_clicked"/>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                          </packing>
                         </child>
                         <child>
-                          <widget class="GtkButton" id="buttonClear">
+                          <widget class="GtkHSeparator" id="hseparator4">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="response_id">0</property>
-                            <signal name="clicked" handler="on_buttonClear_clicked"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator4">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox11">
-                        <property name="visible">True</property>
-                        <property name="spacing">3</property>
                         <child>
-                          <widget class="GtkRadioButton" id="radioPlanning">
+                          <widget class="GtkHBox" id="hbox11">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Geplante Sendungen</property>
-                            <property name="response_id">0</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
+                            <property name="spacing">3</property>
+                            <child>
+                              <widget class="GtkRadioButton" id="radioPlanning">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Geplante Sendungen</property>
+                                <property name="response_id">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelPlanningCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkEventBox" id="eventboxPlanningCurrentCount">
+                                <property name="visible">True</property>
+                                <signal name="button_release_event" handler="on_eventboxPlanningCurrentCount_button_release_event"/>
+                                <child>
+                                  <widget class="GtkLabel" id="labelPlanningCurrentCount">
+                                    <property name="width_request">30</property>
+                                    <property name="height_request">30</property>
+                                    <property name="visible">True</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text">Anzahl bereits ausgestrahlter Sendungen</property>
+                                    <property name="label" translatable="yes">?</property>
+                                    <property name="use_underline">True</property>
+                                  </widget>
+                                </child>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="labelPlanningCount">
+                          <widget class="GtkHSeparator" id="hseparator9">
+                            <property name="visible">True</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="labelOtrkey">
+                            <property name="visible">True</property>
+                            <property name="ypad">3</property>
+                            <property name="label" translatable="yes">otrkey-Dateien</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHBox" id="hbox5">
+                            <property name="visible">True</property>
+                            <child>
+                              <widget class="GtkRadioButton" id="radioUndecoded">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Nicht dekodiert</property>
+                                <property name="response_id">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelOtrkeysCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHSeparator" id="separator1">
+                            <property name="visible">True</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="labelAvi">
+                            <property name="visible">True</property>
+                            <property name="ypad">3</property>
+                            <property name="label" translatable="yes">avi-Dateien</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">7</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHBox" id="hbox6">
+                            <property name="visible">True</property>
+                            <child>
+                              <widget class="GtkRadioButton" id="radioUncut">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Ungeschnitten</property>
+                                <property name="response_id">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelUncutCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">8</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHBox" id="hbox7">
+                            <property name="visible">True</property>
+                            <child>
+                              <widget class="GtkRadioButton" id="radioCut">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Geschnitten</property>
+                                <property name="response_id">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelCutCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">9</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHBox" id="hbox8">
+                            <property name="visible">True</property>
+                            <child>
+                              <widget class="GtkRadioButton" id="radioArchive">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Archiv</property>
+                                <property name="response_id">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelArchiveCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">10</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHSeparator" id="separator3">
+                            <property name="visible">True</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">11</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkHBox" id="hbox15">
+                            <property name="visible">True</property>
+                            <child>
+                              <widget class="GtkRadioButton" id="radioTrash">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Müll</property>
+                                <property name="response_id">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </widget>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelTrashCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">12</property>
+                          </packing>
+                        </child>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="resize">False</property>
+                    <property name="shrink">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkVPaned" id="vpaned1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <widget class="GtkVBox" id="vbox14">
+                        <property name="visible">True</property>
+                        <child>
+                          <widget class="GtkLabel" id="labelMessage">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="wrap">True</property>
                           </widget>
                           <packing>
-                            <property name="position">1</property>
+                            <property name="expand">False</property>
+                            <property name="padding">10</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkEventBox" id="eventboxPlanningCurrentCount">
-                            <property name="visible">True</property>
-                            <signal name="button_release_event" handler="on_eventboxPlanningCurrentCount_button_release_event"/>
+                          <widget class="GtkEventBox" id="eventbox_search">
                             <child>
-                              <widget class="GtkLabel" id="labelPlanningCurrentCount">
-                                <property name="width_request">30</property>
+                              <widget class="GtkLabel" id="label_search">
                                 <property name="height_request">30</property>
                                 <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Anzahl bereits ausgestrahlter Sendungen</property>
-                                <property name="label" translatable="yes">?</property>
-                                <property name="use_underline">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Suchergebnisse für ...&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
                               </widget>
                             </child>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkScrolledWindow" id="scrolledwindow_planning">
+                            <property name="can_focus">True</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <child>
+                              <widget class="GtkTreeView" id="treeview_planning">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </widget>
+                            </child>
+                          </widget>
+                          <packing>
                             <property name="position">2</property>
                           </packing>
                         </child>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="hseparator9">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelOtrkey">
-                        <property name="visible">True</property>
-                        <property name="ypad">3</property>
-                        <property name="label" translatable="yes">otrkey-Dateien</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox5">
-                        <property name="visible">True</property>
                         <child>
-                          <widget class="GtkRadioButton" id="radioUndecoded">
+                          <widget class="GtkScrolledWindow" id="scrolledwindow_files">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Nicht dekodiert</property>
-                            <property name="response_id">0</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <child>
+                              <widget class="GtkTreeView" id="treeview_files">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="level_indentation">3</property>
+                              </widget>
+                            </child>
                           </widget>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
+                      </widget>
+                      <packing>
+                        <property name="resize">True</property>
+                        <property name="shrink">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkTable" id="table_details">
+                        <property name="visible">True</property>
+                        <property name="border_width">6</property>
+                        <property name="n_rows">4</property>
+                        <property name="n_columns">2</property>
+                        <property name="column_spacing">4</property>
+                        <property name="row_spacing">3</property>
                         <child>
-                          <widget class="GtkLabel" id="labelOtrkeysCount">
+                          <widget class="GtkLabel" id="label_length">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">...</property>
                           </widget>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="separator1">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelAvi">
-                        <property name="visible">True</property>
-                        <property name="ypad">3</property>
-                        <property name="label" translatable="yes">avi-Dateien</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox6">
-                        <property name="visible">True</property>
-                        <child>
-                          <widget class="GtkRadioButton" id="radioUncut">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Ungeschnitten</property>
-                            <property name="response_id">0</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="labelUncutCount">
+                          <widget class="GtkLabel" id="label53">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Dauer:</property>
                           </widget>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">8</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox7">
-                        <property name="visible">True</property>
-                        <child>
-                          <widget class="GtkRadioButton" id="radioCut">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Geschnitten</property>
-                            <property name="response_id">0</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="labelCutCount">
+                          <widget class="GtkLabel" id="label_video_format">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">...</property>
                           </widget>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">9</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox8">
-                        <property name="visible">True</property>
-                        <child>
-                          <widget class="GtkRadioButton" id="radioArchive">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Archiv</property>
-                            <property name="response_id">0</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="labelArchiveCount">
+                          <widget class="GtkLabel" id="label52">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Video-Format:</property>
                           </widget>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">10</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHSeparator" id="separator3">
-                        <property name="visible">True</property>
-                      </widget>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">11</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox15">
-                        <property name="visible">True</property>
-                        <child>
-                          <widget class="GtkRadioButton" id="radioTrash">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Müll</property>
-                            <property name="response_id">0</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="labelTrashCount">
+                          <widget class="GtkLabel" id="label_filetype">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Typ</property>
+                            <property name="use_markup">True</property>
                           </widget>
                           <packing>
-                            <property name="position">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label51">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Aspect-Ratio:</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label_aspect">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">...</property>
+                            <property name="use_markup">True</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                       </widget>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="position">12</property>
+                        <property name="resize">False</property>
+                        <property name="shrink">False</property>
                       </packing>
                     </child>
                   </widget>
+                  <packing>
+                    <property name="resize">True</property>
+                    <property name="shrink">True</property>
+                  </packing>
                 </child>
               </widget>
-              <packing>
-                <property name="resize">False</property>
-                <property name="shrink">False</property>
-              </packing>
             </child>
             <child>
-              <widget class="GtkVBox" id="vbox6">
+              <widget class="GtkHSeparator" id="hseparator12">
                 <property name="visible">True</property>
-                <child>
-                  <widget class="GtkLabel" id="labelMessage">
-                    <property name="visible">True</property>
-                    <property name="xalign">0</property>
-                    <property name="wrap">True</property>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="padding">10</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkEventBox" id="eventbox_search">
-                    <child>
-                      <widget class="GtkLabel" id="label_search">
-                        <property name="height_request">30</property>
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Suchergebnisse für ...&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                      </widget>
-                    </child>
-                  </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkScrolledWindow" id="scrolledwindow_planning">
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <child>
-                      <widget class="GtkTreeView" id="treeview_planning">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                      </widget>
-                    </child>
-                  </widget>
-                  <packing>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkScrolledWindow" id="scrolledwindow_files">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <child>
-                      <widget class="GtkTreeView" id="treeview_files">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="level_indentation">3</property>
-                      </widget>
-                    </child>
-                  </widget>
-                  <packing>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
               </widget>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="expand">False</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </widget>
@@ -3565,8 +3753,27 @@
         <child>
           <widget class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
+            <property name="spacing">5</property>
             <child>
-              <placeholder/>
+              <widget class="GtkImage" id="image_status">
+                <property name="visible">True</property>
+                <property name="xpad">2</property>
+                <property name="ypad">2</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label_statusbar">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="ypad">2</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkStatusbar" id="statusbar">
@@ -3574,7 +3781,8 @@
                 <property name="spacing">2</property>
               </widget>
               <packing>
-                <property name="position">1</property>
+                <property name="expand">False</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </widget>

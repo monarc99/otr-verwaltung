@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Mar 19 14:47:51 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Mar 26 15:37:04 2009 -->
 <interface>
   <object class="GtkDialog" id="dialog_conclusion">
     <property name="width_request">700</property>
@@ -99,7 +99,7 @@
                   <object class="GtkRadioButton" id="radiobuttonRate0">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">0 - Test</property>
+                    <property name="label" translatable="yes">0 - "Dummy"/keine Cutlist</property>
                     <property name="draw_indicator">True</property>
                   </object>
                   <packing>
@@ -111,7 +111,7 @@
                   <object class="GtkRadioButton" id="radiobuttonRate1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">1 - Anfang und Ende geschnitten</property>
+                    <property name="label" translatable="yes">1 - Anfang und Ende grob geschnitten</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
                   </object>
@@ -124,7 +124,7 @@
                   <object class="GtkRadioButton" id="radiobuttonRate2">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">2 - +/-  5 Sekunden</property>
+                    <property name="label" translatable="yes">2 - Anfang und Ende halbwegs genau geschnitten</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
                   </object>
@@ -137,7 +137,8 @@
                   <object class="GtkRadioButton" id="radiobuttonRate3">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">3 - +/- 1 Sekunde</property>
+                    <property name="label" translatable="yes">3 - Schnitte sind annehmbar und
+ die Werbung wurde entfernt</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
                   </object>
@@ -150,7 +151,8 @@
                   <object class="GtkRadioButton" id="radiobuttonRate4">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">4 - Framegenau</property>
+                    <property name="label" translatable="yes">4 - doppelte Szenen wurden nicht entfernt 
+ oder es sind sch&#xF6;nere Schnitte m&#xF6;glich</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
                   </object>
@@ -163,7 +165,8 @@
                   <object class="GtkRadioButton" id="radiobuttonRate5">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">5 - Framegenau und keine doppelten Szenen</property>
+                    <property name="label" translatable="yes">5 - s&#xE4;mtliches unerw&#xFC;nschtes Material 
+ wurde framegenau entfernt</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radiobuttonRate0</property>
                   </object>
@@ -504,7 +507,7 @@
                           <object class="GtkRadioButton" id="radio_create_rate_0">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">0 - Test</property>
+                            <property name="label" translatable="yes">0 - "Dummy"/keine Cutlist</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                           </object>
@@ -517,7 +520,7 @@
                           <object class="GtkRadioButton" id="radio_create_rate_1">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">1 - Anfang und Ende geschnitten</property>
+                            <property name="label" translatable="yes">1 - Anfang und Ende grob geschnitten</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_create_rate_0</property>
@@ -531,7 +534,7 @@
                           <object class="GtkRadioButton" id="radio_create_rate_2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">2 - +/-  5 Sekunden</property>
+                            <property name="label" translatable="yes">2 - Anfang und Ende halbwegs genau geschnitten</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_create_rate_0</property>
@@ -545,7 +548,8 @@
                           <object class="GtkRadioButton" id="radio_create_rate_3">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">3 - +/- 1 Sekunde</property>
+                            <property name="label" translatable="yes">3 - Schnitte sind annehmbar und
+ die Werbung wurde entfernt</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_create_rate_0</property>
@@ -559,7 +563,8 @@
                           <object class="GtkRadioButton" id="radio_create_rate_4">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">4 - Framegenau</property>
+                            <property name="label" translatable="yes">4 - doppelte Szenen wurden nicht entfernt
+ oder es sind sch&#xF6;nere Schnitte m&#xF6;glich</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_create_rate_0</property>
@@ -573,7 +578,8 @@
                           <object class="GtkRadioButton" id="radio_create_rate_5">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">5 - Framegenau und keine doppelten Szenen</property>
+                            <property name="label" translatable="yes">5 - s&#xE4;mtliches unerw&#xFC;nschtes Material 
+ wurde framegenau entfernt</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_create_rate_0</property>

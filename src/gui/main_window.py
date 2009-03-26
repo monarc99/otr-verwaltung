@@ -19,11 +19,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from os.path import join, isdir, basename
+from os.path import join, isdir, basename, splitext
 import sys
 import time
 import urllib
 import webbrowser
+import subprocess
 
 import gtk
 import pango
@@ -31,63 +32,22 @@ import pango
 from basewindow import BaseWindow
 import otrpath
 from constants import Action, Section
+from GeneratorTask import GeneratorTask
 
 class MainWindow(BaseWindow):
     
     def __init__(self, app, gui):
         self.app = app
-        self.gui = gui
-    
-        widgets = [            
-            'toolbar',
-
-            'eventbox_tasks',
-            'progressbar_tasks',
-            'label_tasks',
-
-            # sidebar
-            'entry_search',
-            'eventboxPlanningCurrentCount',
-            'labelPlanningCurrentCount',
-            'labelPlanningCount',
-            'radioPlanning',
-            'radioUndecoded',            
-            'separator1',
-            'labelAvi',
-            'radioUncut',
-            'radioCut',
-            'separator2',
-            'radioArchive',
-            'separator3',
-            'radioTrash',
-            'labelOtrkeysCount',
-            'labelUncutCount',
-            'labelCutCount',
-            'labelArchiveCount',
-            'labelTrashCount',
-
-            'label_search',
-            'eventbox_search',
-            'labelMessage',
-            'scrolledwindow_planning',
-            'treeview_planning',
-            'scrolledwindow_files',
-            'treeview_files'
-            ]
+        self.gui = gui      
                 
-        builder = self.create_builder("main_window.ui")
-                
-        BaseWindow.__init__(self, 
-                            builder,
-                            "main_window",
-                            widgets)
+        BaseWindow.__init__(self, "main_window.ui", "main_window")
        
-        self.__setup_toolbar(builder)
-        self.__setup_treeview_planning(builder)
-        self.__setup_treeview_files(builder)
-        self.__setup_widgets(builder)
+        self.__setup_toolbar()
+        self.__setup_treeview_planning()
+        self.__setup_treeview_files()
+        self.__setup_widgets()
         
-    def __setup_toolbar(self, builder):       
+    def __setup_toolbar(self):       
         toolbar_buttons = [
             ('decode', 'decode.png', 'Dekodieren', Action.DECODE),
             ('decodeandcut', 'decodeandcut.png', "Dekodieren und Schneiden", Action.DECODEANDCUT),
@@ -133,7 +93,7 @@ class MainWindow(BaseWindow):
                 
             self.sets_of_toolbars[section] = toolbar_buttons
     
-    def __setup_treeview_planning(self, builder):
+    def __setup_treeview_planning(self):
         treeview = self.get_widget('treeview_planning') 
         store = gtk.TreeStore(int, str, str, str)                        
         treeview.set_model(store)
@@ -159,7 +119,7 @@ class MainWindow(BaseWindow):
         treeview.get_model().set_sort_func(0, self.tv_planning_sort, None)
         treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)    
     
-    def __setup_treeview_files(self, builder):
+    def __setup_treeview_files(self):
         treeview = self.get_widget('treeview_files') 
         store = gtk.TreeStore(str, str, str, bool) # filename, size, date, locked
         treeview.set_model(store)
@@ -197,6 +157,7 @@ class MainWindow(BaseWindow):
         # allow multiple selection
         treeselection = treeview.get_selection()
         treeselection.set_mode(gtk.SELECTION_MULTIPLE)
+        treeselection.connect('changed', lambda callback: self.update_details())
                
         # sorting
         treeview.get_model().set_sort_func(0, self.tv_files_sort, None)
@@ -207,14 +168,19 @@ class MainWindow(BaseWindow):
         self.pix_otrkey = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('decode.png'))
         self.pix_folder = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('folder.png'))
 
-    def __setup_widgets(self, builder):
+    def __setup_widgets(self):
+        # details
+        self.get_widget('table_details').props.visible = self.app.config.get('common', 'show_details')
+        self.get_widget('menuViewDetails').set_active(self.app.config.get('common', 'show_details'))
+
+        self.get_widget('image_status').clear()
         
         self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
         
         # delete-search button image
         image = gtk.Image()
         image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
-        builder.get_object('buttonClear').set_image(image)
+        self.get_widget('buttonClear').set_image(image)
                       
         # connect other signals
         self.get_widget('radioPlanning').connect('clicked', self.on_sidebar_toggled, Section.PLANNING)
@@ -225,26 +191,26 @@ class MainWindow(BaseWindow):
         self.get_widget('radioTrash').connect('clicked', self.on_sidebar_toggled, Section.TRASH)
         
         # change background of sidebar
-        eventbox = builder.get_object('eventboxSidebar')
+        eventbox = self.get_widget('eventboxSidebar')
         cmap = eventbox.get_colormap()
         colour = cmap.alloc_color("gray")
         style = eventbox.get_style().copy()
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
 
-        style = builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
+        style = self.get_widget('eventboxPlanningCurrentCount').get_style().copy()
         pixmap, mask = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('badge.png')).render_pixmap_and_mask()
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
-        builder.get_object('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
-        builder.get_object('eventboxPlanningCurrentCount').set_style(style)
+        self.get_widget('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
+        self.get_widget('eventboxPlanningCurrentCount').set_style(style)
 
         # change font of sidebar     
         for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
-            builder.get_object(label).modify_font(pango.FontDescription("bold"))
+            self.get_widget(label).modify_font(pango.FontDescription("bold"))
 
         # change background of tasks and searchbar
         for eventbox in ['eventbox_tasks', 'eventbox_search']:
-            eventbox = builder.get_object(eventbox)
+            eventbox = self.get_widget(eventbox)
             cmap = eventbox.get_colormap()
             colour = cmap.alloc_color("#FFF288")
             style = eventbox.get_style().copy()
@@ -252,7 +218,7 @@ class MainWindow(BaseWindow):
             eventbox.set_style(style)
 
         # image cancel
-        builder.get_object('image_cancel').set_from_file(otrpath.get_image_path('cancel.png'))
+        self.get_widget('image_cancel').set_from_file(otrpath.get_image_path('cancel.png'))
         
       
     #
@@ -423,9 +389,116 @@ class MainWindow(BaseWindow):
             self.get_widget('eventboxPlanningCurrentCount').show()
             self.get_widget('labelPlanningCurrentCount').set_text(str(count))
       
+    def change_status(self, message_type, message):
+        """ Displays an image and text in the statusbar for 10 seconds. 
+            message_type: 0 = information """      
+            
+        self.get_widget('label_statusbar').set_text(message)           
+            
+        if message_type == 0:            
+            self.get_widget('image_status').set_from_file(otrpath.get_image_path("information.png"))
+                        
+        def wait():
+            yield 0 # fake generator
+            time.sleep(10)
+               
+        def completed():
+            self.get_widget('label_statusbar').set_text("")     
+            self.get_widget('image_status').clear()
+               
+        GeneratorTask(wait, None, completed).start()         
+        
+    def update_details(self):
+        if not self.app.config.get('common', 'show_details'):
+            return
+        
+        if self.app.section == Section.PLANNING:
+            return
+
+        mplayer = self.app.config.get('play', 'mplayer')
+
+        if not mplayer:
+            self.get_widget('label_filetype').set_text("Der MPlayer ist nicht installiert!")
+            return
+      
+        filenames = self.get_selected_filenames()
+      
+        if len(filenames) == 0:
+            self.reset_details("<b>Keine Datei markiert.</b>")
+        
+        elif len(filenames) > 1:
+            self.reset_details("<b>%s Dateien markiert.</b>" % len(filenames))
+        
+        else:
+            filename = filenames[0]
+           
+            extension = splitext(filename)[1]
+            
+            self.get_widget('label_filetype').set_markup("<b>%s-Datei</b>" % extension)
+            
+            if extension != ".otrkey":
+                # use mplayer to retrieve information          
+                
+                # prettify the output!
+                def prettify_aspect(aspect):
+                    if aspect == "1.7778":
+                        return "16:9" 
+                    elif aspect == "1.3333":
+                        return "4:3"
+                    else:
+                        return aspect
+                
+                def prettify_length(seconds):                       
+                    hrs = float(seconds) / 3600       
+                    leftover = float(seconds) % 3600
+                    mins = leftover / 60
+                    secs = leftover % 60
+                       
+                    return "%02d:%02d:%02d" % (hrs, mins, secs)
+                
+                values = (
+                    ("ID_VIDEO_ASPECT", 'label_aspect', prettify_aspect),
+                    ("ID_VIDEO_FORMAT", 'label_video_format', None),
+                    ("ID_LENGTH", 'label_length', prettify_length)
+                    )
+              
+                process = subprocess.Popen([mplayer, "-identify", "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)
+                      
+                while process.poll() == None:
+                    line = process.stdout.readline().strip()
+
+                    for value, widget, callback in values:
+                        
+                        if line.startswith(value):
+                            # mplayer gives an output like this: ID_VIDEO_ASPECT=1.3333
+                            value = line.split("=")[1]
+                            
+                            if callback:
+                                value = callback(value)
+                            
+                            self.get_widget(widget).set_text(value)                                                         
+                        
+                        
+    def reset_details(self, filetype=""):
+        self.get_widget('label_filetype').set_markup(filetype)
+        self.get_widget('label_aspect').set_text("...")
+        self.get_widget('label_video_format').set_text("...")
+        self.get_widget('label_length').set_text("...")
+      
     #
     #  Signal handlers
     #
+   
+    def on_menuViewDetails_toggled(self, widget, data=None):
+        value = widget.get_active()
+        
+        self.app.config.set('common', 'show_details', int(value))        
+        
+        self.get_widget('table_details').props.visible = value
+                        
+        if value:
+            self.update_details()
+            
     
     def on_menu_check_update_activate(self, widget, data=None):
         current_version = open(otrpath.get_path("VERSION"), 'r').read().strip()
@@ -438,6 +511,9 @@ class MainWindow(BaseWindow):
         
         self.gui.message_info_box("Ihre Version ist:\n%s\n\nAktuelle Version ist:\n%s" % (current_version, svn_version))            
 
+    
+    def on_menuHelpHelp_activate(self, widget, data=None):
+        webbrowser.open("http://code.google.com/p/otr-verwaltung/w/list")
                       
     def on_menuHelpAbout_activate(self, widget, data=None):
 

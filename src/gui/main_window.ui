@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Thu Mar 19 14:47:51 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Mar 26 15:37:04 2009 -->
 <interface>
   <object class="GtkUIManager" id="uimanager1">
     <child>
@@ -38,16 +38,35 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="menuView">
+            <property name="name">menuView</property>
+            <property name="label" translatable="yes">_Ansicht</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkToggleAction" id="menuViewDetails">
+            <property name="name">menuViewDetails</property>
+            <property name="label" translatable="yes">Details</property>
+            <signal handler="on_menuViewDetails_toggled" name="toggled"/>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="menuHelp">
             <property name="name">menuHelp</property>
             <property name="label" translatable="yes">_Hilfe</property>
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="menuHelpHelp">
+            <property name="stock_id" translatable="yes">gtk-help</property>
+            <property name="name">menuHelpHelp</property>
+            <signal handler="on_menuHelpHelp_activate" name="activate"/>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="menu_check_update">
             <property name="name">menu_check_update</property>
             <property name="label" translatable="yes">Auf Update pr&#xFC;fen</property>
-            <signal handler="on_menu_check_update_activate" name="activate"/>
           </object>
         </child>
         <child>
@@ -69,7 +88,12 @@
           <separator/>
           <menuitem action="menuEditPreferences"/>
         </menu>
+        <menu action="menuView">
+          <menuitem action="menuViewDetails"/>
+        </menu>
         <menu action="menuHelp">
+          <menuitem action="menuHelpHelp"/>
+          <separator/>
           <menuitem action="menu_check_update"/>
           <separator/>
           <menuitem action="menuAbout"/>
@@ -187,394 +211,526 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHPaned" id="hpaned1">
+          <object class="GtkVBox" id="vbox3">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="position">240</property>
-            <property name="position_set">True</property>
             <child>
-              <object class="GtkEventBox" id="eventboxSidebar">
-                <property name="width_request">240</property>
+              <object class="GtkHPaned" id="hpaned1">
                 <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="position">240</property>
+                <property name="position_set">True</property>
                 <child>
-                  <object class="GtkVBox" id="vbox3">
+                  <object class="GtkEventBox" id="eventboxSidebar">
+                    <property name="width_request">240</property>
                     <property name="visible">True</property>
-                    <property name="border_width">8</property>
-                    <property name="spacing">4</property>
                     <child>
-                      <object class="GtkHBox" id="hbox4">
+                      <object class="GtkVBox" id="vbox6">
                         <property name="visible">True</property>
+                        <property name="border_width">8</property>
+                        <property name="spacing">4</property>
                         <child>
-                          <object class="GtkEntry" id="entry_search">
+                          <object class="GtkHBox" id="hbox4">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="text" translatable="yes">Durchsuchen</property>
-                            <signal handler="on_entry_search_changed" name="changed"/>
-                            <signal handler="on_entry_search_button_press_event" name="button_press_event"/>
-                            <signal handler="on_entry_search_focus_out_event" name="focus_out_event"/>
+                            <child>
+                              <object class="GtkEntry" id="entry_search">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="text" translatable="yes">Durchsuchen</property>
+                                <signal handler="on_entry_search_changed" name="changed"/>
+                                <signal handler="on_entry_search_button_press_event" name="button_press_event"/>
+                                <signal handler="on_entry_search_focus_out_event" name="focus_out_event"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="buttonClear">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <signal handler="on_buttonClear_clicked" name="clicked"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                          </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="buttonClear">
+                          <object class="GtkHSeparator" id="hseparator4">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <signal handler="on_buttonClear_clicked" name="clicked"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="hseparator4">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHBox" id="hbox11">
-                        <property name="visible">True</property>
-                        <property name="spacing">3</property>
                         <child>
-                          <object class="GtkRadioButton" id="radioPlanning">
+                          <object class="GtkHBox" id="hbox11">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Geplante Sendungen</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
+                            <property name="spacing">3</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radioPlanning">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Geplante Sendungen</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="labelPlanningCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEventBox" id="eventboxPlanningCurrentCount">
+                                <property name="visible">True</property>
+                                <signal handler="on_eventboxPlanningCurrentCount_button_release_event" name="button_release_event"/>
+                                <child>
+                                  <object class="GtkLabel" id="labelPlanningCurrentCount">
+                                    <property name="width_request">30</property>
+                                    <property name="height_request">30</property>
+                                    <property name="visible">True</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text">Anzahl bereits ausgestrahlter Sendungen</property>
+                                    <property name="label" translatable="yes">?</property>
+                                    <property name="use_underline">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="labelPlanningCount">
+                          <object class="GtkHSeparator" id="hseparator9">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="labelOtrkey">
+                            <property name="visible">True</property>
+                            <property name="ypad">3</property>
+                            <property name="label" translatable="yes">otrkey-Dateien</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox5">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radioUndecoded">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Nicht dekodiert</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="labelOtrkeysCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHSeparator" id="separator1">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="labelAvi">
+                            <property name="visible">True</property>
+                            <property name="ypad">3</property>
+                            <property name="label" translatable="yes">avi-Dateien</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">7</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox6">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radioUncut">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Ungeschnitten</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="labelUncutCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">8</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox7">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radioCut">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Geschnitten</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="labelCutCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">9</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox8">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radioArchive">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">Archiv</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="labelArchiveCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">10</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHSeparator" id="separator3">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">11</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox15">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radioTrash">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="label" translatable="yes">M&#xFC;ll</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radioUndecoded</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="labelTrashCount">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">12</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="resize">False</property>
+                    <property name="shrink">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkVPaned" id="vpaned1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <object class="GtkVBox" id="vbox14">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkLabel" id="labelMessage">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="wrap">True</property>
                           </object>
                           <packing>
-                            <property name="position">1</property>
+                            <property name="expand">False</property>
+                            <property name="padding">10</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEventBox" id="eventboxPlanningCurrentCount">
-                            <property name="visible">True</property>
-                            <signal handler="on_eventboxPlanningCurrentCount_button_release_event" name="button_release_event"/>
+                          <object class="GtkEventBox" id="eventbox_search">
                             <child>
-                              <object class="GtkLabel" id="labelPlanningCurrentCount">
-                                <property name="width_request">30</property>
+                              <object class="GtkLabel" id="label_search">
                                 <property name="height_request">30</property>
                                 <property name="visible">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip_text">Anzahl bereits ausgestrahlter Sendungen</property>
-                                <property name="label" translatable="yes">?</property>
-                                <property name="use_underline">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Suchergebnisse f&#xFC;r ...&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
                               </object>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow" id="scrolledwindow_planning">
+                            <property name="can_focus">True</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <child>
+                              <object class="GtkTreeView" id="treeview_planning">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
                             <property name="position">2</property>
                           </packing>
                         </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="hseparator9">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelOtrkey">
-                        <property name="visible">True</property>
-                        <property name="ypad">3</property>
-                        <property name="label" translatable="yes">otrkey-Dateien</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHBox" id="hbox5">
-                        <property name="visible">True</property>
                         <child>
-                          <object class="GtkRadioButton" id="radioUndecoded">
+                          <object class="GtkScrolledWindow" id="scrolledwindow_files">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Nicht dekodiert</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
+                            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                            <child>
+                              <object class="GtkTreeView" id="treeview_files">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="level_indentation">3</property>
+                              </object>
+                            </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
+                      </object>
+                      <packing>
+                        <property name="resize">True</property>
+                        <property name="shrink">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkTable" id="table_details">
+                        <property name="visible">True</property>
+                        <property name="border_width">6</property>
+                        <property name="n_rows">4</property>
+                        <property name="n_columns">2</property>
+                        <property name="column_spacing">4</property>
+                        <property name="row_spacing">3</property>
                         <child>
-                          <object class="GtkLabel" id="labelOtrkeysCount">
+                          <object class="GtkLabel" id="label_length">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">...</property>
                           </object>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="separator1">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="labelAvi">
-                        <property name="visible">True</property>
-                        <property name="ypad">3</property>
-                        <property name="label" translatable="yes">avi-Dateien</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHBox" id="hbox6">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkRadioButton" id="radioUncut">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Ungeschnitten</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="labelUncutCount">
+                          <object class="GtkLabel" id="label53">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Dauer:</property>
                           </object>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">8</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHBox" id="hbox7">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkRadioButton" id="radioCut">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Geschnitten</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="labelCutCount">
+                          <object class="GtkLabel" id="label_video_format">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">...</property>
                           </object>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">9</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHBox" id="hbox8">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkRadioButton" id="radioArchive">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Archiv</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="labelArchiveCount">
+                          <object class="GtkLabel" id="label52">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Video-Format:</property>
                           </object>
                           <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">10</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHSeparator" id="separator3">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">11</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkHBox" id="hbox15">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkRadioButton" id="radioTrash">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">M&#xFC;ll</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">radioUndecoded</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="labelTrashCount">
+                          <object class="GtkLabel" id="label_filetype">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Typ</property>
+                            <property name="use_markup">True</property>
                           </object>
                           <packing>
-                            <property name="position">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label51">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Aspect-Ratio:</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_aspect">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">...</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="position">12</property>
+                        <property name="resize">False</property>
+                        <property name="shrink">False</property>
                       </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="resize">True</property>
+                    <property name="shrink">True</property>
+                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="resize">False</property>
-                <property name="shrink">False</property>
-              </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="vbox6">
+              <object class="GtkHSeparator" id="hseparator12">
                 <property name="visible">True</property>
-                <child>
-                  <object class="GtkLabel" id="labelMessage">
-                    <property name="visible">True</property>
-                    <property name="xalign">0</property>
-                    <property name="wrap">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="padding">10</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEventBox" id="eventbox_search">
-                    <child>
-                      <object class="GtkLabel" id="label_search">
-                        <property name="height_request">30</property>
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Suchergebnisse f&#xFC;r ...&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow_planning">
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <child>
-                      <object class="GtkTreeView" id="treeview_planning">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow_files">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <child>
-                      <object class="GtkTreeView" id="treeview_files">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="level_indentation">3</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="expand">False</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -585,8 +741,27 @@
         <child>
           <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
+            <property name="spacing">5</property>
             <child>
-              <placeholder/>
+              <object class="GtkImage" id="image_status">
+                <property name="visible">True</property>
+                <property name="xpad">2</property>
+                <property name="ypad">2</property>
+                <property name="stock">gtk-missing-image</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_statusbar">
+                <property name="visible">True</property>
+                <property name="xalign">0</property>
+                <property name="ypad">2</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
               <object class="GtkStatusbar" id="statusbar">
@@ -594,7 +769,8 @@
                 <property name="spacing">2</property>
               </object>
               <packing>
-                <property name="position">1</property>
+                <property name="expand">False</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>

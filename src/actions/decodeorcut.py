@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from gtk import events_pending, main_iteration, RESPONSE_OK
-import gobject
 import base64
 import popen2
 import subprocess
 import urllib
 import os
 from os.path import basename, join, dirname, exists, splitext
-import threading
 import time
 
 import fileoperations
@@ -19,34 +17,7 @@ from baseaction import BaseAction
 import codec
 import cutlists as cutlists_management
 import otrpath
-
-class GeneratorTask(object):
-   def __init__(self, generator, loop_callback, complete_callback=None):
-       self.generator = generator
-       self.loop_callback = loop_callback
-       self.complete_callback = complete_callback
-
-   def _start(self, *args, **kwargs):
-       self._stopped = False
-       for ret in self.generator(*args, **kwargs):
-           if self._stopped:
-               thread.exit()
-           gobject.idle_add(self._loop, ret)
-       if self.complete_callback is not None:
-           gobject.idle_add(self.complete_callback)
-
-   def _loop(self, ret):
-       if ret is None:
-           ret = ()
-       if not isinstance(ret, tuple):
-           ret = (ret,)
-       self.loop_callback(*ret)
-
-   def start(self, *args, **kwargs):
-       threading.Thread(target=self._start, args=args, kwargs=kwargs).start()
-
-   def stop(self):
-       self._stopped = True
+from GeneratorTask import GeneratorTask
 
 class DecodeOrCut(BaseAction):
     
@@ -103,120 +74,79 @@ class DecodeOrCut(BaseAction):
         dialog.hide()         
         
         file_conclusions = self.__gui.dialog_conclusion.file_conclusions        
-        
+                      
         if cut:
              
-            # create cutlists
+            # create cutlists            
             cutlists = []
             
             for file_conclusion in file_conclusions:
                 if file_conclusion.cut.create_cutlist:  
 
-                    filename = file_conclusion.uncut_avi + ".cutlist"                    
-                    print "Cutlist-Dateiname: ", filename
-
-                    if "VirtualDub" in file_conclusion.cut.executable:
-                        app_name = "VirtualDub"
+                    if "VirtualDub" in file_conclusion.cut.cutlist.intended_app:
+                        intended_app_name = "VirtualDub"
                     else:
-                        app_name = "Avidemux"
-                                               
-                    try:                        
-                        cutlist = open(filename, 'w')
-                                                  
-                        cutlist.writelines([
-                            "[General]\n",
-                            "Application=OTR-Verwaltung\n",
-                            "Version=%s\n" % open(otrpath.get_path("VERSION"), 'r').read().strip(),
-                            "comment1=The following parts of the movie will be kept, the rest will be cut out.\n",
-                            "ApplyToFile=%s\n" % basename(file_conclusion.uncut_avi),
-                            "OriginalFileSizeBytes=%s\n" % str(fileoperations.get_size(file_conclusion.uncut_avi)),
-                            "FramesPerSecond=25\n",
-                            "IntendedCutApplicationName=%s\n" % app_name,
-                            "IntendedCutApplication=%s\n" % file_conclusion.cut.executable,
-                            "IntendedCutApplicationVersion=\n",
-                            "VDUseSmartRendering=%s\n" % str(int(self.config.get('cut', 'smart'))),
-                            "VDSmartRenderingCodecFourCC=0x53444646\n",
-                            "VDSmartRenderingCodecVersion=0x00000000\n",
-                            "NoOfCuts=%s\n" % str(len(file_conclusion.cut.cutlist_cuts)),
-                            "comment2=All values are given in seconds.\n",
-                            "\n",
-                            "[Info]\n",
-                            "Author=%s\n" % self.config.get('cut', 'cutlist_username'),
-                            "RatingByAuthor=%s\n" % str(file_conclusion.cut.cutlist_information['rating']),
-                            "EPGError=%s\n" % str(int(file_conclusion.cut.cutlist_information['wrong_content'])),
-                            "ActualContent=%s\n" % str(file_conclusion.cut.cutlist_information['actual_content']),
-                            "MissingBeginning=%s\n" % str(int(file_conclusion.cut.cutlist_information['missing_beginning'])),
-                            "MissingEnding=%s\n" % str(int(file_conclusion.cut.cutlist_information['missing_ending'])),
-                            "MissingVideo=0\n",
-                            "MissingAudio=0\n",
-                            "OtherError=%s\n" % str(int(file_conclusion.cut.cutlist_information['other_error'])),
-                            "OtherErrorDescription=%s\n" % str(file_conclusion.cut.cutlist_information['other_error_description']),
-                            "SuggestedMovieName=%s\n" % str(file_conclusion.cut.cutlist_information['suggested']),
-                            "UserComment=%s\n" % str(file_conclusion.cut.cutlist_information['comment']),
-                            "\n"
-                        ])
-                       
-                        for count, start, duration in file_conclusion.cut.cutlist_cuts:
-                            print start
-                            print duration
+                        intended_app_name = "Avidemux"
 
-                            cutlist.writelines([
-                                "[Cut%s]\n" % str(count),
-                                "Start=%s\n" % str(start),
-                                "Duration=%s\n" % str(duration),
-                                "\n"
-                            ])                       
-                                                               
-                    except IOError:
-                        self.__gui.message_error_box("Konnte Cutlist-Datei nicht erstellen: " + filename)
-                        continue                       
-                    finally:
-                        cutlist.close()
-                        
-                    cutlists.append(filename)
+                    file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_avi + ".cutlist"
+                    file_conclusion.cut.cutlist.author = self.config.get('cut', 'cutlist_username')
+                    file_conclusion.cut.cutlist.intended_version = open(otrpath.get_path("VERSION"), 'r').read().strip()
+                    file_conclusion.cut.cutlist.smart = self.config.get('cut', 'smart')
+
+                    file_conclusion.cut.cutlist.write_local_cutlist(file_conclusion.uncut_avi, intended_app_name, file_conclusion.cut.my_rating)
                     
+                    cutlists.append(file_conclusion.cut.cutlist)
+                        
+            # upload them:            
+            def upload(error_cb):
+                yield 0 # fake generator                   
+                errors = 0                
+                userid = self.config.get('cut', 'cutlist_hash')
+
+                for cutlist in cutlists:
+                    error_message = cutlist.upload(userid)
+                    if error_message: 
+                        error_cb("Fehler beim Hochladen der Cutlist:\n" + error_message)
+                        errors += 1
+                    else:
+                        if self.config.get('cut', 'delete_cutlists'):
+                            fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
+                 
+                count = len(cutlists)                       
+                self.__gui.main_window.change_status(0, "Es wurden %s/%s Cutlisten hochgeladen!" % (str(count - errors), str(count)))                        
+                
             if len(cutlists) > 0:                
                 if self.__gui.question_box("Soll(en) %s Cutlist(en) hochgeladen werden?" % len(cutlists)):
-                    errors = 0
                     
-                    userid = self.config.get('cut', 'cutlist_hash')
-
-                    for cutlist in cutlists:
-                        message = cutlists_management.upload_cutlist(cutlist, userid)
-                        if None != message:
-                            # fehler
-                            self.__gui.message_error_box("Fehler beim Hochladen der Cutlist:\n" + message)
-                            errors += 1
-                            
-                    count = len(cutlists)
-                    self.__gui.message_info_box("Es wurden %s/%s Cutlisten hochgeladen!" % (str(count - errors), str(count)))                      
-                      
+                    def error_cb(self, message):
+                        self.__gui.message_error_box(message)
+                    
+                    GeneratorTask(upload).start(error_cb)
+            
             # rename
             for file_conclusion in file_conclusions:
            
-                rename = file_conclusion.cut.rename
-                                         
-                if rename != None:                   
+                rename = file_conclusion.cut.rename                                                          
+                
+                # TODO: mp4 support
+            
+                if 0 == rename: # no rename
+                    continue
                     
-                    # TODO: mp4 support
-                
-                    if 0 == rename: # no rename
-                        continue
-                        
-                    elif 1 == rename: # otr rename                               
-                        new_name = rename_by_schema(basename(file_conclusion.uncut_avi))
-                
-                    elif 2 == rename: # filename rename
-                        new_name = file_conclusion.cut.cutlist[8] + ".avi"
-                        
-                    elif 3 == rename: # filename_original rename
-                        new_name = file_conclusion.cut.cutlist[16] + ".avi"
-                        
-                    elif 4 == rename: # autoname rename
-                        new_name = file_conclusion.cut.cutlist[15] + ".avi"                    
-                
-                    new_filename = join(self.config.get('folders', 'cut_avis'), new_name)        
-                    fileoperations.rename_file(file_conclusion.cut_avi, new_filename)                
+                elif 1 == rename: # otr rename                               
+                    new_name = rename_by_schema(basename(file_conclusion.uncut_avi))
+            
+                elif 2 == rename: # filename rename
+                    new_name = file_conclusion.cut.cutlist.filename + ".avi"
+                    
+                elif 3 == rename: # filename_original rename
+                    new_name = file_conclusion.cut.cutlist.filename_original + ".avi"
+                    
+                elif 4 == rename: # autoname rename
+                    new_name = file_conclusion.cut.cutlist.autoname + ".avi"                    
+            
+                new_filename = join(self.config.get('folders', 'cut_avis'), new_name)        
+                fileoperations.rename_file(file_conclusion.cut_avi, new_filename)                
         
             # move uncut avi to trash if it's ok            
             for file_conclusion in file_conclusions:
@@ -229,21 +159,23 @@ class DecodeOrCut(BaseAction):
             # remove local cutlists      
             if self.config.get('cut', 'delete_cutlists'):
                 for file_conclusion in file_conclusions:
-                    if file_conclusion.cut.local_cutlist:
-                        fileoperations.remove_file(file_conclusion.cut.local_cutlist)
+                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist:
+                        fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
         
-            # rate cutlists
-            if cut:
+            # rate cutlists        
+            def rate():                    
+                yield 0 # fake generator
                 count = 0
                 for file_conclusion in file_conclusions:                    
-                    if file_conclusion.cut.rating > -1:
-                        if cutlists_management.rate(file_conclusion.cut.cutlist, file_conclusion.cut.rating, self.config.get('cut', 'server')):
+                    if file_conclusion.cut.my_rating:
+                        print "Rate!"
+                        if file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('cut', 'server')):
                             count += 1
                 
-                if count == 1:
-                    self.__gui.message_info_box("Es wurde 1 Cutlist bewertet!")
-                elif count > 1:
-                    self.__gui.message_info_box("Es wurde(n) %s Cutlist(en) bewertet!" % count)
+                if count > 0:
+                    self.__gui.main_window.change_status(0, "Es wurde(n) %s Cutlist(en) bewertet!" % count)              
+            
+            GeneratorTask(rate).start()
              
      
     def decode(self, file_conclusions):          
@@ -392,7 +324,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = error
 
-                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_avi, self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), error_cb)                           
+                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_avi, self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), error_cb)
                 
                 if len(cutlists) == 0:
                     file_conclusion.cut.status = Status.ERROR
@@ -406,7 +338,7 @@ class DecodeOrCut(BaseAction):
                 # show dialog
                 self.__gui.dialog_cut.filename = file_conclusion.uncut_avi
                 self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_avi))
-                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!</span>' % self.config.get('folders', 'cut_avis'))
+                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!\n\nUm eine Cutlist zu erstellen muss das Projekt gespeichert werden (siehe Website->Wiki->Häufige Fragen).</span>' % self.config.get('folders', 'cut_avis'))
 
                 if self.config.get('cut', 'cut_action') == Cut_action.ASK:
                     self.__gui.dialog_cut.get_widget('radio_best_cutlist').set_active(True)
@@ -455,65 +387,14 @@ class DecodeOrCut(BaseAction):
             # save cut_action
             file_conclusion.cut.cut_action = cut_action
 
-            if cut_action == Cut_action.BEST_CUTLIST:
-                if len(cutlists) == 0:
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Keine Cutlist gefunden"
-                    continue
-            
-                best_cutlist = cutlists_management.get_best_cutlist(cutlists)                 
-                
-                best_cutlist_id = best_cutlist[0]
-                
-                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, best_cutlist_id)
-
-                if cut_avi == None:
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error    
-                else:
-                    file_conclusion.cut.status = Status.OK
-                    file_conclusion.cut_avi = cut_avi
-                    file_conclusion.cut.local_cutlist = local_cutlist
-                    file_conclusion.cut.cutlist = best_cutlist                            
-                
-            elif cut_action == Cut_action.CHOOSE_CUTLIST:
-                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, self.__gui.dialog_cut.chosen_cutlist[0])
-                
-                if cut_avi == None:
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error    
-                else:
-                    file_conclusion.cut.status = Status.OK
-                    file_conclusion.cut_avi = cut_avi
-                    file_conclusion.cut.local_cutlist = local_cutlist
-                    file_conclusion.cut.cutlist = self.__gui.dialog_cut.chosen_cutlist
-
-            elif cut_action == Cut_action.LOCAL_CUTLIST:
-                filename_cutlist = file_conclusion.uncut_avi + ".cutlist"
-                
-                if not exists(filename_cutlist):
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
-                    continue
-               
-                cut_avi, local_cutlist, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, filename_cutlist, local=True)
-                
-                if cut_avi == None:
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error
-                else:
-                    file_conclusion.cut.status = Status.OK
-                    file_conclusion.cut_avi = cut_avi
-                    file_conclusion.cut.local_cutlist = local_cutlist
-
-            elif cut_action == Cut_action.MANUALLY: # MANUALLY                               
+            if cut_action == Cut_action.MANUALLY: # MANUALLY                               
                 error_code, error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_avi)
                     
                 if error_code < 0:
                     file_conclusion.cut.status = Status.OK  
                     file_conclusion.cut.create_cutlist = True            
-                    file_conclusion.cut.cutlist_cuts = cuts
-                    file_conclusion.cut.executable = basename(executable)
+                    file_conclusion.cut.cutlist.cuts = cuts
+                    file_conclusion.cut.cutlist.intended_app = basename(executable)
                 elif error_code == 1:
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = error_message
@@ -521,7 +402,42 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.status = Status.OK                    
                     file_conclusion.cut.create_cutlist_error = error_message
                     
-              
+                continue
+                    
+            # all other cases: cut file by cutlist
+
+            if cut_action == Cut_action.BEST_CUTLIST:
+                if len(cutlists) == 0:
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = "Keine Cutlist gefunden"
+                    continue
+                                               
+                file_conclusion.cut.cutlist = cutlists_management.get_best_cutlist(cutlists)                                 
+                file_conclusion.cut.cutlist.download(self.config.get('cut', 'server'), file_conclusion.uncut_avi)
+             
+            elif cut_action == Cut_action.CHOOSE_CUTLIST:
+                
+                file_conclusion.cut.cutlist = self.__gui.dialog_cut.chosen_cutlist
+                file_conclusion.cut.cutlist.download(self.config.get('cut', 'server'), file_conclusion.uncut_avi)
+                
+            elif cut_action == Cut_action.LOCAL_CUTLIST:     
+                file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_avi + ".cutlist"
+                
+                if not exists(filename_cutlist):
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
+                    continue
+            
+            # and finally cut the file
+            cut_avi, error = self.cut_file_by_cutlist(file_conclusion.uncut_avi, file_conclusion.cut.cutlist)
+
+            if cut_avi == None:
+                file_conclusion.cut.status = Status.ERROR
+                file_conclusion.cut.message = error    
+            else:
+                file_conclusion.cut.status = Status.OK
+                file_conclusion.cut_avi = cut_avi                    
+                                                        
         # after iterating over all items:
         return True
 
@@ -625,9 +541,6 @@ class DecodeOrCut(BaseAction):
                 
                 count += 1
 
-        if len(cuts) == 0:
-            return None, "Konnte keine Schnitte finden!"
-
         fileoperations.remove_file(filename)
 
         return cuts, None       
@@ -714,38 +627,28 @@ class DecodeOrCut(BaseAction):
         else:
             return -1, None, cuts, config_value
              
-    def cut_file_by_cutlist(self, filename, cutlist, local=False):
-        program, config_value = self.__get_program(filename)
-        if program < 0:
-            return None, None, config_value 
-            
-        if local:
-            local_filename = cutlist            
-        else:                             
-            # download cutlists     
-            local_filename, error = cutlists_management.download_cutlist(cutlist, self.config.get('cut', 'server'), filename)
+    def cut_file_by_cutlist(self, filename, cutlist):
+        """ Returns: cut_avi, error """
 
-            if not local_filename:
-                return None, None, "Konnte Cutlist nicht herunterladen (%s)." % error
-       
-        print "local_filename: ", local_filename
+        program, program_config_value = self.__get_program(filename)
+        if program < 0:
+            return None, program_config_value 
        
         # get dictionary of cuts
-        cuts = cutlists_management.get_cuts_of_cutlist(local_filename)
-        
-        if type(cuts) != list: # error occured
-            return None, None, "Fehler: cuts!=list (%s)" % cuts
+        error = cutlist.read_cuts()        
+        if error:
+            return None, error       
         
         if program == Program.AVIDEMUX:
-            cut_avi, error = self.__cut_file_avidemux(filename, config_value, cuts)
+            cut_avi, error = self.__cut_file_avidemux(filename, program_config_value, cutlist.cuts)
             
         else: # VIRTUALDUB                              
-            cut_avi, error = self.__cut_file_virtualdub(filename, config_value, cuts)
+            cut_avi, error = self.__cut_file_virtualdub(filename, program_config_value, cutlist.cuts)
             
         if error:
-            return None, None, error
+            return None, error
         else:
-            return cut_avi, local_filename, None
+            return cut_avi, None
 
     def __cut_file_avidemux(self, filename, config_value, cuts):
         # make file for avidemux scripting engine

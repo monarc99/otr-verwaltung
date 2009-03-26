@@ -21,62 +21,34 @@
 
 import sys
 import os
-import re
 
-try:
-    import gtk
-    import pygtk
-except:
-    print "PyGTK/GTK is missing."
-    sys.exit(-1)
-  
+import gtk
+
    
 class BaseWindow:
     
-    def __path(self, filename):
-        return os.path.join(sys.path[0], os.path.join("gui", filename))
-        
-    def __init__(self, builder, name, widgets=None, parent=None): 
+    def __init__(self, builder_filename, name, parent=None): 
         """ Implements a gtk.Window/gtk.Dialog built by a gtk.Builder.
-              builder - a gtk.Builder object. Can be created by create_builder()
+              builder_filename - 
               name - name of window, name of builder file
-              widgets (optional) - list of widgets to be loaded
-              parent (optional) - a parent window classs        
-        """
+              parent (optional) - a parent window class """
+               
+        filename = os.path.join(sys.path[0], os.path.join("gui", builder_filename))
+        self.__builder = gtk.Builder()
+        self.__builder.add_from_file(filename)
                           
         # Get window from builder
-        self.__window = builder.get_object(name)
-        if parent != None:
+        self.__window = self.get_widget(name)
+        if parent:
             self.__window.set_transient_for(parent.get_window())
-        
-        # Get widgets from builder
-        self.__widgets = {}
-        if widgets != None:
-            for widget_name in widgets:
-                self.__widgets[widget_name] = builder.get_object(widget_name)
-                    
+                           
         # connect signals for "parent" class
-        builder.connect_signals(self)
-
-    def create_builder(self, files):
-        """ Initializes a new gtk.Builder.
-            files - String of file/List of files. """
-                
-        builder = gtk.Builder()
-        if type(files) == str:
-            builder.add_from_file(self.__path(files))
-        elif type(files) == list:
-            for builder_file in files:
-                builder.add_from_file(self.__path(builder_file))
-        else:
-            raise AttributeError, "Files has to be a string or a list."
-        
-        return builder    
-                       
+        self.__builder.connect_signals(self)
+                                
     # Convenience methods
     def get_widget(self, widget_name):
         """ Get a widget by name. """
-        return self.__widgets[widget_name]
+        return self.__builder.get_object(widget_name)
     
     def create_widget(self, widget_name, widget):
         self.__widgets[widget_name] = widget

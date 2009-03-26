@@ -50,11 +50,12 @@ class App:
         self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
         self.__cut_video = re.compile('.*(avi|mp4)$') 
     
+        self.section = Section.OTRKEY
+    
         # load gui
         self.__gui = Gui(self)
     
         # show undecoded otrkeys         
-        self.section = Section.OTRKEY
         self.show_section(Section.OTRKEY)
         
         # compile list of planned items
@@ -69,7 +70,8 @@ class App:
             except:
                 continue
         
-        self.__gui.main_window.broadcasts_badge()
+        self.__gui.main_window.broadcasts_badge()                         
+        self.__gui.main_window.update_details()                         
                                 
     ### 
     ### Show sections
@@ -91,25 +93,30 @@ class App:
         files = []
         text = ""
         
-        if section==Section.PLANNING:
+        if section == Section.PLANNING:
             text = self.section_planning()
+            
+            self.__gui.main_window.get_widget('table_details').hide()            
             self.__gui.main_window.show_planning(True)
         else:
             self.__gui.main_window.show_planning(False)
+            
+            if self.config.get('common', 'show_details'):
+                self.__gui.main_window.get_widget('table_details').show()
         
-        if section==Section.OTRKEY:
+        if section == Section.OTRKEY:
             text, files = self.section_otrkey()
         
-        elif section==Section.AVI_UNCUT:
+        elif section == Section.AVI_UNCUT:
             text, files = self.section_avi_uncut()   
 
-        elif section==Section.AVI_CUT:
+        elif section == Section.AVI_CUT:
             text, files = self.section_avi_cut()   
 
-        elif section==Section.TRASH:
+        elif section == Section.TRASH:
             text, files = self.section_trash()   
 
-        elif section==Section.ARCHIVE: 
+        elif section == Section.ARCHIVE: 
             # returns NO files       
             text = self.section_archive()
 
@@ -405,13 +412,7 @@ class App:
             self.show_section(self.section)
             
     
-    def __show(self, cutlist_filename, avi_filename, edl_subtitles_cb):
-        cuts = cutlists_management.get_cuts_of_cutlist(cutlist_filename)
-                
-        if type(cuts) != list: # error occured
-            self.__gui.message_error_box(cuts)
-            return
-        
+    def __show(self, cuts, avi_filename, edl_subtitles_cb):        
         f_edl = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "w")
         f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")    
         
@@ -433,7 +434,7 @@ class App:
         fileoperations.remove_file(f_edl)
         fileoperations.remove_file(f_sub)
         
-    def show_cuts(self, avi_filename, cutlist_filename):       
+    def show_cuts(self, avi_filename, cutlist):       
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):            
             diff = 10
@@ -462,12 +463,17 @@ class App:
                     f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
                 
             f_edl.write("50000 0")
-            
-           
-        self.__show(cutlist_filename, avi_filename, edl_subtitles_cb)    
-        
+         
+         
+        error = cutlist.read_cuts()
+                
+        if error:
+            self.__gui.message_error_box(error)
+            return           
+
+        self.__show(cutlist.cuts, avi_filename, edl_subtitles_cb)            
     
-    def show_cuts_after_cut(self, avi_filename, cutlist_filename):
+    def show_cuts_after_cut(self, avi_filename, cuts):
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):                    
             diff = 10
@@ -487,7 +493,7 @@ class App:
                     f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))                      
 
 
-        self.__show(cutlist_filename, avi_filename, edl_subtitles_cb)    
+        self.__show(cuts, avi_filename, edl_subtitles_cb)    
     
     def format_seconds(self, seconds):
         hrs = seconds / 3600       

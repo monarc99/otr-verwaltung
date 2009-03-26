@@ -1,24 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#
-# OTR-Verwaltung 0.9 (Beta 1)
-# Copyright (C) 2008 Benjamin Elbers (elbersb@googlemail.com)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
-
 import base64
 import os
 
@@ -33,30 +15,12 @@ class PreferencesWindow(BaseWindow):
     def __init__(self, app, gui, parent):
         self.app = app
         self.gui = gui
-    
-        widgets = [
-            'notebook',
- 
-            # Speicherorte
-            'folderArchive',
-            # Dekodieren
-            'entryEMail',
-            'entryPassword',      
-            'checkCorrect',
-            # Schneiden
-            'comboboxMPlayer',
-            # Umbenennen
-            'entry_schema',
-            'label_schema'   
-            ]
+                      
+        BaseWindow.__init__(self, "preferences_window.ui", "preferences_window", parent)
         
-        builder = self.create_builder("preferences_window.ui")
-            
-        BaseWindow.__init__(self, builder, "preferences_window", widgets, parent)
+        self.__setup_widgets()
         
-        self.__setup_widgets(builder)
-        
-    def __setup_widgets(self, builder):
+    def __setup_widgets(self):
         self.example_filename = 'James_Bond_007_09.01.06_20-15_ard_120_TVOON_DE.mpg.HQ.avi'
         
         # preferences fonts (little explanations)
@@ -69,7 +33,7 @@ class PreferencesWindow(BaseWindow):
                     'labelManually',                    
                     'labelLocalCutlist']
         for label in labels:
-            builder.get_object(label).modify_font(pango.FontDescription("9"))            
+            self.get_widget(label).modify_font(pango.FontDescription("9"))            
                          
         # fill combobox of player
         if os.name == "posix":
@@ -77,8 +41,8 @@ class PreferencesWindow(BaseWindow):
         else:
             players = [r"X:\Pfad\zu\vlc.exe", r"X:\Pfad\zu\wmp.exe"]
         
-        self.__set_model_from_list(builder.get_object('comboboxPlayer'), players)
-        builder.get_object('comboboxentry-player').set_text(self.app.config.get('play', 'player'))
+        self.__set_model_from_list(self.get_widget('comboboxPlayer'), players)
+        self.get_widget('comboboxentry-player').set_text(self.app.config.get('play', 'player'))
         
         # fill combobox of mplayer
         if os.name == "posix":
@@ -86,8 +50,8 @@ class PreferencesWindow(BaseWindow):
         else:
             mplayers = [r"X:\Pfad\zu\mplayer.exe"]
 
-        self.__set_model_from_list(builder.get_object('comboboxMPlayer'), mplayers)
-        builder.get_object('comboboxentry-mplayer').set_text(self.app.config.get('play', 'mplayer'))
+        self.__set_model_from_list(self.get_widget('comboboxMPlayer'), mplayers)
+        self.get_widget('comboboxentry-mplayer').set_text(self.app.config.get('play', 'mplayer'))
 
         # fill combobox of avi, hq, mp4
         if os.name == "posix":
@@ -102,48 +66,48 @@ class PreferencesWindow(BaseWindow):
             virtualdub_man = [r"C:\Programme\VirtualDub\VirtualDub.exe"]
 
         # avi + hq        
-        self.__set_model_from_list(builder.get_object('combobox_avi'), avidemux + virtualdub)
-        builder.get_object('comboboxentry-avi').set_text(self.app.config.get('cut', 'avi'))
-        self.__set_model_from_list(builder.get_object('combobox_hq'), virtualdub)
-        builder.get_object('comboboxentry-hq').set_text(self.app.config.get('cut', 'hq'))
+        self.__set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)
+        self.get_widget('comboboxentry-avi').set_text(self.app.config.get('cut', 'avi'))
+        self.__set_model_from_list(self.get_widget('combobox_hq'), virtualdub)
+        self.get_widget('comboboxentry-hq').set_text(self.app.config.get('cut', 'hq'))
     
         # man_avi + man_avidemux
-        self.__set_model_from_list(builder.get_object('combobox_man_avi'), avidemux_man + virtualdub_man)
-        builder.get_object('comboboxentry-man_avi').set_text(self.app.config.get('cut', 'man_avi'))
-        self.__set_model_from_list(builder.get_object('combobox_man_hq'), virtualdub_man)
-        builder.get_object('comboboxentry-man_hq').set_text(self.app.config.get('cut', 'man_hq'))
+        self.__set_model_from_list(self.get_widget('combobox_man_avi'), avidemux_man + virtualdub_man)
+        self.get_widget('comboboxentry-man_avi').set_text(self.app.config.get('cut', 'man_avi'))
+        self.__set_model_from_list(self.get_widget('combobox_man_hq'), virtualdub_man)
+        self.get_widget('comboboxentry-man_hq').set_text(self.app.config.get('cut', 'man_hq'))
                 
         # fill combobox servers
-        self.__set_model_from_list(builder.get_object('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
-        builder.get_object('comboboxentry-server').set_text(self.app.config.get('cut', 'server'))
+        self.__set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
+        self.get_widget('comboboxentry-server').set_text(self.app.config.get('cut', 'server'))
         
         # fill values from config_dic
         # folder choosers on folders tab           
-        builder.get_object('folderNewOtrkeys').set_current_folder(self.app.config.get('folders', 'new_otrkeys'))
-        builder.get_object('folderTrash').set_current_folder(self.app.config.get('folders', 'trash'))
-        builder.get_object('folderUncutAvis').set_current_folder(self.app.config.get('folders', 'uncut_avis'))
-        builder.get_object('folderCutAvis').set_current_folder(self.app.config.get('folders', 'cut_avis'))
-        builder.get_object('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
-        builder.get_object('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
-        builder.get_object('check_smart').set_active(self.app.config.get('cut', 'smart'))
+        self.get_widget('folderNewOtrkeys').set_current_folder(self.app.config.get('folders', 'new_otrkeys'))
+        self.get_widget('folderTrash').set_current_folder(self.app.config.get('folders', 'trash'))
+        self.get_widget('folderUncutAvis').set_current_folder(self.app.config.get('folders', 'uncut_avis'))
+        self.get_widget('folderCutAvis').set_current_folder(self.app.config.get('folders', 'cut_avis'))
+        self.get_widget('checkArchive').set_active(self.app.config.get('common', 'use_archive'))    
+        self.get_widget('folderArchive').set_current_folder(self.app.config.get('folders', 'archive'))     
+        self.get_widget('check_smart').set_active(self.app.config.get('cut', 'smart'))
          
         # cutlists tab
-        builder.get_object('check_delete_cutlists').set_active(self.app.config.get('cut', 'delete_cutlists'))
-        builder.get_object('entry_username').set_text(self.app.config.get('cut', 'cutlist_username'))
+        self.get_widget('check_delete_cutlists').set_active(self.app.config.get('cut', 'delete_cutlists'))
+        self.get_widget('entry_username').set_text(self.app.config.get('cut', 'cutlist_username'))
         
         # choose cutlists by size or filename
         value = bool(self.app.config.get('cut', 'choose_cutlists_by')) # 0=size, 1=filename
-        builder.get_object('radio_size').set_active(not value) 
-        builder.get_object('radio_filename').set_active(value)
+        self.get_widget('radio_size').set_active(not value) 
+        self.get_widget('radio_filename').set_active(value)
               
         # decode tab
-        builder.get_object('entry_decoder').set_text(self.app.config.get('decode', 'path'))
+        self.get_widget('entry_decoder').set_text(self.app.config.get('decode', 'path'))
         
         if self.app.config.get('decode', 'save_email_password') == Save_Email_Password.DONT_SAVE:
-            builder.get_object('radioDontSave').set_active(True)
-            self.on_radioDontSave_toggled(builder.get_object('radioDontSave'))
+            self.get_widget('radioDontSave').set_active(True)
+            self.on_radioDontSave_toggled(self.get_widget('radioDontSave'))
         else:
-            builder.get_object('radioSave').set_active(True)
+            self.get_widget('radioSave').set_active(True)
             self.get_widget('entryEMail').set_text(self.app.config.get('decode', 'email'))
             self.get_widget('entryPassword').set_text(base64.b64decode(self.app.config.get('decode', 'password')))
         
@@ -154,10 +118,10 @@ class PreferencesWindow(BaseWindow):
                                
         # radio buttons on cut tab
         radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually', 'radioLocalCutlist'] # order is important!
-        builder.get_object(radiobuttons[self.app.config.get('cut', 'cut_action')]).set_active(True)
+        self.get_widget(radiobuttons[self.app.config.get('cut', 'cut_action')]).set_active(True)
                
         # rename tab
-        builder.get_object('check_rename_cut').set_active(self.app.config.get('rename', 'rename_cut'))
+        self.get_widget('check_rename_cut').set_active(self.app.config.get('rename', 'rename_cut'))
         self.get_widget('entry_schema').set_sensitive(self.app.config.get('rename', 'rename_cut'))
         self.get_widget('entry_schema').set_text(self.app.config.get('rename', 'schema'))
      

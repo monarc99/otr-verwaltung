@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os.path import basename
+from os.path import basename, exists
 
 import gtk
 
@@ -12,65 +12,8 @@ class DialogConclusion(BaseWindow):
     
     def __init__(self, app, parent):
         self.app = app
-    
-        widgets = [
-            'buttonBack',
-            'buttonForward',
-            'buttonClose',
-            'labelCount',
-            'tableConclusion',
-            'labelConclusionFilename',
-            'labelConclusionCutStatus',
-            'labelConclusionDecodeStatus',
-            'labelConclusionCut',
-            'labelConclusionDecode',
-            'checkbuttonRate',
-            'vboxRating',           
-            'buttonConclusionPlay',
-            'check_delete_uncut',
-            'button_conclusion_play_cut',
-            'radiobuttonRate0',
-            'radiobuttonRate1',
-            'radiobuttonRate2',
-            'radiobuttonRate3',
-            'radiobuttonRate4',
-            'radiobuttonRate5',    
             
-            'table_rename',
-            'label_otr_rename',
-            'label_filename_rename',
-            'label_filename_original_rename',
-            'label_autoname_rename',
-            'radio_no_rename',
-            'radio_otr_rename',
-            'radio_filename_rename',
-            'radio_filename_original_rename',
-            'radio_autoname_rename',
-            
-            # create cutlist
-            'vbox_create_cutlist',
-            'hbox_create_cutlist',            
-            'check_create_cutlist',
-            'label_create_cutlist_error',
-            'radio_create_rate_0',
-            'radio_create_rate_1',
-            'radio_create_rate_2',
-            'radio_create_rate_3',
-            'radio_create_rate_4',
-            'radio_create_rate_5',
-            'check_wrong_content',
-            'entry_actual_content',
-            'check_missing_beginning',
-            'check_missing_ending',
-            'check_other_error',
-            'entry_other_error_description',
-            'entry_suggested',
-            'entry_comment'
-            ]
-        
-        builder = self.create_builder("dialog_conclusion.ui")
-            
-        BaseWindow.__init__(self, builder, "dialog_conclusion", widgets, parent)
+        BaseWindow.__init__(self, "dialog_conclusion.ui", "dialog_conclusion", parent)
                 
         # setup widgets
 
@@ -78,8 +21,7 @@ class DialogConclusion(BaseWindow):
         for radio in range(6):
             name = "radiobuttonRate" + str(radio)
             self.get_widget(name).connect('toggled', self.on_radiobuttonRating_toggled, radio)
-            self.get_widget(name).set_sensitive(False)
-     
+            self.get_widget(name).set_sensitive(False)    
         
         # cutlist create rating
         for radio in range(6):
@@ -146,10 +88,16 @@ class DialogConclusion(BaseWindow):
             filename = self.file_conclusions[self.conclusion_iter].cut_avi
 
         self.app.perform_action(Action.PLAY, [filename])      
+       
+    def on_button_conclusion_play_cut_clicked(self, widget, data=None):
+        file_conclusion = self.file_conclusions[self.conclusion_iter]
+    
+        self.app.show_cuts_after_cut(file_conclusion.cut_avi, file_conclusion.cut.cutlist.cuts)
+    
         
     def on_radiobuttonRating_toggled(self, widget, rate):
         if widget.get_active() == True:            
-            self.file_conclusions[self.conclusion_iter].cut.rating = rate 
+            self.file_conclusions[self.conclusion_iter].cut.my_rating = rate 
     
     def on_check_delete_uncut_toggled(self, widget, data=None):
         print "set to: ", widget.get_active()
@@ -165,14 +113,6 @@ class DialogConclusion(BaseWindow):
         for radio in ['radiobuttonRate0', 'radiobuttonRate1', 'radiobuttonRate2', 'radiobuttonRate3', 'radiobuttonRate4', 'radiobuttonRate5' ]:
             self.get_widget(radio).set_sensitive(status)
     
-    def on_button_conclusion_play_cut_clicked(self, widget, data=None):
-        file_conclusion = self.file_conclusions[self.conclusion_iter]
-    
-        if not file_conclusion.cut.local_cutlist:
-            print "Lokale Cutlist nicht vorhanden!"
-        else:
-            self.app.show_cuts_after_cut(file_conclusion.cut_avi, file_conclusion.cut.local_cutlist)
-    
     def on_radio_rename_toggled(self, widget, radio_count):   
         if widget.get_active():
             self.file_conclusions[self.conclusion_iter].cut.rename = radio_count       
@@ -183,7 +123,6 @@ class DialogConclusion(BaseWindow):
     #
 
     def on_check_create_cutlist_toggled(self, widget, data=None):       
-        print "set create_cutlist to ", widget.get_active()
         self.file_conclusions[self.conclusion_iter].cut.create_cutlist = widget.get_active()
 
         self.get_widget('hbox_create_cutlist').set_sensitive(widget.get_active())
@@ -192,31 +131,31 @@ class DialogConclusion(BaseWindow):
         if widget.get_active():
             file_conclusion = self.file_conclusions[self.conclusion_iter]
             
-            file_conclusion.cut.cutlist_information['rating'] = radio_count   
+            file_conclusion.cut.cutlist.ratingbyauthor = radio_count
 
     def on_check_wrong_content_toggled(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['wrong_content'] = widget.get_active()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.wrong_content = widget.get_active()
 
     def on_entry_actual_content_changed(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['actual_content'] = widget.get_text()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.actualcontent = widget.get_text()
 
     def on_check_missing_beginning_toggled(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['missing_beginning'] = widget.get_active()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.missing_beginning = widget.get_active()
 
     def on_check_missing_ending_toggled(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['missing_ending'] = widget.get_active()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.missing_ending = widget.get_active()
 
     def on_check_other_error_toggled(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['other_error'] = widget.get_active()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.other_error = widget.get_active()
 
     def on_entry_other_error_description_changed(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['other_error_description'] = widget.get_text()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.othererrordescription = widget.get_text()
 
     def on_entry_suggested_changed(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['suggested'] = widget.get_text()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.suggested_filename = widget.get_text()
 
     def on_entry_comment_changed(self, widget, data=None):
-        self.file_conclusions[self.conclusion_iter].cut.cutlist_information['comment'] = widget.get_text()
+        self.file_conclusions[self.conclusion_iter].cut.cutlist.usercomment = widget.get_text()
     
     #
     # Controls
@@ -297,7 +236,7 @@ class DialogConclusion(BaseWindow):
                     
                     self.get_widget('vbox_create_cutlist').show()
                     
-                    if file_conclusion.cut.cutlist_cuts == None: # cannot create cutlist!
+                    if not file_conclusion.cut.cutlist.cuts: # cannot create cutlist!
                         self.get_widget('hbox_create_cutlist').hide()
                         self.get_widget('label_create_cutlist_error').set_text(file_conclusion.cut.create_cutlist_error)
                         self.get_widget('check_create_cutlist').set_sensitive(False)
@@ -313,20 +252,20 @@ class DialogConclusion(BaseWindow):
                         if file_conclusion.cut.create_cutlist:
                             self.get_widget('hbox_create_cutlist').set_sensitive(True)                            
                         
-                            # fill values
-                            v = file_conclusion.cut.cutlist_information
+                            c = file_conclusion.cut.cutlist
+                        
+                            # fill values                            
+                            if c.ratingbyauthor:
+                                self.get_widget('radio_create_rate_' + str(c.ratingbyauthor)).set_active(True)
                             
-                            rating = v['rating']
-                            self.get_widget('radio_create_rate_' + str(rating)).set_active(True)
-                            
-                            self.get_widget('check_wrong_content').set_active(v['wrong_content'])
-                            self.get_widget('entry_actual_content').set_text(v['actual_content'])
-                            self.get_widget('check_missing_beginning').set_active(v['missing_beginning'])
-                            self.get_widget('check_missing_ending').set_active(v['missing_ending'])
-                            self.get_widget('check_other_error').set_active(v['other_error'])
-                            self.get_widget('entry_other_error_description').set_text(v['other_error_description'])
-                            self.get_widget('entry_suggested').set_text(v['suggested'])
-                            self.get_widget('entry_comment').set_text(v['comment'])
+                            self.get_widget('check_wrong_content').set_active(c.wrong_content)
+                            self.get_widget('entry_actual_content').set_text(c.actualcontent)
+                            self.get_widget('check_missing_beginning').set_active(c.missing_beginning)
+                            self.get_widget('check_missing_ending').set_active(c.missing_ending)
+                            self.get_widget('check_other_error').set_active(c.other_error)
+                            self.get_widget('entry_other_error_description').set_text(c.othererrordescription)
+                            self.get_widget('entry_suggested').set_text(c.suggested_filename)
+                            self.get_widget('entry_comment').set_text(c.usercomment)
                         else:
                             self.get_widget('hbox_create_cutlist').set_sensitive(False)
                                                                
@@ -334,7 +273,7 @@ class DialogConclusion(BaseWindow):
                     if file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST: 
                         text += ", Mit lokaler Cutlist geschnitten"                       
                     else:
-                        text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist[0]
+                        text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist.id
                         
                         self.get_widget('vboxRating').show()                
     
@@ -350,18 +289,18 @@ class DialogConclusion(BaseWindow):
                             self.get_widget('radio_otr_rename').set_active(True)                          
                             
                         self.__set_rename('otr_rename', self.rename_by_schema(basename(file_conclusion.uncut_avi)))
-                        self.__set_rename('filename_rename', file_conclusion.cut.cutlist[8])
-                        self.__set_rename('filename_original_rename', file_conclusion.cut.cutlist[16])
-                        self.__set_rename('autoname_rename', file_conclusion.cut.cutlist[15])                      
+                        self.__set_rename('filename_rename', file_conclusion.cut.cutlist.filename)
+                        self.__set_rename('filename_original_rename', file_conclusion.cut.cutlist.filename_original)
+                        self.__set_rename('autoname_rename', file_conclusion.cut.cutlist.autoname)                      
         
                     # enable play options
                     self.get_widget('buttonConclusionPlay').show()
                     self.get_widget('button_conclusion_play_cut').show()
                     
                     # already rated?
-                    if file_conclusion.cut.rating > -1:                               
+                    if file_conclusion.cut.my_rating > -1:                               
                         self.get_widget('checkbuttonRate').set_active(True)
-                        self.get_widget('radiobuttonRate' + str(file_conclusion.cut.rating)).set_active(True)
+                        self.get_widget('radiobuttonRate' + str(file_conclusion.cut.my_rating)).set_active(True)
                     else:
                         self.get_widget('checkbuttonRate').set_active(False)            
              
@@ -379,4 +318,3 @@ class DialogConclusion(BaseWindow):
             radio.set_sensitive(False)
         else:
             radio.set_sensitive(True)
-        

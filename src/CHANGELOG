@@ -1,4 +1,11 @@
-0.5.7
+0.6
+    * Bugfix: Bewerten funktioniert wieder korrekt
+    * Bugfix: Beim Schneiden mit bester Cutlist trat ein Fehler auf, der das Bewerten, Abspielen etc. verhinderte
+    * Statuszeile wird genutzt beim Bewerten und <<Hochladen>>
+    * Details zu Videos werden angezeigt (mit Hilfe des MPlayers)
+    * Die Bewertungstexte von cutlist.at wurden übernommen
+
+0.5.7, 21. März 2009
     * neues Icon 
     * neue Einstellungen für ffdshow, um Header-Informationen zu erhalten (Dank an monarc!)
     * ffdshow-Einstellungen werden auch beim manuellen Schneiden mit VirtualDub geladen

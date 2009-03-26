@@ -16,25 +16,8 @@ class DialogCut(BaseWindow):
     def __init__(self, app, gui, parent):
         self.gui = gui
         self.app = app
-    
-        widgets = [
-            'label_file',
-            
-            'radio_best_cutlist',
-            'radio_choose_cutlist',
-            'radio_local_cutlist',
-            'label_cutlist',
-            'radio_manually',            
-            'label_warning',
-            
-            'button_show_cuts',
-            'treeview_cutlists',
-            'label_status'
-            ]
-        
-        builder = self.create_builder("dialog_cut.ui")    
-        
-        BaseWindow.__init__(self, builder, "dialog_cut", widgets, parent)
+                
+        BaseWindow.__init__(self, "dialog_cut.ui", "dialog_cut", parent)
 
         self.__setup_widgets()
         
@@ -53,7 +36,7 @@ class DialogCut(BaseWindow):
             str, # 2 ratingbyauthor
             str, # 3 rating
             str, # 4 ratingcount
-            str, # 5 cuts
+            str, # 5 countcuts
             str, # 6 actualcontent
             str, # 7 usercomment
             str, # 8 filename
@@ -118,11 +101,9 @@ class DialogCut(BaseWindow):
     ### Convenience methods
     ###
             
-    def add_cutlist(self, data):               
-        self.cutlists.append(data)
+    def add_cutlist(self, c):                                           
+        self.cutlists.append(c)      
 
-        data = list(data)
-      
         errors = {
            "100000" : "Fehlender Beginn", 
            "010000" : "Fehlendes Ende",
@@ -132,21 +113,23 @@ class DialogCut(BaseWindow):
            "000001" : "Falscher Inhalt/EPG-Error"
         }
       
-        if data[12] in errors.keys():
-            data[12] = errors[data[12]]
+        if c.errors in errors.keys():
+            c.errors = errors[c.errors]
         else:
-            data[12] = ''     
+            c.errors = ''
         
-        if data[6] or data[12] or data[13]:
-            data.append(True)
-        else:
-            data.append(False)
+        errors = False
+        if c.actualcontent or c.errors or c.othererrordescription:
+            errors = True
         
-        data[2] = "<b>%s</b>" % data[2]
-        data[3] = "<b>%s</b>" % data[3]
-        data[6] = "<span foreground='red'>%s</span>" % data[6]
-        data[12] = "<span foreground='red'>%s</span>" % data[12]
-        data[13] = "<span foreground='red'>%s</span>" % data[13]
+        c.ratingbyauthor = "<b>%s</b>" % c.ratingbyauthor
+        c.rating = "<b>%s</b>" % c.rating
+        c.actualcontent = "<span foreground='red'>%s</span>" % c.actualcontent
+        c.errors = "<span foreground='red'>%s</span>" % c.errors
+        c.othererrordescription = "<span foreground='red'>%s</span>" % c.othererrordescription
+        
+        data = [ c.id, c.author, c.ratingbyauthor, c.rating, c.ratingcount, c.countcuts, c.actualcontent, c.usercomment, c.filename, c.withframes, c.withtime, c.duration, c.errors, c.othererrordescription, c.downloadcount, c.autoname, c.filename_original ]
+        data.append(errors)
         
         self.get_widget('treeview_cutlists').get_model().append(data)  
        
@@ -161,8 +144,11 @@ class DialogCut(BaseWindow):
         self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
         
     def on_button_show_cuts_clicked(self, widget, data=None):
+        cutlist = cutlists_management.Cutlist()
+
         if self.get_widget('radio_local_cutlist').get_active():
-            local_filename = self.get_widget('label_cutlist').get_text()
+            
+            cutlist.local_filename = self.get_widget('label_cutlist').get_text()
             
         else:
             treeselection = self.get_widget('treeview_cutlists').get_selection()  
@@ -175,16 +161,18 @@ class DialogCut(BaseWindow):
             (model, iter) = treeselection.get_selected()                   
             cutlist_id = model.get_value(iter, 0)    
                         
-            local_filename, error = cutlists_management.download_cutlist(cutlist_id, self.app.config.get('cut', 'server'), self.filename)
-            
-            if not local_filename:
+            cutlist.id = cutlist_id
+                                    
+            error = cutlist.download(self.app.config.get('cut', 'server'), self.filename)
+
+            if error:
                 self.gui.message_error_box(error)
                 return
             
-        self.app.show_cuts(self.filename, local_filename)
+        self.app.show_cuts(self.filename, cutlist)
         
         # delete cutlist
-        fileoperations.remove_file(local_filename)
+        fileoperations.remove_file(cutlist.local_filename)
     
     def on_selection_changed(self, selection, data=None):     
         model, paths = selection.get_selected_rows()
@@ -206,9 +194,9 @@ class DialogCut(BaseWindow):
             (model, iter) = treeselection.get_selected()                   
             cutlist_id = model.get_value(iter, 0)
         
-            for data in self.cutlists:
-                if data[0] == cutlist_id:
-                    self.chosen_cutlist = data
+            for cutlist in self.cutlists:
+                if cutlist.id == cutlist_id:
+                    self.chosen_cutlist = cutlist
                     self.get_window().response(Cut_action.CHOOSE_CUTLIST)
                     return
             
