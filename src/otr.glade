@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Thu Mar 26 15:37:04 2009 -->
+<!--Generated with glade3 3.4.5 on Thu Apr  2 22:11:18 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -2982,6 +2982,7 @@
     <property name="title" translatable="yes">OTR-Verwaltung</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <signal name="destroy" handler="on_main_window_destroy"/>
+    <signal name="delete_event" handler="on_main_window_delete_event"/>
     <child>
       <widget class="GtkVBox" id="vboxMain">
         <property name="visible">True</property>

@@ -123,6 +123,8 @@ class DialogConclusion(BaseWindow):
     #
 
     def on_check_create_cutlist_toggled(self, widget, data=None):       
+        print "set create_cutlist to ", widget.get_active()
+    
         self.file_conclusions[self.conclusion_iter].cut.create_cutlist = widget.get_active()
 
         self.get_widget('hbox_create_cutlist').set_sensitive(widget.get_active())
@@ -269,24 +271,30 @@ class DialogConclusion(BaseWindow):
                         else:
                             self.get_widget('hbox_create_cutlist').set_sensitive(False)
                                                                
-                else:
+                if file_conclusion.cut_avi:
+                
                     if file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST: 
                         text += ", Mit lokaler Cutlist geschnitten"                       
+                    if file_conclusion.cut.cut_action == Cut_action.MANUALLY:
+                        text += ""
                     else:
                         text += ", Geschnitten mit Cutlist #%s" % file_conclusion.cut.cutlist.id
                         
-                        self.get_widget('vboxRating').show()                
+                        if file_conclusion.cut.cut_action != Cut_action.MANUALLY:
+                            self.get_widget('vboxRating').show()                
     
                         self.get_widget('table_rename').show()                  
                         
                         # fill values                         
                         rename = file_conclusion.cut.rename
-
-                        if rename != None:       
+                        print "rename: ", rename
+                        
+                        if rename != 0:       
                             print self.rename_radio_buttons[rename]         
                             self.get_widget(self.rename_radio_buttons[rename]).set_active(True)
                         elif self.use_rename_by_schema:
                             self.get_widget('radio_otr_rename').set_active(True)                          
+                        
                             
                         self.__set_rename('otr_rename', self.rename_by_schema(basename(file_conclusion.uncut_avi)))
                         self.__set_rename('filename_rename', file_conclusion.cut.cutlist.filename)

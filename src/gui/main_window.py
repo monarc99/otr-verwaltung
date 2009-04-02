@@ -31,7 +31,7 @@ import pango
 
 from basewindow import BaseWindow
 import otrpath
-from constants import Action, Section
+from constants import Action, Section, Cut_action
 from GeneratorTask import GeneratorTask
 
 class MainWindow(BaseWindow):
@@ -46,8 +46,28 @@ class MainWindow(BaseWindow):
         self.__setup_treeview_planning()
         self.__setup_treeview_files()
         self.__setup_widgets()
+    
+    def __get_cut_menu(self, action):
+        # menu for cut/decodeandcut
+        cut_menu = gtk.Menu()
+        items = [
+            ("Nachfragen", Cut_action.ASK),
+            ("Beste Cutlist", Cut_action.BEST_CUTLIST),
+            ("Cutlist wählen", Cut_action.CHOOSE_CUTLIST),
+            ("Lokale Cutlist", Cut_action.LOCAL_CUTLIST),
+            ("Manuell (und Cutlist erstellen)", Cut_action.MANUALLY)
+        ]
+       
+        for label, cut_action in items:
+            item = gtk.MenuItem(label)
+            item.show()
+            item.connect("activate", self.on_toolbutton_clicked, action, cut_action)
+            cut_menu.add(item)
         
-    def __setup_toolbar(self):       
+        return cut_menu
+    
+    def __setup_toolbar(self):
+    
         toolbar_buttons = [
             ('decode', 'decode.png', 'Dekodieren', Action.DECODE),
             ('decodeandcut', 'decodeandcut.png', "Dekodieren und Schneiden", Action.DECODEANDCUT),
@@ -68,11 +88,16 @@ class MainWindow(BaseWindow):
         
         self.toolbar_buttons = {}
         for key, image_name, text, action in toolbar_buttons:
-
             image = gtk.image_new_from_file(otrpath.get_image_path(image_name))
             image.show()
-            self.toolbar_buttons[key] = gtk.ToolButton(image, text)
-            self.toolbar_buttons[key].connect("clicked", self.on_toolbutton_clicked, action)
+
+            if key == "cut" or key == "decodeandcut":
+                self.toolbar_buttons[key] = gtk.MenuToolButton(image, text)
+                self.toolbar_buttons[key].set_menu(self.__get_cut_menu(action))
+            else:
+                self.toolbar_buttons[key] = gtk.ToolButton(image, text)
+
+            self.toolbar_buttons[key].connect("clicked", self.on_toolbutton_clicked, action)              
             self.toolbar_buttons[key].show()
              
              
@@ -540,8 +565,13 @@ class MainWindow(BaseWindow):
     def on_menuEditPreferences_activate(self, widget, data=None):
         self.gui.preferences_window.show()
     
-    def on_main_window_destroy(self, widget, data=None):        
+    def on_main_window_destroy(self, widget, data=None):                
         gtk.main_quit()
+   
+    def on_main_window_delete_event(self, widget, data=None):
+        if self.app.locked:
+            if not self.gui.question_box("Das Programm arbeitet noch. Soll wirklich abgebrochen werden?"):        
+                return True # won't be destroyed
         
     def on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
@@ -555,10 +585,10 @@ class MainWindow(BaseWindow):
         entry_search.grab_focus()
     
     # toolbar actions
-    def on_toolbutton_clicked(self, button, action):                
+    def on_toolbutton_clicked(self, button, action, cut_action=None):
         filenames = self.get_selected_filenames()
-        broadcasts = self.get_selected_broadcasts()
-        self.app.perform_action(action, filenames, broadcasts)             
+        broadcasts = self.get_selected_broadcasts()       
+        self.app.perform_action(action, filenames, broadcasts, cut_action)
                   
     # sidebar
     def on_sidebar_toggled(self, widget, section):

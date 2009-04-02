@@ -45,6 +45,7 @@ class App:
             self.config = Config(otrpath.get_config_path('conf'))
 
         self.__search_text = ""
+        self.locked = False
             
         # regex
         self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
@@ -357,7 +358,7 @@ class App:
     ### Actions
     ###        
     
-    def perform_action(self, chosen_action, filenames=None, broadcasts=None):
+    def perform_action(self, chosen_action, filenames=None, broadcasts=None, cut_action=None):
         """ Performs an action (toolbar, context menu, etc.) """
 
         if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD]:
@@ -386,25 +387,53 @@ class App:
                     return
            
         action = actions.get_action(chosen_action, self.__gui)            
+         
+        self.locked = True
                
         # different actions:
-        if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]: action.do(chosen_action, filenames, self.config, self.rename_by_schema)
-        elif chosen_action == Action.RENAME: action.do(filenames)
-        elif chosen_action == Action.REAL_DELETE: action.do(filenames)
-        elif chosen_action == Action.RESTORE: action.do(filenames, self.config.get('folders', 'new_otrkeys'), self.config.get('folders', 'uncut_avis'), self.config.get('folders', 'cut_avis'))
-        elif chosen_action == Action.DELETE: action.do(filenames, self.config.get('folders', 'trash'))
-        elif chosen_action == Action.PLAY: action.do(filenames[0], self.config.get('play', 'player'))
-        elif chosen_action == Action.CUT_PLAY: action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'uncut_avis'), self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), self.config.get('cut', 'delete_cutlists'))            
-        elif chosen_action == Action.PLAN_REMOVE: action.do(broadcasts, self.planned_broadcasts) 
-        elif chosen_action == Action.PLAN_SEARCH: action.do(broadcasts, self.planned_broadcasts)            
-        elif chosen_action == Action.PLAN_ADD: action.do(self.planned_broadcasts)
-        elif chosen_action == Action.PLAN_EDIT: action.do(broadcasts[0], self.planned_broadcasts)        
-        elif chosen_action == Action.ARCHIVE: action.do(filenames, self.config.get('folders', 'archive'))
+        if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:             
+            action.do(chosen_action, filenames, self.config, self.rename_by_schema, cut_action)
+    
+        elif chosen_action == Action.RENAME: 
+            action.do(filenames)
+    
+        elif chosen_action == Action.REAL_DELETE: 
+            action.do(filenames)
+    
+        elif chosen_action == Action.RESTORE: 
+            action.do(filenames, self.config.get('folders', 'new_otrkeys'), self.config.get('folders', 'uncut_avis'), self.config.get('folders', 'cut_avis'))
+    
+        elif chosen_action == Action.DELETE:
+            action.do(filenames, self.config.get('folders', 'trash'))
+    
+        elif chosen_action == Action.PLAY: 
+            action.do(filenames[0], self.config.get('play', 'player'))
+    
+        elif chosen_action == Action.CUT_PLAY: 
+            action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'uncut_avis'), self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), self.config.get('cut', 'delete_cutlists'))            
+    
+        elif chosen_action == Action.PLAN_REMOVE: 
+            action.do(broadcasts, self.planned_broadcasts) 
+    
+        elif chosen_action == Action.PLAN_SEARCH: 
+            action.do(broadcasts, self.planned_broadcasts)            
+    
+        elif chosen_action == Action.PLAN_ADD: 
+            action.do(self.planned_broadcasts)
+    
+        elif chosen_action == Action.PLAN_EDIT: 
+            action.do(broadcasts[0], self.planned_broadcasts)        
+    
+        elif chosen_action == Action.ARCHIVE: 
+            action.do(filenames, self.config.get('folders', 'archive'))
+     
         elif chosen_action == Action.NEW_FOLDER:
             if len(filenames) == 0:
                 action.do(self.config.get('folders', 'archive'))
             else:
                 action.do(filenames[0])
+        
+        self.locked = False
         
         # update view?
         if action.update_list:            

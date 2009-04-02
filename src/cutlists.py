@@ -109,6 +109,9 @@ class Cutlist:
             
             Returns: error message, otherwise None """
         
+        if len(self.cuts) != 0:
+            return
+        
         config_parser = ConfigParser.SafeConfigParser()        
          
         try:            

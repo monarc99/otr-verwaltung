@@ -5,7 +5,7 @@ from os.path import isfile
 import ConfigParser
 import datetime
 import sys
-import time, md5
+import time, hashlib
 
 from constants import Save_Email_Password, Cut_action
 
@@ -121,10 +121,8 @@ class Config:
         return config_dic
       
     def create_hash(self):
-        checksum = md5.new(str(time.time()))
-        return checksum.hexdigest()[0:20]
-        
-        
+        return hashlib.md5(str(time.time())).hexdigest()[0:20]
+                
     def __read_value(self, section, option, default):
         """ Reads values from the ConfigParser object. If the
             file doesn't exist or is corrupt, use the default
