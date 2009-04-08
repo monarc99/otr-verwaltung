@@ -19,6 +19,9 @@ class Planning(list):
         
     def append(self, *data):       
         self += [PlanningItem(*data)]
+        
+    def get_from_rss(self):
+        return [broadcast for broadcast in self if broadcast.status == 1]            
                 
     def read_config(self, config_data):
         for item in config_data.split(';'):                        

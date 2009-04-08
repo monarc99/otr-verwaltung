@@ -4,6 +4,8 @@
 from gtk import RESPONSE_OK
 import time
 import webbrowser
+import urllib2
+import xml.dom.minidom
 
 from baseaction import BaseAction
 
@@ -85,7 +87,35 @@ class RSS(BaseAction):
         self.__gui = gui
     
     def do(self, planned_broadcasts, email, rss_hash):
-        url = "http://www.onlinetvrecorder.com/rss/my.php?email=%s&hash=%s" % (email, rss_hash)
-    
-        for broadcast in broadcasts:
-            pass
+        if not email or not rss_hash:
+            self.__gui.message_error_box("E-Mail oder Hash sind nicht richtig eingetragen!")
+        
+        url = "http://www.onlinetvrecorder.com/rss/my.php?email=%s&hash=%s" % (email, rss_hash)    
+        print url        
+        
+        rss_file = urllib2.urlopen(url)
+        print rss_file.read()
+                 
+        # rss_otrkeys = []                  
+                 
+        # dom = xml.dom.minidom.parse(rss_file)
+        # handle.close()
+        # dom_x = dom_cutlists.getElementsByTagName('x')
+
+        # elements = cutlist_element.getElementsByTagName(node_name)
+        # for node in elements[0].childNodes:
+        #    return node.nodeValue                    
+        
+        from_rss = planned_broadcasts.get_from_rss()
+        
+        for rss_otrkey in rss_otrkeys:
+            # search for this otrkey in existing broadcasts
+            for local_rss_otrkey in from_rss:
+                if rss_otrkey == local_rss_otrkey:
+                    continue # already local
+                
+                # get: title, datetime, station from rss_otrkey
+                title = None               
+                datetime = None
+                station = None
+                planned_broadcasts.append(1, title, datetime, station, rss_otrkey)

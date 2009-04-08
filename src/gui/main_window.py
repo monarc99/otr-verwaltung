@@ -103,7 +103,7 @@ class MainWindow(BaseWindow):
              
              
         self.sets_of_toolbars = {
-            Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search' ],
+            Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search', 'plan_rss' ],
             Section.OTRKEY :    [ 'decodeandcut', 'decode', 'delete' ],
             Section.AVI_UNCUT:  [ 'cut', 'delete', 'archive', 'play', 'cut_play' ],
             Section.AVI_CUT:    [ 'archive', 'delete', 'cut', 'play', 'rename' ],
@@ -585,9 +585,9 @@ class MainWindow(BaseWindow):
         entry_search.grab_focus()
     
     # toolbar actions
-    def on_toolbutton_clicked(self, button, action, cut_action=None):
+    def on_toolbutton_clicked(self, button, action, cut_action=None):        
         filenames = self.get_selected_filenames()
-        broadcasts = self.get_selected_broadcasts()       
+        broadcasts = self.get_selected_broadcasts()    
         self.app.perform_action(action, filenames, broadcasts, cut_action)
                   
     # sidebar

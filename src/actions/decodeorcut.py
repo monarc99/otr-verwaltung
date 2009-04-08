@@ -150,7 +150,7 @@ class DecodeOrCut(BaseAction):
         
             # move uncut avi to trash if it's ok            
             for file_conclusion in file_conclusions:
-                if file_conclusion.cut.delete_uncut:
+                if file_conclusion.cut.status == Status.OK and file_conclusion.cut.delete_uncut:
                     # move to trash
                     print file_conclusion.uncut_avi, " to trash"
                     target = self.config.get('folders', 'trash')
@@ -378,7 +378,9 @@ class DecodeOrCut(BaseAction):
                 
                 response = self.__gui.dialog_cut.run()                
                 self.__gui.dialog_cut.hide()
-                
+
+                print "response", response
+
                 if response < 0:
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = "Abgebrochen"

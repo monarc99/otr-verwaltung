@@ -352,9 +352,9 @@ class App:
     
     def perform_action(self, chosen_action, filenames=None, broadcasts=None, cut_action=None):
         """ Performs an action (toolbar, context menu, etc.) """
-
-        if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD]:
-            if len(broadcasts) == 0 and chosen_action != Action.PLAN_ADD:
+       
+        if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD, Action.PLAN_RSS]:
+            if len(broadcasts) == 0 and not chosen_action in [Action.PLAN_ADD, Action.PLAN_RSS]:
                 if len(self.__gui.main_window.get_widget('treeview_planning').get_model()) > 0:
                     if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
                         broadcasts = []                    
@@ -376,10 +376,10 @@ class App:
                     else:
                         return
                 else:
-                    return
-           
-        action = actions.get_action(chosen_action, self.__gui)            
-         
+                    return          
+
+        action = actions.get_action(chosen_action, self.__gui)
+
         self.locked = True
                
         # different actions:
@@ -417,7 +417,7 @@ class App:
             action.do(broadcasts[0], self.planned_broadcasts)       
             
         elif chosen_action == Action.PLAN_RSS:
-            action.do(self.planned_broadcasts) 
+            action.do(self.planned_broadcasts, self.config.get('decode', 'email'), self.config.get('decode', 'hash')) 
     
         elif chosen_action == Action.ARCHIVE: 
             action.do(filenames, self.config.get('folders', 'archive'))
