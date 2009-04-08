@@ -507,7 +507,10 @@ class DecodeOrCut(BaseAction):
         if not mplayer:
             return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Aspect Ratio benötigt."
         
-        process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+        try:
+            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+        except OSError:
+            return None, "MPlayer wurde nicht gefunden!"            
            
         while True:
             line = process.stdout.readline()

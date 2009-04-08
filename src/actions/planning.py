@@ -13,8 +13,9 @@ class Add(BaseAction):
         self.__gui = gui
 
     def do(self, planned_broadcasts):
-        if self.__gui.dialog_planning.run_new() == RESPONSE_OK:
-            planned_broadcasts += [self.__gui.dialog_planning.get_values()]
+        if self.__gui.dialog_planning.run_new() == RESPONSE_OK:           
+            broadcast, datetime, station = self.__gui.dialog_planning.get_values()
+            planned_broadcasts.append(0, broadcast, datetime, station)
             
             self.__gui.main_window.broadcasts_badge()
             
@@ -29,11 +30,13 @@ class Edit(BaseAction):
     def do(self, broadcast, planned_broadcasts):
         index = self.__gui.main_window.get_widget('treeview_planning').get_model().get_value(broadcast, 0)
         
-        if self.__gui.dialog_planning.run_edit(*planned_broadcasts[index]) == RESPONSE_OK:
-            planned_broadcasts[index] = (self.__gui.dialog_planning.get_values())
+        if self.__gui.dialog_planning.run_edit(planned_broadcasts[index]) == RESPONSE_OK:
+            title, datetime, station = self.__gui.dialog_planning.get_values()
+            planned_broadcasts[index].title = title
+            planned_broadcasts[index].datetime = datetime
+            planned_broadcasts[index].station = station
             
-            self.__gui.main_window.broadcasts_badge()
-            
+            self.__gui.main_window.broadcasts_badge()            
             
         self.__gui.dialog_planning.hide()
 
@@ -61,17 +64,28 @@ class Remove(BaseAction):
             
 class Search(BaseAction):
     def __init__(self, gui):
-        self.update_list = True
+        self.update_list = False
         self.__gui = gui
         
     def do(self, broadcasts, planned_broadcasts):
         for broadcast in broadcasts:
             index = self.__gui.main_window.get_widget('treeview_planning').get_model().get_value(broadcast, 0)
-            title, stamp, station = planned_broadcasts[index]
+            broadcast = planned_broadcasts[index]
                         
             # build string: Titanic_08.12.24_20-15_pro7_
-            string = title.replace(' ', '_') + ' '
-            string += time.strftime("%y.%m.%d_%H-%M", time.localtime(stamp)) + "_"
-            string += station + "_"
+            string = broadcast.title.replace(' ', '_') + ' '
+            string += time.strftime("%y.%m.%d_%H-%M", time.localtime(broadcast.datetime)) + "_"
+            string += broadcast.station + "_"
             
             webbrowser.open("http://www.otr-search.com/?q=%s" % string)
+            
+class RSS(BaseAction):
+    def __init__(self, gui):
+        self.update_list = True
+        self.__gui = gui
+    
+    def do(self, planned_broadcasts, email, rss_hash):
+        url = "http://www.onlinetvrecorder.com/rss/my.php?email=%s&hash=%s" % (email, rss_hash)
+    
+        for broadcast in broadcasts:
+            pass

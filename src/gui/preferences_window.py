@@ -115,7 +115,8 @@ class PreferencesWindow(BaseWindow):
         self.get_widget('entryPassword').set_visibility(False)
             
         self.get_widget('checkCorrect').set_active(self.app.config.get('decode', 'correct'))
-                               
+        self.get_widget('entry_hash').set_text(self.app.config.get('decode', 'hash'))
+        
         # radio buttons on cut tab
         radiobuttons = [ 'radioAsk', 'radioBestCutlist', 'radioChooseCutlist', 'radioManually', 'radioLocalCutlist'] # order is important!
         self.get_widget(radiobuttons[self.app.config.get('cut', 'cut_action')]).set_active(True)
@@ -224,6 +225,9 @@ class PreferencesWindow(BaseWindow):
     
     def on_checkCorrect_toggled(self, widget, data=None):
         self.app.config.set('decode', 'correct', int(widget.get_active()))
+
+    def on_entry_hash_changed(self, widget, data=None):
+        self.app.config.set('decode', 'hash', widget.get_text())
   
     # cut tab
     def on_radioAsk_toggled(self, widget, data=None):

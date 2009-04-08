@@ -92,8 +92,7 @@ class DialogConclusion(BaseWindow):
     def on_button_conclusion_play_cut_clicked(self, widget, data=None):
         file_conclusion = self.file_conclusions[self.conclusion_iter]
     
-        self.app.show_cuts_after_cut(file_conclusion.cut_avi, file_conclusion.cut.cutlist.cuts)
-    
+        self.app.show_cuts_after_cut(file_conclusion.cut_avi, file_conclusion.cut.cutlist)    
         
     def on_radiobuttonRating_toggled(self, widget, rate):
         if widget.get_active() == True:            

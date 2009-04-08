@@ -38,17 +38,17 @@ class DialogPlanning(BaseWindow):
      
         return self.run()
         
-    def run_edit(self, broadcast, stamp, station):
+    def run_edit(self, broadcast):
         self.get_widget('label_headline').set_markup('<b>Sendung bearbeiten:</b>')
            
-        self.get_widget('entry_broadcast').set_text(broadcast)
+        self.get_widget('entry_broadcast').set_text(broadcast.title)
 
-        dt = datetime.datetime.fromtimestamp(stamp)
+        dt = datetime.datetime.fromtimestamp(broadcast.datetime)
         self.get_widget('calendar').select_month(dt.month - 1, dt.year)
         self.get_widget('calendar').select_day(dt.day)
         self.get_widget('entry_time').set_text(dt.strftime('%H:%M'))
 
-        self.get_widget('comboboxentry_station').set_text(station)
+        self.get_widget('comboboxentry_station').set_text(broadcast.station)
            
         return self.run()
     

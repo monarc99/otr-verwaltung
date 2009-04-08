@@ -33,6 +33,7 @@ from configparser import Config
 import fileoperations
 import cutlists as cutlists_management
 from constants import Section, Action
+from planning import Planning
 import otrpath
 
 class App:
@@ -59,17 +60,8 @@ class App:
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
         
-        # compile list of planned items
-        self.planned_broadcasts = []
-        
-        for item in self.config.get('planning', 'planned_items').split(';'):
-            try:
-                values = item.split(',')
-                assert len(values) == 3
-                
-                self.planned_broadcasts += [(values[0], int(values[1]), values[2])]
-            except:
-                continue
+        self.planned_broadcasts = Planning()
+        self.planned_broadcasts.read_config(self.config.get('planning', 'planned_items'))
         
         self.__gui.main_window.broadcasts_badge()                         
         self.__gui.main_window.update_details()                         
@@ -143,7 +135,7 @@ class App:
         text = "Diese Aufnahmen wurden geplant." 
        
         for count, broadcast in enumerate(self.planned_broadcasts):
-            if self.search(broadcast[0]):
+            if self.search(broadcast.title):
                 self.__gui.main_window.append_row_planning(count)
             
         return text
@@ -329,7 +321,7 @@ class App:
         # planning
         items = []
         for count, broadcast in enumerate(self.planned_broadcasts):
-            if self.search(broadcast[0]):
+            if self.search(broadcast.title):
                 items += [count]
 
         count = len(items)
@@ -422,7 +414,10 @@ class App:
             action.do(self.planned_broadcasts)
     
         elif chosen_action == Action.PLAN_EDIT: 
-            action.do(broadcasts[0], self.planned_broadcasts)        
+            action.do(broadcasts[0], self.planned_broadcasts)       
+            
+        elif chosen_action == Action.PLAN_RSS:
+            action.do(self.planned_broadcasts) 
     
         elif chosen_action == Action.ARCHIVE: 
             action.do(filenames, self.config.get('folders', 'archive'))
@@ -502,7 +497,7 @@ class App:
 
         self.__show(cutlist.cuts, avi_filename, edl_subtitles_cb)            
     
-    def show_cuts_after_cut(self, avi_filename, cuts):
+    def show_cuts_after_cut(self, avi_filename, cutlist):
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):                    
             diff = 10
@@ -522,7 +517,13 @@ class App:
                     f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))                      
 
 
-        self.__show(cuts, avi_filename, edl_subtitles_cb)    
+        error = cutlist.read_cuts()
+                
+        if error:
+            self.__gui.message_error_box(error)
+            return           
+
+        self.__show(cutlist.cuts, avi_filename, edl_subtitles_cb)
     
     def format_seconds(self, seconds):
         hrs = seconds / 3600       
@@ -543,10 +544,7 @@ class App:
         self.__gui.run()
         
         # write planning to config
-        string = ''
-        for broadcast in self.planned_broadcasts:
-            string += broadcast[0] + ',' + str(broadcast[1]) + ',' + broadcast[2] + ';'
-        self.config.set('planning', 'planned_items', string)               
+        self.config.set('planning', 'planned_items', self.planned_broadcasts.get_config())               
 
              
 app = App()

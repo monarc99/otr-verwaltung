@@ -83,7 +83,8 @@ class MainWindow(BaseWindow):
             ('plan_add', 'film_add.png', "Hinzufügen", Action.PLAN_ADD),
             ('plan_remove', 'film_delete.png', "Löschen", Action.PLAN_REMOVE),
             ('plan_edit', 'film_edit.png', "Bearbeiten", Action.PLAN_EDIT),
-            ('plan_search', 'film_search.png', "Auf Mirror suchen", Action.PLAN_SEARCH)
+            ('plan_search', 'film_search.png', "Auf Mirror suchen", Action.PLAN_SEARCH),
+            ('plan_rss', 'rss_go.png', "Von OTR aktualisieren", Action.PLAN_RSS)
             ]
         
         self.toolbar_buttons = {}
@@ -355,16 +356,16 @@ class MainWindow(BaseWindow):
         return broadcasts
                
     def append_row_planning(self, index):
-        broadcast, stamp, station = self.app.planned_broadcasts[index]
-        datetime = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(stamp))
+        broadcast = self.app.planned_broadcasts[index]
+        datetime = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(broadcast.datetime))
     
         now = time.time()
 
-        if stamp < now: 
+        if broadcast.datetime < now: 
             # everything bold
-            data = [index, "<b>%s</b>" % broadcast, "<b>%s</b>" % datetime, "<b>%s</b>" % station]
+            data = [index, "<b>%s</b>" % broadcast.title, "<b>%s</b>" % datetime, "<b>%s</b>" % broadcast.station]
         else:
-            data = [index, broadcast, datetime, station]
+            data = [index, broadcast.title, datetime, broadcast.station]
               
         iter = self.get_widget('treeview_planning').get_model().append(None, data)
         return iter
@@ -403,9 +404,8 @@ class MainWindow(BaseWindow):
     def broadcasts_badge(self):
         count = 0
         now = time.time()
-        for broadcast in self.app.planned_broadcasts:
-            stamp = broadcast[1]
-            if stamp < now:
+        for broadcast in self.app.planned_broadcasts:           
+            if broadcast.datetime < now:
                 count += 1
     
         if count == 0:
@@ -650,7 +650,7 @@ class MainWindow(BaseWindow):
                 
         def foreach(model, path, iter, data=None):
             index = model.get_value(iter, 0)
-            stamp = self.app.planned_broadcasts[index][1]
+            stamp = self.app.planned_broadcasts[index].datetime
 
             if stamp < now:
                 selection.select_iter(iter)

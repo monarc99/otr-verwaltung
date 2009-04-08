@@ -78,7 +78,8 @@ class Config:
                     'save_email_password':  int(self.__read_value('decode', 'save_email_password', Save_Email_Password.DONT_SAVE)),
                     'email':                self.__read_value('decode', 'email', ''),
                     'password':             self.__read_value('decode', 'password', ''),
-                    'correct':              int(self.__read_value('decode', 'correct', 0))              
+                    'correct':              int(self.__read_value('decode', 'correct', 0)),
+                    'hash':                 self.__read_value('decode', 'hash', '')
                 },
             'cut':
                 {
