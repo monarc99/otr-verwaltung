@@ -189,7 +189,7 @@ class DecodeOrCut(BaseAction):
         
         # retrieve email and password
         # user did not save email and password
-        if self.config.get('save_email_password') == Save_Email_Password.DONT_SAVE:
+        if not self.config.get('save_email_password'):
             # let the user type in his data through a dialog
             response = self.__gui.dialog_email_password.run()
             self.__gui.dialog_email_password.hide() 
