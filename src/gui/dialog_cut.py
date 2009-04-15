@@ -163,7 +163,7 @@ class DialogCut(BaseWindow):
                         
             cutlist.id = cutlist_id
                                     
-            error = cutlist.download(self.app.config.get('cut', 'server'), self.filename)
+            error = cutlist.download(self.app.config.get('server'), self.filename)
 
             if error:
                 self.gui.message_error_box(error)

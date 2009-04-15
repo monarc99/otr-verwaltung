@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed Apr  8 15:16:28 2009 -->
+<!--Generated with glade3 3.4.5 on Tue Apr 14 16:45:06 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="preferences_window">
     <property name="border_width">9</property>
@@ -277,33 +277,9 @@
                   <widget class="GtkTable" id="table3">
                     <property name="visible">True</property>
                     <property name="border_width">8</property>
-                    <property name="n_rows">7</property>
+                    <property name="n_rows">6</property>
                     <property name="n_columns">2</property>
                     <property name="row_spacing">11</property>
-                    <child>
-                      <widget class="GtkEntry" id="entry_hash">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <signal name="changed" handler="on_entry_hash_changed"/>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="label55">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Hash für Aufnahmen:</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">6</property>
-                        <property name="bottom_attach">7</property>
-                      </packing>
-                    </child>
                     <child>
                       <widget class="GtkHBox" id="hbox3">
                         <property name="visible">True</property>
@@ -3121,6 +3097,7 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Auf Update prüfen</property>
                         <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_menu_check_update_activate"/>
                       </widget>
                     </child>
                     <child>

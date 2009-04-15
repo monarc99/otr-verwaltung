@@ -6,6 +6,7 @@ import time
 import webbrowser
 import urllib2
 import xml.dom.minidom
+import hashlib
 
 from baseaction import BaseAction
 
@@ -86,11 +87,11 @@ class RSS(BaseAction):
         self.update_list = True
         self.__gui = gui
     
-    def do(self, planned_broadcasts, email, rss_hash):
+    def do(self, planned_broadcasts, email, password):
         if not email or not rss_hash:
             self.__gui.message_error_box("E-Mail oder Hash sind nicht richtig eingetragen!")
         
-        url = "http://www.onlinetvrecorder.com/rss/my.php?email=%s&hash=%s" % (email, rss_hash)    
+        url = "http://www.onlinetvrecorder.com/rss/my.php?email=%s&hash=%s" % (email, hashlib.md5(password).hexdigest())    
         print url        
         
         rss_file = urllib2.urlopen(url)

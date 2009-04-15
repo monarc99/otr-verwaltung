@@ -1,5 +1,7 @@
 0.6.1:
-    * Bugfix: Geschnittenes Abspielen funktioniert nicht    
+    * Bugfix: Geschnittenes Abspielen funktioniert nicht
+    * Bugfix: Ungeschnittene Dateien konnten in seltenen Fällen gelöscht werden, obwohl nicht geschnitten wurde    
+    * Hohe CPU-Belastung tritt beim Starten eines Prozesses, z.B. beim Schneiden, nicht mehr auf
 
 0.6
     * Bugfix: Bewerten funktioniert wieder korrekt

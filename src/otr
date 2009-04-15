@@ -61,7 +61,7 @@ class App:
         self.show_section(Section.OTRKEY)
         
         self.planned_broadcasts = Planning()
-        self.planned_broadcasts.read_config(self.config.get('planning', 'planned_items'))
+        self.planned_broadcasts.read_config(self.config.get('planned_items'))
         
         self.__gui.main_window.broadcasts_badge()                         
         self.__gui.main_window.update_details()                         
@@ -94,7 +94,7 @@ class App:
         else:
             self.__gui.main_window.show_planning(False)
             
-            if self.config.get('common', 'show_details'):
+            if self.config.get('show_details'):
                 self.__gui.main_window.get_widget('table_details').show()
         
         if section == Section.OTRKEY:
@@ -142,7 +142,7 @@ class App:
              
     def section_otrkey(self):
         text = "Diese Dateien wurden noch nicht dekodiert." 
-        path = self.config.get('folders', 'new_otrkeys')
+        path = self.config.get('folder_new_otrkeys')
         
         if path == "":      
             return text, []
@@ -153,7 +153,7 @@ class App:
          
     def section_avi_uncut(self):
         text = "Diese Dateien wurden noch nicht geschnitten."
-        path = self.config.get('folders', 'uncut_avis')
+        path = self.config.get('folder_uncut_avis')
         
         files = [join(path, f) for f in os.listdir(path) if self.__uncut_video.match(f) and self.search(f)]
             
@@ -161,10 +161,10 @@ class App:
         
     def section_avi_cut(self):
         text = "Diese avi-Dateien sind fertig geschnitten."
-        if self.config.get('common', 'use_archive'):
+        if self.config.get('use_archive'):
             text += " Sie können ins Archiv verschoben werden."
                 
-        path = self.config.get('folders', 'cut_avis')
+        path = self.config.get('folder_cut_avis')
         
         files = []                
         for f in os.listdir(path):
@@ -177,7 +177,7 @@ class App:
         
     def section_trash(self):
         text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
-        path = self.config.get('folders', 'trash')
+        path = self.config.get('folder_trash')
                     
         files = [join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
                 
@@ -186,7 +186,7 @@ class App:
     def section_archive(self):
         text = "Diese Dateien wurden ins Archiv verschoben."
 
-        path = self.config.get('folders', 'archive')
+        path = self.config.get('folder_archive')
         
         self.tree(None, path)        
         
@@ -219,7 +219,7 @@ class App:
     
     def rename_by_schema(self, filename, schema=""):   
         if schema == "":
-            schema = self.config.get('rename', 'schema')        
+            schema = self.config.get('rename_schema')        
         
         if self.__uncut_video.match(filename):           
             
@@ -306,7 +306,7 @@ class App:
          
         # archive 
         files = []       
-        for root, dirs, wfiles in os.walk(self.config.get('folders', 'archive')):
+        for root, dirs, wfiles in os.walk(self.config.get('folder_archive')):
             for f in wfiles:
                 # TODO: match all videos files mp4, usw.
                 if f.endswith('.avi') and self.search(f):
@@ -393,16 +393,16 @@ class App:
             action.do(filenames)
     
         elif chosen_action == Action.RESTORE: 
-            action.do(filenames, self.config.get('folders', 'new_otrkeys'), self.config.get('folders', 'uncut_avis'), self.config.get('folders', 'cut_avis'))
+            action.do(filenames, self.config.get('folder_new_otrkeys'), self.config.get('folder_uncut_avis'), self.config.get('folder_cut_avis'))
     
         elif chosen_action == Action.DELETE:
-            action.do(filenames, self.config.get('folders', 'trash'))
+            action.do(filenames, self.config.get('folder_trash'))
     
         elif chosen_action == Action.PLAY: 
-            action.do(filenames[0], self.config.get('play', 'player'))
+            action.do(filenames[0], self.config.get('player'))
     
         elif chosen_action == Action.CUT_PLAY: 
-            action.do(filenames[0], self.config.get('play', 'mplayer'), self.config.get('folders', 'uncut_avis'), self.config.get('cut', 'server'), self.config.get('cut', 'choose_cutlists_by'), self.config.get('cut', 'delete_cutlists'))            
+            action.do(filenames[0], self.config.get('mplayer'), self.config.get('folder_uncut_avis'), self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('delete_cutlists'))            
     
         elif chosen_action == Action.PLAN_REMOVE: 
             action.do(broadcasts, self.planned_broadcasts) 
@@ -417,14 +417,14 @@ class App:
             action.do(broadcasts[0], self.planned_broadcasts)       
             
         elif chosen_action == Action.PLAN_RSS:
-            action.do(self.planned_broadcasts, self.config.get('decode', 'email'), self.config.get('decode', 'hash')) 
+            action.do(self.planned_broadcasts, self.config.get('email'), self.config.get('password')) 
     
         elif chosen_action == Action.ARCHIVE: 
-            action.do(filenames, self.config.get('folders', 'archive'))
+            action.do(filenames, self.config.get('folder_archive'))
      
         elif chosen_action == Action.NEW_FOLDER:
             if len(filenames) == 0:
-                action.do(self.config.get('folders', 'archive'))
+                action.do(self.config.get('folder_archive'))
             else:
                 action.do(filenames[0])
         
@@ -437,21 +437,22 @@ class App:
             
     
     def __show(self, cuts, avi_filename, edl_subtitles_cb):        
-        f_edl = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl"), "w")
-        f_sub = open(join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub"), "w")    
+        f_edl = open(join(self.config.get('folder_new_otrkeys'), ".tmp.edl"), "w")
+        f_sub = open(join(self.config.get('folder_new_otrkeys'), ".tmp.sub"), "w")    
         
         edl_subtitles_cb(f_edl, f_sub, cuts)        
         
         f_edl.close()
         f_sub.close()
         
-        f_edl = join(self.config.get('folders', 'new_otrkeys'), ".tmp.edl")
-        f_sub = join(self.config.get('folders', 'new_otrkeys'), ".tmp.sub")
+        f_edl = join(self.config.get('folder_new_otrkeys'), ".tmp.edl")
+        f_sub = join(self.config.get('folder_new_otrkeys'), ".tmp.sub")
             
-        p = subprocess.Popen([self.config.get('play', 'mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, avi_filename])
+        p = subprocess.Popen([self.config.get('mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, avi_filename])
        
         # wait
         while p.poll() == None:
+            time.sleep(1)
             while events_pending():
                 main_iteration(False)
                 
@@ -537,14 +538,14 @@ class App:
     def run(self):
         self.__gui.main_window.show()      
 
-        if self.config.get('folders', 'new_otrkeys') == "":      
+        if self.config.get('folder_new_otrkeys') == "":      
             self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
             self.__gui.preferences_window.show()
                
         self.__gui.run()
         
         # write planning to config
-        self.config.set('planning', 'planned_items', self.planned_broadcasts.get_config())               
+        self.config.set('planned_items', self.planned_broadcasts.get_config())               
 
              
 app = App()

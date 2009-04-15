@@ -1,149 +1,100 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os.path import isfile
-import ConfigParser
-import datetime
-import sys
 import time, hashlib
 
-from constants import Save_Email_Password, Cut_action
+from constants import Cut_action
 
 class Config:
-    def __init__(self, config_file):
-        # a new ConfigParser
-        self.__config_parser = ConfigParser.ConfigParser()        
+    def __init__(self, config_file):   
         self.__config_file = config_file
-        self.__config_dic = self.__read()
+        self.__read()
 
-    def save(self):
-        """ Called by app to save the config dictionary.
-            Creates a new config file if it doesn't exist. """
-                                
-        try:
-            f = open(self.__config_file, "w")
-        except IOError, inst:
-            print "Config file couldn't be written: "
-            print "ERROR: ", inst
-            return  
-       
-        # go through dictionary and save everything
-        for section in self.__config_dic:
-            for option in self.__config_dic[section]:
-                self.__save_value(section, option, self.__config_dic[section][option])
-        
-        self.__config_parser.write(f)
-        
-        f.close()
-        
-    def get(self, section, option):
-        """ Sets a configuration options """
-        return self.__config_dic[section][option]
-        
-    def set(self, section, option, value):
-        """ Updates configuration. """
-        self.__config_dic[section][option] = value
+    def get(self, option):
+        """ Sets a configuration option. """       
+        datatype, value = self.__config_dic[option]
 
-    def __read(self):
-        """ read config file, if exists, otherwise, use default values """
-        
-        if isfile(self.__config_file):
-            try:           
-                self.__config_parser.read(self.__config_file)
-            except Exception, inst:
-                print "Config file couldn't be read: "
-                print "ERROR: ", inst
-                print "... will start with default values ..."
-                
-         
-        # create config dictionary to return
-        config_dic = {
-            'common':
-                {
-                    'activate_cut':         int(self.__read_value('common', 'activate_cut', 1)),
-                    'use_archive':          int(self.__read_value('common', 'use_archive', 0)),
-                    'show_details':         int(self.__read_value('common', 'show_details', 0))                
-                },
-            'folders':               
-                {
-                    'new_otrkeys':          self.__read_value('folders', 'new_otrkeys', ''),
-                    'uncut_avis':           self.__read_value('folders', 'uncut_avis', ''),
-                    'cut_avis':             self.__read_value('folders', 'cut_avis', ''),
-                    'trash':                self.__read_value('folders', 'trash', ''),
-                    'archive':              self.__read_value('folders', 'archive', '')
-                },
-            'decode':
-                {
-                    'path':                 self.__read_value('decode', 'path', ''),
-                    'save_email_password':  int(self.__read_value('decode', 'save_email_password', Save_Email_Password.DONT_SAVE)),
-                    'email':                self.__read_value('decode', 'email', ''),
-                    'password':             self.__read_value('decode', 'password', ''),
-                    'correct':              int(self.__read_value('decode', 'correct', 0)),
-                    'hash':                 self.__read_value('decode', 'hash', '')
-                },
-            'cut':
-                {
-                    'avi':                  self.__read_value('cut', 'avi', ''),
-                    'hq':                   self.__read_value('cut', 'hq', ''),
-                    'mp4':                  self.__read_value('cut', 'mp4', ''),
-                    'man_avi':              self.__read_value('cut', 'man_avi', ''),
-                    'man_hq':               self.__read_value('cut', 'man_hq', ''),
-                    'man_mp4':              self.__read_value('cut', 'man_mp4', ''),
-                    'server':               self.__read_value('cut', 'server', 'http://cutlist.at/'),
-                    'cut_action':           int(self.__read_value('cut', 'cut_action', Cut_action.ASK)),
-                    'delete_cutlists':      int(self.__read_value('cut', 'delete_cutlists', 1)),
-                    'smart':                int(self.__read_value('cut', 'smart', 1)),
-                    'choose_cutlists_by':   int(self.__read_value('cut', 'choose_cutlists_by', 0)), # 0=size, 1=filename
-                    'cutlist_username':     self.__read_value('cut', 'cutlist_username', ''),
-                    'cutlist_hash':         self.__read_value('cut', 'cutlist_hash', self.create_hash())
-                },
-            'play':
-                {
-                    'player':               self.__read_value('play', 'player', ''),                    
-                    'mplayer':              self.__read_value('play', 'mplayer', 'mplayer')
-                },
-            'planning':
-                {
-                    'planned_items':        self.__read_value('planning', 'planned_items', '')
-                },
-            'rename':
-                {
-                    'rename_cut':           int(self.__read_value('rename', 'rename_cut', 0)),
-                    'schema':               self.__read_value('rename', 'schema', '{titel} vom {tag}. {MONAT} {jahr}, {stunde}:{minute} ({sender})'),            
-                }
-        }
-               
-        if config_dic['folders']['new_otrkeys'] != '' and config_dic['folders']['uncut_avis'] == '':
-            config_dic['folders']['uncut_avis'] = config_dic['folders']['new_otrkeys']
-        
-        if config_dic['folders']['new_otrkeys'] != '' and config_dic['folders']['cut_avis'] == '':
-            config_dic['folders']['cut_avis'] = config_dic['folders']['new_otrkeys']
-               
-        return config_dic
-      
-    def create_hash(self):
-        return hashlib.md5(str(time.time())).hexdigest()[0:20]
-                
-    def __read_value(self, section, option, default):
-        """ Reads values from the ConfigParser object. If the
-            file doesn't exist or is corrupt, use the default
-            value """        
-        try:
-            value = self.__config_parser.get(section, option)
-        except ConfigParser.NoSectionError:
-            value = default
-        except ConfigParser.NoOptionError:
-            value = default
+        print "get config option %s: %s" % (option, value)
         
         return value
-    
-    def __save_value(self, section, option, value):
-        """ Saves values to ConfigParser.
-            Creates sections and options if they don't exist. """
+        
+    def set(self, option, value):
+        """ Sets a configuration option. """
+        datatype, old_value = self.__config_dic[option]
+        self.__config_dic[option] = datatype, value
+        
+        print "set config option %s to %s" % (option, value)
+
+    def save(self):
+        """ Saves configuration to disk. """
+                                
         try:
-            self.__config_parser.set(section, option, value)
-        except ConfigParser.NoSectionError:
-            # if the section doesn't exist, create it and 
-            # call the method again
-            self.__config_parser.add_section(section)
-            self.__save_value(section, option, value)
+            config = open(self.__config_file, "w")
+        except IOError, message:
+            print "Config file couldn't be written: ", message
+            return
+       
+        # go through dictionary and save everything
+        for key, (datatype, value) in self.__config_dic.iteritems():
+            if datatype == bool:
+                value = int(value)                
+            
+            config.write('%s=%s\n' % (key, str(value)))
+               
+        config.close()
+        
+    def __read(self):
+        """ Reads an existing configuration file. """
+                
+        self.__config_dic = {
+            'use_archive':          (bool, False),
+            'show_details':         (bool, False),
+            'folder_new_otrkeys':   (str, ''),
+            'folder_uncut_avis':    (str, ''),
+            'folder_cut_avis':      (str, ''),
+            'folder_trash':         (str, ''),
+            'folder_archive':       (str, ''),
+            'decoder':              (str, ''),
+            'save_email_password':  (bool, False),
+            'email':                (str, ''),
+            'password':             (str, ''),
+            'verify_decoded':       (bool, False),          
+            'cut_avis_by':          (str, ''),
+            'cut_hqs_by':           (str, ''),
+            'cut_mp4s_by':          (str, ''),
+            'cut_avis_man_by':      (str, ''),
+            'cut_hqs_man_by':       (str, ''),
+            'cut_mp4s_man_by':      (str, ''),
+            'server':               (str, 'http://cutlist.at/'),
+            'cut_action':           (int, Cut_action.ASK),
+            'delete_cutlists':      (bool, True),
+            'smart':                (bool, True),
+            'choose_cutlists_by':   (int, 0), # 0 = size, 1=name
+            'cutlist_username':     (str, ''),
+            'cutlist_hash':         (str, hashlib.md5(str(time.time())).hexdigest()[0:20]),
+            'player':               (str, ''),
+            'mplayer':              (str, ''),
+            'planned_items':        (str, ''),
+            'rename_cut':           (bool, False),
+            'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}:{minute} ({sender})')
+        }
+        
+        try:           
+            config = open(self.__config_file, 'r')
+        except IOError, message:
+            print "Config file couldn't be read: ", message
+            
+        # read file
+        for line in config:
+            if '=' in line:
+                key, value = line.split('=', 1)
+                key, value = key.strip(), value.strip()
+                
+                if key in self.__config_dic.keys():
+                    datatype = self.__config_dic[key][0]
+                    
+                    #print "%5s: %15s=%15s" % (datatype, key.strip(), value)
+                    if datatype == bool:
+                        value = int(value)                    
+                    
+                    self.__config_dic[key.strip()] = datatype, datatype(value)

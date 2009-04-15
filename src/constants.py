@@ -35,10 +35,6 @@ class Cut_action:
     MANUALLY        = 3
     LOCAL_CUTLIST   = 4
 
-class Save_Email_Password:
-    DONT_SAVE   = 0
-    SAVE        = 1
-
 class Status:
     OK          = 0
     ERROR       = 1

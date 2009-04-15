@@ -103,7 +103,7 @@ class MainWindow(BaseWindow):
              
              
         self.sets_of_toolbars = {
-            Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search', 'plan_rss' ],
+            Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],# 'plan_rss' ],
             Section.OTRKEY :    [ 'decodeandcut', 'decode', 'delete' ],
             Section.AVI_UNCUT:  [ 'cut', 'delete', 'archive', 'play', 'cut_play' ],
             Section.AVI_CUT:    [ 'archive', 'delete', 'cut', 'play', 'rename' ],
@@ -196,8 +196,8 @@ class MainWindow(BaseWindow):
 
     def __setup_widgets(self):
         # details
-        self.get_widget('table_details').props.visible = self.app.config.get('common', 'show_details')
-        self.get_widget('menuViewDetails').set_active(self.app.config.get('common', 'show_details'))
+        self.get_widget('table_details').props.visible = self.app.config.get('show_details')
+        self.get_widget('menuViewDetails').set_active(self.app.config.get('show_details'))
 
         self.get_widget('image_status').clear()
         
@@ -434,13 +434,13 @@ class MainWindow(BaseWindow):
         GeneratorTask(wait, None, completed).start()         
         
     def update_details(self):
-        if not self.app.config.get('common', 'show_details'):
+        if not self.app.config.get('show_details'):
             return
         
         if self.app.section == Section.PLANNING:
             return
 
-        mplayer = self.app.config.get('play', 'mplayer')
+        mplayer = self.app.config.get('mplayer')
 
         if not mplayer:
             self.get_widget('label_filetype').set_text("Der MPlayer ist nicht installiert!")
@@ -489,7 +489,7 @@ class MainWindow(BaseWindow):
               
                 process = subprocess.Popen([mplayer, "-identify", "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)
                       
-                while process.poll() == None:
+                while process.poll() == None:               
                     line = process.stdout.readline().strip()
 
                     for value, widget, callback in values:
@@ -517,7 +517,7 @@ class MainWindow(BaseWindow):
     def on_menuViewDetails_toggled(self, widget, data=None):
         value = widget.get_active()
         
-        self.app.config.set('common', 'show_details', int(value))        
+        self.app.config.set('show_details', value)        
         
         self.get_widget('table_details').props.visible = value
                         
