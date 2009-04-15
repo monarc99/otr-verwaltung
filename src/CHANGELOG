@@ -1,3 +1,6 @@
+0.6.2:
+    * Bugfix: Sortieren bei den geplanten Sendungen funktionierte nicht
+
 0.6.1:
     * Bugfix: Geschnittenes Abspielen funktionierte nicht
     * Bugfix: Ungeschnittene Dateien konnten in seltenen Fällen gelöscht werden, obwohl nicht geschnitten wurde    

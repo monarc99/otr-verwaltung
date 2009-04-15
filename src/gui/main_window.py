@@ -372,8 +372,8 @@ class MainWindow(BaseWindow):
 
     def tv_planning_sort(self, model, iter1, iter2, data):
         # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row              
-        time1 = self.app.planned_broadcasts[model.get_value(iter1, 0)][1]
-        time2 = self.app.planned_broadcasts[model.get_value(iter2, 0)][1]
+        time1 = self.app.planned_broadcasts[model.get_value(iter1, 0)].datetime
+        time2 = self.app.planned_broadcasts[model.get_value(iter2, 0)].datetime
 
         if time1 > time2:
             return 1
