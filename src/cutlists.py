@@ -205,7 +205,7 @@ class Cutlist:
 #
 #
 
-def download_cutlists(filename, server, choose_cutlists_by, error_cb=None, cutlist_found_cb=None):    
+def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, error_cb=None, cutlist_found_cb=None):    
     """ Downloads all cutlists for the given file. 
             filename            - movie filename
             server              - cutlist server
@@ -219,9 +219,17 @@ def download_cutlists(filename, server, choose_cutlists_by, error_cb=None, cutli
     if choose_cutlists_by == 0: # by size
         size = fileoperations.get_size(filename)
         url = "%sgetxml.php?ofsb=%s" % (server, str(size))
+    
     else: # by name
-        url = "%sgetxml.php?name=%s" % (server, os.path.basename(filename))
-              
+        root, extension = os.path.splitext(os.path.basename(filename))
+       
+        if cutlist_mp4_as_hq and extension == '.mp4':
+            root += ".HQ"
+    
+        url = "%sgetxml.php?name=%s" % (server, root)
+
+    print url
+                  
     try:
         handle = urllib.urlopen(url)
     except IOError:  

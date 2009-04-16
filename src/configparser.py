@@ -76,7 +76,8 @@ class Config:
             'mplayer':              (str, ''),
             'planned_items':        (str, ''),
             'rename_cut':           (bool, False),
-            'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}:{minute} ({sender})')
+            'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}:{minute} ({sender})'),
+            'cutlist_mp4_as_hq':    (bool, False) # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
         }
         
         try:           

@@ -1,5 +1,6 @@
 0.6.2:
     * Bugfix: Sortieren bei den geplanten Sendungen funktionierte nicht
+    * Bugfix: Geschnittenes Abspielen funktioniert nicht (Toolbareintrag)
 
 0.6.1:
     * Bugfix: Geschnittenes Abspielen funktionierte nicht

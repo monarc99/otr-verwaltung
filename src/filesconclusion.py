@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from constants import Action
+import os.path
 
 from cutlists import Cutlist
 
@@ -32,7 +33,10 @@ class FileConclusion:
             self.decode = Decode()
         
         self.uncut_avi = uncut_avi
-        
+        self.extension = os.path.splitext(uncut_avi)[1]
+
+        print "Adding: ", self.extension
+
         if action == Action.CUT or action == Action.DECODEANDCUT:
             self.cut_avi = ""
             self.cut = Cut() 

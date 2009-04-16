@@ -65,17 +65,22 @@ class PreferencesWindow(BaseWindow):
             virtualdub = [r"C:\Programme\VirtualDub\vdub.exe"]
             virtualdub_man = [r"C:\Programme\VirtualDub\VirtualDub.exe"]
 
-        # avi + hq        
+        # avi + hq + mp4
         self.__set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)
         self.get_widget('comboboxentry-avi').set_text(self.app.config.get('cut_avis_by'))
         self.__set_model_from_list(self.get_widget('combobox_hq'), virtualdub)
         self.get_widget('comboboxentry-hq').set_text(self.app.config.get('cut_hqs_by'))
+        self.__set_model_from_list(self.get_widget('combobox_mp4'), avidemux)
+        self.get_widget('comboboxentry-mp4').set_text(self.app.config.get('cut_mp4s_by'))
     
-        # man_avi + man_avidemux
+        # manually
         self.__set_model_from_list(self.get_widget('combobox_man_avi'), avidemux_man + virtualdub_man)
         self.get_widget('comboboxentry-man_avi').set_text(self.app.config.get('cut_avis_man_by'))
         self.__set_model_from_list(self.get_widget('combobox_man_hq'), virtualdub_man)
         self.get_widget('comboboxentry-man_hq').set_text(self.app.config.get('cut_hqs_man_by'))
+        self.__set_model_from_list(self.get_widget('combobox_man_mp4'), avidemux_man)
+        self.get_widget('comboboxentry-man_mp4').set_text(self.app.config.get('cut_mp4s_man_by'))
+      
                 
         # fill combobox servers
         self.__set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
@@ -245,17 +250,25 @@ class PreferencesWindow(BaseWindow):
         if widget.get_active() == True:
             self.app.config.set('cut_action', Cut_action.MANUALLY)
 
+
     def on_comboboxentry_avi_changed(self, widget, data=None):
         self.app.config.set('cut_avis_by', widget.get_text())
 
     def on_comboboxentry_hq_changed(self, widget, data=None):
         self.app.config.set('cut_hqs_by', widget.get_text())
         
+    def on_comboboxentry_mp4_changed(self, widget, data=None):
+        self.app.config.set('cut_mp4s_by', widget.get_text())        
+        
     def on_comboboxentry_man_avi_changed(self, widget, data=None):
         self.app.config.set('cut_avis_man_by', widget.get_text())
 
     def on_comboboxentry_man_hq_changed(self, widget, data=None):
         self.app.config.set('cut_hqs_man_by', widget.get_text())
+        
+    def on_comboboxentry_man_mp4_changed(self, widget, data=None):
+        self.app.config.set('cut_mp4s_man_by', widget.get_text())
+
 
     def on_check_smart_toggled(self, widget, data=None):
         self.app.config.set('smart', int(widget.get_active()))

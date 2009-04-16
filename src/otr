@@ -50,7 +50,7 @@ class App:
             
         # regex
         self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
-        self.__cut_video = re.compile('.*(avi|mp4)$') 
+        self.__cut_video = re.compile('.*(avi|mp4)$')  # TODO: more formats
     
         self.section = Section.OTRKEY
     
@@ -241,11 +241,10 @@ class App:
             format = parts[0]
             mp4 = False
             
-            if 'HQ' in format:
-                format = 'HQ'                
-            elif 'mp4' in format:
+            if 'mp4' in format:
                 format = 'mp4'
-                mp4 = True
+            if 'HQ' in format:
+                format = 'HQ'            
             else:
                 format = 'avi'
 
@@ -265,12 +264,7 @@ class App:
             }
              
             for token, value in values.iteritems():
-                schema = schema.replace('{%s}' % token, value)
-                 
-            if mp4 == True:
-                schema += ".mp4"
-            else:
-                schema += ".avi"                   
+                schema = schema.replace('{%s}' % token, value)                            
                 
             return schema
         else:         
@@ -402,8 +396,8 @@ class App:
             action.do(filenames[0], self.config.get('player'))
     
         elif chosen_action == Action.CUT_PLAY: 
-            action.do(filenames[0], self.config.get('mplayer'), self.config.get('folder_uncut_avis'), self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('delete_cutlists'))            
-    
+            action.do(filenames[0], self.config.get('mplayer'), self.config.get('folder_uncut_avis'), self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), self.config.get('delete_cutlists'))            
+
         elif chosen_action == Action.PLAN_REMOVE: 
             action.do(broadcasts, self.planned_broadcasts) 
     
@@ -487,8 +481,7 @@ class App:
                     f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
                     f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
                 
-            f_edl.write("50000 0")
-         
+            f_edl.write("50000 0")         
          
         error = cutlist.read_cuts()
                 
