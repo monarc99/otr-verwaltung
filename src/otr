@@ -18,8 +18,8 @@ except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
 
-
 if exists(join(sys.path[0], 'otrpath.py')):    
+    # if not installed, use local config file
     f = open(join(sys.path[0], 'conf'), 'a')
     f.close()
 else:

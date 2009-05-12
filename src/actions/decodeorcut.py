@@ -702,7 +702,7 @@ class DecodeOrCut(BaseAction):
             'app.audio.normalizeValue=0;\n',
             'app.audio.delay=0;\n',
             'app.audio.mixer("NONE");\n',
-            'app.audio.scanVBR();\n',
+            'app.audio.scanVBR();\n', # TODO: mp4!!
             'app.setContainer("AVI");\n',
             'setSuccess(app.save("%s"));\n' % cut_avi
             ])
