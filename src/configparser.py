@@ -84,6 +84,7 @@ class Config:
             config = open(self.__config_file, 'r')
         except IOError, message:
             print "Config file couldn't be read: ", message            
+            return
             
         # read file
         for line in config:
