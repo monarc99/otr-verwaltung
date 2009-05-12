@@ -1,4 +1,7 @@
 0.6.2:
+    * Bugfix: In bestimmten Fällen wurden geschnittene Dateien nicht umbenannt.
+    * Bugfix: Es wurde immer mit der selben Einstellung geschnitten
+    * Bugfix: Programm ließ sich nicht starten
     * Bugfix: Sortieren bei den geplanten Sendungen funktionierte nicht
     * Bugfix: Geschnittenes Abspielen funktioniert nicht (Toolbareintrag)
 

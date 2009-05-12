@@ -22,13 +22,15 @@ def error(message_text):
     dialog.destroy()
                     
 def remove_file(filename):
+    print "[Fileoperations] Remove ", filename
     try:
         os.remove(filename)
     except Exception, e:
         error("Fehler beim Löschen von %s (%s)." % (filename, e))
     
 def rename_file(old_filename, new_filename):
-
+    print "[Fileoperations] Rename %s to %s" % (old_filename, new_filename)
+    
     if old_filename == new_filename:
         error("Umbenennen: Die beiden Dateinamen stimmen überein! (%s)" % old_filename)
         return
@@ -45,6 +47,7 @@ def rename_file(old_filename, new_filename):
         error("Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))
 
 def move_file(filename, target):
+    print "[Fileoperations] Move %s to %s" % (filename, target)
     try:
         os.rename(filename, join(target, basename(filename)))
     except OSError, e:

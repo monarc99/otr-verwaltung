@@ -66,10 +66,11 @@ class DecodeOrCut(BaseAction):
         self.__gui.main_window.block_gui(False)
 
         # no more need for tasks view
-        self.__gui.main_window.get_widget('eventbox_tasks').hide()
+        self.__gui.main_window.get_widget('eventbox_tasks').hide()            
+ 
                     
         # show conclusion
-        dialog = self.__gui.dialog_conclusion.build(file_conclusions, action, rename_by_schema, self.config.get('rename_cut'))
+        dialog = self.__gui.dialog_conclusion.build(file_conclusions, action, rename_by_schema)
         dialog.run()
         dialog.hide()         
         
@@ -132,7 +133,7 @@ class DecodeOrCut(BaseAction):
                     continue
                     
                 elif 1 == rename: # otr rename                               
-                    new_name = rename_by_schema(basename(file_conclusion.uncut_avi))
+                    new_name = rename_by_schema(basename(file_conclusion.uncut_avi)) + file_conclusion.extension
             
                 elif 2 == rename: # filename rename
                     new_name = file_conclusion.cut.cutlist.filename + file_conclusion.extension
@@ -296,7 +297,9 @@ class DecodeOrCut(BaseAction):
     def cut(self, file_conclusions, action, cut_action=None):                      
         # now this method may not return "False"
         self.__gui.main_window.get_widget('eventbox_tasks').show()
-        self.__gui.main_window.block_gui(True)  
+        self.__gui.main_window.block_gui(True)          
+      
+        default_cut_action = cut_action
         
         for count, file_conclusion in enumerate(file_conclusions):
             self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
@@ -309,8 +312,10 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.message = "Datei wurde nicht dekodiert."
                     continue
 
-            # how should the file be cut?
-            if not cut_action:
+            # how should the file be cut?            
+            if default_cut_action:
+                cut_action = default_cut_action
+            else:
                 cut_action = self.config.get('cut_action')
                 
             cutlists = []
@@ -441,7 +446,10 @@ class DecodeOrCut(BaseAction):
                 file_conclusion.cut.message = error    
             else:
                 file_conclusion.cut.status = Status.OK
-                file_conclusion.cut_avi = cut_avi                    
+                file_conclusion.cut_avi = cut_avi               
+
+                if self.config.get('rename_cut'):
+                    file_conclusion.cut.rename = 1
                                                         
         # after iterating over all items:
         return True

@@ -38,13 +38,12 @@ class DialogConclusion(BaseWindow):
     ### Convenience
     ###        
     
-    def build(self, file_conclusions, action, rename_by_schema, use_rename_by_schema):
+    def build(self, file_conclusions, action, rename_by_schema):
         dialog = self.get_window()
         dialog.show_all()
                    
         self.action = action
         self.rename_by_schema = rename_by_schema
-        self.use_rename_by_schema = use_rename_by_schema
 
         # show status/rating for decode/cut?
         if self.action == Action.DECODE:
@@ -99,7 +98,7 @@ class DialogConclusion(BaseWindow):
             self.file_conclusions[self.conclusion_iter].cut.my_rating = rate 
     
     def on_check_delete_uncut_toggled(self, widget, data=None):
-        print "set to: ", widget.get_active()
+        print "[Conclusion] Set cut.delete_uncut to: ", widget.get_active()
         self.file_conclusions[self.conclusion_iter].cut.delete_uncut = widget.get_active()
        
     def on_checkbuttonRate_toggled(self, widget, data=None):
@@ -115,14 +114,14 @@ class DialogConclusion(BaseWindow):
     def on_radio_rename_toggled(self, widget, radio_count):   
         if widget.get_active():
             self.file_conclusions[self.conclusion_iter].cut.rename = radio_count       
-            print self.file_conclusions[self.conclusion_iter].cut.rename
+            print "[Conclusion] Set cut.rename to ", self.file_conclusions[self.conclusion_iter].cut.rename
         
     #
     # Create Cutlist
     #
 
     def on_check_create_cutlist_toggled(self, widget, data=None):       
-        print "set create_cutlist to ", widget.get_active()
+        print "[Conclusion] Set cut.create_cutlist to ", widget.get_active()
     
         self.file_conclusions[self.conclusion_iter].cut.create_cutlist = widget.get_active()
 
@@ -291,9 +290,6 @@ class DialogConclusion(BaseWindow):
                         if rename != 0:       
                             print self.rename_radio_buttons[rename]         
                             self.get_widget(self.rename_radio_buttons[rename]).set_active(True)
-                        elif self.use_rename_by_schema:
-                            self.get_widget('radio_otr_rename').set_active(True)                          
-                        
                             
                         self.__set_rename('otr_rename', self.rename_by_schema(basename(file_conclusion.uncut_avi)))
                         self.__set_rename('filename_rename', file_conclusion.cut.cutlist.filename)
