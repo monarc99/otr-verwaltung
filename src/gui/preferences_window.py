@@ -36,34 +36,22 @@ class PreferencesWindow(BaseWindow):
             self.get_widget(label).modify_font(pango.FontDescription("9"))            
                          
         # fill combobox of player
-        if os.name == "posix":
-            players = ["vlc", "totem", "mplayer"]
-        else:
-            players = [r"X:\Pfad\zu\vlc.exe", r"X:\Pfad\zu\wmp.exe"]
+        players = ["vlc", "totem", "mplayer"]
         
         self.__set_model_from_list(self.get_widget('comboboxPlayer'), players)
         self.get_widget('comboboxentry-player').set_text(self.app.config.get('player'))
         
         # fill combobox of mplayer
-        if os.name == "posix":
-            mplayers = ["mplayer"]
-        else:
-            mplayers = [r"X:\Pfad\zu\mplayer.exe"]
+        mplayers = ["mplayer"]
 
         self.__set_model_from_list(self.get_widget('comboboxMPlayer'), mplayers)
         self.get_widget('comboboxentry-mplayer').set_text(self.app.config.get('mplayer'))
 
         # fill combobox of avi, hq, mp4
-        if os.name == "posix":
-            avidemux = ["avidemux", "avidemux2_cli"]
-            avidemux_man = ["avidemux"]
-            virtualdub = [r"/pfad/zu/vdub.exe"]
-            virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
-        else:
-            avidemux = [r"C:\Programme\Avidemux\avidemux.exe"]
-            avidemux_man = [r"C:\Programme\Avidemux\avidemux.exe"]
-            virtualdub = [r"C:\Programme\VirtualDub\vdub.exe"]
-            virtualdub_man = [r"C:\Programme\VirtualDub\VirtualDub.exe"]
+        avidemux = ["avidemux", "avidemux2_cli"]
+        avidemux_man = ["avidemux"]
+        virtualdub = [r"/pfad/zu/vdub.exe"]
+        virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
 
         # avi + hq + mp4
         self.__set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)

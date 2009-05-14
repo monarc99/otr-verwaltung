@@ -12,8 +12,7 @@ try:
     from gtk import events_pending, main_iteration
     from gtk import gdk
     import gobject
-    if os.name == "posix":
-        gdk.threads_init()    
+    gdk.threads_init()    
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
