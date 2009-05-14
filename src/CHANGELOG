@@ -1,3 +1,6 @@
+0.6.3:
+    * Bugfix: Weiteres Problem beim Umbenennen
+
 0.6.2, 12. Mai:
     * Bugfix: In bestimmten Fällen wurden geschnittene Dateien nicht umbenannt.
     * Bugfix: Es wurde immer mit der selben Einstellung geschnitten

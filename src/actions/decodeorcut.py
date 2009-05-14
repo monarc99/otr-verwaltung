@@ -133,16 +133,16 @@ class DecodeOrCut(BaseAction):
                     continue
                     
                 elif 1 == rename: # otr rename                               
-                    new_name = rename_by_schema(basename(file_conclusion.uncut_avi)) + file_conclusion.extension
+                    new_name = rename_by_schema(basename(file_conclusion.uncut_avi)) + file_conclusion.get_extension()
             
                 elif 2 == rename: # filename rename
-                    new_name = file_conclusion.cut.cutlist.filename + file_conclusion.extension
+                    new_name = file_conclusion.cut.cutlist.filename + file_conclusion.get_extension()
                     
                 elif 3 == rename: # filename_original rename
-                    new_name = file_conclusion.cut.cutlist.filename_original + file_conclusion.extension
+                    new_name = file_conclusion.cut.cutlist.filename_original + file_conclusion.get_extension()
                     
                 elif 4 == rename: # autoname rename
-                    new_name = file_conclusion.cut.cutlist.autoname + file_conclusion.extension
+                    new_name = file_conclusion.cut.cutlist.autoname + file_conclusion.get_extension()
             
                 new_filename = join(self.config.get('folder_cut_avis'), new_name)        
                 fileoperations.rename_file(file_conclusion.cut_avi, new_filename)                

@@ -14,7 +14,7 @@ class Config:
         """ Sets a configuration option. """       
         datatype, value = self.__config_dic[option]
 
-        print "get config option %s: %s" % (option, value)
+        print "[Config] Get config option %s: %s" % (option, value)
         
         return value
         
@@ -23,7 +23,7 @@ class Config:
         datatype, old_value = self.__config_dic[option]
         self.__config_dic[option] = datatype, value
         
-        print "set config option %s to %s" % (option, value)
+        print "[Config] Set config option %s to %s" % (option, value)
 
     def save(self):
         """ Saves configuration to disk. """
