@@ -1,5 +1,6 @@
 0.6.3:
     * Bugfix: Weiteres Problem beim Umbenennen
+    * Es werden mehr Video-Formate angezeigt und beim Suchen etc. unterstützt
 
 0.6.2, 12. Mai:
     * Bugfix: In bestimmten Fällen wurden geschnittene Dateien nicht umbenannt.

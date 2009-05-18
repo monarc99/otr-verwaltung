@@ -48,13 +48,15 @@ class App:
         self.locked = False
             
         # regex
-        self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
-        self.__cut_video = re.compile('.*(avi|mp4)$')  # TODO: more formats
+        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
+        self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
     
         self.section = Section.OTRKEY
     
         # load gui
         self.__gui = Gui(self)
+        self.config.read()
+        self.__gui.preferences_window.update_config_values()
     
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
@@ -99,11 +101,11 @@ class App:
         if section == Section.OTRKEY:
             text, files = self.section_otrkey()
         
-        elif section == Section.AVI_UNCUT:
-            text, files = self.section_avi_uncut()   
+        elif section == Section.VIDEO_UNCUT:
+            text, files = self.section_video_uncut()   
 
-        elif section == Section.AVI_CUT:
-            text, files = self.section_avi_cut()   
+        elif section == Section.VIDEO_CUT:
+            text, files = self.section_video_cut()   
 
         elif section == Section.TRASH:
             text, files = self.section_trash()   
@@ -150,35 +152,33 @@ class App:
             
         return (text, files)
          
-    def section_avi_uncut(self):
+    def section_video_uncut(self):
         text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config.get('folder_uncut_avis')
         
-        files = [join(path, f) for f in os.listdir(path) if self.__uncut_video.match(f) and self.search(f)]
+        files = [join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search(f)]
             
         return (text, files)
         
-    def section_avi_cut(self):
-        text = "Diese avi-Dateien sind fertig geschnitten."
-        if self.config.get('use_archive'):
-            text += " Sie können ins Archiv verschoben werden."
+    def section_video_cut(self):
+        text = "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."
                 
         path = self.config.get('folder_cut_avis')
         
         files = []                
         for f in os.listdir(path):
-            if not self.__uncut_video.match(f):
-                if self.__cut_video.match(f):
+            if not self.uncut_video.match(f):
+                if self.cut_video.match(f):
                     if self.search(f):
                         files += [join(path, f)]
         
         return (text, files)
         
     def section_trash(self):
-        text = "Diese otrkey- und avi-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
+        text = "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path = self.config.get('folder_trash')
                     
-        files = [join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or f.endswith('.avi')) and self.search(f)]
+        files = [join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or self.cut_video.match(f)) and self.search(f)]
                 
         return (text, files)
 
@@ -208,7 +208,7 @@ class App:
                 iter = self.append_row_treeview_files(parent, full_path)
                 self.tree(iter)
             else:
-                if file.endswith('.avi'):
+                if self.cut_video.match(file):
                     if self.search(file):
                         self.append_row_treeview_files(parent, full_path)
 
@@ -220,7 +220,7 @@ class App:
         if schema == "":
             schema = self.config.get('rename_schema')        
         
-        if self.__uncut_video.match(filename):           
+        if self.uncut_video.match(filename):           
             
             parts = filename.split('_')
             parts.reverse()
@@ -286,8 +286,8 @@ class App:
         counts = {}
 
         for method, section in [(self.section_otrkey, Section.OTRKEY),
-                                (self.section_avi_uncut, Section.AVI_UNCUT),
-                                (self.section_avi_cut, Section.AVI_CUT),
+                                (self.section_video_uncut, Section.VIDEO_UNCUT),
+                                (self.section_video_cut, Section.VIDEO_CUT),
                                 (self.section_trash, Section.TRASH)]:
             files = []
             text, items = method()   
@@ -300,9 +300,8 @@ class App:
         # archive 
         files = []       
         for root, dirs, wfiles in os.walk(self.config.get('folder_archive')):
-            for f in wfiles:
-                # TODO: match all videos files mp4, usw.
-                if f.endswith('.avi') and self.search(f):
+            for f in wfiles:                
+                if self.cut_video.match(f) and self.search(f):
                     files += [join(root, f)]
 
         count = len(files)
@@ -386,7 +385,7 @@ class App:
             action.do(filenames)
     
         elif chosen_action == Action.RESTORE: 
-            action.do(filenames, self.config.get('folder_new_otrkeys'), self.config.get('folder_uncut_avis'), self.config.get('folder_cut_avis'))
+            action.do(filenames, self.config.get('folder_new_otrkeys'), self.config.get('folder_uncut_avis'), self.config.get('folder_cut_avis'), self.uncut_video)
     
         elif chosen_action == Action.DELETE:
             action.do(filenames, self.config.get('folder_trash'))
@@ -429,7 +428,7 @@ class App:
             self.show_section(self.section)
             
     
-    def __show(self, cuts, avi_filename, edl_subtitles_cb):        
+    def __show(self, cuts, video_filename, edl_subtitles_cb):        
         f_edl = open(join(self.config.get('folder_new_otrkeys'), ".tmp.edl"), "w")
         f_sub = open(join(self.config.get('folder_new_otrkeys'), ".tmp.sub"), "w")    
         
@@ -441,7 +440,7 @@ class App:
         f_edl = join(self.config.get('folder_new_otrkeys'), ".tmp.edl")
         f_sub = join(self.config.get('folder_new_otrkeys'), ".tmp.sub")
             
-        p = subprocess.Popen([self.config.get('mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, avi_filename])
+        p = subprocess.Popen([self.config.get('mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
        
         # wait
         while p.poll() == None:
@@ -452,7 +451,7 @@ class App:
         fileoperations.remove_file(f_edl)
         fileoperations.remove_file(f_sub)
         
-    def show_cuts(self, avi_filename, cutlist):       
+    def show_cuts(self, video_filename, cutlist):       
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):            
             diff = 10
@@ -488,9 +487,9 @@ class App:
             self.__gui.message_error_box(error)
             return           
 
-        self.__show(cutlist.cuts, avi_filename, edl_subtitles_cb)            
+        self.__show(cutlist.cuts, video_filename, edl_subtitles_cb)            
     
-    def show_cuts_after_cut(self, avi_filename, cutlist):
+    def show_cuts_after_cut(self, video_filename, cutlist):
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):                    
             diff = 10
@@ -516,7 +515,7 @@ class App:
             self.__gui.message_error_box(error)
             return           
 
-        self.__show(cutlist.cuts, avi_filename, edl_subtitles_cb)
+        self.__show(cutlist.cuts, video_filename, edl_subtitles_cb)
     
     def format_seconds(self, seconds):
         hrs = seconds / 3600       

@@ -5,17 +5,16 @@ import sys
 import os
 
 import gtk
-
    
 class BaseWindow:
     
-    def __init__(self, builder_filename, name, parent=None): 
+    def __init__(self, name, parent=None): 
         """ Implements a gtk.Window/gtk.Dialog built by a gtk.Builder.
               builder_filename - 
               name - name of window, name of builder file
               parent (optional) - a parent window class """
                
-        filename = os.path.join(sys.path[0], os.path.join("gui", builder_filename))
+        filename = os.path.join(sys.path[0], os.path.join("gui", name + ".glade"))
         self.__builder = gtk.Builder()
         self.__builder.add_from_file(filename)
                           
@@ -53,5 +52,4 @@ class BaseWindow:
         if type(self.__window) == gtk.Dialog:
             return self.__window.run()
         else:
-            raise Exception, "Cannot call run() on %s. \
-You have to use a gtk.Dialog." % type(self.__window)
+            raise Exception, "Cannot call run() on %s. You have to use a gtk.Dialog." % type(self.__window)

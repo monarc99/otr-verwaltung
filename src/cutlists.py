@@ -81,18 +81,18 @@ class Cutlist:
         if 'erfolgreich' in connection.getresponse().read():
             return None
 
-    def download(self, server, avi_filename):
-        """ Downloads a cutlist to the folder where avi_filename is. 
+    def download(self, server, video_filename):
+        """ Downloads a cutlist to the folder where video_filename is. 
             Checks whether cutlist already exists.
             
             Returns: error message, otherwise None """
         
-        self.local_filename = avi_filename
+        self.local_filename = video_filename
         count = 0
         
         while os.path.exists(self.local_filename + ".cutlist"):
             count += 1
-            self.local_filename = "%s.%s" % (avi_filename, str(count))
+            self.local_filename = "%s.%s" % (video_filename, str(count))
         
         self.local_filename += ".cutlist"
         
@@ -146,7 +146,7 @@ class Cutlist:
             print e
             return False
 
-    def write_local_cutlist(self, uncut_avi, intended_app_name, my_rating):
+    def write_local_cutlist(self, uncut_video, intended_app_name, my_rating):
         """ Writes a cutlist file to the instance's local_filename. """
     
         try:                        
@@ -157,8 +157,8 @@ class Cutlist:
                 "Application=OTR-Verwaltung\n",
                 "Version=%s\n" % self.intended_version,
                 "comment1=The following parts of the movie will be kept, the rest will be cut out.\n",
-                "ApplyToFile=%s\n" % os.path.basename(uncut_avi),
-                "OriginalFileSizeBytes=%s\n" % str(fileoperations.get_size(uncut_avi)),
+                "ApplyToFile=%s\n" % os.path.basename(uncut_video),
+                "OriginalFileSizeBytes=%s\n" % str(fileoperations.get_size(uncut_video)),
                 "FramesPerSecond=25\n",
                 "IntendedCutApplicationName=%s\n" % intended_app_name,
                 "IntendedCutApplication=%s\n" % self.intended_app,

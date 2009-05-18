@@ -17,7 +17,7 @@ class DialogCut(BaseWindow):
         self.gui = gui
         self.app = app
                 
-        BaseWindow.__init__(self, "dialog_cut.ui", "dialog_cut", parent)
+        BaseWindow.__init__(self, "dialog_cut", parent)
 
         self.__setup_widgets()
         

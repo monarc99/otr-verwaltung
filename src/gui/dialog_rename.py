@@ -10,7 +10,7 @@ from basewindow import BaseWindow
 class DialogRename(BaseWindow):
     
     def __init__(self, parent):            
-        BaseWindow.__init__(self, "dialog_rename.ui", "dialog_rename", parent)
+        BaseWindow.__init__(self, "dialog_rename", parent)
         
     def init_and_run(self, title, filenames):        
         entries = {}

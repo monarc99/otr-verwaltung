@@ -14,7 +14,7 @@ class DialogPlanning(BaseWindow):
     def __init__(self, gui, parent):
         self.gui = gui
             
-        BaseWindow.__init__(self, "dialog_planning.ui", "dialog_planning", parent)
+        BaseWindow.__init__(self, "dialog_planning", parent)
         
         # fill combobox
         store = gtk.ListStore(str)
@@ -34,7 +34,7 @@ class DialogPlanning(BaseWindow):
         self.get_widget('calendar').select_day(dt.day)
      
         self.get_widget('entry_broadcast').set_text('')
-        self.get_widget('comboboxentry_station').set_text('')
+        self.get_widget('combobox_station').child.set_text('')
      
         return self.run()
         
@@ -48,7 +48,7 @@ class DialogPlanning(BaseWindow):
         self.get_widget('calendar').select_day(dt.day)
         self.get_widget('entry_time').set_text(dt.strftime('%H:%M'))
 
-        self.get_widget('comboboxentry_station').set_text(broadcast.station)
+        self.get_widget('combobox_station').child.set_text(broadcast.station)
            
         return self.run()
     
@@ -78,6 +78,6 @@ class DialogPlanning(BaseWindow):
         dt = datetime.datetime(year, month + 1, day, int(hour), int(minute))
         stamp = time.mktime(dt.timetuple())
         
-        station = self.get_widget('comboboxentry_station').get_text().replace(',','_').replace(';','_')
+        station = self.get_widget('combobox_station').child.get_text().replace(',','_').replace(';','_')
         
         return broadcast, int(stamp), station

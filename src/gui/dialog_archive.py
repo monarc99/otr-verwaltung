@@ -10,7 +10,7 @@ from basewindow import BaseWindow
 class DialogArchive(BaseWindow):
     
     def __init__(self, parent):                    
-        BaseWindow.__init__(self, "dialog_archive.ui", "dialog_archive", parent)
+        BaseWindow.__init__(self, "dialog_archive", parent)
         
         self.__setup_widgets()
         
@@ -36,8 +36,7 @@ class DialogArchive(BaseWindow):
         
         treeview.append_column(tvcolumn_new)
         
-        selection = treeview.get_selection()
-    
+        selection = treeview.get_selection()    
     
     ###
     ### Convenience methods
@@ -53,11 +52,7 @@ class DialogArchive(BaseWindow):
         
     ###
     ### Signal handlers
-    ###
-    
-    def on_archive_buttonCancel_clicked(self, widget, data=None):
-        if self.question_box("Wirklich abbrechen?"):
-            self.hide()
+    ###    
     
     def folder_name(self, column, cell, model, iter):
         cell.set_property('text', basename(model.get_value(iter, 0)))

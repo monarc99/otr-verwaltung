@@ -22,7 +22,7 @@ class MainWindow(BaseWindow):
         self.app = app
         self.gui = gui      
                 
-        BaseWindow.__init__(self, "main_window.ui", "main_window")
+        BaseWindow.__init__(self, "main_window")
        
         self.__setup_toolbar()
         self.__setup_treeview_planning()
@@ -87,8 +87,8 @@ class MainWindow(BaseWindow):
         self.sets_of_toolbars = {
             Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],# 'plan_rss' ],
             Section.OTRKEY :    [ 'decodeandcut', 'decode', 'delete' ],
-            Section.AVI_UNCUT:  [ 'cut', 'delete', 'archive', 'play', 'cut_play' ],
-            Section.AVI_CUT:    [ 'archive', 'delete', 'cut', 'play', 'rename' ],
+            Section.VIDEO_UNCUT:  [ 'cut', 'delete', 'archive', 'play', 'cut_play' ],
+            Section.VIDEO_CUT:    [ 'archive', 'delete', 'cut', 'play', 'rename' ],
             Section.ARCHIVE:    [ 'delete', 'play', 'rename', 'new_folder' ],
             Section.TRASH:      [ 'real_delete', 'restore' ]
         }                       
@@ -193,8 +193,8 @@ class MainWindow(BaseWindow):
         # connect other signals
         self.get_widget('radioPlanning').connect('clicked', self.on_sidebar_toggled, Section.PLANNING)
         self.get_widget('radioUndecoded').connect('clicked', self.on_sidebar_toggled, Section.OTRKEY)
-        self.get_widget('radioUncut').connect('clicked', self.on_sidebar_toggled, Section.AVI_UNCUT)
-        self.get_widget('radioCut').connect('clicked', self.on_sidebar_toggled, Section.AVI_CUT)
+        self.get_widget('radioUncut').connect('clicked', self.on_sidebar_toggled, Section.VIDEO_UNCUT)
+        self.get_widget('radioCut').connect('clicked', self.on_sidebar_toggled, Section.VIDEO_CUT)
         self.get_widget('radioArchive').connect('clicked', self.on_sidebar_toggled, Section.ARCHIVE)  
         self.get_widget('radioTrash').connect('clicked', self.on_sidebar_toggled, Section.TRASH)
         
@@ -310,7 +310,7 @@ class MainWindow(BaseWindow):
     def tv_files_name(self, column, cell, model, iter):            
         cell.set_property('text', basename(model.get_value(iter, self.FILENAME)))
 
-    def tv_files_pixbuf(self, column, cell, model, iter):
+    def tv_files_pixbuf(self, column, cell, model, iter):        
         filename = model.get_value(iter, self.FILENAME)
     
         if isdir(filename):
@@ -612,8 +612,8 @@ class MainWindow(BaseWindow):
                   
             self.get_widget('labelPlanningCount').set_text(counts_of_section[Section.PLANNING])                  
             self.get_widget('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
-            self.get_widget('labelUncutCount').set_text(counts_of_section[Section.AVI_UNCUT])
-            self.get_widget('labelCutCount').set_text(counts_of_section[Section.AVI_CUT])     
+            self.get_widget('labelUncutCount').set_text(counts_of_section[Section.VIDEO_UNCUT])
+            self.get_widget('labelCutCount').set_text(counts_of_section[Section.VIDEO_CUT])     
             self.get_widget('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
             self.get_widget('labelTrashCount').set_text(counts_of_section[Section.TRASH])
        

@@ -6,7 +6,7 @@
 # - Update im OTR-Forum
 
 name='otr-verwaltung';
-version='0.5.5';
+version=`cat src/VERSION`;
 
 rm $name-$version.orig.tar.gz
 rm -r $name-$version
@@ -58,7 +58,7 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: otr-verwaltung
 Architecture: all
-Depends: python, python-gtk2
+Depends: python-gtk2
 Description: Dateien von onlinetvrecorder.com verwalten:
     - otrkey-Dateien dekodieren
     - avi-Dateien (DivX und HQ) mit Cutlists schneiden (Avidemux und Virtualdub, auch unter Linux!)
@@ -114,3 +114,5 @@ dpkg-buildpackage
 
 cd ..
 rm -r $name-$version
+
+echo "DO: sudo alien -r x.deb"

@@ -13,7 +13,7 @@ class DialogConclusion(BaseWindow):
     def __init__(self, app, parent):
         self.app = app
             
-        BaseWindow.__init__(self, "dialog_conclusion.ui", "dialog_conclusion", parent)
+        BaseWindow.__init__(self, "dialog_conclusion", parent)
                 
         # setup widgets
 
@@ -82,16 +82,16 @@ class DialogConclusion(BaseWindow):
              
     def on_buttonConclusionPlay_clicked(self, widget, data=None):    
         if self.action == Action.DECODE or self.file_conclusions[self.conclusion_iter].cut.status != Status.OK:
-            filename = self.file_conclusions[self.conclusion_iter].uncut_avi
+            filename = self.file_conclusions[self.conclusion_iter].uncut_video
         else:    
-            filename = self.file_conclusions[self.conclusion_iter].cut_avi
+            filename = self.file_conclusions[self.conclusion_iter].cut_video
 
         self.app.perform_action(Action.PLAY, [filename])      
        
     def on_button_conclusion_play_cut_clicked(self, widget, data=None):
         file_conclusion = self.file_conclusions[self.conclusion_iter]
     
-        self.app.show_cuts_after_cut(file_conclusion.cut_avi, file_conclusion.cut.cutlist)    
+        self.app.show_cuts_after_cut(file_conclusion.cut_video, file_conclusion.cut.cutlist)    
         
     def on_radiobuttonRating_toggled(self, widget, rate):
         if widget.get_active() == True:            
@@ -199,7 +199,7 @@ class DialogConclusion(BaseWindow):
         if self.action == Action.DECODE:
             filename = basename(file_conclusion.otrkey)
         else:
-            filename = "%s\n%s" % (basename(file_conclusion.uncut_avi), basename(file_conclusion.cut_avi))
+            filename = "%s\n%s" % (basename(file_conclusion.uncut_video), basename(file_conclusion.cut_video))
                           
         self.get_widget('labelConclusionFilename').set_markup("<b>%s</b>" % filename)
         
@@ -269,7 +269,7 @@ class DialogConclusion(BaseWindow):
                         else:
                             self.get_widget('hbox_create_cutlist').set_sensitive(False)
                                                                
-                if file_conclusion.cut_avi:
+                if file_conclusion.cut_video:
                 
                     if file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST: 
                         text += ", Mit lokaler Cutlist geschnitten"                       
@@ -291,7 +291,7 @@ class DialogConclusion(BaseWindow):
                             print self.rename_radio_buttons[rename]         
                             self.get_widget(self.rename_radio_buttons[rename]).set_active(True)
                             
-                        self.__set_rename('otr_rename', self.rename_by_schema(basename(file_conclusion.uncut_avi)))
+                        self.__set_rename('otr_rename', self.rename_by_schema(basename(file_conclusion.uncut_video)))
                         self.__set_rename('filename_rename', file_conclusion.cut.cutlist.filename)
                         self.__set_rename('filename_original_rename', file_conclusion.cut.cutlist.filename_original)
                         self.__set_rename('autoname_rename', file_conclusion.cut.cutlist.autoname)                      

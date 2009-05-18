@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from gtk import RESPONSE_OK
-from os.path import basename, join, isdir, dirname
+from os.path import basename, join, isdir, dirname, splitext
 from os import listdir
-
 
 import fileoperations
 from baseaction import BaseAction
@@ -12,7 +11,7 @@ from baseaction import BaseAction
 class Archive(BaseAction):
    
     def __init__(self, gui):
-        self.update_list = True
+        self.update_list = False
         self.__gui = gui
 
     def do(self, filenames, folder):       
@@ -46,6 +45,8 @@ class Archive(BaseAction):
         result = dialog.run()
 
         if result == RESPONSE_OK:            
+            self.update_list = True
+
             # get selection
             selection = treeview_folders.get_selection()
             (model, iter) = selection.get_selected()
@@ -54,19 +55,20 @@ class Archive(BaseAction):
             target_folder = model.get_value(iter, 0)
             
             for f in filenames:
+                extension = splitext(f)[1]
+                
                 # get new filename
                 new_name = treestore_files.get_value(dict_files_iter[f], 0)
                                 
-                if not new_name.endswith('.avi'):
-                    new_name += '.avi'
+                if not new_name.endswith(extension):
+                    new_name += extension
             
                 new_name = join(dirname(f), new_name)
                 
                 if new_name != f:
                     fileoperations.rename_file(f, new_name)
     
-                fileoperations.move_file(new_name, target_folder)   
-                
+                fileoperations.move_file(new_name, target_folder)                   
                     
         dialog.hide()
                 

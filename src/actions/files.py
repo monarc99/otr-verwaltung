@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from os import mkdir
-from os.path import dirname, join, isdir
+from os.path import dirname, join, isdir, splitext
 import fileoperations
 import re
 
@@ -43,16 +43,15 @@ class Restore(BaseAction):
     def __init__(self, gui):
         self.update_list = True
         self.__gui = gui
-        self.__uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
 
-    def do(self, filenames, new_otrkeys_folder, uncut_avis_folder, cut_avis_folder):
+    def do(self, filenames, new_otrkeys_folder, uncut_videos_folder, cut_videos_folder, uncut_video):
         for f in filenames:
             if f.endswith("otrkey"):
                 fileoperations.move_file(f, new_otrkeys_folder)
-            elif self.__uncut_video.match(f):                        
-                fileoperations.move_file(f, uncut_avis_folder)
+            elif uncut_video.match(f):
+                fileoperations.move_file(f, uncut_videos_folder)
             else:
-                fileoperations.move_file(f, cut_avis_folder)
+                fileoperations.move_file(f, cut_videos_folder)
     
 class Rename(BaseAction):
     def __init__(self, gui):
@@ -64,10 +63,12 @@ class Rename(BaseAction):
                 
         if response:
             for f in filenames:
+                extension = splitext(f)[1]
+                
                 new_name = join(dirname(f), new_names[f])
                 
-                if f.endswith('.avi') and not new_name.endswith('.avi'):
-                    new_name += '.avi'
+                if f.endswith(extension) and not new_name.endswith(extension):
+                    new_name += extension
                     
                 fileoperations.rename_file(f, new_name)
         else:

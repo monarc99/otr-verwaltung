@@ -4,8 +4,8 @@
 class Section:
     PLANNING    = 6
     OTRKEY      = 0
-    AVI_UNCUT   = 1
-    AVI_CUT     = 2
+    VIDEO_UNCUT = 1
+    VIDEO_CUT   = 2
     ARCHIVE     = 3
     TRASH       = 4
     SEARCH      = 5

@@ -24,19 +24,19 @@ class Cut:
         self.my_rating = None               # rating, when cut by cutlist        
         self.rename = 0                     # by autoname, filename ...
         self.create_cutlist = False         # create a cutlist?
-        self.delete_uncut = True            # delete the uncut avi after cut?
+        self.delete_uncut = True            # delete the uncut video after cut?
 
 class FileConclusion:
-    def __init__(self, action, otrkey="", uncut_avi=""):
+    def __init__(self, action, otrkey="", uncut_video=""):
         if action == Action.DECODE or action == Action.DECODEANDCUT:
             self.otrkey = otrkey
             self.decode = Decode()
         
-        self.uncut_avi = uncut_avi
+        self.uncut_video = uncut_video
 
         if action == Action.CUT or action == Action.DECODEANDCUT:
-            self.cut_avi = ""
+            self.cut_video = ""
             self.cut = Cut() 
 
     def get_extension(self):    
-        return os.path.splitext(self.uncut_avi)[1]
+        return os.path.splitext(self.uncut_video)[1]
