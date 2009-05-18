@@ -3,7 +3,6 @@
 
 from gtk import events_pending, main_iteration, RESPONSE_OK
 import base64
-import popen2
 import subprocess
 import urllib
 import os
@@ -213,18 +212,23 @@ class DecodeOrCut(BaseAction):
                    
             verify = True                   
 
-            command = "%s -i %s -e %s -p %s -o %s" % (self.config.get('decoder'), file_conclusion.otrkey, email, password, self.config.get('folder_uncut_avis'))
-            
-            if self.config.get('verify_decoded') == 0:
+            command = [self.config.get('decoder'), "-i", file_conclusion.otrkey, "-e", email, "-p", password, "-o", self.config.get('folder_uncut_avis')]
+                      
+            if not self.config.get('verify_decoded'):
                 verify = False
-                command += " -q"           
+                command += ["-q"]              
 
-            (pout, pin, perr) = popen2.popen3(command)
-
+            try:       
+                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+            except OSError:
+                file_conclusion.decode.status = Status.ERROR
+                file_conclusion.decode.message = "Dekoder wurde nicht gefunden."
+                continue               
+ 
             while True:
                 l = ""
                 while True:
-                    c = pout.read(1)
+                    c = process.stdout.read(1)
                     if c == "\r" or c == "\n":
                         break
                     l += c
@@ -252,22 +256,15 @@ class DecodeOrCut(BaseAction):
                 except ValueError:                
                     pass
            
-            # errors?
-            errors = perr.readlines()
+            # errors?            
+            errors = process.stderr.readlines()
             error_message = ""
             for error in errors:
                 error_message += error.strip()
-                            
-            # close process
-            pout.close()
-            perr.close()
-            pin.close()
-                                                            
+                                                  
             if len(errors) == 0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
-                print self.config.get('folder_uncut_avis')
-                print file_conclusion.otrkey
-                print basename(file_conclusion.otrkey)[0:len(file_conclusion.otrkey)-7]
+                
                 file_conclusion.uncut_video = join(self.config.get('folder_uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
                              
                 # move otrkey to trash
