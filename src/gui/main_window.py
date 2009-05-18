@@ -8,6 +8,7 @@ import urllib
 import webbrowser
 import subprocess
 
+
 import gtk
 import pango
 
@@ -544,6 +545,9 @@ class MainWindow(BaseWindow):
         about_dialog.run()
         about_dialog.destroy()
     
+    def on_menuEditPlugins_activate(self, widget, data=None):
+        self.gui.dialog_plugins.run()
+
     def on_menuEditPreferences_activate(self, widget, data=None):
         self.gui.preferences_window.show()
     

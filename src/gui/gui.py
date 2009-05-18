@@ -15,6 +15,7 @@ from dialog_cut import DialogCut
 from dialog_email_password import DialogEmailPassword
 from dialog_rename import DialogRename
 from dialog_planning import DialogPlanning
+from dialog_plugins import DialogPlugins
 
 import otrpath
 
@@ -32,6 +33,7 @@ class Gui:
         self.dialog_email_password = DialogEmailPassword(self.main_window)
         self.dialog_rename = DialogRename(self.main_window)
         self.dialog_planning = DialogPlanning(self, self.main_window)
+        self.dialog_plugins = DialogPlugins(self, self.main_window)
 
         for window in [self.main_window]:
             window.get_window().set_icon(gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('icon3.png')))      

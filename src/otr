@@ -7,6 +7,7 @@ from os.path import join, isdir, exists
 import re
 import subprocess
 import time
+import hashlib
 
 try:
     from gtk import events_pending, main_iteration
@@ -18,8 +19,10 @@ except:
     sys.exit(-1)
 
 if exists(join(sys.path[0], 'otrpath.py')):    
-    # if not installed, use local config file
+    # if not installed, use local config files
     f = open(join(sys.path[0], 'conf'), 'a')
+    f.close()
+    f = open(join(sys.path[0], 'pluginconf'), 'a')
     f.close()
 else:
     sys.path.insert(0, "/usr/share/otr-verwaltung")
@@ -27,22 +30,57 @@ else:
 
 # intern
 from gui.gui import Gui
+from pluginsystem import PluginSystem
 from actions import actions
 from configparser import Config
 import fileoperations
 import cutlists as cutlists_management
-from constants import Section, Action
+from constants import Section, Action, Cut_action
 from planning import Planning
 import otrpath
 
 class App:
     
-    def __init__(self):             
+    def __init__(self):     
+        config_dic = {
+            'show_details':         (bool, False),
+            'folder_new_otrkeys':   (str, ''),
+            'folder_uncut_avis':    (str, ''),
+            'folder_cut_avis':      (str, ''),
+            'folder_trash':         (str, ''),
+            'folder_archive':       (str, ''),
+            'decoder':              (str, ''),
+            'save_email_password':  (bool, False),
+            'email':                (str, ''),
+            'password':             (str, ''),
+            'verify_decoded':       (bool, False),          
+            'cut_avis_by':          (str, ''),
+            'cut_hqs_by':           (str, ''),
+            'cut_mp4s_by':          (str, ''),
+            'cut_avis_man_by':      (str, ''),
+            'cut_hqs_man_by':       (str, ''),
+            'cut_mp4s_man_by':      (str, ''),
+            'server':               (str, 'http://cutlist.at/'),
+            'cut_action':           (int, Cut_action.ASK),
+            'delete_cutlists':      (bool, True),
+            'smart':                (bool, True),
+            'choose_cutlists_by':   (int, 0), # 0 = size, 1=name
+            'cutlist_username':     (str, ''),
+            'cutlist_hash':         (str, hashlib.md5(str(time.time())).hexdigest()[0:20]),
+            'player':               (str, ''),
+            'mplayer':              (str, ''),
+            'planned_items':        (str, ''),
+            'rename_cut':           (bool, False),
+            'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})'),
+            'cutlist_mp4_as_hq':    (bool, False), # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
+            'enabled_plugins':      (str, '')
+        }
+            
         # read configs
         if exists(otrpath.get_path('conf')):
-            self.config = Config(otrpath.get_path('conf'))
+            self.config = Config(otrpath.get_path('conf'), config_dic)
         else:
-            self.config = Config(otrpath.get_config_path('conf'))
+            self.config = Config(otrpath.get_config_path('conf'), config_dic)
 
         self.__search_text = ""
         self.locked = False
@@ -57,6 +95,14 @@ class App:
         self.__gui = Gui(self)
         self.config.read()
         self.__gui.preferences_window.update_config_values()
+    
+        # load plugins
+        if exists(otrpath.get_path('pluginconf')):
+            pluginconf_path = otrpath.get_path('pluginconf')
+        else:
+            pluginconf_path = otrpath.get_config_path('pluginconf')
+    
+        self.plugin_system = PluginSystem(self, pluginconf_path, self.config.get('enabled_plugins'))
     
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
@@ -454,7 +500,7 @@ class App:
     def show_cuts(self, video_filename, cutlist):       
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):            
-            diff = 10
+            diff = 11
             
             sub_count = 0
 
@@ -492,7 +538,7 @@ class App:
     def show_cuts_after_cut(self, video_filename, cutlist):
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):                    
-            diff = 10
+            diff = 11
             
             length = 0
             sub_count = 0
@@ -535,9 +581,12 @@ class App:
                
         self.__gui.run()
         
-        # write planning to config
+        # write to config
         self.config.set('planned_items', self.planned_broadcasts.get_config())               
-
+        self.config.set('enabled_plugins', self.plugin_system.get_enabled_config())
+        
+        # save plugins' configuration
+        self.plugin_system.save_config()
              
 app = App()
 app.run()

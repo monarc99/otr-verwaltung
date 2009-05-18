@@ -17,6 +17,13 @@ def get_path(filename=None):
         return sys.path[0]
     else:
         return join(sys.path[0], filename)
+
+def get_plugin_paths():
+    plugins_home = get_config_path('plugins')
+    if not isdir(plugins_home):
+        os.mkdir(plugins_home)
+    plugins_usr = get_path('plugins')
+    return plugins_home, plugins_usr
     
 def get_gui_path(filename=None):
     if filename == None:

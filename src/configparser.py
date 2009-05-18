@@ -1,47 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import time, hashlib
-
-from constants import Cut_action
-
 class Config:
-    def __init__(self, config_file):   
+    def __init__(self, config_file, config_dic):   
         self.__config_file = config_file
         self.on_changed = {}
         
-        self.__config_dic = {
-            'show_details':         (bool, False),
-            'folder_new_otrkeys':   (str, ''),
-            'folder_uncut_avis':    (str, ''),
-            'folder_cut_avis':      (str, ''),
-            'folder_trash':         (str, ''),
-            'folder_archive':       (str, ''),
-            'decoder':              (str, ''),
-            'save_email_password':  (bool, False),
-            'email':                (str, ''),
-            'password':             (str, ''),
-            'verify_decoded':       (bool, False),          
-            'cut_avis_by':          (str, ''),
-            'cut_hqs_by':           (str, ''),
-            'cut_mp4s_by':          (str, ''),
-            'cut_avis_man_by':      (str, ''),
-            'cut_hqs_man_by':       (str, ''),
-            'cut_mp4s_man_by':      (str, ''),
-            'server':               (str, 'http://cutlist.at/'),
-            'cut_action':           (int, Cut_action.ASK),
-            'delete_cutlists':      (bool, True),
-            'smart':                (bool, True),
-            'choose_cutlists_by':   (int, 0), # 0 = size, 1=name
-            'cutlist_username':     (str, ''),
-            'cutlist_hash':         (str, hashlib.md5(str(time.time())).hexdigest()[0:20]),
-            'player':               (str, ''),
-            'mplayer':              (str, ''),
-            'planned_items':        (str, ''),
-            'rename_cut':           (bool, False),
-            'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})'),
-            'cutlist_mp4_as_hq':    (bool, False) # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
-        }
+        self.__config_dic = config_dic
 
     def connect(self, option, callback):        
         if option not in self.on_changed.keys():
