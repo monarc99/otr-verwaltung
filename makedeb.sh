@@ -51,7 +51,7 @@ cat > control << EOF
 Source: otr-verwaltung
 Section: misc
 Priority: optional
-Maintainer: Benjamin Elbers <elbersb@gmail.com>
+Maintainer: Benjamin Elbers <elbersb+otr@gmail.com>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.7.3
 Homepage: <insert the upstream URL, if relevant>
