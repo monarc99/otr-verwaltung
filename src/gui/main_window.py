@@ -52,16 +52,14 @@ class MainWindow(BaseWindow):
     def __setup_toolbar(self):
     
         toolbar_buttons = [
-            ('decode', 'decode.png', 'Dekodieren', Action.DECODE),
             ('decodeandcut', 'decodeandcut.png', "Dekodieren und Schneiden", Action.DECODEANDCUT),
+            ('decode', 'decode.png', 'Dekodieren', Action.DECODE),
             ('delete', 'delete.png', "In den Müll verschieben", Action.DELETE),
             ('archive', 'archive.png', "Archivieren", Action.ARCHIVE),
-            ('cut', 'cut.png', "Schneiden", Action.CUT),
-            ('play', 'play.png', "Abspielen", Action.PLAY),
+            ('cut', 'cut.png', "Schneiden", Action.CUT),          
             ('restore', 'restore.png', "Wiederherstellen", Action.RESTORE),
             ('rename', 'rename.png', "Umbenennen", Action.RENAME),
-            ('new_folder', 'new_folder.png', "Neuer Ordner", Action.NEW_FOLDER),
-            ('cut_play', 'play.png', "Geschnitten Abspielen", Action.CUT_PLAY),
+            ('new_folder', 'new_folder.png', "Neuer Ordner", Action.NEW_FOLDER),            
             ('real_delete', 'delete.png', "Löschen", Action.REAL_DELETE),
             ('plan_add', 'film_add.png', "Hinzufügen", Action.PLAN_ADD),
             ('plan_remove', 'film_delete.png', "Löschen", Action.PLAN_REMOVE),
@@ -74,7 +72,7 @@ class MainWindow(BaseWindow):
         for key, image_name, text, action in toolbar_buttons:
             image = gtk.image_new_from_file(otrpath.get_image_path(image_name))
             image.show()
-
+            
             if key == "cut" or key == "decodeandcut":
                 self.toolbar_buttons[key] = gtk.MenuToolButton(image, text)
                 self.toolbar_buttons[key].set_menu(self.__get_cut_menu(action))
@@ -86,12 +84,12 @@ class MainWindow(BaseWindow):
              
              
         self.sets_of_toolbars = {
-            Section.PLANNING :  [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],# 'plan_rss' ],
-            Section.OTRKEY :    [ 'decodeandcut', 'decode', 'delete' ],
-            Section.VIDEO_UNCUT:  [ 'cut', 'delete', 'archive', 'play', 'cut_play' ],
-            Section.VIDEO_CUT:    [ 'archive', 'delete', 'cut', 'play', 'rename' ],
-            Section.ARCHIVE:    [ 'delete', 'play', 'rename', 'new_folder' ],
-            Section.TRASH:      [ 'real_delete', 'restore' ]
+            Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],# 'plan_rss' ],
+            Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete' ],
+            Section.VIDEO_UNCUT: [ 'cut', 'delete', 'archive', ],
+            Section.VIDEO_CUT:   [ 'archive', 'delete', 'cut', 'rename' ],
+            Section.ARCHIVE:     [ 'delete', 'rename', 'new_folder' ],
+            Section.TRASH:       [ 'real_delete', 'restore' ]
         }                       
 
         # create sets of toolbuttons          
@@ -101,6 +99,24 @@ class MainWindow(BaseWindow):
                 toolbar_buttons.append(self.toolbar_buttons[button_name])
                 
             self.sets_of_toolbars[section] = toolbar_buttons
+   
+    def add_toolbutton(self, image, text, sections):
+        image.show()
+        toolbutton = gtk.ToolButton(image, text)
+        toolbutton.show()
+        
+        for section in sections:            
+            self.sets_of_toolbars[section].append(toolbutton)
+
+        self.set_toolbar(self.app.section)
+        return toolbutton
+        
+    def remove_toolbutton(self, toolbutton):
+        for section in self.sets_of_toolbars.keys():
+            if toolbutton in self.sets_of_toolbars[section]:
+                self.sets_of_toolbars[section].remove(toolbutton)
+
+        self.set_toolbar(self.app.section)    
     
     def __setup_treeview_planning(self):
         treeview = self.get_widget('treeview_planning') 

@@ -20,33 +20,42 @@ class Play(Plugin):
         self.toolbutton = self.gui.main_window.add_toolbutton(gtk.image_new_from_file(self.get_path('play.png')), 'Abspielen', self.relevant_sections)
         self.toolbutton.connect('clicked', self.on_play_clicked)        
         
-        self.gui.main_window.get_widget('treeview_files').connect('row-activated', self.on_row_activated)
+        self.row_activate_id = self.gui.main_window.get_widget('treeview_files').connect('row-activated', self.on_row_activated)
         
     def disable(self):
-        self.gui.main_window.remove_toolbutton(self.toolbutton)
-    
-    def configurate(self):
-        print "config"
+        self.gui.main_window.remove_toolbutton(self.toolbutton)        
+        self.gui.main_window.get_widget('treeview_files').disconnect(self.row_activate_id)
+
+    def configurate(self, dialog):
+        dialog.vbox.set_spacing(4) 
+
+        combobox_players = gtk.ComboBoxEntry()
+        self.gui.set_model_from_list(combobox_players, ['vlc', 'mplayer', 'totem'])
+        dialog.vbox.pack_start(combobox_players, expand=False)
+                
+        def on_combobox_players_changed(widget, data=None):
+            self.Config['player'] = widget.child.get_text()
+               
+        combobox_players.connect('changed', on_combobox_players_changed)
+           
+        # current config
+        combobox_players.child.set_text(self.Config['player'])
+        
+        return dialog
        
     # plugin methods
-    def start_player(self, filename):
-        player = self.Config['player']
+    def start_player(self):        
+        filename = self.gui.main_window.get_selected_filenames()[0]
         
         try:        
-            subprocess.Popen([player, filename])    
+            subprocess.Popen([self.Config['player'], filename])    
         except OSError:
             self.__gui.message_error_box("Es ist kein Player angegeben!")
     
-    def on_play_clicked(self, widget, data=None):
-        # get filename
-        filename = '' 
-        
-        self.start_player(filename)
+    # signal methods
+    def on_play_clicked(self, widget, data=None):       
+        self.start_player()
     
-    def on_row_activated(self, treeview, path, view_column):
-        
+    def on_row_activated(self, treeview, path, view_column):        
         if self.app.section in self.relevant_sections:
-            filename = ''
-            
-            self.start_player(filename)
-        
+            self.start_player() 

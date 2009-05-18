@@ -11,21 +11,22 @@ class Section:
     SEARCH      = 5
         
 class Action:
+    # planning
     PLAN_ADD        = 11
     PLAN_REMOVE     = 12
     PLAN_EDIT       = 13
     PLAN_SEARCH     = 14
     PLAN_RSS        = 15
+    # decode and cut
     DECODE          = 0
     DECODEANDCUT    = 1
     CUT             = 2
+    # file movement
     DELETE          = 3
     ARCHIVE         = 4
-    PLAY            = 5
     RESTORE         = 6
     RENAME          = 7
     NEW_FOLDER      = 8
-    CUT_PLAY        = 9
     REAL_DELETE     = 10
 
 class Cut_action:

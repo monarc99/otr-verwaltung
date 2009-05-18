@@ -12,10 +12,13 @@ class Plugin:
     Author = "Author of Plugin"
     Configurable = False
     Config = { } # key-value-pairs for configuration
+                 # just put your default values in here, the plugin system will do the rest for you
     
-    def __init__(self, app):
+    def __init__(self, app, gui, dirname):
         """ Don't override the constructor. Do the intial work in 'enable'. """
-        self.app = app       # for api access        
+        self.app = app       # for api access
+        self.gui = gui       # for api access                
+        self.dirname = dirname
     
     def enable(self):
         """ This is called when the plugin is enabled. 
@@ -27,16 +30,26 @@ class Plugin:
             Revert your actions. """
         pass
         
-    def configurate(self):
+    def configurate(self, dialog):
         """ This is called when the user wants to configure the plugin.
-            You might want to display a dialog to the user.
-            Note: Set CONFIGURABLE to True.
-            Note: Use the Config dict to let the plugin system save your settings. """
-        pass        
+            You might want to display a dialog to the user (see parameter).
+            Alter the dialog.vbox property and return the dialog. The plugin system will do the rest.
+            Remember to connect to the 'changed' signals of the widgets you placed in the dialog.
+            Use the signals to update your Config dict.
+            Note: Set CONFIGURABLE to True. """
+
+        return dialog
+    
+    def get_path(self, file=None):
+        """ """
+        if file:    
+            return os.path.join(self.dirname, file)
+        else:
+            return self.dirname
                 
 class PluginSystem:
     
-    def __init__(self, app, conf_path, enabled_plugins=''):
+    def __init__(self, app, gui, conf_path, enabled_plugins=''):
         self.plugins = {} # name : plugin instance
         self.enabled_plugins = [plugin for plugin in enabled_plugins.split(':') if plugin] # list of names
         self.conf_path = conf_path
@@ -51,7 +64,7 @@ class PluginSystem:
         print "[Plugins] Paths to search: ", plugin_paths
                               
         for path in plugin_paths:                  
-            sys.path.insert(0, path)           
+            sys.path.append(path)           
             
             for file in os.listdir(path):
                 plugin_name, extension = os.path.splitext(file)
@@ -59,7 +72,8 @@ class PluginSystem:
                 if extension == ".py":                        
                     plugin_module = __import__(plugin_name)
                     # instanciate plugin
-                    self.plugins[plugin_name] = getattr(plugin_module, plugin_name)(app)
+                    
+                    self.plugins[plugin_name] = getattr(plugin_module, plugin_name)(app, gui, os.path.dirname(plugin_module.__file__))
                     
                     config = {}
                     if self.parser.has_section(plugin_name):

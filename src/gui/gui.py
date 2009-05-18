@@ -23,8 +23,7 @@ class Gui:
     def __init__(self, app):
         self.app = app
            
-        # TODO: einheitliches benennungsschema für widgets: MainWindow oder main_window
-        # TODO: signal-methoden mit präfix __: def on_button_clicked -> def __on_button_clicked?
+        # TODO: einheitliches benennungsschema für widgets: MainWindow oder main_window        
         self.main_window = MainWindow(app, self)
         self.preferences_window = PreferencesWindow(app, self, self.main_window)
         self.dialog_archive = DialogArchive(self.main_window)
@@ -40,6 +39,23 @@ class Gui:
 
     def run(self):
         gtk.main()
+
+    #
+    # Helpers
+    #
+    
+    def set_model_from_list(self, cb, items):
+        """Setup a ComboBox or ComboBoxEntry based on a list of strings."""           
+        model = gtk.ListStore(str)
+        for i in items:
+            model.append([i])
+        cb.set_model(model)
+        if type(cb) == gtk.ComboBoxEntry:
+            cb.set_text_column(0)
+        elif type(cb) == gtk.ComboBox:
+            cell = gtk.CellRendererText()
+            cb.pack_start(cell, True)
+            cb.add_attribute(cell, 'text', 0)            
 
     # 
     # Dialogs

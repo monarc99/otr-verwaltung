@@ -102,7 +102,7 @@ class App:
         else:
             pluginconf_path = otrpath.get_config_path('pluginconf')
     
-        self.plugin_system = PluginSystem(self, pluginconf_path, self.config.get('enabled_plugins'))
+        self.plugin_system = PluginSystem(self, self.__gui, pluginconf_path, self.config.get('enabled_plugins'))
     
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
@@ -434,13 +434,7 @@ class App:
             action.do(filenames, self.config.get('folder_new_otrkeys'), self.config.get('folder_uncut_avis'), self.config.get('folder_cut_avis'), self.uncut_video)
     
         elif chosen_action == Action.DELETE:
-            action.do(filenames, self.config.get('folder_trash'))
-    
-        elif chosen_action == Action.PLAY: 
-            action.do(filenames[0], self.config.get('player'))
-    
-        elif chosen_action == Action.CUT_PLAY: 
-            action.do(filenames[0], self.config.get('mplayer'), self.config.get('folder_uncut_avis'), self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), self.config.get('delete_cutlists'))            
+            action.do(filenames, self.config.get('folder_trash'))      
 
         elif chosen_action == Action.PLAN_REMOVE: 
             action.do(broadcasts, self.planned_broadcasts) 

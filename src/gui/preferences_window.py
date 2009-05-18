@@ -69,7 +69,6 @@ class PreferencesWindow(BaseWindow):
         ComboBoxEntryBinding(self.app.config, 'cut_avis_man_by', self.get_widget('combobox_man_avi'))
         ComboBoxEntryBinding(self.app.config, 'cut_hqs_man_by', self.get_widget('combobox_man_hq'))
         ComboBoxEntryBinding(self.app.config, 'cut_mp4s_man_by', self.get_widget('combobox_man_mp4'))
-        ComboBoxEntryBinding(self.app.config, 'player', self.get_widget('comboboxPlayer'))
         ComboBoxEntryBinding(self.app.config, 'server', self.get_widget('comboboxServer'))
 
         RadioButtonsBinding(self.app.config, 'cut_action', [ 
@@ -89,41 +88,25 @@ class PreferencesWindow(BaseWindow):
         # avi + hq + mp4
         avidemux = ["avidemux", "avidemux2_cli"]
         virtualdub = [r"/pfad/zu/vdub.exe"]        
-        self.__set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)
-        self.__set_model_from_list(self.get_widget('combobox_hq'), virtualdub)
-        self.__set_model_from_list(self.get_widget('combobox_mp4'), avidemux)
+        self.gui.set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)
+        self.gui.set_model_from_list(self.get_widget('combobox_hq'), virtualdub)
+        self.gui.set_model_from_list(self.get_widget('combobox_mp4'), avidemux)
         
         # manually
         avidemux_man = ["avidemux"]
         virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
-        self.__set_model_from_list(self.get_widget('combobox_man_avi'), avidemux_man + virtualdub_man)
-        self.__set_model_from_list(self.get_widget('combobox_man_hq'), virtualdub_man) 
-        self.__set_model_from_list(self.get_widget('combobox_man_mp4'), avidemux_man)
+        self.gui.set_model_from_list(self.get_widget('combobox_man_avi'), avidemux_man + virtualdub_man)
+        self.gui.set_model_from_list(self.get_widget('combobox_man_hq'), virtualdub_man) 
+        self.gui.set_model_from_list(self.get_widget('combobox_man_mp4'), avidemux_man)
        
         # fill comboboxentries
-        self.__set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
-        self.__set_model_from_list(self.get_widget('comboboxPlayer'), ["vlc", "totem", "mplayer"])
+        self.gui.set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
                          
     def update_config_values(self):
         self.get_widget('entryPassword').set_visibility(False)
     
         self.get_widget('entry_schema').set_sensitive(self.app.config.get('rename_cut'))
-     
-    # Helper
-        
-    def __set_model_from_list(self, cb, items):
-        """Setup a ComboBox or ComboBoxEntry based on a list of strings."""           
-        model = gtk.ListStore(str)
-        for i in items:
-            model.append([i])
-        cb.set_model(model)
-        if type(cb) == gtk.ComboBoxEntry:
-            cb.set_text_column(0)
-        elif type(cb) == gtk.ComboBox:
-            cell = gtk.CellRendererText()
-            cb.pack_start(cell, True)
-            cb.add_attribute(cell, 'text', 0)        
-        
+             
     #  Signal handlers
 
     def on_button_set_file_clicked(self, entry, data=None):    
