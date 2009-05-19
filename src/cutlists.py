@@ -48,7 +48,7 @@ class Cutlist:
         self.local_filename = None
         
   
-    def upload(self, userid):
+    def upload(self, server):
         """ Uploads a cutlist to cutlist.at "
             Upload code from:  http://code.activestate.com/recipes/146306/ 
             
@@ -60,7 +60,7 @@ class Cutlist:
             '--' + boundary,
             'Content-Disposition: form-data; name="userid"',
             '',
-            userid,
+            'irgendeineuserid',
             '--' + boundary,
             'Content-Disposition: form-data; name="userfile[]"; filename="%s"' % self.local_filename,
             '',
@@ -70,11 +70,11 @@ class Cutlist:
 
         body = '\r\n'.join(lines)
 
-        connection = httplib.HTTPConnection("www.cutlist.at", 80)        
+        connection = httplib.HTTPConnection(server.split('/')[2], 80)        
         headers = { 'Content-Type': 'multipart/form-data; boundary=%s' % boundary }
 
         try:
-            connection.request('POST', "/index.php?upload=2", body, headers)
+            connection.request('POST', server + "index.php?upload=2", body, headers)
         except Exception, error_message:
            return error_message       
 

@@ -26,6 +26,7 @@ class DecodeOrCut(BaseAction):
 
     def do(self, action, filenames, config, rename_by_schema, cut_action=None):
         self.config = config
+        self.rename_by_schema = rename_by_schema
         
         decode, cut = False, False            
             
@@ -69,11 +70,7 @@ class DecodeOrCut(BaseAction):
  
                     
         # show conclusion
-        dialog = self.__gui.dialog_conclusion.build(file_conclusions, action, rename_by_schema)
-        dialog.run()
-        dialog.hide()         
-        
-        file_conclusions = self.__gui.dialog_conclusion.file_conclusions        
+        file_conclusions = self.__gui.dialog_conclusion.run(file_conclusions, action, self.rename_by_schema)       
                       
         if cut:
              
@@ -81,7 +78,7 @@ class DecodeOrCut(BaseAction):
             cutlists = []
             
             for file_conclusion in file_conclusions:
-                if file_conclusion.cut.create_cutlist and not file_conclusion.cut.create_cutlist_error:  
+                if file_conclusion.cut.create_cutlist:  
 
                     if "VirtualDub" in file_conclusion.cut.cutlist.intended_app:
                         intended_app_name = "VirtualDub"
@@ -100,11 +97,10 @@ class DecodeOrCut(BaseAction):
             # upload them:            
             def upload(error_cb):
                 yield 0 # fake generator                   
-                errors = 0                
-                userid = self.config.get('cutlist_hash')
+                errors = 0                                
 
                 for cutlist in cutlists:
-                    error_message = cutlist.upload(userid)
+                    error_message = cutlist.upload(self.config.get('server'))
                     if error_message: 
                         error_cb("Fehler beim Hochladen der Cutlist:\n" + error_message)
                         errors += 1
@@ -124,27 +120,15 @@ class DecodeOrCut(BaseAction):
                     GeneratorTask(upload).start(error_cb)
             
             # rename
-            for file_conclusion in file_conclusions:
-           
-                rename = file_conclusion.cut.rename                                                          
-                           
-                if 0 == rename: # no rename
-                    continue
-                    
-                elif 1 == rename: # otr rename                               
-                    new_name = rename_by_schema(basename(file_conclusion.uncut_video)) + file_conclusion.get_extension()
-            
-                elif 2 == rename: # filename rename
-                    new_name = file_conclusion.cut.cutlist.filename + file_conclusion.get_extension()
-                    
-                elif 3 == rename: # filename_original rename
-                    new_name = file_conclusion.cut.cutlist.filename_original + file_conclusion.get_extension()
-                    
-                elif 4 == rename: # autoname rename
-                    new_name = file_conclusion.cut.cutlist.autoname + file_conclusion.get_extension()
-            
-                new_filename = join(self.config.get('folder_cut_avis'), new_name)        
-                fileoperations.rename_file(file_conclusion.cut_video, new_filename)                
+            for file_conclusion in file_conclusions:                         
+                if file_conclusion.cut.rename:
+                    extension = file_conclusion.get_extension()
+                    if not file_conclusion.cut.rename.endswith(extension):
+                        file_conclusion.cut.rename += extension
+                
+                    if file_conclusion.cut_video != file_conclusion.cut.rename:
+                        new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename)        
+                        fileoperations.rename_file(file_conclusion.cut_video, new_filename)                
         
             # move uncut video to trash if it's ok            
             for file_conclusion in file_conclusions:
@@ -166,8 +150,8 @@ class DecodeOrCut(BaseAction):
                 yield 0 # fake generator
                 count = 0
                 for file_conclusion in file_conclusions:                    
-                    if file_conclusion.cut.my_rating:
-                        print "Rate!"
+                    if file_conclusion.cut.my_rating > -1:
+                        print "Rate with ", file_conclusion.cut.my_rating
                         if file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('server')):
                             count += 1
                 
@@ -299,7 +283,7 @@ class DecodeOrCut(BaseAction):
                 cut_action = default_cut_action
             else:
                 cut_action = self.config.get('cut_action')
-                
+                             
             cutlists = []
             
             if cut_action == Cut_action.MANUALLY:
@@ -325,7 +309,7 @@ class DecodeOrCut(BaseAction):
                 # show dialog
                 self.__gui.dialog_cut.filename = file_conclusion.uncut_video
                 self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_video))
-                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Die Datei muss im Ordner "%s" und unter einem neuen Namen gespeichert werden, damit das Programm erkennt, dass diese Datei geschnitten wurde!\n\nUm eine Cutlist zu erstellen muss das Projekt gespeichert werden (siehe Website->Wiki->Häufige Fragen).</span>' % self.config.get('folder_cut_avis'))
+                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Um eine Cutlist zu erstellen muss das Projekt im Ordner %s gespeichert werden (siehe Website->Wiki->Häufige Fragen). OTR-Verwaltung schneidet die Datei dann automatisch.</span>' % self.config.get('folder_cut_avis'))
 
                 if cut_action == Cut_action.ASK:
                     self.__gui.dialog_cut.get_widget('radio_best_cutlist').set_active(True)
@@ -377,24 +361,19 @@ class DecodeOrCut(BaseAction):
             file_conclusion.cut.cut_action = cut_action
 
             if cut_action == Cut_action.MANUALLY: # MANUALLY                               
-                error_code, error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_video)
+                error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_video)
                                        
-                if error_code < 0:
+                if not error_message:
                     file_conclusion.cut.status = Status.OK  
                     file_conclusion.cut.create_cutlist = True            
                     file_conclusion.cut.cutlist.cuts = cuts
                     file_conclusion.cut.cutlist.intended_app = basename(executable)
-                    # do not continue because the file isn't cut already!
+                    # do not continue because the file hasn't been cut already!
                     
-                elif error_code == 1:
+                else:
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = error_message                   
                     continue
-
-                elif error_code == 2:                    
-                    file_conclusion.cut.status = Status.OK                         
-                    file_conclusion.cut.create_cutlist_error = error_message                    
-                    continue               
                     
             # all other cases and if we got cuts: cut file by cutlist
 
@@ -429,11 +408,12 @@ class DecodeOrCut(BaseAction):
             else:
                 file_conclusion.cut.status = Status.OK
                 file_conclusion.cut_video = cut_video
-
-                if self.config.get('rename_cut'):
-                    file_conclusion.cut.rename = 1
-                                                        
-        # after iterating over all items:
+                
+                if self.config.get('rename_cut'):                        
+                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))                
+                else:
+                    file_conclusion.cut.rename = basename(cut_video)               
+        
         return True
 
     def __get_format(self, filename):        
@@ -579,17 +559,12 @@ class DecodeOrCut(BaseAction):
     def cut_file_manually(self, filename):
         """ Cuts a file manually with Avidemux or VirtualDub and gets cuts from
             possibly created project files. 
-            returns: error_code, error_message, cuts, executable
-
-            error_code: -1 - no error
-                         1 - program (avidemux/VirtualDub) error 
-                         2 - could not get cuts 
-                         3 - could not cut by cutlist """
+            returns: error_message, cuts, executable """
         
         program, config_value = self.__get_program(filename, manually=True)
         
         if program < 0:
-            return 1, config_value, None, None
+            return config_value, None, None
     
         if program == Program.AVIDEMUX:       
             script_filename = filename + ".js"
@@ -609,7 +584,7 @@ class DecodeOrCut(BaseAction):
             try:                   
                 avidemux = subprocess.Popen(command)
             except OSError:
-                return 1, "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
+                return "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
                 
             while avidemux.poll() == None:
                 time.sleep(1)
@@ -622,14 +597,14 @@ class DecodeOrCut(BaseAction):
             cut_video_is_none, error = self.__cut_file_virtualdub(filename, config_value, cuts=None, manually=True)
             
             if error != None:
-                return 1, error, None, None
+                return error, None, None
                 
             cuts, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('folder_uncut_avis'), "cutlist.vcf"))
          
         if cutlist_error:            
-            return 2, cutlist_error, None, config_value
+            return cutlist_error, None, config_value
         else:
-            return -1, None, cuts, config_value
+            return None, cuts, config_value
              
     def cut_file_by_cutlist(self, filename, cutlist):
         """ Returns: cut_video, error """

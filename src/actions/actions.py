@@ -8,6 +8,8 @@ import files
 
 from constants import Action
     
+# TODO: ein bisschen sinnlos; actions können auch direkt aufgerufen werden, oder?    
+    
 actions = {
     # planning
     Action.PLAN_ADD     : planning.Add,
@@ -22,6 +24,7 @@ actions = {
     Action.CUT          : decodeorcut.DecodeOrCut,
     
     # file movement
+    # TODO: archive in "files"
     Action.ARCHIVE      : archive.Archive,
     Action.DELETE       : files.Delete,
     Action.RESTORE      : files.Restore,

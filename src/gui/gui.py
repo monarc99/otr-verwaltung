@@ -27,7 +27,7 @@ class Gui:
         self.main_window = MainWindow(app, self)
         self.preferences_window = PreferencesWindow(app, self, self.main_window)
         self.dialog_archive = DialogArchive(self.main_window)
-        self.dialog_conclusion = DialogConclusion(app, self.main_window)
+        self.dialog_conclusion = DialogConclusion(app, self, self.main_window)
         self.dialog_cut = DialogCut(app, self, self.main_window)
         self.dialog_email_password = DialogEmailPassword(self.main_window)
         self.dialog_rename = DialogRename(self.main_window)

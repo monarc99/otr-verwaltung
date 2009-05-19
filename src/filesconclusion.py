@@ -15,14 +15,13 @@ class Cut:
     def __init__(self):
         self.status = -1
         self.message = ""
-        self.create_cutlist_error = ""      # couldn't get cuts from project file                                           
         
         self.cut_action = -1                # manually, best cutlist ...
         self.cutlist = Cutlist()            # cutlist class instance
 
         # filled in by dialog_conclusion
-        self.my_rating = None               # rating, when cut by cutlist        
-        self.rename = 0                     # by autoname, filename ...
+        self.my_rating = -1                 # rating, when cut by cutlist        
+        self.rename = ""                    # renamed filename
         self.create_cutlist = False         # create a cutlist?
         self.delete_uncut = True            # delete the uncut video after cut?
 

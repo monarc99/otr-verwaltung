@@ -7,7 +7,6 @@ from os.path import join, isdir, exists
 import re
 import subprocess
 import time
-import hashlib
 
 try:
     from gtk import events_pending, main_iteration
@@ -49,6 +48,7 @@ class App:
             'folder_cut_avis':      (str, ''),
             'folder_trash':         (str, ''),
             'folder_archive':       (str, ''),
+            'player':               (str, ''),
             'decoder':              (str, ''),
             'save_email_password':  (bool, False),
             'email':                (str, ''),
@@ -66,14 +66,13 @@ class App:
             'smart':                (bool, True),
             'choose_cutlists_by':   (int, 0), # 0 = size, 1=name
             'cutlist_username':     (str, ''),
-            'cutlist_hash':         (str, hashlib.md5(str(time.time())).hexdigest()[0:20]),
             'player':               (str, ''),
             'mplayer':              (str, ''),
             'planned_items':        (str, ''),
             'rename_cut':           (bool, False),
             'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})'),
             'cutlist_mp4_as_hq':    (bool, False), # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
-            'enabled_plugins':      (str, '')
+            'enabled_plugins':      (str, 'Play')
         }
             
         # read configs
@@ -467,6 +466,12 @@ class App:
             self.__gui.main_window.do_search(self.__search_text)
             self.show_section(self.section)
             
+    
+    def play_file(self, filename):
+        try:        
+            subprocess.Popen([self.config.get('player'), filename])    
+        except OSError:
+            self.__gui.message_error_box("Es ist kein Player angegeben!")
     
     def __show(self, cuts, video_filename, edl_subtitles_cb):        
         f_edl = open(join(self.config.get('folder_new_otrkeys'), ".tmp.edl"), "w")
