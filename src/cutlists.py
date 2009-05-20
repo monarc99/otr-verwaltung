@@ -139,12 +139,16 @@ class Cutlist:
         url = "%srate.php?rate=%s&rating=%s" % (server, self.id, rating)
 
         try:
-            print url
-            urllib.urlopen(url)                                 
-            return True
-        except IOError, e:
-            print e
-            return False
+            print "[Cutlist] Rate URL:", url
+            message = urllib.urlopen(url).read()
+            print "[Cutlist] Rate message: ", message        
+            
+            if "Cutlist wurde bewertet. Vielen Dank!" in message:
+                return True, message
+            else:
+                return False, message
+        except IOError:
+            return False, "Keine Internetverbindung"
 
     def write_local_cutlist(self, uncut_video, intended_app_name, my_rating):
         """ Writes a cutlist file to the instance's local_filename. """

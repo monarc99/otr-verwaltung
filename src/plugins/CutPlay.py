@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import subprocess
+import subprocess, time
 import os.path
 import gtk
-import time
+
 
 from pluginsystem import Plugin
 

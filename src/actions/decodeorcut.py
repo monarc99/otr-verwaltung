@@ -148,15 +148,29 @@ class DecodeOrCut(BaseAction):
             # rate cutlists        
             def rate():                    
                 yield 0 # fake generator
+                messages = []
                 count = 0
                 for file_conclusion in file_conclusions:                    
                     if file_conclusion.cut.my_rating > -1:
                         print "Rate with ", file_conclusion.cut.my_rating
-                        if file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('server')):
+                        success, message = file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('server'))
+                        if success:
                             count += 1
+                        else:
+                            messages += [message]
                 
-                if count > 0:
-                    self.__gui.main_window.change_status(0, "Es wurde(n) %s Cutlist(en) bewertet!" % count)              
+                if count > 0 or len(messages) > 0:
+                    if count == 0:
+                        text = "Es wurde keine Cutlist bewertet!"
+                    if count == 1:
+                        text = "Es wurde 1 Cutlist bewertet!" % count
+                    else:
+                        text = "Es wurden %s Cutlisten bewertet!" % count
+                        
+                    if len(messages) > 0:
+                        text += " (Fehler: %s)" % ", ".join(messages)
+                
+                    self.__gui.main_window.change_status(0, text)
             
             GeneratorTask(rate).start()
              

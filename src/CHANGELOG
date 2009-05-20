@@ -1,6 +1,10 @@
-0.6.3:
+0.7:
     * Bugfix: Weiteres Problem beim Umbenennen
     * Es werden mehr Video-Formate angezeigt und beim Suchen etc. unterstützt
+    * Plugin-System mit Plugins: MKV (noch nicht funktionsfähig), Geschnitten Abspielen, Abspielen (nun aus Hauptprogramm ausgelagert)    
+    * komplett neu geschriebener Zusammenfassungsdialog, nun ist auch hier schon "individuelles" Umbenennen möglich, Cutlistinformation werden angezeigt
+    * Bessere Rückmeldung beim Bewerten von Cutlisten
+    * Durch die vielen Änderungen am Code können sich wieder einige Bugs eingeschlichen haben, vor allem beim Zusammenfassungsdialog
 
 0.6.2, 12. Mai:
     * Bugfix: In bestimmten Fällen wurden geschnittene Dateien nicht umbenannt.

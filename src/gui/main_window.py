@@ -413,24 +413,27 @@ class MainWindow(BaseWindow):
             self.get_widget('eventboxPlanningCurrentCount').show()
             self.get_widget('labelPlanningCurrentCount').set_text(str(count))
       
-    def change_status(self, message_type, message):
-        """ Displays an image and text in the statusbar for 10 seconds. 
-            message_type: 0 = information """      
+    def change_status(self, message_type, message, permanent=False):
+        """ Displays an image and text in the statusbar.
+                message_type:   0   = information 
+                                -1  = no image displayed
+                permanent:      if False, the message vanishes after 10 seconds """
             
         self.get_widget('label_statusbar').set_text(message)           
             
         if message_type == 0:            
             self.get_widget('image_status').set_from_file(otrpath.get_image_path("information.png"))
-                        
-        def wait():
-            yield 0 # fake generator
-            time.sleep(10)
-               
-        def completed():
-            self.get_widget('label_statusbar').set_text("")     
-            self.get_widget('image_status').clear()
-               
-        GeneratorTask(wait, None, completed).start()         
+        
+        if not permanent:                
+            def wait():
+                yield 0 # fake generator
+                time.sleep(10)
+                   
+            def completed():
+                self.get_widget('label_statusbar').set_text("")     
+                self.get_widget('image_status').clear()
+                   
+            GeneratorTask(wait, None, completed).start()         
         
     def update_details(self):
         if not self.app.config.get('show_details'):

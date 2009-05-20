@@ -49,7 +49,10 @@ class DialogConclusion(BaseWindow):
         self.action = action
         self.rename_by_schema = rename_by_schema                       
         self.__file_conclusions = file_conclusions
-         
+        self.forward_clicks = 0
+
+        self.get_window().show_all()
+                
         # basic show/hide
         widgets_hidden = []
         if self.action == Action.DECODE:
@@ -62,7 +65,7 @@ class DialogConclusion(BaseWindow):
             self.get_widget(widget).hide()
                 
         self.show_conclusion(0)       
-        
+
         self.get_window().run()
         self.hide()
         return self.__file_conclusions
@@ -99,6 +102,7 @@ class DialogConclusion(BaseWindow):
     
     def on_button_forward_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter + 1)
+        self.forward_clicks += 1
         
     def show_conclusion(self, new_iter):
         self.conclusion_iter = new_iter
@@ -110,15 +114,15 @@ class DialogConclusion(BaseWindow):
         self.get_widget('button_forward').set_sensitive(not (self.conclusion_iter + 1 == len(self.__file_conclusions)))               
                 
         # status message
-        if self.action != Action.CUT:
-            status, message = self.file_conclusion.decode.status, self.file_conclusion.decode.message
-            self.get_widget('label_decode_status').set_markup(self.__status_to_s(status, message))
-            self.get_widget('label_filename').set_markup("<b>%s</b>" % os.path.basename(self.file_conclusion.otrkey))
-            
         if self.action != Action.DECODE:
             status, message = self.file_conclusion.cut.status, self.file_conclusion.cut.message
             self.get_widget('label_cut_status').set_markup(self.__status_to_s(status, message))
             self.get_widget('label_filename').set_markup("<b>%s</b>" % os.path.basename(self.file_conclusion.uncut_video))
+        
+        if self.action != Action.CUT:
+            status, message = self.file_conclusion.decode.status, self.file_conclusion.decode.message
+            self.get_widget('label_decode_status').set_markup(self.__status_to_s(status, message))
+            self.get_widget('label_filename').set_markup("<b>%s</b>" % os.path.basename(self.file_conclusion.otrkey))
         
         # fine tuning              
         if self.action == Action.DECODE:
@@ -139,7 +143,7 @@ class DialogConclusion(BaseWindow):
             self.get_widget('box_rename').props.visible = cut_ok           
             
             if cut_ok:        
-                rename_list = [os.path.basename(self.file_conclusion.uncut_video), self.rename_by_schema(os.path.basename(self.file_conclusion.uncut_video))]
+                rename_list = [os.path.basename(self.file_conclusion.cut_video), self.rename_by_schema(os.path.basename(self.file_conclusion.uncut_video))]
                 
                 if self.file_conclusion.cut.cutlist.filename:
                     rename_list.append(self.file_conclusion.cut.cutlist.filename)

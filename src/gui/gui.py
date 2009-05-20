@@ -82,7 +82,7 @@ class Gui:
         result = dialog.run()
         dialog.destroy()
         
-        return result==gtk.RESPONSE_YES
+        return result == gtk.RESPONSE_YES
         
     def __get_dialog(self, message_type, message_buttons, message_text):
         return gtk.MessageDialog(

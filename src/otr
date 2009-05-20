@@ -18,15 +18,11 @@ except:
     sys.exit(-1)
 
 if exists(join(sys.path[0], 'otrpath.py')):    
-    # if not installed, use local config files
-    f = open(join(sys.path[0], 'conf'), 'a')
-    f.close()
-    f = open(join(sys.path[0], 'pluginconf'), 'a')
-    f.close()
+    LOCAL = True
 else:
+    LOCAL = False
     sys.path.insert(0, "/usr/share/otr-verwaltung")
     
-
 # intern
 from gui.gui import Gui
 from pluginsystem import PluginSystem
@@ -76,7 +72,7 @@ class App:
         }
             
         # read configs
-        if exists(otrpath.get_path('conf')):
+        if LOCAL:
             self.config = Config(otrpath.get_path('conf'), config_dic)
         else:
             self.config = Config(otrpath.get_config_path('conf'), config_dic)
@@ -96,12 +92,14 @@ class App:
         self.__gui.preferences_window.update_config_values()
     
         # load plugins
-        if exists(otrpath.get_path('pluginconf')):
+        if LOCAL:
+            plugin_paths = [otrpath.get_path('plugins')]
             pluginconf_path = otrpath.get_path('pluginconf')
         else:
+            plugin_paths = otrpath.get_plugin_paths()
             pluginconf_path = otrpath.get_config_path('pluginconf')
     
-        self.plugin_system = PluginSystem(self, self.__gui, pluginconf_path, self.config.get('enabled_plugins'))
+        self.plugin_system = PluginSystem(self, self.__gui, pluginconf_path, plugin_paths, self.config.get('enabled_plugins'))
     
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
@@ -110,8 +108,8 @@ class App:
         self.planned_broadcasts.read_config(self.config.get('planned_items'))
         
         self.__gui.main_window.broadcasts_badge()                         
-        self.__gui.main_window.update_details()                         
-                                
+        self.__gui.main_window.update_details()        
+             
     ### 
     ### Show sections
     ###

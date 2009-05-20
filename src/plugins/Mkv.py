@@ -10,8 +10,8 @@ from pluginsystem import Plugin
 from constants import Section
 
 class Mkv(Plugin):
-    Name = "MKV"
-    Desc = "Wandelt avi-Dateien mit Hilfe von mkvmerge in mkv-Dateien um."
+    Name = "MKV *NICHT FUNKTIONSFÄHIG*"
+    Desc = "*NICHT FUNKTIONSFÄHIG* Wandelt avi-Dateien mit Hilfe von mkvmerge in mkv-Dateien um."
     Author = "Benjamin Elbers"
     Configurable = True
     Config = { 'mkvmerge': 'mkvmerge' }

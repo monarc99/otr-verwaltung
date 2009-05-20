@@ -95,7 +95,6 @@
               <object class="GtkVBox" id="vbox_details">
                 <property name="width_request">250</property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">8</property>
                 <child>

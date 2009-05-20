@@ -49,7 +49,7 @@ class Plugin:
                 
 class PluginSystem:
     
-    def __init__(self, app, gui, conf_path, enabled_plugins=''):
+    def __init__(self, app, gui, conf_path, plugin_paths, enabled_plugins=''):
         self.plugins = {} # name : plugin instance
         self.enabled_plugins = [plugin for plugin in enabled_plugins.split(':') if plugin] # list of names
         self.conf_path = conf_path
@@ -60,9 +60,8 @@ class PluginSystem:
         if os.path.isfile(conf_path):           
             self.parser.read(conf_path)            
        
-        plugin_paths = otrpath.get_plugin_paths()
         print "[Plugins] Paths to search: ", plugin_paths
-                              
+                                     
         for path in plugin_paths:                  
             sys.path.append(path)           
             
@@ -72,6 +71,9 @@ class PluginSystem:
                 if extension == ".py":                        
                     plugin_module = __import__(plugin_name)
                     # instanciate plugin
+                    
+                    if not hasattr(plugin_module, plugin_name):
+                        continue
                     
                     self.plugins[plugin_name] = getattr(plugin_module, plugin_name)(app, gui, os.path.dirname(plugin_module.__file__))
                     

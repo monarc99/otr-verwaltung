@@ -34,7 +34,6 @@ class DialogPlugins(BaseWindow):
         iter = store.get_iter(path)
         store.set_value(iter, 0, not store.get_value(iter, 0))
         
-        self.get_widget('vbox_details').set_sensitive(store.get_value(iter, 0))
         if store.get_value(iter, 0): # enable or disable plugin
             self.gui.app.plugin_system.enable(store.get_value(iter, 3))
         else:
@@ -42,9 +41,7 @@ class DialogPlugins(BaseWindow):
         
     def on_selection_changed(self, selection, data=None):
         store, iter = selection.get_selected()       
-        if not iter: return
-       
-        self.get_widget('vbox_details').set_sensitive(store.get_value(iter, 0))
+        if not iter: return      
         
         self.get_widget('label_name').set_markup("<b>%s</b>" % store.get_value(iter, 1))
         self.get_widget('label_desc').set_markup("<b>Beschreibung: </b>\n%s" % store.get_value(iter, 2))

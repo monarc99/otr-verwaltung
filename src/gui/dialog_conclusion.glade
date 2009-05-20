@@ -34,7 +34,6 @@
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
                     <property name="label" translatable="yes">x</property>
-                    <property name="wrap">True</property>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -147,7 +146,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTable" id="table_buttons">
+              <object class="GtkTable" id="box_buttons">
                 <property name="visible">True</property>
                 <property name="n_rows">3</property>
                 <property name="n_columns">2</property>
@@ -285,6 +284,15 @@
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
                 <child>
+                  <object class="GtkHSeparator" id="hseparator2">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkCheckButton" id="check_create_cutlist">
                     <property name="label" translatable="yes">Cutlist erstellen</property>
                     <property name="visible">True</property>
@@ -295,7 +303,7 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -333,12 +341,6 @@
                         <child>
                           <object class="GtkComboBox" id="combobox_own_rating">
                             <property name="visible">True</property>
-                            <property name="tooltip_text" translatable="yes">0 - Dummy oder keine Cutlist
-1 - Anfang und Ende grob geschnitten
-2 - Anfang und Ende halbwegs genau geschnitten
-3 - Schnitt annehmbar und Werbung entfernt
-4 - doppelte Szenen nicht entfernt oder sch&#xF6;nere Schnitte m&#xF6;glich
-5 - s&#xE4;mtliches unerw&#xFC;nschtes Material framegenau entfernt</property>
                             <property name="model">liststore_ratings</property>
                             <property name="active">0</property>
                             <signal name="changed" handler="on_combobox_own_rating_changed"/>
@@ -542,7 +544,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="padding">3</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -662,7 +664,7 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">Culist nicht bewerten</col>
+        <col id="0" translatable="yes">Cutlist nicht bewerten</col>
       </row>
       <row>
         <col id="0" translatable="yes">0 - Dummy/keine Cutlist</col>
