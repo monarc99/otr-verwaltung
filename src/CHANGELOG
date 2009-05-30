@@ -1,3 +1,6 @@
+0.7.1:
+    * Planungsdialog wurde bei Fehlermeldung beendet
+
 0.7:
     * Bugfix: Weiteres Problem beim Umbenennen
     * Es werden mehr Video-Formate angezeigt und beim Suchen etc. unterstützt

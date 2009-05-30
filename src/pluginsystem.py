@@ -6,8 +6,11 @@ import ConfigParser
 
 import otrpath
 
-class Plugin:       
+class Plugin:  
+    """ Basisklasse für Plugins """
+     
     Name = "Name of Plugin"
+    """ Name des Plugins """
     Desc = "Description of Plugin"
     Author = "Author of Plugin"
     Configurable = False
@@ -41,7 +44,7 @@ class Plugin:
         return dialog
     
     def get_path(self, file=None):
-        """ """
+        
         if file:    
             return os.path.join(self.dirname, file)
         else:

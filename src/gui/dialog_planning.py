@@ -52,12 +52,12 @@ class DialogPlanning(BaseWindow):
            
         return self.run()
     
-    def on_button_ok_clicked(self, dialog, data=None):
+    def _on_button_ok_clicked(self, dialog, data=None):
         # validate time
         if self.get_widget('entry_broadcast').get_text()=="":
             self.gui.message_error_box('Der Titel der Sendung ist nicht angegeben!')
             return
-        
+
         try:
             hour, minute = self.get_widget('entry_time').get_text().split(':')               
             assert int(hour) in range(24)

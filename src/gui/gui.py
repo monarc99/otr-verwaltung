@@ -20,11 +20,12 @@ from dialog_plugins import DialogPlugins
 import otrpath
 
 class Gui:
+    
     def __init__(self, app):
         self.app = app
            
         # TODO: einheitliches benennungsschema für widgets: MainWindow oder main_window        
-        self.main_window = MainWindow(app, self)
+        self.main_window = MainWindow(app, self)        
         self.preferences_window = PreferencesWindow(app, self, self.main_window)
         self.dialog_archive = DialogArchive(self.main_window)
         self.dialog_conclusion = DialogConclusion(app, self, self.main_window)
@@ -74,11 +75,11 @@ class Gui:
                     
         dialog.run()
         dialog.destroy()
-    
+
     def question_box(self, message_text):
         dialog = self.__get_dialog(gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, \
                                                                 message_text)
-               
+                
         result = dialog.run()
         dialog.destroy()
         

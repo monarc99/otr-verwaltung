@@ -12,7 +12,8 @@ import fileoperations
 import otrpath
 
 class DialogCut(BaseWindow):
-    
+    """ Dialog, um den Schnittmodus constants.Cut_action und ggf die Cutlist auszuwählen """ 
+   
     def __init__(self, app, gui, parent):
         self.gui = gui
         self.app = app
@@ -85,7 +86,7 @@ class DialogCut(BaseWindow):
             treeview.append_column(col)
             
         selection = treeview.get_selection()
-        selection.connect('changed', self.on_selection_changed)
+        selection.connect('changed', self._on_selection_changed)
     
         self.filename = ""
     
@@ -137,13 +138,13 @@ class DialogCut(BaseWindow):
     ### Signal handlers
     ###
     
-    def on_radio_manually_toggled(self, widget, data=None):
+    def _on_radio_manually_toggled(self, widget, data=None):
         self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
     
-    def on_radio_best_cutlist_toggled(self, widget, data=None):
+    def _on_radio_best_cutlist_toggled(self, widget, data=None):
         self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
         
-    def on_button_show_cuts_clicked(self, widget, data=None):
+    def _on_button_show_cuts_clicked(self, widget, data=None):
         cutlist = cutlists_management.Cutlist()
 
         if self.get_widget('radio_local_cutlist').get_active():
@@ -174,12 +175,12 @@ class DialogCut(BaseWindow):
         # delete cutlist
         fileoperations.remove_file(cutlist.local_filename)
     
-    def on_selection_changed(self, selection, data=None):     
+    def _on_selection_changed(self, selection, data=None):     
         model, paths = selection.get_selected_rows()
         if paths:
             self.get_widget('radio_choose_cutlist').set_active(True)
        
-    def on_buttonCutOK_clicked(self, widget, data=None):
+    def _on_buttonCutOK_clicked(self, widget, data=None):
         if self.get_widget('radio_best_cutlist').get_active() == True:
             self.get_window().response(Cut_action.BEST_CUTLIST)
 

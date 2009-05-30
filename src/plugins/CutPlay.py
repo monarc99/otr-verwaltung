@@ -5,7 +5,6 @@ import subprocess, time
 import os.path
 import gtk
 
-
 from pluginsystem import Plugin
 
 import cutlists as cutlists_management

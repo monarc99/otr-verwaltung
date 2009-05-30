@@ -111,7 +111,7 @@ class PreferencesWindow(BaseWindow):
              
     #  Signal handlers
 
-    def on_button_set_file_clicked(self, entry, data=None):    
+    def _on_button_set_file_clicked(self, entry, data=None):    
         chooser = gtk.FileChooserDialog(title="Datei auswählen",
                                         action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                         buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
@@ -124,9 +124,9 @@ class PreferencesWindow(BaseWindow):
     
         chooser.destroy()
     
-    def on_preferences_buttonClose_clicked(self, widget, data=None):    
+    def _on_preferences_buttonClose_clicked(self, widget, data=None):    
         self.hide()    
 
-    def on_preferences_window_delete_event(self, window, event):        
+    def _on_preferences_window_delete_event(self, window, event):        
         self.hide()
         return True # don't destroy

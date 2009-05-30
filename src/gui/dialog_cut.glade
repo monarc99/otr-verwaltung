@@ -52,7 +52,7 @@
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <signal name="clicked" handler="on_button_show_cuts_clicked"/>
+                    <signal name="clicked" handler="_on_button_show_cuts_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -74,7 +74,7 @@
                 <property name="receives_default">False</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
-                <signal name="toggled" handler="on_radio_best_cutlist_toggled"/>
+                <signal name="toggled" handler="_on_radio_best_cutlist_toggled"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -215,7 +215,7 @@
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radio_best_cutlist</property>
-                        <signal name="toggled" handler="on_radio_manually_toggled"/>
+                        <signal name="toggled" handler="_on_radio_manually_toggled"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -288,7 +288,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="image_position">right</property>
-                <signal name="clicked" handler="on_buttonCutOK_clicked"/>
+                <signal name="clicked" handler="_on_buttonCutOK_clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>

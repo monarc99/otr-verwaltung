@@ -8,7 +8,7 @@
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
-    <signal name="delete_event" handler="on_preferences_window_delete_event"/>
+    <signal name="delete_event" handler="_on_preferences_window_delete_event"/>
     <child>
       <object class="GtkVBox" id="vbox2">
         <property name="visible">True</property>
@@ -279,7 +279,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <signal name="clicked" handler="on_button_set_file_clicked" object="entry_decoder"/>
+                            <signal name="clicked" handler="_on_button_set_file_clicked" object="entry_decoder"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -464,7 +464,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="on_button_set_file_clicked" object="combobox_man_mp4"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_mp4"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -496,7 +496,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="on_button_set_file_clicked" object="combobox_man_hq"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_hq"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -528,7 +528,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="on_button_set_file_clicked" object="combobox_man_avi" after="yes"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_avi" after="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -560,7 +560,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="on_button_set_file_clicked" object="combobox_mp4"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_mp4"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -592,7 +592,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="on_button_set_file_clicked" object="combobox_hq"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_hq"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -624,7 +624,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="on_button_set_file_clicked" object="combobox_avi"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_avi"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1123,7 +1123,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <signal name="clicked" handler="on_button_set_file_clicked" object="comboboxPlayer"/>
+                            <signal name="clicked" handler="_on_button_set_file_clicked" object="comboboxPlayer"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1368,7 +1368,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_preferences_buttonClose_clicked"/>
+                <signal name="clicked" handler="_on_preferences_buttonClose_clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>

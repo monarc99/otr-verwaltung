@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 
 class Section:
+    """ Die verschiedenen Ansichten """
     PLANNING    = 6
+    """ Geplante Sendungen"""
     OTRKEY      = 0
+    """ Nicht dekodiert """
     VIDEO_UNCUT = 1
     VIDEO_CUT   = 2
     ARCHIVE     = 3

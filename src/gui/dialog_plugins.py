@@ -13,7 +13,7 @@ class DialogPlugins(BaseWindow):
     
         BaseWindow.__init__(self, "dialog_plugins", parent)
         
-        self.get_widget('treeview_plugins').get_selection().connect('changed', self.on_selection_changed)
+        self.get_widget('treeview_plugins').get_selection().connect('changed', self._on_selection_changed)
         
     def run(self):
         self.get_widget('liststore_plugins').clear()
@@ -28,7 +28,7 @@ class DialogPlugins(BaseWindow):
         self.get_window().run()
         self.hide()
         
-    def on_cellrenderer_enabled_toggled(self, widget, path, data=None):
+    def _on_cellrenderer_enabled_toggled(self, widget, path, data=None):
         store = self.get_widget('liststore_plugins')
     
         iter = store.get_iter(path)
@@ -39,7 +39,7 @@ class DialogPlugins(BaseWindow):
         else:
             self.gui.app.plugin_system.disable(store.get_value(iter, 3))            
         
-    def on_selection_changed(self, selection, data=None):
+    def _on_selection_changed(self, selection, data=None):
         store, iter = selection.get_selected()       
         if not iter: return      
         
@@ -49,7 +49,7 @@ class DialogPlugins(BaseWindow):
         self.get_widget('label_author').set_markup("<b>Autor: </b>\n%s" % self.gui.app.plugin_system.plugins[name].Author)
         self.get_widget('button_config').set_sensitive(self.gui.app.plugin_system.plugins[name].Configurable)
         
-    def on_button_config_clicked(self, widget, data=None):
+    def _on_button_config_clicked(self, widget, data=None):
         store, iter = self.get_widget('treeview_plugins').get_selection().get_selected()   
         name = store.get_value(iter, 3)       
         

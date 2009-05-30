@@ -30,9 +30,9 @@ class DialogConclusion(BaseWindow):
     def __init__(self, app, gui, parent):
         self.app = app
         self.gui = gui
-            
+           
         BaseWindow.__init__(self, "dialog_conclusion", parent)       
-
+                
         self.get_widget('check_create_cutlist').modify_font(pango.FontDescription("bold"))
               
         for combobox in ['combobox_external_rating', 'combobox_own_rating']:
@@ -97,10 +97,10 @@ class DialogConclusion(BaseWindow):
     ### Controls
     ###
 
-    def on_button_back_clicked(self, widget, data=None):
+    def _on_button_back_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter - 1)
     
-    def on_button_forward_clicked(self, widget, data=None):
+    def _on_button_forward_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter + 1)
         self.forward_clicks += 1
         
@@ -196,69 +196,69 @@ class DialogConclusion(BaseWindow):
     
     # box_buttons
     
-    def on_button_play_clicked(self, widget, data=None):
+    def _on_button_play_clicked(self, widget, data=None):
         if self.action == Action.DECODE or (self.action == Action.DECODEANDCUT and self.file_conclusion.cut.status != Status.OK):
             self.app.play_file(self.file_conclusion.uncut_video)
         else:
             self.app.play_file(self.file_conclusion.cut_video)
   
-    def on_button_conclusion_play_cut_clicked(self, widget, data=None):
+    def _on_button_conclusion_play_cut_clicked(self, widget, data=None):
         self.app.show_cuts_after_cut(self.file_conclusion.cut_video, self.file_conclusion.cut.cutlist)    
 
-    def on_combobox_external_rating_changed(self, widget, data=None):
+    def _on_combobox_external_rating_changed(self, widget, data=None):
         rating = widget.get_active() - 1 
         print "[Conclusion] cut.my_rating = ", rating
         self.file_conclusion.cut.my_rating = rating
 
-    def on_check_delete_uncut_toggled(self, widget, data=None):
+    def _on_check_delete_uncut_toggled(self, widget, data=None):
         print "[Conclusion] cut.delete_uncut = ", widget.get_active()
         self.file_conclusion.cut.delete_uncut = widget.get_active()
    
-    def on_comboboxentry_rename_changed(self, widget, data=None):
+    def _on_comboboxentry_rename_changed(self, widget, data=None):
         print "[Conclusion] cut.rename = ", widget.child.get_text()
         self.file_conclusion.cut.rename = widget.child.get_text()
     
     # box_create_cutlist           
-    def on_check_create_cutlist_toggled(self, widget, data=None):
+    def _on_check_create_cutlist_toggled(self, widget, data=None):
         create_cutlist = widget.get_active()
         print "[Conclusion] cut.create_cutlist = ", create_cutlist
         self.file_conclusion.cut.create_cutlist = create_cutlist
         self.get_widget('box_create_cutlist_options').set_sensitive(create_cutlist)
         
-    def on_combobox_own_rating_changed(self, widget, data=None):
+    def _on_combobox_own_rating_changed(self, widget, data=None):
         ratingbyauthor = widget.get_active() - 1 
         print "[Conclusion] cut.cutlist.ratingbyauthor = ", ratingbyauthor
         self.file_conclusion.cut.cutlist.ratingbyauthor = ratingbyauthor
         
-    def on_check_wrong_content_toggled(self, widget, data=None):
+    def _on_check_wrong_content_toggled(self, widget, data=None):
         print "[Conclusion] cut.cutlist.wrong_content = ", widget.get_active()
         self.file_conclusion.cut.cutlist.wrong_content = widget.get_active()
 
-    def on_entry_actual_content_changed(self, widget, data=None):
+    def _on_entry_actual_content_changed(self, widget, data=None):
         print "[Conclusion] cut.cutlist.actualcontent = ", widget.get_text()
         self.file_conclusion.cut.cutlist.actualcontent = widget.get_text()
 
-    def on_check_missing_beginning_toggled(self, widget, data=None):
+    def _on_check_missing_beginning_toggled(self, widget, data=None):
         print "[Conclusion] cut.cutlist.missing_beginning = ", widget.get_active()
         self.file_conclusion.cut.cutlist.missing_beginning = widget.get_active()
 
-    def on_check_missing_ending_toggled(self, widget, data=None):
+    def _on_check_missing_ending_toggled(self, widget, data=None):
         print "[Conclusion] cut.cutlist.missing_ending = ", widget.get_active()        
         self.file_conclusion.cut.cutlist.missing_ending = widget.get_active()
 
-    def on_check_other_error_toggled(self, widget, data=None):
+    def _on_check_other_error_toggled(self, widget, data=None):
         print "[Conclusion] cut.cutlist.other_error = ", widget.get_active()
         self.file_conclusion.cut.cutlist.other_error = widget.get_active()
 
-    def on_entry_other_error_description_changed(self, widget, data=None):
+    def _on_entry_other_error_description_changed(self, widget, data=None):
         print "[Conclusion] cut.cutlist.othererrordescription = ", widget.get_text()
         self.file_conclusion.cut.cutlist.othererrordescription = widget.get_text()
 
-    def on_entry_suggested_changed(self, widget, data=None):
+    def _on_entry_suggested_changed(self, widget, data=None):
         print "[Conclusion] cut.cutlist.suggested_filename = ", widget.get_text()
         self.file_conclusion.cut.cutlist.suggested_filename = widget.get_text()
 
-    def on_entry_comment_changed(self, widget, data=None):
+    def _on_entry_comment_changed(self, widget, data=None):
         print "[Conclusion] cut.cutlist.usercomment = ", widget.get_text()
         self.file_conclusion.cut.cutlist.usercomment = widget.get_text()
                     

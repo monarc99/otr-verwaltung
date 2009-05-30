@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-class PlanningException(Exception):
-    pass
-
 class PlanningItem():
     def __init__(self, status, title, datetime, station, rss_otrkey=""):
-        self.status = status
+        self.status = status        
         self.title = title
         self.datetime = datetime
         self.station = station

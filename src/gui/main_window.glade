@@ -6,8 +6,8 @@
     <property name="width_request">700</property>
     <property name="title" translatable="yes">OTR-Verwaltung</property>
     <property name="window_position">center</property>
-    <signal name="destroy" handler="on_main_window_destroy"/>
-    <signal name="delete_event" handler="on_main_window_delete_event"/>
+    <signal name="destroy" handler="_on_main_window_destroy"/>
+    <signal name="delete_event" handler="_on_main_window_delete_event"/>
     <child>
       <object class="GtkVBox" id="vboxMain">
         <property name="visible">True</property>
@@ -30,7 +30,7 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_menuFileQuit_activate"/>
+                        <signal name="activate" handler="_on_menuFileQuit_activate"/>
                       </object>
                     </child>
                   </object>
@@ -51,7 +51,7 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_menuEditSearch_activate"/>
+                        <signal name="activate" handler="_on_menuEditSearch_activate"/>
                       </object>
                     </child>
                     <child>
@@ -64,7 +64,7 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Plugins</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_menuEditPlugins_activate"/>
+                        <signal name="activate" handler="_on_menuEditPlugins_activate"/>
                       </object>
                     </child>
                     <child>
@@ -73,7 +73,7 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_menuEditPreferences_activate"/>
+                        <signal name="activate" handler="_on_menuEditPreferences_activate"/>
                       </object>
                     </child>
                   </object>
@@ -93,7 +93,7 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Details</property>
                         <property name="use_underline">True</property>
-                        <signal name="toggled" handler="on_menuViewDetails_toggled"/>
+                        <signal name="toggled" handler="_on_menuViewDetails_toggled"/>
                       </object>
                     </child>
                   </object>
@@ -114,7 +114,7 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_menuHelpHelp_activate"/>
+                        <signal name="activate" handler="_on_menuHelpHelp_activate"/>
                       </object>
                     </child>
                     <child>
@@ -127,7 +127,7 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Auf Update pr&#xFC;fen</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_menu_check_update_activate"/>
+                        <signal name="activate" handler="_on_menu_check_update_activate"/>
                       </object>
                     </child>
                     <child>
@@ -141,7 +141,7 @@
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_menuHelpAbout_activate"/>
+                        <signal name="activate" handler="_on_menuHelpAbout_activate"/>
                       </object>
                     </child>
                   </object>
@@ -210,7 +210,7 @@
                     </child>
                     <child>
                       <object class="GtkEventBox" id="eventbox_cancel">
-                        <signal name="button_press_event" handler="on_eventbox_cancel_button_press_event"/>
+                        <signal name="button_press_event" handler="_on_eventbox_cancel_button_press_event"/>
                         <child>
                           <object class="GtkImage" id="image_cancel">
                             <property name="visible">True</property>
@@ -278,9 +278,9 @@
                             <property name="can_focus">True</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">Durchsuchen</property>
-                            <signal name="button_press_event" handler="on_entry_search_button_press_event"/>
-                            <signal name="changed" handler="on_entry_search_changed"/>
-                            <signal name="focus_out_event" handler="on_entry_search_focus_out_event"/>
+                            <signal name="button_press_event" handler="_on_entry_search_button_press_event"/>
+                            <signal name="changed" handler="_on_entry_search_changed"/>
+                            <signal name="focus_out_event" handler="_on_entry_search_focus_out_event"/>
                           </object>
                           <packing>
                             <property name="position">0</property>
@@ -291,7 +291,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <signal name="clicked" handler="on_buttonClear_clicked"/>
+                            <signal name="clicked" handler="_on_buttonClear_clicked"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -343,7 +343,7 @@
                         <child>
                           <object class="GtkEventBox" id="eventboxPlanningCurrentCount">
                             <property name="visible">True</property>
-                            <signal name="button_release_event" handler="on_eventboxPlanningCurrentCount_button_release_event"/>
+                            <signal name="button_release_event" handler="_on_eventboxPlanningCurrentCount_button_release_event"/>
                             <child>
                               <object class="GtkLabel" id="labelPlanningCurrentCount">
                                 <property name="width_request">30</property>

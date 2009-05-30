@@ -160,7 +160,7 @@
                     <property name="receives_default">False</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
-                    <signal name="toggled" handler="on_check_delete_uncut_toggled"/>
+                    <signal name="toggled" handler="_on_check_delete_uncut_toggled"/>
                   </object>
                   <packing>
                     <property name="right_attach">2</property>
@@ -177,7 +177,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">image1</property>
-                    <signal name="clicked" handler="on_button_play_clicked"/>
+                    <signal name="clicked" handler="_on_button_play_clicked"/>
                   </object>
                   <packing>
                     <property name="x_options">GTK_FILL</property>
@@ -191,7 +191,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">image2</property>
-                    <signal name="clicked" handler="on_button_conclusion_play_cut_clicked"/>
+                    <signal name="clicked" handler="_on_button_conclusion_play_cut_clicked"/>
                   </object>
                   <packing>
                     <property name="top_attach">1</property>
@@ -228,7 +228,7 @@
 5 - s&#xE4;mtliches unerw&#xFC;nschtes Material framegenau entfernt</property>
                         <property name="model">liststore_ratings</property>
                         <property name="active">0</property>
-                        <signal name="changed" handler="on_combobox_external_rating_changed"/>
+                        <signal name="changed" handler="_on_combobox_external_rating_changed"/>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -261,7 +261,7 @@
                     <child>
                       <object class="GtkComboBoxEntry" id="comboboxentry_rename">
                         <property name="visible">True</property>
-                        <signal name="changed" handler="on_comboboxentry_rename_changed"/>
+                        <signal name="changed" handler="_on_comboboxentry_rename_changed"/>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -299,7 +299,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
-                    <signal name="toggled" handler="on_check_create_cutlist_toggled"/>
+                    <signal name="toggled" handler="_on_check_create_cutlist_toggled"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -343,7 +343,7 @@
                             <property name="visible">True</property>
                             <property name="model">liststore_ratings</property>
                             <property name="active">0</property>
-                            <signal name="changed" handler="on_combobox_own_rating_changed"/>
+                            <signal name="changed" handler="_on_combobox_own_rating_changed"/>
                           </object>
                           <packing>
                             <property name="position">2</property>
@@ -365,7 +365,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">&#x25CF;</property>
-                            <signal name="changed" handler="on_entry_comment_changed"/>
+                            <signal name="changed" handler="_on_entry_comment_changed"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -388,7 +388,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">&#x25CF;</property>
-                            <signal name="changed" handler="on_entry_suggested_changed"/>
+                            <signal name="changed" handler="_on_entry_suggested_changed"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -434,7 +434,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_check_wrong_content_toggled"/>
+                            <signal name="toggled" handler="_on_check_wrong_content_toggled"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -461,7 +461,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
-                                <signal name="changed" handler="on_entry_actual_content_changed"/>
+                                <signal name="changed" handler="_on_entry_actual_content_changed"/>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -480,7 +480,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_check_missing_beginning_toggled"/>
+                            <signal name="toggled" handler="_on_check_missing_beginning_toggled"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -494,7 +494,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_check_missing_ending_toggled"/>
+                            <signal name="toggled" handler="_on_check_missing_ending_toggled"/>
                           </object>
                           <packing>
                             <property name="position">4</property>
@@ -511,7 +511,7 @@
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_check_other_error_toggled"/>
+                                <signal name="toggled" handler="_on_check_other_error_toggled"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -523,7 +523,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
-                                <signal name="changed" handler="on_entry_other_error_description_changed"/>
+                                <signal name="changed" handler="_on_entry_other_error_description_changed"/>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -593,7 +593,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_button_back_clicked"/>
+                    <signal name="clicked" handler="_on_button_back_clicked"/>
                   </object>
                   <packing>
                     <property name="position">0</property>
@@ -616,7 +616,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_button_forward_clicked"/>
+                    <signal name="clicked" handler="_on_button_forward_clicked"/>
                   </object>
                   <packing>
                     <property name="position">0</property>

@@ -52,7 +52,7 @@
                       <object class="GtkTreeViewColumn" id="treeviewcolumn2">
                         <child>
                           <object class="GtkCellRendererToggle" id="cellrenderer_enabled">
-                            <signal name="toggled" handler="on_cellrenderer_enabled_toggled"/>
+                            <signal name="toggled" handler="_on_cellrenderer_enabled_toggled"/>
                           </object>
                           <attributes>
                             <attribute name="active">0</attribute>
@@ -105,7 +105,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_button_config_clicked"/>
+                    <signal name="clicked" handler="_on_button_config_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
