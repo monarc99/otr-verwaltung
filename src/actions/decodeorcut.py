@@ -692,7 +692,7 @@ class DecodeOrCut(BaseAction):
         except OSError:
             return None, "Avidemux konnte nicht aufgerufen werden: " + config_value
         
-        self.__gui.main_window.set_task_progress(50)
+        self.__gui.main_window.set_tasks_progress(50)
         
         while avidemux.poll() == None:
             time.sleep(1)
@@ -736,6 +736,8 @@ class DecodeOrCut(BaseAction):
                 os.chdir(dirname(config_value))
             except OSError:        
                 return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
+    
+        self.__gui.main_window.set_tasks_progress(50)
     
         f = open("tmp.vcf", "w")
         

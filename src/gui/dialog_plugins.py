@@ -62,5 +62,3 @@ class DialogPlugins(BaseWindow):
         dialog.show_all()
         dialog.run()
         dialog.hide()
-         
-        
