@@ -7,6 +7,7 @@ from os.path import join, isdir, exists
 import re
 import subprocess
 import time
+import hashlib
 
 try:
     from gtk import events_pending, main_iteration
@@ -35,10 +36,13 @@ from planning import Planning
 import otrpath
 
 class App:
+    """ Hauptklasse des Programms. """
+    
+    section = Section.OTRKEY
+    """ Die aktuell angezeigt `~constants.Section`. Zum Ändern sollte die Funktion `~otr.App.show_section` verwendet werden. """
     
     def __init__(self):     
         config_dic = {
-            'show_details':         (bool, False),
             'folder_new_otrkeys':   (str, ''),
             'folder_uncut_avis':    (str, ''),
             'folder_cut_avis':      (str, ''),
@@ -68,14 +72,20 @@ class App:
             'rename_cut':           (bool, False),
             'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})'),
             'cutlist_mp4_as_hq':    (bool, False), # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
-            'enabled_plugins':      (str, 'Play')
+            'show_bottom':          (bool, False),
+            'enabled_plugins':      (str, 'Play'),
+            'cutlist_hash':         (str, hashlib.md5(str(time.time())).hexdigest()),
+            'window_settings':      (str, '')
         }
-            
+                   
         # read configs
         if LOCAL:
+            print "[Config] Path: ", otrpath.get_path('conf')
             self.config = Config(otrpath.get_path('conf'), config_dic)
         else:
+            print "[Config] Path: ", otrpath.get_config_path('conf')
             self.config = Config(otrpath.get_config_path('conf'), config_dic)
+        self.config.read()                
 
         self.__search_text = ""
         self.locked = False
@@ -83,13 +93,16 @@ class App:
         # regex
         self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
         self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
-    
-        self.section = Section.OTRKEY
-    
+       
         # load gui
         self.__gui = Gui(self)
-        self.config.read()
         self.__gui.preferences_window.update_config_values()
+    
+        if self.config.get('window_settings'):
+            maximize, width, height = self.config.get('window_settings').split(',')
+            if int(maximize):
+                self.__gui.main_window.get_window().maximize()            
+            self.__gui.main_window.get_window().resize(int(width), int(height))
     
         # load plugins
         if LOCAL:
@@ -107,18 +120,18 @@ class App:
         self.planned_broadcasts = Planning()
         self.planned_broadcasts.read_config(self.config.get('planned_items'))
         
-        self.__gui.main_window.broadcasts_badge()                         
-        self.__gui.main_window.update_details()        
+        self.__gui.main_window.broadcasts_badge()                           
              
     ### 
     ### Show sections
     ###
     
     def show_section(self, section):
-        """ Shows one of the five different sections. 
-            - set files of treeview
-            - set section-variable to current section
-            - set appropriate toolbar"""
+        """ Zeigt eine der verschiedenen `Sections <constants.Section>` an. 
+                        
+            * aktualisiert einen Treeview und zeigt den korrekten an
+            * setzt die aktuelle `~otr.App.section`
+            * zeigt die korrekten Toolbuttons an """
 
         # set current section
         self.section = section
@@ -131,31 +144,27 @@ class App:
         text = ""
         
         if section == Section.PLANNING:
-            text = self.section_planning()
-            
-            self.__gui.main_window.get_widget('table_details').hide()            
+            text = self.__section_planning()
+      
             self.__gui.main_window.show_planning(True)
         else:
             self.__gui.main_window.show_planning(False)
-            
-            if self.config.get('show_details'):
-                self.__gui.main_window.get_widget('table_details').show()
         
         if section == Section.OTRKEY:
-            text, files = self.section_otrkey()
+            text, files = self.__section_otrkey()
         
         elif section == Section.VIDEO_UNCUT:
-            text, files = self.section_video_uncut()   
+            text, files = self.__section_video_uncut()   
 
         elif section == Section.VIDEO_CUT:
-            text, files = self.section_video_cut()   
+            text, files = self.__section_video_cut()   
 
         elif section == Section.TRASH:
-            text, files = self.section_trash()   
+            text, files = self.__section_trash()   
 
         elif section == Section.ARCHIVE: 
             # returns NO files       
-            text = self.section_archive()
+            text = self.__section_archive()
 
         if len(files) > 0: # this is not executed when the section is "Archive"
             if len(files) == 1:
@@ -168,34 +177,34 @@ class App:
             # put filenames into treestore
             for f in files:
                 # TODO: don't show files if in use
-                self.append_row_treeview_files(None, f)
+                self.__append_row_treeview_files(None, f)
 
         # set message text
-        self.__gui.main_window.get_widget('labelMessage').set_text(text)
+        self.__gui.main_window.get_widget('labelMessage').set_markup(text)
 
 
     # helper for different sections
-    def section_planning(self):
+    def __section_planning(self):
         text = "Diese Aufnahmen wurden geplant." 
        
         for count, broadcast in enumerate(self.planned_broadcasts):
             if self.search(broadcast.title):
-                self.__gui.main_window.append_row_planning(count)
+                self.__gui.main_window.append_row_planning(self.planned_broadcasts[count])
             
         return text
              
-    def section_otrkey(self):
+    def __section_otrkey(self):
         text = "Diese Dateien wurden noch nicht dekodiert." 
         path = self.config.get('folder_new_otrkeys')
         
-        if path == "":      
+        if path == "":
             return text, []
         
         files = [join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
             
         return (text, files)
          
-    def section_video_uncut(self):
+    def __section_video_uncut(self):
         text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config.get('folder_uncut_avis')
         
@@ -203,7 +212,7 @@ class App:
             
         return (text, files)
         
-    def section_video_cut(self):
+    def __section_video_cut(self):
         text = "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."
                 
         path = self.config.get('folder_cut_avis')
@@ -217,7 +226,7 @@ class App:
         
         return (text, files)
         
-    def section_trash(self):
+    def __section_trash(self):
         text = "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path = self.config.get('folder_trash')
                     
@@ -225,17 +234,17 @@ class App:
                 
         return (text, files)
 
-    def section_archive(self):
+    def __section_archive(self):
         text = "Diese Dateien wurden ins Archiv verschoben."
 
         path = self.config.get('folder_archive')
         
-        self.tree(None, path)        
+        self.__tree(None, path)        
         
         return text            
                  
     # recursive function for archive to add folders and files with a tree structure
-    def tree(self, parent=None, path=None):              
+    def __tree(self, parent=None, path=None):              
         if parent != None:            
             dir = self.__gui.main_window.get_widget('treeview_files').get_model().get_value(parent, 0)
         else:  # base path (archive directory)
@@ -248,18 +257,20 @@ class App:
             full_path = join(dir, file)
             
             if isdir(full_path):                
-                iter = self.append_row_treeview_files(parent, full_path)
-                self.tree(iter)
+                iter = self.__append_row_treeview_files(parent, full_path)
+                self.__tree(iter)
             else:
                 if self.cut_video.match(file):
                     if self.search(file):
-                        self.append_row_treeview_files(parent, full_path)
+                        self.__append_row_treeview_files(parent, full_path)
 
     ###
     ### Helpers
     ###
     
-    def rename_by_schema(self, filename, schema=""):   
+    def rename_by_schema(self, filename, schema=""):
+        """ Gibt den nach dem angegebenen Schema umbenannten Dateinamen zurück. Wird `schema` leer gelassen, so wird das eingestellte Schema verwendet. """
+    
         if schema == "":
             schema = self.config.get('rename_schema')        
         
@@ -312,7 +323,7 @@ class App:
         else:         
             return filename
      
-    def append_row_treeview_files(self, parent, filename):        
+    def __append_row_treeview_files(self, parent, filename):        
         iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
         return iter
      
@@ -322,16 +333,18 @@ class App:
     ### 
                       
     def start_search(self, search):
+        """ #FIXME """
+
         self.__search_text = search.lower()
 
         items = []        
         # create dict of counts
         counts = {}
 
-        for method, section in [(self.section_otrkey, Section.OTRKEY),
-                                (self.section_video_uncut, Section.VIDEO_UNCUT),
-                                (self.section_video_cut, Section.VIDEO_CUT),
-                                (self.section_trash, Section.TRASH)]:
+        for method, section in [(self.__section_otrkey, Section.OTRKEY),
+                                (self.__section_video_uncut, Section.VIDEO_UNCUT),
+                                (self.__section_video_cut, Section.VIDEO_CUT),
+                                (self.__section_trash, Section.TRASH)]:
             files = []
             text, items = method()   
             count = len(items)
@@ -366,13 +379,18 @@ class App:
             counts[Section.PLANNING] = ""
         
         self.show_section(self.section)                   
+        
         return counts
     
     def stop_search(self):
+        """ #FIXME """
+        
         self.__search_text = ""
         self.show_section(self.section)
         
     def search(self, f):
+        """ #FIXME """
+        
         if self.__search_text == "":
             return True
         else:    
@@ -386,7 +404,7 @@ class App:
     ###        
     
     def perform_action(self, chosen_action, filenames=None, broadcasts=None, cut_action=None):
-        """ Performs an action (toolbar, context menu, etc.) """
+        """ #FIXME """
        
         if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD, Action.PLAN_RSS]:
             if len(broadcasts) == 0 and not chosen_action in [Action.PLAN_ADD, Action.PLAN_RSS]:
@@ -466,6 +484,8 @@ class App:
             
     
     def play_file(self, filename):
+        """ #FIXME """        
+        
         try:        
             subprocess.Popen([self.config.get('player'), filename])    
         except OSError:
@@ -495,9 +515,11 @@ class App:
         fileoperations.remove_file(f_sub)
         
     def show_cuts(self, video_filename, cutlist):       
+        """ #FIXME """
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):            
             diff = 11
+            pre_diff = 5
             
             sub_count = 0
 
@@ -507,8 +529,8 @@ class App:
                 end = start + duration
 
                 f_edl.write("%s 0\n" % (start - diff))
-                f_edl.write("%s %s 0\n" % (start + diff, end - diff))
-                f_edl.write("%s " % (end + diff))
+                f_edl.write("%s %s 0\n" % (start + pre_diff, end - diff))
+                f_edl.write("%s " % (end + pre_diff))
 
                 for second in range(diff):
                     sub_count += 1
@@ -522,7 +544,7 @@ class App:
                     f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
                     f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
                 
-            f_edl.write("50000 0")         
+            f_edl.write("50000 0")
          
         error = cutlist.read_cuts()
                 
@@ -533,15 +555,17 @@ class App:
         self.__show(cutlist.cuts, video_filename, edl_subtitles_cb)            
     
     def show_cuts_after_cut(self, video_filename, cutlist):
+        """ #FIXME """
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):                    
             diff = 11
-            
+            pre_diff = 5
+                        
             length = 0
             sub_count = 0
                             
             for count, start, duration in cuts:
-                f_edl.write("%s %s 0\n" % (diff + length, length + duration - diff))
+                f_edl.write("%s %s 0\n" % (pre_diff + length, length + duration - diff))
                 length += duration
                 
                 # vor dem schnitt:
@@ -561,6 +585,8 @@ class App:
         self.__show(cutlist.cuts, video_filename, edl_subtitles_cb)
     
     def format_seconds(self, seconds):
+        """ #FIXME """
+        
         hrs = seconds / 3600       
         leftover = seconds % 3600
         mins = leftover / 60
@@ -570,7 +596,10 @@ class App:
         return "%02d:%02d:%02d,%03d" % (hrs, mins, secs, ms)
                       
     def run(self):
+        """ #FIXME """
+        
         self.__gui.main_window.show()      
+        
 
         if self.config.get('folder_new_otrkeys') == "":      
             self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
@@ -582,9 +611,18 @@ class App:
         self.config.set('planned_items', self.planned_broadcasts.get_config())               
         self.config.set('enabled_plugins', self.plugin_system.get_enabled_config())
         
+
+        maximized = str(int(self.__gui.main_window.maximized))
+        width = str(self.__gui.main_window.size[0])
+        height = str(self.__gui.main_window.size[1])
+        
+        settings = ','.join([maximized, width, height])
+        self.config.set('window_settings', settings)
+        
         # save plugins' configuration
         self.plugin_system.save_config()
-             
-app = App()
-app.run()
-app.config.save()
+ 
+if __name__ == '__main__':            
+    app = App()
+    app.run()
+    app.config.save()
