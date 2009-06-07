@@ -48,7 +48,7 @@ class Cutlist:
         self.local_filename = None
         
   
-    def upload(self, server):
+    def upload(self, server, cutlist_hash):
         """ Uploads a cutlist to cutlist.at "
             Upload code from:  http://code.activestate.com/recipes/146306/ 
             
@@ -60,7 +60,7 @@ class Cutlist:
             '--' + boundary,
             'Content-Disposition: form-data; name="userid"',
             '',
-            'irgendeineuserid',
+            cutlist_hash,
             '--' + boundary,
             'Content-Disposition: form-data; name="userfile[]"; filename="%s"' % self.local_filename,
             '',

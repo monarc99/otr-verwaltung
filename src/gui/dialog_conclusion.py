@@ -162,7 +162,7 @@ class DialogConclusion(BaseWindow):
                 if cut_ok:
                     text = self.get_widget('label_cut_status').get_text()
                     
-                    text += "\nMit Cutlist %s geschnitten: Autor: <b>%s</b>, Wertung: <b>%s</b>" % (self.file_conclusion.cut.cutlist.id, self.file_conclusion.cut.cutlist.author, self.file_conclusion.cut.cutlist.rating)
+                    text += "\nMit Cutlist %s geschnitten: Autor: <b>%s</b>, Wertung: <b>%s</b>\nKommentar: <b>%s</b>" % (self.file_conclusion.cut.cutlist.id, self.file_conclusion.cut.cutlist.author, self.file_conclusion.cut.cutlist.rating, self.file_conclusion.cut.cutlist.usercomment)
                     
                     self.get_widget('label_cut_status').set_markup(text)
             else:

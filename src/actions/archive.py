@@ -62,8 +62,8 @@ class Archive(BaseAction):
                                 
                 if not new_name.endswith(extension):
                     new_name += extension
-            
-                new_name = join(dirname(f), new_name)
+
+                new_name = join(dirname(f), new_name.replace('/', '_'))
                 
                 if new_name != f:
                     fileoperations.rename_file(f, new_name)

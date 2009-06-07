@@ -11,7 +11,6 @@ class Section:
     VIDEO_CUT   = 2
     ARCHIVE     = 3
     TRASH       = 4
-    SEARCH      = 5
         
 class Action:
     # planning

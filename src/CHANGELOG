@@ -1,5 +1,14 @@
 0.7.1:
     * Planungsdialog wurde bei Fehlermeldung beendet
+    * Neue Abhängigkeiten im Deb-Paket: libgtk2.0-0 >= 2.16
+    * Das Programm startet nun auch, wenn Pfade für Ordner nicht existieren
+    * Die Nachlaufzeit beim Betrachten der Schnitte wurde gekürzt (5s statt 11s)
+    * Fehler beim Umbenennen wurden behoben ('/' im Dateinamen)
+    * Das Programm merkt sich die Größe des Fensters beim Schließen
+    * Die Anzeige von Details wie Aspect-Ratio und Länge des Films wurde als Plugin ausgelagert
+    * Funktionierendes Mkv-Plugin, noch ist es aber nicht möglich, nach dem Schneiden automatisch umzuwandeln
+    * API: Plugin-Autoren haben die Möglichkeit, in der Fußleiste Zusatzinformationen anzuzeigen, wie es jetzt auch für die Details verwendet wird (z.B. IMDb)
+    * API: Schönere Zugriffe auf die Aufgabenleiste (Fortschrittsbalken, Textfeld)
 
 0.7:
     * Bugfix: Weiteres Problem beim Umbenennen

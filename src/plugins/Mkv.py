@@ -5,19 +5,20 @@ import gtk
 import subprocess
 import time
 
+from GeneratorTask import GeneratorTask
 from pluginsystem import Plugin
 
 from constants import Section
 
 class Mkv(Plugin):
-    Name = "MKV *NICHT FUNKTIONSFÄHIG*"
-    Desc = "*NICHT FUNKTIONSFÄHIG* Wandelt avi-Dateien mit Hilfe von mkvmerge in mkv-Dateien um."
+    Name = "MKV"
+    Desc = "Wandelt avi-Dateien mit Hilfe von mkvmerge in mkv-Dateien um."
     Author = "Benjamin Elbers"
     Configurable = True
     Config = { 'mkvmerge': 'mkvmerge' }
         
     def enable(self):
-        self.toolbutton = self.gui.main_window.add_toolbutton(gtk.image_new_from_file(self.get_path('mkv.png')), 'In MKV konvertieren', [Section.VIDEO_UNCUT, Section.VIDEO_CUT, Section.ARCHIVE])
+        self.toolbutton = self.gui.main_window.add_toolbutton(gtk.image_new_from_file(self.get_path('mkv.png')), 'In Mkv umwandeln', [Section.VIDEO_UNCUT, Section.VIDEO_CUT, Section.ARCHIVE])
         self.toolbutton.connect('clicked', self.on_mkv_clicked)                        
         
     def disable(self):
@@ -44,19 +45,47 @@ class Mkv(Plugin):
         return dialog
 
     def on_mkv_clicked(self, widget, data=None):
-        for filename in self.gui.main_window.get_selected_filenames():
-            p = subprocess.Popen([self.Config['mkvmerge'], "-o", filename + ".mkv", filename], stdout=subprocess.PIPE)
-            
-            while p.poll() == None:
-                time.sleep(1)
+        self.toolbutton.set_sensitive(False)
+        filenames = self.gui.main_window.get_selected_filenames()
+        self.gui.main_window.set_tasks_visible(True)
+        self.success = 0
                 
-                # read progress from stdout 
-                # p.stdout.read()
-                
-                while gtk.events_pending():
-                    gtk.main_iteration(False)
-            # TODO: WRITE nice bindings to progress bar        
-            #           main_window.show_tasks
-            #           main_window.hide_tasks
-            #           main_window.set_tasks(text=None, progress=None)
-            
+        def mkvmerge():
+
+            for count, filename in enumerate(filenames):           
+                yield 0, count
+                self.progress = 0
+                p = subprocess.Popen([self.Config['mkvmerge'], "-o", filename + ".mkv", filename], stdout=subprocess.PIPE)
+                            
+                while p.poll() == None:
+                    # read progress from stdout 
+                    char = p.stdout.read(1)
+                    progress = ''
+                    if char == ':':
+                        while char != '%':
+                            char = p.stdout.read(1)
+                            progress += char
+                      
+                        try:
+                            self.progress = int(progress.strip(' %'))
+                            yield 1, self.progress                                
+                        except ValueError:
+                            pass
+
+                if self.progress == 100:
+                    self.success += 1
+                  
+        def loop(state, argument):
+            if state == 0:
+                self.gui.main_window.set_tasks_text("In Mkv Umwandeln %s/%s" % (str(argument + 1), str(len(filenames))))
+            else:                
+                self.gui.main_window.set_tasks_progress(argument)
+        
+        def complete():
+            self.gui.main_window.change_status(0, "Erfolgreich %s/%s Dateien umgewandelt." % (str(self.success), str(len(filenames))))
+            self.gui.main_window.set_tasks_visible(False)
+            if self.success > 0:
+                self.app.show_section(self.app.section)
+            self.toolbutton.set_sensitive(True)
+                        
+        GeneratorTask(mkvmerge, loop, complete).start()             

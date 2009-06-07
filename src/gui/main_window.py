@@ -188,8 +188,7 @@ class MainWindow(BaseWindow):
         
         # allow multiple selection
         treeselection = treeview.get_selection()
-        treeselection.set_mode(gtk.SELECTION_MULTIPLE)
-        treeselection.connect('changed', lambda callback: self.update_details())
+        treeselection.set_mode(gtk.SELECTION_MULTIPLE)        
                
         # sorting
         treeview.get_model().set_sort_func(0, self.__tv_files_sort, None)
@@ -200,11 +199,9 @@ class MainWindow(BaseWindow):
         self.__pix_otrkey = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('decode.png'))
         self.__pix_folder = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('folder.png'))
 
-    def __setup_widgets(self):
-        # details
-        self.get_widget('table_details').props.visible = self.__app.config.get('show_details')
-        self.get_widget('menuViewDetails').set_active(self.__app.config.get('show_details'))
-
+    def __setup_widgets(self):        
+        self.get_widget('menu_bottom').set_active(self.__app.config.get('show_bottom'))
+        
         self.get_widget('image_status').clear()
         
         self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
@@ -455,99 +452,26 @@ class MainWindow(BaseWindow):
                 self.get_widget('image_status').clear()
                    
             GeneratorTask(wait, None, completed).start()         
-        
-    def update_details(self):
-        if not self.__app.config.get('show_details'):
-            return
-        
-        if self.__app.section == Section.PLANNING:
-            return
+   
+    def set_tasks_visible(self, visible):
+        """ Zeigt/Versteckt einen Text und einen Fortschrittsbalken, um Aufgaben auszuführen. """
+        self.get_widget('eventbox_tasks').props.visible = visible        
+        self.get_widget('label_tasks').set_markup("")
+        self.get_widget('progressbar_tasks').set_fraction(0)
 
-        mplayer = self.__app.config.get('mplayer')
+    def set_tasks_text(self, text):
+        """ Zeigt den angegebenen Text im Aufgabenfenster an. """
+        self.get_widget('label_tasks').set_markup(text)
 
-        if not mplayer:
-            self.get_widget('label_filetype').set_text("Der MPlayer ist nicht installiert!")
-            return
-      
-        filenames = self.get_selected_filenames()
-      
-        if len(filenames) == 0:
-            self.reset_details("<b>Keine Datei markiert.</b>")
+    def set_tasks_progress(self, progress):
+        """ Setzt den Fortschrittsbalken auf die angegebene %-Zahl. """
+        self.get_widget('progressbar_tasks').set_fraction(progress / 100.)
         
-        elif len(filenames) > 1:
-            self.reset_details("<b>%s Dateien markiert.</b>" % len(filenames))
-        
-        else:
-            filename = filenames[0]
-           
-            extension = splitext(filename)[1]
-            
-            self.get_widget('label_filetype').set_markup("<b>%s-Datei</b>" % extension)
-            
-            if extension != ".otrkey":
-                # use mplayer to retrieve information          
-                
-                # prettify the output!
-                def prettify_aspect(aspect):
-                    if aspect == "1.7778":
-                        return "16:9" 
-                    elif aspect == "1.3333":
-                        return "4:3"
-                    else:
-                        return aspect
-                
-                def prettify_length(seconds):                       
-                    hrs = float(seconds) / 3600       
-                    leftover = float(seconds) % 3600
-                    mins = leftover / 60
-                    secs = leftover % 60
-                       
-                    return "%02d:%02d:%02d" % (hrs, mins, secs)
-                
-                values = (
-                    ("ID_VIDEO_ASPECT", 'label_aspect', prettify_aspect),
-                    ("ID_VIDEO_FORMAT", 'label_video_format', None),
-                    ("ID_LENGTH", 'label_length', prettify_length)
-                    )
-              
-                process = subprocess.Popen([mplayer, "-identify", "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)
-                      
-                while process.poll() == None:               
-                    line = process.stdout.readline().strip()
-
-                    for value, widget, callback in values:
-                        
-                        if line.startswith(value):
-                            # mplayer gives an output like this: ID_VIDEO_ASPECT=1.3333
-                            value = line.split("=")[1]
-                            
-                            if callback:
-                                value = callback(value)
-                            
-                            self.get_widget(widget).set_text(value)                                                         
-                        
-                        
-    def reset_details(self, filetype=""):
-        self.get_widget('label_filetype').set_markup(filetype)
-        self.get_widget('label_aspect').set_text("...")
-        self.get_widget('label_video_format').set_text("...")
-        self.get_widget('label_length').set_text("...")
-      
+          
     #
     #  Signal handlers
     #
-   
-    def _on_menuViewDetails_toggled(self, widget, data=None):
-        value = widget.get_active()
-        
-        self.__app.config.set('show_details', value)        
-        
-        self.get_widget('table_details').props.visible = value
-                        
-        if value:
-            self.update_details()
-            
-    
+               
     def _on_menu_check_update_activate(self, widget, data=None):
         current_version = open(otrpath.get_path("VERSION"), 'r').read().strip()
     
@@ -591,6 +515,16 @@ class MainWindow(BaseWindow):
     def _on_menuEditPreferences_activate(self, widget, data=None):
         self.__gui.preferences_window.show()
     
+    def _on_main_window_configure_event(self, widget, event, data=None):
+        self.size = self.get_window().get_size()       
+   
+    def _on_main_window_window_state_event(self, widget, event, data=None):
+        state = event.new_window_state
+        if (state & gtk.gdk.WINDOW_STATE_MAXIMIZED):
+            self.maximized = True
+        else:
+            self.maximized = False
+    
     def _on_main_window_destroy(self, widget, data=None):                
         gtk.main_quit()
    
@@ -609,6 +543,10 @@ class MainWindow(BaseWindow):
             entry_search.set_text('')
         
         entry_search.grab_focus()
+    
+    def _on_menu_bottom_toggled(self, widget, data=None):
+        self.__app.config.set('show_bottom', widget.get_active())
+        self.get_widget('box_bottom').props.visible = widget.get_active()
     
     # toolbar actions
     def _on_toolbutton_clicked(self, button, action, cut_action=None):        
@@ -682,3 +620,11 @@ class MainWindow(BaseWindow):
                 selection.select_iter(iter)
 
         self.get_widget('treeview_planning').get_model().foreach(foreach)
+        
+    # bottom
+    def on_notebook_bottom_page_added(self, notebook, child, page_num, data=None):
+        self.get_widget('menu_bottom').set_sensitive(True)
+    
+    def on_notebook_bottom_page_removed(self, notebook, child, page_num, data=None):        
+        self.get_widget('menu_bottom').set_sensitive(False)
+        self.get_widget('menu_bottom').set_active(False)

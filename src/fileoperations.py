@@ -4,9 +4,10 @@
 """ Stellt Methoden für Dateioperationen bereit. 
 Zeigt bei Fehlern einen gtk.MessageDialog an."""
 
+import gtk
 import os
 import shutil
-from os.path import join, basename, exists
+from os.path import join, basename, exists, dirname
 
 # TODO: Achten auf :/\* etc. in Dateiname!
 # TODO: Fehler abfangen, fehlerwert zurückgeben, damit das Programm weitermachen kann

@@ -64,12 +64,13 @@ class Rename(BaseAction):
         if response:
             for f in filenames:
                 extension = splitext(f)[1]
-                
-                new_name = join(dirname(f), new_names[f])
+
+                new_name = new_names[f]
+                new_name = join(dirname(f), new_name.replace('/', '_'))
                 
                 if f.endswith(extension) and not new_name.endswith(extension):
                     new_name += extension
-                    
+                
                 fileoperations.rename_file(f, new_name)
         else:
             self.update_list = False

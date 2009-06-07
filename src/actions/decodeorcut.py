@@ -31,16 +31,14 @@ class DecodeOrCut(BaseAction):
         decode, cut = False, False            
             
         # prepare tasks
-        self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(0.0)
-
         if action == Action.DECODE:
-            self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren')
+            self.__gui.main_window.set_tasks_text('Dekodieren')
             decode = True
         elif action == Action.CUT:
-            self.__gui.main_window.get_widget('label_tasks').set_text('Schneiden')
+            self.__gui.main_window.set_tasks_text('Schneiden')
             cut = True
         else: # decode and cut
-            self.__gui.main_window.get_widget('label_tasks').set_text('Dekodieren/Schneiden')        
+            self.__gui.main_window.set_tasks_text('Dekodieren/Schneiden')        
             decode, cut = True, True
                                        
         file_conclusions = []
@@ -66,7 +64,7 @@ class DecodeOrCut(BaseAction):
         self.__gui.main_window.block_gui(False)
 
         # no more need for tasks view
-        self.__gui.main_window.get_widget('eventbox_tasks').hide()            
+        self.__gui.main_window.set_tasks_visible(False)
  
                     
         # show conclusion
@@ -100,7 +98,7 @@ class DecodeOrCut(BaseAction):
                 errors = 0                                
 
                 for cutlist in cutlists:
-                    error_message = cutlist.upload(self.config.get('server'))
+                    error_message = cutlist.upload(self.config.get('server'), self.config.get('cutlist_hash'))
                     if error_message: 
                         error_cb("Fehler beim Hochladen der Cutlist:\n" + error_message)
                         errors += 1
@@ -127,7 +125,7 @@ class DecodeOrCut(BaseAction):
                         file_conclusion.cut.rename += extension
                 
                     if file_conclusion.cut_video != file_conclusion.cut.rename:
-                        new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename)        
+                        new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))
                         fileoperations.rename_file(file_conclusion.cut_video, new_filename)                
         
             # move uncut video to trash if it's ok            
@@ -200,13 +198,13 @@ class DecodeOrCut(BaseAction):
                 return False                        
         
         # now this method may not return "False"
-        self.__gui.main_window.get_widget('eventbox_tasks').show()
+        self.__gui.main_window.set_tasks_visible(True)
         self.__gui.main_window.block_gui(True)
                    
         # decode each file
         for count, file_conclusion in enumerate(file_conclusions):
             # update progress
-            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
+            self.__gui.main_window.set_tasks_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
                    
             verify = True                   
 
@@ -239,15 +237,15 @@ class DecodeOrCut(BaseAction):
                         file_count = count + 1, len(file_conclusions)
                                                         
                         if "input" in l:
-                            self.__gui.main_window.get_widget('label_tasks').set_text("Eingabedatei %s/%s kontrollieren" % file_count)
+                            self.__gui.main_window.set_tasks_text("Eingabedatei %s/%s kontrollieren" % file_count)
                         elif "output" in l:
-                            self.__gui.main_window.get_widget('label_tasks').set_text("Ausgabedatei %s/%s kontrollieren" % file_count)
+                            self.__gui.main_window.set_tasks_text("Ausgabedatei %s/%s kontrollieren" % file_count)
                         elif "Decoding" in l:
-                            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s dekodieren" % file_count)
+                            self.__gui.main_window.set_tasks_text("Datei %s/%s dekodieren" % file_count)
                                                         
                     progress = int(l[10:13])                    
                     # update progress
-                    self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(progress / 100.)
+                    self.__gui.main_window.set_tasks_progress(progress)
                     
                     while events_pending():
                         main_iteration(False)
@@ -276,14 +274,14 @@ class DecodeOrCut(BaseAction):
             
     def cut(self, file_conclusions, action, cut_action=None):                      
         # now this method may not return "False"
-        self.__gui.main_window.get_widget('eventbox_tasks').show()
+        self.__gui.main_window.set_tasks_visible(True)
         self.__gui.main_window.block_gui(True)          
       
         default_cut_action = cut_action
         
         for count, file_conclusion in enumerate(file_conclusions):
-            self.__gui.main_window.get_widget('label_tasks').set_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
-            self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(0.0)
+            self.__gui.main_window.set_tasks_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
+            self.__gui.main_window.set_tasks_progress(0)
     
             # file correctly decoded?            
             if action == Action.DECODEANDCUT:
@@ -694,7 +692,7 @@ class DecodeOrCut(BaseAction):
         except OSError:
             return None, "Avidemux konnte nicht aufgerufen werden: " + config_value
         
-        self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(.5)
+        self.__gui.main_window.set_task_progress(50)
         
         while avidemux.poll() == None:
             time.sleep(1)
@@ -703,7 +701,7 @@ class DecodeOrCut(BaseAction):
 #
 #            if "Done:" in line:
 #                progress = line[line.find(":") + 1 : line.find("%")]
-#                self.__gui.main_window.get_widget('progressbar_tasks').set_fraction(int(progress) / 100.)
+#                self.__gui.main_window.set_tasks_progress(int(progress))
 #            
             while events_pending():
                 main_iteration(False)

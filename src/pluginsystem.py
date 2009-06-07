@@ -11,8 +11,8 @@ class Plugin:
      
     Name = "Name of Plugin"
     """ Name des Plugins """
-    Desc = "Description of Plugin"
-    Author = "Author of Plugin"
+    Desc = "Beschreibung"
+    Author = "Autor"
     Configurable = False
     Config = { } # key-value-pairs for configuration
                  # just put your default values in here, the plugin system will do the rest for you
@@ -59,7 +59,7 @@ class PluginSystem:
        
         # read config
         print "[Plugins] Config path: ", conf_path
-        self.parser = ConfigParser.SafeConfigParser()
+        self.parser = ConfigParser.ConfigParser()
         if os.path.isfile(conf_path):           
             self.parser.read(conf_path)            
        
@@ -117,3 +117,4 @@ class PluginSystem:
         
     def get_enabled_config(self):
         return ":".join(self.enabled_plugins)
+

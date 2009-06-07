@@ -8,7 +8,7 @@ import pango
 
 from basewindow import BaseWindow
 from constants import Cut_action
-from config_bindings import EntryBinding, FileChooserBinding, CheckButtonBinding, ComboBoxEntryBinding, RadioButtonsBinding
+from configparser import EntryBinding, FileChooserBinding, CheckButtonBinding, ComboBoxEntryBinding, RadioButtonsBinding
 
 class PreferencesWindow(BaseWindow):
     
@@ -35,13 +35,33 @@ class PreferencesWindow(BaseWindow):
         for label in labels:
             self.get_widget(label).modify_font(pango.FontDescription("9"))            
                          
+                    
+        # avi + hq + mp4
+        avidemux = ["avidemux", "avidemux2_cli"]
+        virtualdub = [r"/pfad/zu/vdub.exe"]        
+        self.gui.set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)
+        self.gui.set_model_from_list(self.get_widget('combobox_hq'), virtualdub)
+        self.gui.set_model_from_list(self.get_widget('combobox_mp4'), avidemux)
+        
+        # manually
+        avidemux_man = ["avidemux"]
+        virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
+        self.gui.set_model_from_list(self.get_widget('combobox_man_avi'), avidemux_man + virtualdub_man)
+        self.gui.set_model_from_list(self.get_widget('combobox_man_hq'), virtualdub_man) 
+        self.gui.set_model_from_list(self.get_widget('combobox_man_mp4'), avidemux_man)
+       
+        # fill comboboxentries
+        self.gui.set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
+        self.gui.set_model_from_list(self.get_widget('comboboxPlayer'), ["vlc", "totem", "mplayer"])
+                         
+    def update_config_values(self):
         EntryBinding(self.app.config, 'cutlist_username', self.get_widget('entry_username'))
         EntryBinding(self.app.config, 'decoder', self.get_widget('entry_decoder'))
         EntryBinding(self.app.config, 'email', self.get_widget('entryEMail'))
         EntryBinding(self.app.config, 'mplayer', self.get_widget('entry_mplayer'))        
         EntryBinding(self.app.config, 'password', self.get_widget('entryPassword'), encode=True)       
-        EntryBinding(self.app.config, 'rename_schema', self.get_widget('entry_schema'))        
-
+        EntryBinding(self.app.config, 'rename_schema', self.get_widget('entry_schema'))                
+        
         def rename_schema_changed(value):
             new = self.app.rename_by_schema(self.example_filename, value)
             self.get_widget('label_schema').set_label("<i>%s</i> wird zu <i>%s</i>" % (self.example_filename, new))       
@@ -84,27 +104,7 @@ class PreferencesWindow(BaseWindow):
                 self.get_widget('radio_size'),
                 self.get_widget('radio_filename')
             ])
-            
-
-        # avi + hq + mp4
-        avidemux = ["avidemux", "avidemux2_cli"]
-        virtualdub = [r"/pfad/zu/vdub.exe"]        
-        self.gui.set_model_from_list(self.get_widget('combobox_avi'), avidemux + virtualdub)
-        self.gui.set_model_from_list(self.get_widget('combobox_hq'), virtualdub)
-        self.gui.set_model_from_list(self.get_widget('combobox_mp4'), avidemux)
         
-        # manually
-        avidemux_man = ["avidemux"]
-        virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
-        self.gui.set_model_from_list(self.get_widget('combobox_man_avi'), avidemux_man + virtualdub_man)
-        self.gui.set_model_from_list(self.get_widget('combobox_man_hq'), virtualdub_man) 
-        self.gui.set_model_from_list(self.get_widget('combobox_man_mp4'), avidemux_man)
-       
-        # fill comboboxentries
-        self.gui.set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
-        self.gui.set_model_from_list(self.get_widget('comboboxPlayer'), ["vlc", "totem", "mplayer"])
-                         
-    def update_config_values(self):
         self.get_widget('entryPassword').set_visibility(False)
     
         self.get_widget('entry_schema').set_sensitive(self.app.config.get('rename_cut'))

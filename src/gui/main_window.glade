@@ -7,9 +7,11 @@
     <property name="title" translatable="yes">OTR-Verwaltung</property>
     <property name="window_position">center</property>
     <signal name="destroy" handler="_on_main_window_destroy"/>
+    <signal name="configure_event" handler="_on_main_window_configure_event"/>
     <signal name="delete_event" handler="_on_main_window_delete_event"/>
+    <signal name="window_state_event" handler="_on_main_window_window_state_event"/>
     <child>
-      <object class="GtkVBox" id="vboxMain">
+      <object class="GtkVBox" id="vbox_main">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
@@ -17,7 +19,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkMenuItem" id="menuFile">
+              <object class="GtkMenuItem" id="menu_file">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Datei</property>
                 <property name="use_underline">True</property>
@@ -38,7 +40,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuEdit">
+              <object class="GtkMenuItem" id="menu_edit">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Bearbeiten</property>
                 <property name="use_underline">True</property>
@@ -81,7 +83,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuView">
+              <object class="GtkMenuItem" id="menu_view">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Ansicht</property>
                 <property name="use_underline">True</property>
@@ -89,11 +91,12 @@
                   <object class="GtkMenu" id="menu4">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkCheckMenuItem" id="menuViewDetails">
+                      <object class="GtkCheckMenuItem" id="menu_bottom">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Details</property>
+                        <property name="sensitive">False</property>
+                        <property name="label" translatable="yes">_Fu&#xDF;leiste</property>
                         <property name="use_underline">True</property>
-                        <signal name="toggled" handler="_on_menuViewDetails_toggled"/>
+                        <signal name="toggled" handler="_on_menu_bottom_toggled"/>
                       </object>
                     </child>
                   </object>
@@ -101,7 +104,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuHelp">
+              <object class="GtkMenuItem" id="menu_help">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Hilfe</property>
                 <property name="use_underline">True</property>
@@ -254,7 +257,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHPaned" id="hpaned1">
+          <object class="GtkHPaned" id="paned_main">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="position">240</property>
@@ -586,12 +589,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVPaned" id="vpaned1">
+              <object class="GtkVPaned" id="paned_right">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkVBox" id="vbox14">
+                  <object class="GtkVBox" id="vbox_treeview">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
@@ -663,106 +666,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTable" id="table_details">
-                    <property name="visible">True</property>
-                    <property name="border_width">6</property>
-                    <property name="n_rows">4</property>
-                    <property name="n_columns">2</property>
-                    <property name="column_spacing">4</property>
-                    <property name="row_spacing">3</property>
+                  <object class="GtkEventBox" id="box_bottom">
                     <child>
-                      <object class="GtkLabel" id="label_aspect">
+                      <object class="GtkNotebook" id="notebook_bottom">
                         <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">...</property>
-                        <property name="use_markup">True</property>
+                        <property name="can_focus">True</property>
+                        <signal name="page_added" handler="on_notebook_bottom_page_added"/>
+                        <signal name="page_removed" handler="on_notebook_bottom_page_removed"/>
                       </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label51">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Aspect-Ratio:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="x_options">GTK_FILL</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_filetype">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Typ</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                      <packing>
-                        <property name="right_attach">2</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label52">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Video-Format:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                        <property name="x_options">GTK_FILL</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_video_format">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">...</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label53">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Dauer:</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                        <property name="x_options">GTK_FILL</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_length">
-                        <property name="visible">True</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">...</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -782,7 +693,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="hbox1">
+          <object class="GtkHBox" id="box_status">
             <property name="visible">True</property>
             <property name="spacing">5</property>
             <child>
