@@ -1,4 +1,7 @@
-0.7.1:
+0.7.2:
+    * 
+
+0.7.1, 7. Juni:
     * Planungsdialog wurde bei Fehlermeldung beendet
     * Neue Abhängigkeiten im Deb-Paket: libgtk2.0-0 >= 2.16
     * Das Programm startet nun auch, wenn Pfade für Ordner nicht existieren

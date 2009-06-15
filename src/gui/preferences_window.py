@@ -52,7 +52,6 @@ class PreferencesWindow(BaseWindow):
        
         # fill comboboxentries
         self.gui.set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
-        self.gui.set_model_from_list(self.get_widget('comboboxPlayer'), ["vlc", "totem", "mplayer"])
                          
     def update_config_values(self):
         EntryBinding(self.app.config, 'cutlist_username', self.get_widget('entry_username'))
@@ -90,7 +89,6 @@ class PreferencesWindow(BaseWindow):
         ComboBoxEntryBinding(self.app.config, 'cut_hqs_man_by', self.get_widget('combobox_man_hq'))
         ComboBoxEntryBinding(self.app.config, 'cut_mp4s_man_by', self.get_widget('combobox_man_mp4'))
         ComboBoxEntryBinding(self.app.config, 'server', self.get_widget('comboboxServer'))
-        ComboBoxEntryBinding(self.app.config, 'player', self.get_widget('comboboxPlayer'))
 
         RadioButtonsBinding(self.app.config, 'cut_action', [ 
                 self.get_widget('radioAsk'),

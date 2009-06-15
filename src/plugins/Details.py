@@ -48,14 +48,14 @@ class Details(Plugin):
         self.gui.main_window.get_widget('notebook_bottom').remove_page(self.page_index)
                       
     def update_details(self):       
-        if self.app.section == Section.PLANNING:
-            self.reset_details("")
-            return
-
         try:
             self.task.stop()
         except:
             pass
+    
+        if self.app.section == Section.PLANNING:
+            self.reset_details("")
+            return
 
         mplayer = self.app.config.get('mplayer')
 

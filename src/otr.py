@@ -486,10 +486,7 @@ class App:
     def play_file(self, filename):
         """ #FIXME """        
         
-        try:        
-            subprocess.Popen([self.config.get('player'), filename])    
-        except OSError:
-            self.__gui.message_error_box("Es ist kein Player angegeben!")
+        subprocess.Popen(['xdg-open', filename])
     
     def __show(self, cuts, video_filename, edl_subtitles_cb):        
         f_edl = open(join(self.config.get('folder_new_otrkeys'), ".tmp.edl"), "w")

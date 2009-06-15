@@ -24,18 +24,16 @@ class Plugin:
         self.dirname = dirname
     
     def enable(self):
-        """ This is called when the plugin is enabled. 
-            You can connect to callbacks and setup gui elements. """
+        """ Diese Methode wird aufgerufen, wenn das Plugin aktiviert wird. """
         pass
         
     def disable(self):
-        """ This is called when the plugin is disabled. 
-            Revert your actions. """
+        """ Diese Methode wird aufgerufen, wenn das Plugin deaktiviert wird.
+            Es sollte alle in `enable` gemachten Änderungen rückgängig gemacht werden. """
         pass
         
     def configurate(self, dialog):
-        """ This is called when the user wants to configure the plugin.
-            You might want to display a dialog to the user (see parameter).
+        """ Diese Methode wird aufgerufen, wenn der Benutzer das Plugin konfigurieren möchte.
             Alter the dialog.vbox property and return the dialog. The plugin system will do the rest.
             Remember to connect to the 'changed' signals of the widgets you placed in the dialog.
             Use the signals to update your Config dict.
