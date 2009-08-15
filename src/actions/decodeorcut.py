@@ -161,7 +161,7 @@ class DecodeOrCut(BaseAction):
                     if count == 0:
                         text = "Es wurde keine Cutlist bewertet!"
                     if count == 1:
-                        text = "Es wurde 1 Cutlist bewertet!" % count
+                        text = "Es wurde 1 Cutlist bewertet!"
                     else:
                         text = "Es wurden %s Cutlisten bewertet!" % count
                         
