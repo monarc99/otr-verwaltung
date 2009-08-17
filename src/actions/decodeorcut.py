@@ -665,7 +665,7 @@ class DecodeOrCut(BaseAction):
         f.writelines([
             '//** Postproc **\n',
             'app.video.setPostProc(3,3,0);\n',
-            'app.video.setFps1000(25000);\n'
+            'app.video.fps1000=25000;\n'
             ])
             
         if self.config.get('smart'):
@@ -678,9 +678,9 @@ class DecodeOrCut(BaseAction):
             'app.audio.normalizeMode=0;\n',
             'app.audio.normalizeValue=0;\n',
             'app.audio.delay=0;\n',
-            'app.audio.mixer("NONE");\n',
-            'app.audio.scanVBR();\n',
-            'app.setContainer("AVI");\n',
+            'app.audio.mixer="NONE";\n',
+            'app.audio.scanVBR="";\n',
+            'app.setContainer="AVI";\n',
             'setSuccess(app.save("%s"));\n' % cut_video
             ])
 
