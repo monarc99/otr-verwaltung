@@ -4,6 +4,7 @@
 import gtk
 import subprocess
 import time
+import os.path
 
 from GeneratorTask import GeneratorTask
 from pluginsystem import Plugin
@@ -55,7 +56,7 @@ class Mkv(Plugin):
             for count, filename in enumerate(filenames):           
                 yield 0, count
                 self.progress = 0
-                p = subprocess.Popen([self.Config['mkvmerge'], "-o", filename + ".mkv", filename], stdout=subprocess.PIPE)
+                p = subprocess.Popen([self.Config['mkvmerge'], "-o", os.path.splitext(filename)[0] + ".mkv", filename], stdout=subprocess.PIPE)
                             
                 while p.poll() == None:
                     # read progress from stdout 
