@@ -25,9 +25,9 @@ Mit OTR-Verwaltung lassen sich otrkey- und avi-Dateien von `onlinetvrecorder.com
 Downloads
 #########
 
-**Aktuelle deb-Datei**: `Download <http://cloud.github.com/downloads/elbersb/otr-verwaltung/otr-verwaltung_0.6.2-1_all.deb>`_ (für GTK 2.16)
+**Aktuelle deb-Datei** (z.B. für Ubuntu, Debian): `Download <http://cloud.github.com/downloads/elbersb/otr-verwaltung/otr-verwaltung_0.6.2-1_all.deb>`_ (für GTK 2.16)
 
-**Aktuelle rpm-Datei**: `Download <http://cloud.github.com/downloads/elbersb/otr-verwaltung/otr-verwaltung-0.6.2-2.noarch.rpm>`_ (für GTK 2.16)
+**Aktuelle rpm-Datei** (z.B. für Fedora): `Download <http://cloud.github.com/downloads/elbersb/otr-verwaltung/otr-verwaltung-0.6.2-2.noarch.rpm>`_ (für GTK 2.16)
 
 `Weitere Downloads <http://github.com/elbersb/otr-verwaltung/downloads>`_
 
