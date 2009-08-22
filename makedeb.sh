@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# RELEASE:
-# - hier Versionsnummer ändern
-# - im About-Dialog -"-
-# - Update im OTR-Forum
-
 name='otr-verwaltung';
 version=`cat src/VERSION`;
 
@@ -12,7 +7,7 @@ rm $name-$version.orig.tar.gz
 rm -r $name-$version
 
 mv src "$name-$version";
-tar czvf $name-$version.orig.tar.gz $name-$version --exclude=*.pyc --exclude=.svn --exclude=.* --exclude=*~ --exclude=screenshots --exclude=log --exclude=conf;
+tar czvf $name-$version.orig.tar.gz $name-$version --exclude=*.pyc --exclude=.git --exclude=.* --exclude=*~ --exclude=screenshots --exclude=log --exclude=conf;
 mv "$name-$version" src;
 
 tar -xf $name-$version.orig.tar.gz;
@@ -22,7 +17,7 @@ cd $name-$version
 cat > README << EOF
 ####################################################################   
 OTR-Verwaltung $version
-Copyright (C) 2008 Benjamin Elbers (elbersb@googlemail.com)
+Copyright (C) 2009 Benjamin Elbers (elbersb@gmail.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -79,7 +74,7 @@ EOF
 
 cat > copyright << EOF
 This package was debianized by benjamin <elbersb@gmail.com> on
-Wed, 31 Dec 2008 18:07:07 +0100.
+Wed, 31 Dec 2008 18:07:07 +0100. 
 
 Upstream Author(s):
 
@@ -93,7 +88,7 @@ License:
 
     GPL v3
 
-The Debian packaging is (C) 2008, benjamin <elbersb@gmail.com> and
+The Debian packaging is (C) 2009, Benjamin Elbers <elbersb@gmail.com> and
 is licensed under the GPL, see /usr/share/common-licenses/GPL.
 EOF
 
