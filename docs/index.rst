@@ -10,6 +10,27 @@ Mit OTR-Verwaltung lassen sich otrkey- und avi-Dateien von `onlinetvrecorder.com
 * Cutlists mit Avidemux oder VirtualDub selbst erstellen und hochladen
 * Schnitte vorher mit dem MPlayer betrachten
 
+.. image:: ../src/images/screenshots/otr.png
+   :scale: 30
+
+.. image:: ../src/images/screenshots/preferences.png
+   :scale: 30
+
+.. image:: ../src/images/screenshots/search.png
+   :scale: 30
+   
+.. image:: ../src/images/screenshots/conclusion.png
+   :scale: 30
+
+Downloads
+#########
+
+**Aktuelle deb-Datei**: `Download <http://cloud.github.com/downloads/elbersb/otr-verwaltung/otr-verwaltung_0.6.2-1_all.deb>`_ (für GTK 2.16)
+
+**Aktuelle rpm-Datei**: `Download <http://cloud.github.com/downloads/elbersb/otr-verwaltung/otr-verwaltung-0.6.2-2.noarch.rpm>`_ (für GTK 2.16)
+
+`Weitere Downloads <http://github.com/elbersb/otr-verwaltung/downloads>`_
+
 Hilfe für Benutzer
 ##################
 
@@ -47,6 +68,7 @@ Dank an
 * die Autoren von Multicut-Light für Ideen und Code (Otr-Forum-Thread)
 * für die tollen famfam-Icons: http://www.famfamfam.com/lab/icons/silk/
 * das Icon stammt von Oliver Twardowski 
+* Hosting: Dank an `Github <http://github.com>`_ und `000webhost <http://www.000webhost.com>`_
 
 Referenzen
 ==========
