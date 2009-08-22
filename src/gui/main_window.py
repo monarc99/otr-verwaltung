@@ -222,7 +222,7 @@ class MainWindow(BaseWindow):
         # change background of sidebar
         eventbox = self.get_widget('eventboxSidebar')
         cmap = eventbox.get_colormap()
-        colour = cmap.alloc_color("gray")
+        colour = cmap.alloc_color("lightgray")
         style = eventbox.get_style().copy()
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
