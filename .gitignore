@@ -1,0 +1,2 @@
+# ignore built files from makedeb.sh
+otr-verwaltung_*

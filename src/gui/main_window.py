@@ -476,7 +476,7 @@ class MainWindow(BaseWindow):
         current_version = open(otrpath.get_path("VERSION"), 'r').read().strip()
     
         try:
-           svn_version = urllib.urlopen('http://otr-verwaltung.googlecode.com/svn/trunk/src/STABLEVERSION').read().strip()
+           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/src/VERSION').read().strip()
         except IOError:
             self.__gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
             return
@@ -485,7 +485,7 @@ class MainWindow(BaseWindow):
 
     
     def _on_menuHelpHelp_activate(self, widget, data=None):
-        webbrowser.open("http://code.google.com/p/otr-verwaltung/w/list")
+        webbrowser.open("http://otrverwaltung.host56.com/")
                       
     def _on_menuHelpAbout_activate(self, widget, data=None):
 
@@ -502,10 +502,10 @@ class MainWindow(BaseWindow):
         
         version = open(otrpath.get_path("VERSION"), 'r')        
         about_dialog.set_version(version.read().strip())
-        about_dialog.set_website("http://code.google.com/p/otr-verwaltung/")
+        about_dialog.set_website("http://otrverwaltung.host56.com/")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
-        about_dialog.set_copyright("Copyright \xc2\xa9 2008 Benjamin Elbers")
-        about_dialog.set_authors(["Benjamin Elbers <elbersb@googlemail.com>"])
+        about_dialog.set_copyright("Copyright \xc2\xa9 2009 Benjamin Elbers")
+        about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>"])
         about_dialog.run()
         about_dialog.destroy()
     

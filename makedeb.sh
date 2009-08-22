@@ -15,7 +15,6 @@ tar -xf $name-$version.orig.tar.gz;
 cd $name-$version
 
 cat > README << EOF
-####################################################################   
 OTR-Verwaltung $version
 Copyright (C) 2009 Benjamin Elbers (elbersb@gmail.com)
 
@@ -31,7 +30,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-####################################################################
 EOF
 
 dh_make -e elbersb@gmail.com

@@ -53,11 +53,12 @@ install: build
 	mkdir -p $(CURDIR)/debian/otr-verwaltung
 	
 	# executable
-	cp otr $(CURDIR)/debian/otr-verwaltung/usr/bin/otrverwaltung
+	cp otr.py $(CURDIR)/debian/otr-verwaltung/usr/bin/otrverwaltung
 	
 	# other files
 	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
 	cp *.py $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
+	rm $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/otr.py
 	cp VERSION $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung
 	
 	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/actions
@@ -68,6 +69,9 @@ install: build
 	
 	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/images
 	cp images/* $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/images
+	
+	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/plugins
+	cp plugins/* $(CURDIR)/debian/otr-verwaltung/usr/share/otr-verwaltung/plugins
 	
 	# icon
 	mkdir -p $(CURDIR)/debian/otr-verwaltung/usr/share/icons/hicolor/48x48/apps
