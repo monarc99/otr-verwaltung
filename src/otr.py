@@ -46,7 +46,9 @@ class App:
             'folder_new_otrkeys':   (str, ''),
             'folder_uncut_avis':    (str, ''),
             'folder_cut_avis':      (str, ''),
-            'folder_trash':         (str, ''),
+            'folder_trash_otrkeys': (str, ''),
+            'folder_trash_avis':    (str, ''),
+            'folder_trash':         (str, ''), #TODO: remove soon, only for compability
             'folder_archive':       (str, ''),
             'player':               (str, ''),
             'decoder':              (str, ''),
@@ -86,6 +88,11 @@ class App:
             print "[Config] Path: ", otrpath.get_config_path('conf')
             self.config = Config(otrpath.get_config_path('conf'), config_dic)
         self.config.read()                
+
+        # TODO: remove soon, only for compability
+        if not self.config.get('folder_trash_otrkeys') or not self.config.get('folder_trash_avis'):
+            self.config.set('folder_trash_otrkeys', self.config.get('folder_trash'))
+            self.config.set('folder_trash_avis', self.config.get('folder_trash'))
 
         self.__search_text = ""
         self.locked = False
@@ -228,9 +235,11 @@ class App:
         
     def __section_trash(self):
         text = "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
-        path = self.config.get('folder_trash')
+        path_otrkeys = self.config.get('folder_trash_otrkeys')
+        path_avis = self.config.get('folder_trash_avis')
                     
-        files = [join(path, f) for f in os.listdir(path) if (f.endswith('.otrkey') or self.cut_video.match(f)) and self.search(f)]
+        files = [join(path_otrkeys, f) for f in os.listdir(path_otrkeys) if f.endswith('.otrkey') and self.search(f)]
+        files += [join(path_avis, f) for f in os.listdir(path_avis) if self.cut_video.match(f) and self.search(f)]
                 
         return (text, files)
 

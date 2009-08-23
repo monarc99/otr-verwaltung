@@ -133,7 +133,7 @@ class DecodeOrCut(BaseAction):
                 if file_conclusion.cut.status == Status.OK and file_conclusion.cut.delete_uncut:
                     # move to trash
                     print file_conclusion.uncut_video, " to trash"
-                    target = self.config.get('folder_trash')
+                    target = self.config.get('folder_trash_avis')
                     fileoperations.move_file(file_conclusion.uncut_video, target)        
         
             # remove local cutlists      
@@ -264,7 +264,7 @@ class DecodeOrCut(BaseAction):
                 file_conclusion.uncut_video = join(self.config.get('folder_uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
                              
                 # move otrkey to trash
-                target = self.config.get('folder_trash')
+                target = self.config.get('folder_trash_otrkeys')
                 fileoperations.move_file(file_conclusion.otrkey, target)
             else:            
                 file_conclusion.decode.status = Status.ERROR

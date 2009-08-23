@@ -27,7 +27,8 @@ class PreferencesWindow(BaseWindow):
         labels = [  'labelDescNewOtrkeys',
                     'labelDescUncutAvis',
                     'labelDescCutAvis',
-                    'labelDescTrash',
+                    'labelDescTrashOtrkeys',
+                    'labelDescTrashAvis',
                     'labelBestCutlist',
                     'labelChooseCutlist',
                     'labelManually',                    
@@ -67,12 +68,13 @@ class PreferencesWindow(BaseWindow):
         self.app.config.connect('rename_schema', rename_schema_changed)
         
         FileChooserBinding(self.app.config, 'folder_new_otrkeys', self.get_widget('folderNewOtrkeys')),
-        FileChooserBinding(self.app.config, 'folder_trash', self.get_widget('folderTrash')),
+        FileChooserBinding(self.app.config, 'folder_trash_otrkeys', self.get_widget('folderTrashOtrkeys')),
+        FileChooserBinding(self.app.config, 'folder_trash_avis', self.get_widget('folderTrashAvis')),
         FileChooserBinding(self.app.config, 'folder_uncut_avis', self.get_widget('folderUncutAvis')),
         FileChooserBinding(self.app.config, 'folder_cut_avis', self.get_widget('folderCutAvis')),
         FileChooserBinding(self.app.config, 'folder_archive', self.get_widget('folderArchive')) 
         
-        for option in ['folder_new_otrkeys', 'folder_trash', 'folder_uncut_avis', 'folder_cut_avis', 'folder_archive']:
+        for option in ['folder_new_otrkeys', 'folder_trash_otrkeys', 'folder_trash_avis', 'folder_uncut_avis', 'folder_cut_avis', 'folder_archive']:
             self.app.config.connect(option, lambda value: self.app.show_section(self.app.section))
 
         CheckButtonBinding(self.app.config, 'verify_decoded', self.get_widget('checkCorrect'))
