@@ -288,8 +288,40 @@ def __read_value(cutlist_element, node_name):
         return ''
         
     return ''
-         
-        
+
 def get_best_cutlist(cutlists):
-    # cutlist.at returns the best cutlist at first
-    return cutlists[0]
+    # Der Algorithmus berücksichtigt die Anzahl der Wertungen.
+    # Hat eine Cutlist nur wenige Wertungen erhalten, wird 
+    # ihre Bewertung etwas heruntergestuft. Existiert auch eine
+    # andere Cutlist, die sehr viel mehr Wertungen erhalten hat, 
+    # wird auf diese Weise auch diese Cutlist als beste genommen.
+    #
+    # Beispiel: Cutlist A: 
+    #               Wertung: 5.00,  Anzahl der Bewerter: 2
+    #           Cutlist B:
+    #               Wertung: 4.88   Anzahl der Bewerter: 24
+    #
+    # Der Algorithmus sucht (im Gegensatz zu cutlist.at) Cutlist B
+    # als beste heraus. 
+    # Sind keine Benutzerwertungen vorhanden, wird nach der Autoren-
+    # bewertung sortiert.
+
+    best_cutlists = {}
+
+    for cutlist in cutlists:
+        if cutlist.rating:
+            if int(cutlist.ratingcount) > 6:
+                rating = float(cutlist.rating)
+            else:
+                rating = float(cutlist.rating) - (6 - int(cutlist.ratingcount)) * 0.05
+
+            best_cutlists[cutlist] = rating
+
+    if best_cutlists:
+        items = best_cutlists.items()
+    else:
+        items = [(cutlist, cutlist.ratingbyauthor) for cutlist in cutlists]
+
+    items.sort(lambda x,y: cmp(y[1], x[1]))
+
+    return items[0][0]
