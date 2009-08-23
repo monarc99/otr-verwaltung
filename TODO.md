@@ -1,6 +1,3 @@
-Doku:
-    * Wenn avidemux_cli, muss automation eingeschaltet sein 
-
 Core:
     * Unterstützung für MERGED-Cutlists
     * Sortieren
