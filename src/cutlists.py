@@ -108,6 +108,7 @@ class Cutlist:
         """ Reads cuts from local_filename.
             
             Returns: error message, otherwise None """
+
         
         if len(self.cuts) != 0:
             return
@@ -116,16 +117,17 @@ class Cutlist:
          
         try:            
             config_parser.read(self.local_filename)
+        except ConfigParser.ParsingError, message:
+            print "Malformed cutlist: ", message
 
+        try:
             noofcuts = int(config_parser.get("General", "NoOfCuts"))
-                   
+            
             for count in range(noofcuts):
                 self.cuts.append((count,
                                   float(config_parser.get("Cut" + str(count), "Start")), 
                                   float(config_parser.get("Cut" + str(count), "Duration"))))            
 
-        except ConfigParser.ParsingError, message:
-            print "Malformed cutlist: ", message
         except ConfigParser.NoSectionError, message:
             return "Fehler in Cutlist: " + str(message)
         except ConfigParser.NoOptionError, message:
