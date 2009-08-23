@@ -238,16 +238,13 @@ class MainWindow(BaseWindow):
             self.get_widget(label).modify_font(pango.FontDescription("bold"))
 
         # change background of tasks and searchbar
-        for eventbox in ['eventbox_tasks', 'eventbox_search']:
+        for eventbox in ['eventbox_search']:
             eventbox = self.get_widget(eventbox)
             cmap = eventbox.get_colormap()
             colour = cmap.alloc_color("#FFF288")
             style = eventbox.get_style().copy()
             style.bg[gtk.STATE_NORMAL] = colour
             eventbox.set_style(style)
-
-        # image cancel
-        self.get_widget('image_cancel').set_from_file(otrpath.get_image_path('cancel.png'))
         
       
     #
@@ -454,14 +451,14 @@ class MainWindow(BaseWindow):
             GeneratorTask(wait, None, completed).start()         
    
     def set_tasks_visible(self, visible):
-        """ Zeigt/Versteckt einen Text und einen Fortschrittsbalken, um Aufgaben auszuführen. """
-        self.get_widget('eventbox_tasks').props.visible = visible        
+        """ Zeigt/Versteckt einen Text und einen Fortschrittsbalken, um Aufgaben auszuführen. """      
+        self.get_widget('box_tasks').props.visible = visible
         self.get_widget('label_tasks').set_markup("")
         self.get_widget('progressbar_tasks').set_fraction(0)
 
     def set_tasks_text(self, text):
         """ Zeigt den angegebenen Text im Aufgabenfenster an. """
-        self.get_widget('label_tasks').set_markup(text)
+        self.get_widget('label_tasks').set_markup("<b>%s</b>" % text)
 
     def set_tasks_progress(self, progress):
         """ Setzt den Fortschrittsbalken auf die angegebene %-Zahl. """
@@ -598,11 +595,7 @@ class MainWindow(BaseWindow):
             self.get_widget('labelCutCount').set_text(counts_of_section[Section.VIDEO_CUT])     
             self.get_widget('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
             self.get_widget('labelTrashCount').set_text(counts_of_section[Section.TRASH])
-       
-    def _on_eventbox_cancel_button_press_event(self, widget, data=None):
-        # TODO: Cancel of cut and decode
-        pass
-        
+               
     def _on_eventboxPlanningCurrentCount_button_release_event(self, widget, data=None):
         # show section
         self.get_widget('radioPlanning').set_active(True)
