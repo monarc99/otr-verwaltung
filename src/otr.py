@@ -69,7 +69,7 @@ class App:
             'choose_cutlists_by':   (int, 0), # 0 = size, 1=name
             'cutlist_username':     (str, ''),
             'player':               (str, ''),
-            'mplayer':              (str, ''),
+            'mplayer':              (str, 'mplayer'),
             'planned_items':        (str, ''),
             'rename_cut':           (bool, False),
             'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})'),

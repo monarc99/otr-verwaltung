@@ -58,7 +58,6 @@ class PreferencesWindow(BaseWindow):
         EntryBinding(self.app.config, 'cutlist_username', self.get_widget('entry_username'))
         EntryBinding(self.app.config, 'decoder', self.get_widget('entry_decoder'))
         EntryBinding(self.app.config, 'email', self.get_widget('entryEMail'))
-        EntryBinding(self.app.config, 'mplayer', self.get_widget('entry_mplayer'))        
         EntryBinding(self.app.config, 'password', self.get_widget('entryPassword'), encode=True)       
         EntryBinding(self.app.config, 'rename_schema', self.get_widget('entry_schema'))                
         

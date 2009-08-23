@@ -4,6 +4,7 @@
     * [Mkv-Plugin] Leicht verbesserte Fehlerbehandlung, schönerer Dateiname
     * Unterschiedliche Mülleimer für avis und otrkeys (z.B. für versch. Partitionen)
     * verbesserter Algorithmus, um die beste Cutlist zu finden
+    * mplayer-Konfigurationseinstellung wurde entfernt (der Name der Binary lautet in den meisten Fällen 'mplayer'; lautet er anders, kann dies in der Datei ~/otr-verwaltung/conf bei 'mplayer' geändert werden)
 
 0.7.1, 7. Juni:
     * Planungsdialog wurde bei Fehlermeldung beendet
