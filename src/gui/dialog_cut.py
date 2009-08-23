@@ -123,13 +123,11 @@ class DialogCut(BaseWindow):
         if c.actualcontent or c.errors or c.othererrordescription:
             errors = True
         
-        c.ratingbyauthor = "<b>%s</b>" % c.ratingbyauthor
-        c.rating = "<b>%s</b>" % c.rating
         c.actualcontent = "<span foreground='red'>%s</span>" % c.actualcontent
         c.errors = "<span foreground='red'>%s</span>" % c.errors
         c.othererrordescription = "<span foreground='red'>%s</span>" % c.othererrordescription
         
-        data = [ c.id, c.author, c.ratingbyauthor, c.rating, c.ratingcount, c.countcuts, c.actualcontent, c.usercomment, c.filename, c.withframes, c.withtime, c.duration, c.errors, c.othererrordescription, c.downloadcount, c.autoname, c.filename_original ]
+        data = [ c.id, c.author, "<b>%s</b>" % c.ratingbyauthor, "<b>%s</b>" % c.rating, c.ratingcount, c.countcuts, c.actualcontent, c.usercomment, c.filename, c.withframes, c.withtime, c.duration, c.errors, c.othererrordescription, c.downloadcount, c.autoname, c.filename_original ]
         data.append(errors)
         
         self.get_widget('treeview_cutlists').get_model().append(data)  
