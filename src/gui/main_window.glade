@@ -168,95 +168,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEventBox" id="eventbox_tasks">
-            <property name="height_request">57</property>
-            <child>
-              <object class="GtkVBox" id="vbox17">
-                <property name="visible">True</property>
-                <property name="orientation">vertical</property>
-                <property name="spacing">8</property>
-                <child>
-                  <object class="GtkLabel" id="label_tasks">
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="yalign">1</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Datei 1/2 dekodieren&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                  </object>
-                  <packing>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkHBox" id="hbox12">
-                    <property name="visible">True</property>
-                    <property name="spacing">2</property>
-                    <child>
-                      <object class="GtkLabel" id="label32">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkProgressBar" id="progressbar_tasks">
-                        <property name="width_request">300</property>
-                        <property name="height_request">10</property>
-                        <property name="visible">True</property>
-                        <property name="fraction">0.40000000000000002</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEventBox" id="eventbox_cancel">
-                        <signal name="button_press_event" handler="_on_eventbox_cancel_button_press_event"/>
-                        <child>
-                          <object class="GtkImage" id="image_cancel">
-                            <property name="visible">True</property>
-                            <property name="stock">gtk-missing-image</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label34">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkHSeparator" id="hseparator5">
-                    <property name="visible">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkHPaned" id="paned_main">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -279,7 +190,7 @@
                           <object class="GtkEntry" id="entry_search">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="invisible_char">&#x2022;</property>
                             <property name="text" translatable="yes">Durchsuchen</property>
                             <signal name="button_press_event" handler="_on_entry_search_button_press_event"/>
                             <signal name="changed" handler="_on_entry_search_changed"/>
@@ -689,7 +600,7 @@
             </child>
           </object>
           <packing>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -719,19 +630,47 @@
               </packing>
             </child>
             <child>
-              <object class="GtkStatusbar" id="statusbar">
-                <property name="visible">True</property>
-                <property name="spacing">2</property>
+              <object class="GtkHBox" id="box_tasks">
+                <property name="border_width">3</property>
+                <property name="spacing">3</property>
+                <child>
+                  <object class="GtkProgressBar" id="progressbar_tasks">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_tasks">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkStatusbar" id="statusbar">
+                <property name="visible">True</property>
+                <property name="spacing">2</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">4</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
