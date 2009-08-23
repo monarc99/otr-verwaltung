@@ -11,6 +11,7 @@ class DialogEmailPassword(BaseWindow):
         BaseWindow.__init__(self, "dialog_email_password", parent)
         
         self.get_widget('entryDialogPassword').set_visibility(False)
+     	self.get_widget('entryDialogPassword').connect("activate", lambda widget, dialog: dialog.response(gtk.RESPONSE_OK), self.get_window())
     
     def set_email_password(self, email, password):
         self.get_widget('entryDialogEMail').set_text(email)
