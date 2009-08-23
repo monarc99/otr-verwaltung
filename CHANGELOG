@@ -2,6 +2,7 @@
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung
     * Avidemux 2.5-Unterstützung
     * [Mkv-Plugin] Leicht verbesserte Fehlerbehandlung, schönerer Dateiname
+    * Unterschiedliche Mülleimer für avis und otrkeys (z.B. für versch. Partitionen)
 
 0.7.1, 7. Juni:
     * Planungsdialog wurde bei Fehlermeldung beendet
