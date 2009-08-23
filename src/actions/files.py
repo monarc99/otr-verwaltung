@@ -13,7 +13,7 @@ class Delete(BaseAction):
         self.update_list = False
         self.__gui = gui
 
-    def do(self, filenames, trash):
+    def do(self, filenames, trash_otrkeys, trash_avis):
         if len(filenames) == 1:
             message = "Es ist eine Datei ausgewählt. Soll diese Datei "
         else:
@@ -22,7 +22,10 @@ class Delete(BaseAction):
         if self.__gui.question_box(message + "in den Müll verschoben werden?"):
             self.update_list = True
             for f in filenames:
-                fileoperations.move_file(f, trash)
+                if f.endswith("otrkey"):
+                    fileoperations.move_file(f, trash_otrkeys)
+                else:
+                    fileoperations.move_file(f, trash_avis)
 
 class RealDelete(BaseAction):
     def __init__(self, gui):

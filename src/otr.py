@@ -458,7 +458,7 @@ class App:
             action.do(filenames, self.config.get('folder_new_otrkeys'), self.config.get('folder_uncut_avis'), self.config.get('folder_cut_avis'), self.uncut_video)
     
         elif chosen_action == Action.DELETE:
-            action.do(filenames, self.config.get('folder_trash'))      
+            action.do(filenames, self.config.get('folder_trash_otrkeys'), self.config.get('folder_trash_avis'))      
 
         elif chosen_action == Action.PLAN_REMOVE: 
             action.do(broadcasts, self.planned_broadcasts) 
