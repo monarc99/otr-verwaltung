@@ -1,6 +1,8 @@
 Häufig gestellte Fragen
 =======================
 
+.. _nachfragen_avidemux:
+
 Wie stelle ich die Nachfragen von Avidemux ab?
 ##############################################
 

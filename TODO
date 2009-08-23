@@ -4,7 +4,6 @@ Doku:
 Core:
     * Unterstützung für MERGED-Cutlists
     * Sortieren
-    * Dialoge mit Enter bestätigen können http://faq.pygtk.org/index.py?req=show&file=faq10.012.htp
     * VirtualDub + ffds Konfigurationen überprüfen/Anleitung schreiben
     * RSS-Feed (http://www.otrforum.com/showpost.php?p=248030&postcount=58)
     * Beim Zusammenfassen-Dialog warnen, wenn der Dialog geschlossen wird, und noch nicht alle Dateien angeguckt wurden (Decodieren und Schneiden, Schneiden)
