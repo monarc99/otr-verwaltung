@@ -124,11 +124,11 @@ class DecodeOrCut(BaseAction):
                     if not file_conclusion.cut.rename.endswith(extension):
                         file_conclusion.cut.rename += extension
                 
-                    if file_conclusion.cut_video != file_conclusion.cut.rename:
-                        new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))
-                        fileoperations.rename_file(file_conclusion.cut_video, new_filename)                
+                    new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))    
+                    if file_conclusion.cut_video != new_filename:
+                        fileoperations.rename_file(file_conclusion.cut_video, new_filename)
         
-            # move uncut video to trash if it's ok            
+            # move uncut video to trash if it's ok
             for file_conclusion in file_conclusions:
                 if file_conclusion.cut.status == Status.OK and file_conclusion.cut.delete_uncut:
                     # move to trash
