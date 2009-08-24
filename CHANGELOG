@@ -5,6 +5,7 @@
     * Unterschiedliche Mülleimer für avis und otrkeys (z.B. für versch. Partitionen)
     * verbesserter Algorithmus, um die beste Cutlist zu finden
     * mplayer-Konfigurationseinstellung wurde entfernt (der Name der Binary lautet in den meisten Fällen 'mplayer'; lautet er anders, kann dies in der Datei ~/otr-verwaltung/conf bei 'mplayer' geändert werden)
+    * Die Fortschrittsanzeige fürs Dekodieren und Schneiden befindet sich nun in der dafür vorgesehenen Statusleiste
 
 0.7.1, 7. Juni:
     * Planungsdialog wurde bei Fehlermeldung beendet

@@ -139,7 +139,7 @@ class DecodeOrCut(BaseAction):
             # remove local cutlists      
             if self.config.get('delete_cutlists'):
                 for file_conclusion in file_conclusions:
-                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist:
+                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #TODO ausreichend?: and file_conclusion.cut.status == Status.OK:
                         if exists(file_conclusion.cut.cutlist.local_filename):
                             fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
         
