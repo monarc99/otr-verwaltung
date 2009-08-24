@@ -52,7 +52,7 @@ class PreferencesWindow(BaseWindow):
         self.gui.set_model_from_list(self.get_widget('combobox_man_mp4'), avidemux_man)
        
         # fill comboboxentries
-        self.gui.set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.mbod.net/", "http://cutlist.at/"])
+        self.gui.set_model_from_list(self.get_widget('comboboxServer'), ["http://cutlist.at/"])
                          
     def update_config_values(self):
         EntryBinding(self.app.config, 'cutlist_username', self.get_widget('entry_username'))
