@@ -78,8 +78,11 @@ class Cutlist:
         except Exception, error_message:
            return error_message       
 
-        if 'erfolgreich' in connection.getresponse().read():
+        response = connection.getresponse().read()
+        if 'erfolgreich' in response:
             return None
+        else:
+            return response
 
     def download(self, server, video_filename):
         """ Downloads a cutlist to the folder where video_filename is. 
