@@ -92,30 +92,33 @@ class DecodeOrCut(BaseAction):
                     
                     cutlists.append(file_conclusion.cut.cutlist)
                         
-            # upload them:            
-            def upload(error_cb):
-                yield 0 # fake generator                   
-                errors = 0                                
+            # upload them:
+            def upload():
+                error_messages = []
 
                 for cutlist in cutlists:
                     error_message = cutlist.upload(self.config.get('server'), self.config.get('cutlist_hash'))
                     if error_message: 
-                        error_cb("Fehler beim Hochladen der Cutlist:\n" + error_message)
-                        errors += 1
+                        error_messages.append(error_message)
                     else:
                         if self.config.get('delete_cutlists'):
                             fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
                  
-                count = len(cutlists)                       
-                self.__gui.main_window.change_status(0, "Es wurden %s/%s Cutlisten hochgeladen!" % (str(count - errors), str(count)))                        
+                count = len(cutlists)
                 
-            if len(cutlists) > 0:                
+                message = "Es wurden %s/%s Cutlisten hochgeladen!" % (str(count - len(error_messages)), str(count))
+                if len(error_messages) > 0:
+                    message += " (" + ", ".join(error_messages) + ")"
+
+                yield message
+
+            if len(cutlists) > 0:
                 if self.__gui.question_box("Soll(en) %s Cutlist(en) hochgeladen werden?" % len(cutlists)):
                     
-                    def error_cb(self, message):
-                        self.__gui.message_error_box(message)
+                    def change_status(message):
+                        self.__gui.main_window.change_status(0, message)
                     
-                    GeneratorTask(upload).start(error_cb)
+                    GeneratorTask(upload, change_status).start()
             
             # rename
             for file_conclusion in file_conclusions:                         
@@ -139,7 +142,7 @@ class DecodeOrCut(BaseAction):
             # remove local cutlists      
             if self.config.get('delete_cutlists'):
                 for file_conclusion in file_conclusions:
-                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #TODO ausreichend?: and file_conclusion.cut.status == Status.OK:
+                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #TODO ausreichend?: and file_conclusion.cut.status == Status.OK: , keep-not uploaded cutlists
                         if exists(file_conclusion.cut.cutlist.local_filename):
                             fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
         
