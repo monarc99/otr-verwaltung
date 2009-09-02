@@ -1,16 +1,6 @@
 Einstieg
 ========
 
-Übersicht
-#########
-
-* otrkey-Dateien dekodieren
-* avi-Dateien mit Cutlists schneiden (mit Hilfe der Schnittprogrammme Avidemux und VirtualDub)
-* mehrere Dateien gleichzeitig verarbeiten
-* Cutlists nach dem Schneiden bewerten
-* Cutlists mit Avidemux oder VirtualDub selbst erstellen und hochladen
-* Schnitte vorher mit dem MPlayer betrachten
-
 Installation
 ############
 
