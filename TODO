@@ -8,6 +8,7 @@ Core:
 * Dekodieren threaden
 
 Plugins:
+* Videos aneinander fügen
 * Downloads verfizieren (http://www.otrforum.com/showpost.php?p=248030&postcount=58)
 * http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge.html#CHAPTERS
 * Was würdest du davon halten, eine Art Filtersystem einzubauen? Ich trenne gerne Serien von Filmen und hab jeweils auch meine Unterordner. Verschieben muss ich das Ganze dann leider noch manuell. Ähnlich wie bei E-Mail-Programmen könnte man dann doch z.B. einstellen, dass Dateien mit einer gewissen Zeichenfolge auch in einen bestimmten Ordner verschoben werden. Wäre das ein großer Aufwand?
