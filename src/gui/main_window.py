@@ -288,18 +288,23 @@ class MainWindow(BaseWindow):
         iter = self.get_widget('treeview_files').get_model().append(parent, data)
         return iter
    
-    def humanize_size(self, size):
-        abbrevs = [
-            (1<<30L, 'GB'), 
-            (1<<20L, 'MB'), 
-            (1<<10L, 'k'),
-            (1, '')
-        ]
-
-        for factor, suffix in abbrevs:
-            if size > factor:
-                break
-        return `int(size/factor)` + ' ' + suffix
+    def humanize_size(self, bytes):
+        bytes = float(bytes)
+        if bytes >= 1099511627776:
+            terabytes = bytes / 1099511627776
+            size = '%.1f T' % terabytes
+        elif bytes >= 1073741824:
+            gigabytes = bytes / 1073741824
+            size = '%.1f GB' % gigabytes
+        elif bytes >= 1048576:
+            megabytes = bytes / 1048576
+            size = '%.1f MB' % megabytes
+        elif bytes >= 1024:
+            kilobytes = bytes / 1024
+            size = '%.1f K' % kilobytes
+        else:
+            size = '%.1f b' % bytes
+        return size
        
     def __tv_files_sort(self, model, iter1, iter2, data):
         # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row
