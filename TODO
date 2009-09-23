@@ -14,6 +14,9 @@ Plugins:
 * Was würdest du davon halten, eine Art Filtersystem einzubauen? Ich trenne gerne Serien von Filmen und hab jeweils auch meine Unterordner. Verschieben muss ich das Ganze dann leider noch manuell. Ähnlich wie bei E-Mail-Programmen könnte man dann doch z.B. einstellen, dass Dateien mit einer gewissen Zeichenfolge auch in einen bestimmten Ordner verschoben werden. Wäre das ein großer Aufwand?
 * MKV:
         * was mir noch bei mkv fehlen würde, wäre das Aspekt Ratio umstellen. Also falls mal wieder die falsche Aspekt bei otr erkannt wurde. Dann kann man beim Umwandeln auch gleich wieder den richtigen Aspekt einstellen. 
+        * Anderes Icon
 
 ?:
 * wunsch-otr Serieninfos anzeigen http://tvplaner.wunsch-otr.de/?p=search 
+
+- Ein "Abbrechen"- Knopf wär ganz nice. Z.B. Wenn man feststellt, dass einer der Filme, die für "Dekodieren und Schneiden" ausgewählt waren, noch nicht fertig runtergeladen oder schon fertig geschnitten ist...

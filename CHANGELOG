@@ -1,4 +1,8 @@
-0.7.2:
+0.7.3:
+    * Dateigrößen werden mit Nachkommastellen angezeigt
+    * Dateien mit gleichem Namen werden beim Verschieben nicht überschrieben
+
+0.7.2, 19. September:
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung
     * Avidemux 2.5-Unterstützung
     * [Mkv-Plugin] Leicht verbesserte Fehlerbehandlung, schönerer Dateiname

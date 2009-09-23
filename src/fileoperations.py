@@ -53,12 +53,17 @@ def rename_file(old_filename, new_filename):
         __error("Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))
 
 def move_file(filename, target):
-    """ Verschiebt eine Datei in den angegebenen Ordner. Wenn die Datei im gewählten Ordner 
-    bereits existiert, wird der neue Name um eine Zahl erweitert. """
+    """ Verschiebt eine Datei in den angegebenen Ordner."""
+    
+    new_filename = join(target, basename(filename))
+    
+    if exists(new_filename):
+        __error("Umbenennen: Die Datei existiert bereits! (%s)" % new_filename)
+        return
     
     print "[Fileoperations] Move %s to %s" % (filename, target)
     try:
-        os.rename(filename, join(target, basename(filename)))
+        os.rename(filename, new_filename)
     except OSError, e:
         try:
             shutil.move(filename, target)

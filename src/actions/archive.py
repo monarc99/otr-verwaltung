@@ -80,7 +80,6 @@ class Archive(BaseAction):
     def tree_folders(self, parent):              
         dir = self.__gui.dialog_archive.get_widget('treeviewFolders').get_model().get_value(parent, 0)
             
-        files = []
         files = listdir(dir)            
 
         for file in files:
