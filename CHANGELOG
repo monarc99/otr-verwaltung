@@ -1,6 +1,7 @@
 0.7.3:
     * Dateigrößen werden mit Nachkommastellen angezeigt
     * Dateien mit gleichem Namen werden beim Verschieben nicht überschrieben
+    * Die Gtk-Abhängigkeit (>=2.16) steht jetzt im Paket
 
 0.7.2, 19. September:
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung

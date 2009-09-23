@@ -35,7 +35,7 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: otr-verwaltung
 Architecture: all
-Depends: python-gtk2
+Depends: python-gtk2, libgtk2.0-0 (>= 2.16)
 Description: Dateien von onlinetvrecorder.com verwalten:
     - otrkey-Dateien dekodieren
     - avi-Dateien (DivX und HQ) mit Cutlists schneiden (Avidemux und Virtualdub, auch unter Linux!)
