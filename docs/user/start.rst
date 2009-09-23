@@ -49,6 +49,21 @@ Funktionen
 
 Die folgende Liste von Funktionen ist noch unvollständig.
 
+Videos schneiden
+++++++++++++++++
+
+Es lasst sich Videos auf fünf Arten schneiden:
+
+=================================  ==============
+Nachfragen                         Die unteren vier Möglichkeiten werden bei jeder Datei abgefragt.
+Beste Cutlist                      Das Programm wählt die beste der heruntergeladenen Cutlisten auf Basis der Benutzerbewertungen und der Wertung des Autors aus.
+
+Cutlist wählen                     Die Cutlisten werden heruntergeladen und der Benutzer wählt bei jeder Datei die Cutlist aus
+Lokale Cutlist                     Es wird im Ordner der Video-Datei nach einer Cutlist gesucht.
+
+Manuell (und Cutlist erstellen)    Das Schnittprogramm wird geöffnet, damit der Benutzer die Datei selber schneiden kann. Optional kann auch eine Cutlist erstellt werden.
+=================================  ==============
+
 Cutlisten erstellen
 +++++++++++++++++++
 

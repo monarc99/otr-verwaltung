@@ -28,11 +28,7 @@ class PreferencesWindow(BaseWindow):
                     'labelDescUncutAvis',
                     'labelDescCutAvis',
                     'labelDescTrashOtrkeys',
-                    'labelDescTrashAvis',
-                    'labelBestCutlist',
-                    'labelChooseCutlist',
-                    'labelManually',                    
-                    'labelLocalCutlist']
+                    'labelDescTrashAvis']
         for label in labels:
             self.get_widget(label).modify_font(pango.FontDescription("9"))            
                          
@@ -77,7 +73,6 @@ class PreferencesWindow(BaseWindow):
             self.app.config.connect(option, lambda value: self.app.show_section(self.app.section))
 
         CheckButtonBinding(self.app.config, 'verify_decoded', self.get_widget('checkCorrect'))
-        CheckButtonBinding(self.app.config, 'smart', self.get_widget('check_smart'))
         CheckButtonBinding(self.app.config, 'delete_cutlists', self.get_widget('check_delete_cutlists'))
         CheckButtonBinding(self.app.config, 'rename_cut', self.get_widget('check_rename_cut'))
         
@@ -91,14 +86,6 @@ class PreferencesWindow(BaseWindow):
         ComboBoxEntryBinding(self.app.config, 'cut_mp4s_man_by', self.get_widget('combobox_man_mp4'))
         ComboBoxEntryBinding(self.app.config, 'server', self.get_widget('comboboxServer'))
 
-        RadioButtonsBinding(self.app.config, 'cut_action', [ 
-                self.get_widget('radioAsk'),
-                self.get_widget('radioBestCutlist'),
-                self.get_widget('radioChooseCutlist'),
-                self.get_widget('radioManually'),
-                self.get_widget('radioLocalCutlist')
-            ])
-            
         RadioButtonsBinding(self.app.config, 'choose_cutlists_by', [ 
                 self.get_widget('radio_size'),
                 self.get_widget('radio_filename')
