@@ -195,8 +195,7 @@ class MainWindow(BaseWindow):
         treeselection.set_mode(gtk.SELECTION_MULTIPLE)        
                
         # sorting
-        treeview.get_model().set_sort_func(0, self.__tv_files_sort)
-        treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)
+        treeview.get_model().set_sort_func(0, self.__tv_files_sort)        
         tvcolumns[self.__FILENAME].set_sort_column_id(0)
         tvcolumns[self.__SIZE].set_sort_column_id(1)
         tvcolumns[self.__DATE].set_sort_column_id(2)
