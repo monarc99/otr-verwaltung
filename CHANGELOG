@@ -2,6 +2,8 @@
     * Dateigrößen werden mit Nachkommastellen angezeigt
     * Dateien mit gleichem Namen werden beim Verschieben nicht überschrieben
     * Die Gtk-Abhängigkeit (>=2.16) steht jetzt im Paket
+    * Die Smart-Rendering-Option wurde aus der GUI entfernt
+    * Die Option, die Standard-Schnitt-Aktion zu wählen, wurde aus der GUI entfernt
 
 0.7.2, 19. September:
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung
