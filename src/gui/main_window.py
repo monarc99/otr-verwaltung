@@ -153,13 +153,14 @@ class MainWindow(BaseWindow):
     
     def __setup_treeview_files(self):
         treeview = self.get_widget('treeview_files') 
-        store = gtk.TreeStore(str, str, str, bool) # filename, size, date, locked
+        store = gtk.TreeStore(str, float, float, bool) # filename, size, date, locked
         treeview.set_model(store)
             
         # constants for model and columns
         self.__FILENAME = 0
         self.__SIZE =     1
         self.__DATE =     2
+        self.__ISDIR =    3
         
         # create the TreeViewColumns to display the data
         column_names = ['Dateiname', 'Größe', 'Geändert' ]                       
@@ -176,10 +177,13 @@ class MainWindow(BaseWindow):
         # size
         cell_renderer_text_size = gtk.CellRendererText()
         cell_renderer_text_size.set_property('xalign', 1.0) 
-        tvcolumns[self.__SIZE] = gtk.TreeViewColumn(column_names[self.__SIZE], cell_renderer_text_size, text=self.__SIZE)        
+        tvcolumns[self.__SIZE] = gtk.TreeViewColumn(column_names[self.__SIZE], cell_renderer_text_size)
+        tvcolumns[self.__SIZE].set_cell_data_func(cell_renderer_text_size, self.__tv_files_size)
         
         # date
-        tvcolumns[self.__DATE] = gtk.TreeViewColumn(column_names[self.__DATE], gtk.CellRendererText(), text=self.__DATE)        
+        cell_renderer_text_date = gtk.CellRendererText()
+        tvcolumns[self.__DATE] = gtk.TreeViewColumn(column_names[self.__DATE], cell_renderer_text_date)
+        tvcolumns[self.__DATE].set_cell_data_func(cell_renderer_text_date, self.__tv_files_date)
 
         # append the columns
         for col in tvcolumns:
@@ -191,8 +195,11 @@ class MainWindow(BaseWindow):
         treeselection.set_mode(gtk.SELECTION_MULTIPLE)        
                
         # sorting
-        treeview.get_model().set_sort_func(0, self.__tv_files_sort, None)
+        treeview.get_model().set_sort_func(0, self.__tv_files_sort)
         treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)
+        tvcolumns[self.__FILENAME].set_sort_column_id(0)
+        tvcolumns[self.__SIZE].set_sort_column_id(1)
+        tvcolumns[self.__DATE].set_sort_column_id(2)
         
         # load pixbufs for treeview
         self.__pix_avi = gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('avi.png'))      
@@ -245,8 +252,8 @@ class MainWindow(BaseWindow):
             style = eventbox.get_style().copy()
             style.bg[gtk.STATE_NORMAL] = colour
             eventbox.set_style(style)
-        
-      
+
+
     #
     # treeview_files
     #
@@ -268,23 +275,16 @@ class MainWindow(BaseWindow):
 
         return filenames
         
-    def append_row_files(self, parent, filename, size, date, locked=False):               
+    def append_row_files(self, parent, filename, size, date, isdir=False):      
         """ Fügt eine neue Datei zu treeview_files hinzu.
               parent Für Archiv, ansonsten None: der übergeordnete iter des Ordners
               filename Dateiname
               size Dateigröße in Bytes
               date Änderungsdatum der Datei
-              locked locked"""
+              isdir """
 
-        if isdir(filename):
-            size = ''
-        else:
-            size = self.humanize_size(size)
+        data = [filename, size, date, isdir]
 
-        date = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(date))
-    
-        data = [filename, size, date, locked]
-    
         iter = self.get_widget('treeview_files').get_model().append(parent, data)
         return iter
    
@@ -306,44 +306,52 @@ class MainWindow(BaseWindow):
             size = '%.1f b' % bytes
         return size
        
-    def __tv_files_sort(self, model, iter1, iter2, data):
+    def __tv_files_sort(self, model, iter1, iter2, data=None):
         # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row
-         
-        filename_iter1 = model.get_value(iter1, self.__FILENAME)    
+
+        filename_iter1 = model.get_value(iter1, self.__FILENAME)
         filename_iter2 = model.get_value(iter2, self.__FILENAME)
         
-        # why???
+        # why?
         if filename_iter2 == None:
             return -1
+ 
+        iter1_isdir = model.get_value(iter1, self.__ISDIR)
+        iter2_isdir = model.get_value(iter2, self.__ISDIR)
         
-        iter1_isdir, iter2_isdir = isdir(filename_iter1), isdir(filename_iter2)
-        
-        if iter1_isdir and iter2_isdir: # both are folders
-            # put names into array
+        if (iter1_isdir and iter2_isdir) or (not iter1_isdir and not iter2_isdir): # both are folders OR none of them is a folder
+            # put names into array and sort them
             folders = [ filename_iter1, filename_iter2 ]
-            # sort them
             folders.sort()
+
             # check if the first element is still iter1
             if folders[0] == filename_iter1:
                 return -1
             else:
                 return 1
                 
-        elif iter1_isdir: # only iter1 is a folder
+        elif iter1_isdir: # iter1 is a folder
             return -1
-        elif iter2_isdir: # only iter2 is a folder
-            return 1
-        else: # none of them is a folder
-            return 0
+        else: # iter2 is a folder
+            return 1        
             
     # displaying methods for treeview_files
+    def __tv_files_size(self, column, cell, model, iter):
+        if model.get_value(iter, self.__ISDIR):
+            cell.set_property('text', "")
+        else:
+            cell.set_property('text', self.humanize_size(model.get_value(iter, self.__SIZE)))
+
+    def __tv_files_date(self, column, cell, model, iter):
+        cell.set_property('text', time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(model.get_value(iter, self.__DATE))))
+    
     def __tv_files_name(self, column, cell, model, iter):            
         cell.set_property('text', basename(model.get_value(iter, self.__FILENAME)))
 
     def __tv_files_pixbuf(self, column, cell, model, iter):        
         filename = model.get_value(iter, self.__FILENAME)
     
-        if isdir(filename):
+        if model.get_value(iter, self.__ISDIR):
             cell.set_property('pixbuf', self.__pix_folder)
         else:
             if filename.endswith('.otrkey'):

@@ -331,7 +331,7 @@ class App:
             return filename
      
     def __append_row_treeview_files(self, parent, filename):        
-        iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename))
+        iter = self.__gui.main_window.append_row_files(parent, filename, fileoperations.get_size(filename), fileoperations.get_date(filename), isdir(filename))
         return iter
      
     

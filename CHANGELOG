@@ -4,6 +4,7 @@
     * Die Gtk-Abhängigkeit (>=2.16) steht jetzt im Paket
     * Die Smart-Rendering-Option wurde aus der GUI entfernt
     * Die Option, die Standard-Schnitt-Aktion zu wählen, wurde aus der GUI entfernt
+    * Sortieren nach Dateiname, Größe und Änderungsdatum ist möglich
 
 0.7.2, 19. September:
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung
