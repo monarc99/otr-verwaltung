@@ -475,37 +475,7 @@ class DecodeOrCut(BaseAction):
                     return "4:3", None
                 else:
                     return None, "Aspekt konnte nicht bestimmt werden " + line
-    
-    def __create_cutlist_avidemux(self, filename):
-        """ returns: cuts, error_message """
-        
-        try:
-            f = open(filename, 'r')
-        except IOError:
-            return None, "Konnte %s nicht finden, um Cutlist zu erstellen." % filename
-
-        cuts = [] # (count, start, duration)
-        count = 0
-
-        for line in f.readlines():
-            if "app.addSegment" in line:
-                try:
-                    null, start, duration = line[line.index('(') + 1 : line.index(')')].split(',')
-                except (IndexError, ValueError), message:
-                    return None, "Konnte Schnitte nicht lesen, um Cutlist zu erstellen. (%s)" % message
-                
-                # convert to seconds (avidemux uses frames)
-                cuts.append((count, int(start) / 25., int(duration) / 25.))
-                
-                count += 1
-
-        fileoperations.remove_file(filename)
-
-        if not cuts:
-            return None, "Konnte keine Schnitte lesen."
-
-        return cuts, None       
-        
+            
     def __create_cutlist_virtualdub(self, filename):
         """ returns: cuts, error_message """
         
@@ -546,22 +516,9 @@ class DecodeOrCut(BaseAction):
             return config_value, None, None
     
         if program == Program.AVIDEMUX:       
-            script_filename = filename + ".js"
-            
-            f = open(script_filename, "w")
-            
-            f.writelines([
-                '//AD\n',
-                'var app = new Avidemux();\n',
-                'app.load("%s");\n' % filename
-            ])
-            
-            f.close()
-            
-            command = [config_value, "--run", script_filename]
 
             try:                   
-                avidemux = subprocess.Popen(command)
+                avidemux = subprocess.Popen([config_value, filename], stdout=subprocess.PIPE)
             except OSError:
                 return "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
                 
@@ -569,7 +526,36 @@ class DecodeOrCut(BaseAction):
                 time.sleep(1)
                 pass
                 
-            cuts, cutlist_error = self.__create_cutlist_avidemux(join(self.config.get('folder_uncut_avis'), script_filename))                              
+            seg_lines = []
+            cuts = []
+            for line in avidemux.stdout.readlines():       
+                if line.startswith(' Seg'):
+                    # delete not interesting parts
+                    line = line[:line.find("audio")]
+                
+                    parts = line.split(',')
+        
+                    seg_id = int(parts[0].split(':')[-1])
+                    start = int(parts[1].split(':')[-1])
+                    size = int(parts[2].split(':')[-1])
+                    seg_lines.append((seg_id, start / 25., size / 25.))
+ 
+                    # keep only necessary items
+                    count = 0                    
+                    seg_lines.reverse()
+                    for seg_id, start, duration in seg_lines:
+                        if seg_id == 0:
+                            cuts.append((count, start, duration))
+                            break
+                        else:
+                            cuts.append((count, start, duration))
+                        count += 1
+                    cuts.reverse()
+                
+            if len(cuts) == 0:
+                cutlist_error = "Es wurde nicht geschnitten."
+            else:
+                cutlist_error = None
                         
         else: # VIRTUALDUB
             

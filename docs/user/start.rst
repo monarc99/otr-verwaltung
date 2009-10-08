@@ -72,7 +72,6 @@ Die Datei muss im *manuellen Modus* geschnitten werden. Je nach Einstellung öff
 **Mit Avidemux:**
 
   * Bearbeiten Sie die Datei wie gewünscht (`Anleitung im otrforum <http://www.otrforum.com/showpost.php?p=211693&postcount=3>`_).
-  * Wählen Sie den Menüpunkt :menuselection:`Datei --> Projekt speichern``.
   * Beenden Sie Avidemux. Die Datei wird nun geschnitten.
   * In der Zusammenfassung können Sie Einstellungen für die Cutlist vornehmen.
 
