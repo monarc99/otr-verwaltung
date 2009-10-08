@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gtk
-from os.path import join, basename
+from os.path import join, basename, exists
 
 from basewindow import BaseWindow
 
@@ -101,6 +101,29 @@ class DialogCut(BaseWindow):
     ###
     ### Convenience methods
     ###
+            
+    def setup(self, video_file, folder_cut_avis, cut_action_ask):
+        self.filename = video_file
+        self.get_widget('label_file').set_markup("<b>%s</b>" % basename(video_file))
+        self.get_widget('label_warning').set_markup('<span size="small">Wichtig! Um eine Cutlist zu erstellen muss das Projekt im Ordner %s gespeichert werden (siehe Website->Einstieg->Funktionen). OTR-Verwaltung schneidet die Datei dann automatisch.</span>' % folder_cut_avis)
+
+        if cut_action_ask:
+            self.get_widget('radio_best_cutlist').set_active(True)
+        else:
+            self.get_widget('radio_choose_cutlist').set_active(True)
+
+        # looking for a local cutlist
+        filename_cutlist = video_file + ".cutlist"
+        if exists(filename_cutlist):
+            self.get_widget('label_cutlist').set_markup("<b>%s</b>" % filename_cutlist)
+            self.get_widget('radio_local_cutlist').set_sensitive(True)
+        else:
+            self.get_widget('label_cutlist').set_markup("Keine lokale Cutlist gefunden.")
+            self.get_widget('radio_local_cutlist').set_sensitive(False)
+
+        # start looking for cutlists                
+        self.get_widget('treeview_cutlists').get_model().clear()                
+        self.get_widget('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
             
     def add_cutlist(self, c):                                           
         self.cutlists.append(c)      

@@ -275,75 +275,35 @@ class DecodeOrCut(BaseAction):
                 
         return True
             
-    def cut(self, file_conclusions, action, cut_action=None):                      
+    def cut(self, file_conclusions, action, default_cut_action=None):                      
         # now this method may not return "False"
         self.__gui.main_window.set_tasks_visible(True)
         self.__gui.main_window.block_gui(True)          
-      
-        default_cut_action = cut_action
-        
+             
+        if not default_cut_action:
+            default_cut_action = self.config.get('cut_action')                                         
+               
         for count, file_conclusion in enumerate(file_conclusions):
-            self.__gui.main_window.set_tasks_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
-            self.__gui.main_window.set_tasks_progress(0)
+            self.__gui.main_window.set_tasks_text("Cutlist %s/%s wählen" % (count + 1, len(file_conclusions)))
+            self.__gui.main_window.set_tasks_progress((count + 1) / float(len(file_conclusions)) * 100)
     
             # file correctly decoded?            
             if action == Action.DECODEANDCUT:
-                if file_conclusion.decode.status == Status.ERROR:
+                if file_conclusion.decode.status != Status.OK:
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = "Datei wurde nicht dekodiert."
                     continue
-
-            # how should the file be cut?            
-            if default_cut_action:
-                cut_action = default_cut_action
-            else:
-                cut_action = self.config.get('cut_action')
-                             
-            cutlists = []
-            
-            if cut_action == Cut_action.MANUALLY:
-                pass
-
-            elif cut_action == Cut_action.LOCAL_CUTLIST:
-                pass
-
-            elif cut_action == Cut_action.BEST_CUTLIST:                
-
-                def error_cb(error):
-                    file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = error
-
-                cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), error_cb)
-                
-                if len(cutlists) == 0:
-                    file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = "Keine Cutlists gefunden!"          
-                    continue
-                             
-            else:  # ASK, CHOOSE_CUTLIST
-                # show dialog
-                self.__gui.dialog_cut.filename = file_conclusion.uncut_video
-                self.__gui.dialog_cut.get_widget('label_file').set_markup("<b>%s</b>" % basename(file_conclusion.uncut_video))
-                self.__gui.dialog_cut.get_widget('label_warning').set_markup('<span size="small">Wichtig! Um eine Cutlist zu erstellen muss das Projekt im Ordner %s gespeichert werden (siehe Website->Wiki->Häufige Fragen). OTR-Verwaltung schneidet die Datei dann automatisch.</span>' % self.config.get('folder_cut_avis'))
-
-                if cut_action == Cut_action.ASK:
-                    self.__gui.dialog_cut.get_widget('radio_best_cutlist').set_active(True)
-                else:
-                    self.__gui.dialog_cut.get_widget('radio_choose_cutlist').set_active(True)
-
-                # looking for a local cutlist
-                filename_cutlist = file_conclusion.uncut_video + ".cutlist"
-                if exists(filename_cutlist):
-                    self.__gui.dialog_cut.get_widget('label_cutlist').set_markup("<b>%s</b>" % filename_cutlist)
-                    self.__gui.dialog_cut.get_widget('radio_local_cutlist').set_sensitive(True)
-                else:
-                    self.__gui.dialog_cut.get_widget('label_cutlist').set_markup("Keine lokale Cutlist gefunden.")
-                    self.__gui.dialog_cut.get_widget('radio_local_cutlist').set_sensitive(False)
-
-                # start looking for cutlists
-                self.__gui.dialog_cut.get_widget('treeview_cutlists').get_model().clear()                
-                self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
-                              
+           
+            file_conclusion.cut.cut_action = default_cut_action
+                                         
+            if default_cut_action in [Cut_action.ASK, Cut_action.CHOOSE_CUTLIST]:
+                # show dialog                
+                self.__gui.dialog_cut.setup(
+                    file_conclusion.uncut_video,
+                    self.config.get('folder_cut_avis'),
+                    default_cut_action == Cut_action.ASK)                    
+                    
+                cutlists = []                              
                 self.cutlists_error = False
                 
                 def error_cb(error):            
@@ -358,64 +318,68 @@ class DecodeOrCut(BaseAction):
                     if not self.cutlists_error:
                         self.__gui.dialog_cut.get_widget('label_status').set_markup("")
                
-                GeneratorTask(cutlists_management.download_cutlists, cutlist_found_cb, completed).start(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), error_cb)
+                GeneratorTask(cutlists_management.download_cutlists, None, completed).start(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), error_cb, cutlist_found_cb)
                 
                 response = self.__gui.dialog_cut.run()                
                 self.__gui.dialog_cut.hide()
 
-                print "response", response
-
                 if response < 0:
                     file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Abgebrochen"
-                    continue
-                else:
-                    cut_action = response
-                    
-            # save cut_action
-            file_conclusion.cut.cut_action = cut_action
+                    file_conclusion.cut.message = "Abgebrochen."                    
+                else:  # change cut_action accordingly
+                    file_conclusion.cut.cut_action = response
 
-            if cut_action == Cut_action.MANUALLY: # MANUALLY                               
+            if file_conclusion.cut.cut_action == Cut_action.MANUALLY: # MANUALLY                               
                 error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_video)
                                        
                 if not error_message:
-                    file_conclusion.cut.status = Status.OK  
                     file_conclusion.cut.create_cutlist = True            
                     file_conclusion.cut.cutlist.cuts = cuts
-                    file_conclusion.cut.cutlist.intended_app = basename(executable)
-                    # do not continue because the file hasn't been cut already!
-                    
+                    file_conclusion.cut.cutlist.intended_app = basename(executable)                    
                 else:
                     file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = error_message                   
-                    continue
+                    file_conclusion.cut.message = error_message
                     
-            # all other cases and if we got cuts: cut file by cutlist
-
-            if cut_action == Cut_action.BEST_CUTLIST:
+            elif file_conclusion.cut.cut_action == Cut_action.BEST_CUTLIST:
+                error, cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'))
+                
+                if error:
+                    file_conclusion.cut.status = Status.ERROR
+                    file_conclusion.cut.message = error
+                    continue
+                
                 if len(cutlists) == 0:
                     file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Keine Cutlist gefunden"
+                    file_conclusion.cut.message = "Keine Cutlist gefunden."
                     continue
                                                
-                file_conclusion.cut.cutlist = cutlists_management.get_best_cutlist(cutlists)                                 
-                file_conclusion.cut.cutlist.download(self.config.get('server'), file_conclusion.uncut_video)
+                file_conclusion.cut.cutlist = cutlists_management.get_best_cutlist(cutlists)
              
-            elif cut_action == Cut_action.CHOOSE_CUTLIST:
-                
+            elif file_conclusion.cut.cut_action == Cut_action.CHOOSE_CUTLIST:                
                 file_conclusion.cut.cutlist = self.__gui.dialog_cut.chosen_cutlist
-                file_conclusion.cut.cutlist.download(self.config.get('server'), file_conclusion.uncut_video)
                 
-            elif cut_action == Cut_action.LOCAL_CUTLIST:     
+            elif file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST:     
                 file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
                 
                 if not exists(file_conclusion.cut.cutlist.local_filename):
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
-                    continue
             
-            # and finally cut the file
-            cut_video, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)
+        # and finally cut the file
+        for count, file_conclusion in enumerate(file_conclusions):            
+            
+            if file_conclusion.cut.status in [Status.NOT_DONE, Status.ERROR]:
+                continue    
+        
+            print "[Decodeandcut] Datei %s wird geschnitten" % file_conclusion.uncut_video
+            self.__gui.main_window.set_tasks_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
+            self.__gui.main_window.set_tasks_progress(0.5)
+            
+            # download cutlist
+            if file_conclusion.cut.cut_action in [Cut_action.BEST_CUTLIST, Cut_action.CHOOSE_CUTLIST]:
+                file_conclusion.cut.cutlist.download(self.config.get('server'), file_conclusion.uncut_video)   
+
+            cut_video, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)                
 
             if cut_video == None:
                 file_conclusion.cut.status = Status.ERROR
@@ -425,7 +389,7 @@ class DecodeOrCut(BaseAction):
                 file_conclusion.cut_video = cut_video
                 
                 if self.config.get('rename_cut'):                        
-                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))                
+                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
                 else:
                     file_conclusion.cut.rename = basename(cut_video)               
         

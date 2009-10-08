@@ -243,7 +243,7 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
         handle = urllib.urlopen(url)
     except IOError:  
         if error_cb: error_cb("Verbindungsprobleme")
-        return []
+        return "Verbindungsprobleme", None
                    
     try:
         dom_cutlists = xml.dom.minidom.parse(handle)
@@ -251,7 +251,7 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
         dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
     except:
         if error_cb: error_cb("Keine Cutlists gefunden")
-        return []
+        return "Keine Cutlists gefunden", None
                     
     cutlists = []           
         
@@ -276,14 +276,16 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
         c.downloadcount             = __read_value(cutlist, "downloadcount")
         c.autoname                  = __read_value(cutlist, "autoname")
         c.filename_original         = __read_value(cutlist, "filename_original")
-           
-                                   
+
         if cutlist_found_cb: cutlist_found_cb(c)
             
         cutlists.append(c)
 
-    return cutlists            
-
+    if len(cutlists) == 0:
+        return "Keine Cutlists gefunden", None
+    else:
+        return None, cutlists
+        
 def __read_value(cutlist_element, node_name):
     try:
         elements = cutlist_element.getElementsByTagName(node_name)

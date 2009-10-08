@@ -2,9 +2,9 @@ Core:
 * Unterstützung für MERGED-Cutlists?
 * RSS-Feed (http://www.otrforum.com/showpost.php?p=248030&postcount=58)
 * Beim Zusammenfassen-Dialog warnen, wenn der Dialog geschlossen wird, und noch nicht alle Dateien angeguckt wurden (Decodieren und Schneiden, Schneiden)
-* Erst alle Cutlists auswählen, dann Schneiden
 * Dekodieren und Schneiden threaden
 * "Abbrechen"-Knopf
+* Scrollbars
 
 Plugins:
 * Videos aneinander fügen

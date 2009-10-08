@@ -30,7 +30,10 @@ class CutPlay(Plugin):
     def on_cut_play_clicked(self, widget, data=None):   
         filename = self.gui.main_window.get_selected_filenames()[0]
         
-        cutlists = cutlists_management.download_cutlists(filename, self.app.config.get('server'), self.app.config.get('choose_cutlists_by'), self.app.config.get('cutlist_mp4_as_hq')) 
+        error, cutlists = cutlists_management.download_cutlists(filename, self.app.config.get('server'), self.app.config.get('choose_cutlists_by'), self.app.config.get('cutlist_mp4_as_hq')) 
+        if error:
+            return
+            
         cutlist = cutlists_management.get_best_cutlist(cutlists)
         cutlist.download(self.app.config.get('server'), filename)
         cutlist.read_cuts()       

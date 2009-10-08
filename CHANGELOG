@@ -5,6 +5,7 @@
     * Die Smart-Rendering-Option wurde aus der GUI entfernt
     * Die Option, die Standard-Schnitt-Aktion zu wählen, wurde aus der GUI entfernt
     * Sortieren nach Dateiname, Größe und Änderungsdatum ist möglich
+    * Es werden nun erst die Cutlisten gewählt, dann wird geschnitten
 
 0.7.2, 19. September:
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung
