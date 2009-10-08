@@ -507,7 +507,7 @@ class DecodeOrCut(BaseAction):
        
     def cut_file_manually(self, filename):
         """ Cuts a file manually with Avidemux or VirtualDub and gets cuts from
-            possibly created project files. 
+            possibly created project files (VD) or from output (AD). 
             returns: error_message, cuts, executable """
         
         program, config_value = self.__get_program(filename, manually=True)
@@ -540,17 +540,19 @@ class DecodeOrCut(BaseAction):
                     size = int(parts[2].split(':')[-1])
                     seg_lines.append((seg_id, start / 25., size / 25.))
  
-                    # keep only necessary items
-                    count = 0                    
-                    seg_lines.reverse()
-                    for seg_id, start, duration in seg_lines:
-                        if seg_id == 0:
-                            cuts.append((count, start, duration))
-                            break
-                        else:
-                            cuts.append((count, start, duration))
-                        count += 1
-                    cuts.reverse()
+            # keep only necessary items
+            count = 0
+            seg_lines.reverse()
+            print seg_lines
+            for seg_id, start, duration in seg_lines:
+                if seg_id == 0:
+                    cuts.append((count, start, duration))
+                    break
+                else:
+                    cuts.append((count, start, duration))
+                count += 1
+            cuts.reverse()
+            print cuts
                 
             if len(cuts) == 0:
                 cutlist_error = "Es wurde nicht geschnitten."
