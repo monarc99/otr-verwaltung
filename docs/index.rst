@@ -56,6 +56,7 @@ Das Repository befindet sich auf Github: http://github.com/elbersb/otr-verwaltun
     :maxdepth: 2    
     
     developer/contribute
+    developer/pluginproposals
     developer/create_plugin
     developer/api
 

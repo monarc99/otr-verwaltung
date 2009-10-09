@@ -230,4 +230,5 @@ Erweiterungen als Übung
 #######################
 
 * Option hinzufügen, dass der Sender (Uhrzeit, Format) beim Suchen einbezogen wird.
-* Ein Bild hinzufügen (`gtk.image_new_from_file(self.get_path('bild.png'))`).  
+* Ein Bild hinzufügen (`gtk.image_new_from_file(self.get_path('bild.png'))`).
+* Ein Plugin aus den :doc:`Vorschlägen <pluginproposals>` schreiben.
