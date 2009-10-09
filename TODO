@@ -4,7 +4,6 @@ Core:
 * Beim Zusammenfassen-Dialog warnen, wenn der Dialog geschlossen wird, und noch nicht alle Dateien angeguckt wurden (Decodieren und Schneiden, Schneiden)
 * Dekodieren und Schneiden threaden
 * "Abbrechen"-Knopf
-* Scrollbars
 
 Plugins:
 * Videos aneinander fügen

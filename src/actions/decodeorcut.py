@@ -76,8 +76,8 @@ class DecodeOrCut(BaseAction):
             cutlists = []
             
             for file_conclusion in file_conclusions:
-                if file_conclusion.cut.create_cutlist:  
 
+                if file_conclusion.cut.create_cutlist:
                     if "VirtualDub" in file_conclusion.cut.cutlist.intended_app:
                         intended_app_name = "VirtualDub"
                     else:
@@ -102,7 +102,7 @@ class DecodeOrCut(BaseAction):
                         error_messages.append(error_message)
                     else:
                         if self.config.get('delete_cutlists'):
-                            fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
+                            fileoperations.remove_file(cutlist.local_filename)
                  
                 count = len(cutlists)
                 
@@ -142,7 +142,7 @@ class DecodeOrCut(BaseAction):
             # remove local cutlists      
             if self.config.get('delete_cutlists'):
                 for file_conclusion in file_conclusions:
-                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #TODO ausreichend?: and file_conclusion.cut.status == Status.OK: , keep-not uploaded cutlists
+                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #and file_conclusion.cut.status == Status.OK:
                         if exists(file_conclusion.cut.cutlist.local_filename):
                             fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
         
@@ -543,7 +543,7 @@ class DecodeOrCut(BaseAction):
             # keep only necessary items
             count = 0
             seg_lines.reverse()
-            print seg_lines
+            
             for seg_id, start, duration in seg_lines:
                 if seg_id == 0:
                     cuts.append((count, start, duration))
@@ -551,8 +551,7 @@ class DecodeOrCut(BaseAction):
                 else:
                     cuts.append((count, start, duration))
                 count += 1
-            cuts.reverse()
-            print cuts
+            cuts.reverse()            
                 
             if len(cuts) == 0:
                 cutlist_error = "Es wurde nicht geschnitten."
