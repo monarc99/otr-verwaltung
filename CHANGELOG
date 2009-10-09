@@ -1,4 +1,4 @@
-0.7.3:
+0.8, 9. Oktober:
     * Dateigrößen werden mit Nachkommastellen angezeigt
     * Dateien mit gleichem Namen werden beim Verschieben nicht überschrieben
     * Die Gtk-Abhängigkeit (>=2.16) steht jetzt im Paket
@@ -7,6 +7,7 @@
     * Sortieren nach Dateiname, Größe und Änderungsdatum ist möglich
     * Es werden nun erst die Cutlisten gewählt, dann wird geschnitten
     * Es ist beim manuellen Schneiden mit Avidemux nicht mehr nötig, das Projekt zu speichern. Die Schnitte werden aus der Programmausgabe direkt gelesen.
+    * Bugfix: Bei mehreren erstellten Cutlists konnte es vorkommen, dass nicht alle hochgeladen wurden.
 
 0.7.2, 19. September:
     * xdg-open fürs Abspielen anstelle der Konfigurationseinstellung
