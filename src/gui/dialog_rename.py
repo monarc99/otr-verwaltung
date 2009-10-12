@@ -17,6 +17,7 @@ class DialogRename(BaseWindow):
         for f in filenames:
             entries[f] = gtk.Entry()
             entries[f].set_text(basename(f))
+            entries[f].set_activates_default(True)
             entries[f].show()
             self.get_widget('vboxRename').pack_start(entries[f])
         
