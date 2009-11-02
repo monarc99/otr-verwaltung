@@ -527,7 +527,7 @@ class DecodeOrCut(BaseAction):
                 pass
                 
             seg_lines = []
-            cuts = []
+            
             for line in avidemux.stdout.readlines():       
                 if line.startswith(' Seg'):
                     # delete not interesting parts
@@ -540,17 +540,24 @@ class DecodeOrCut(BaseAction):
                     size = int(parts[2].split(':')[-1])
                     seg_lines.append((seg_id, start / 25., size / 25.))
  
-            # keep only necessary items
-            count = 0
+            # keep only necessary items            
             seg_lines.reverse()
+            temp_cuts = []
             
             for seg_id, start, duration in seg_lines:
                 if seg_id == 0:
-                    cuts.append((count, start, duration))
+                    temp_cuts.append((start, duration))
                     break
                 else:
-                    cuts.append((count, start, duration))
-                count += 1
+                    temp_cuts.append((start, duration))
+                
+            temp_cuts.reverse()
+            
+            cuts = []
+            count = 0
+            for start, duration in temp_cuts:
+                cuts.append((count, start, duration))
+                count += 1                         
                 
             if len(cuts) == 0:
                 cutlist_error = "Es wurde nicht geschnitten."
