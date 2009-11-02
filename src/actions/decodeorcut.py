@@ -551,7 +551,6 @@ class DecodeOrCut(BaseAction):
                 else:
                     cuts.append((count, start, duration))
                 count += 1
-            cuts.reverse()            
                 
             if len(cuts) == 0:
                 cutlist_error = "Es wurde nicht geschnitten."
