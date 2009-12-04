@@ -624,8 +624,7 @@ class DecodeOrCut(BaseAction):
                                 
         f.writelines([
             '//** Postproc **\n',
-            'app.video.setPostProc(3,3,0);\n',
-            'app.video.fps1000=25000;\n'
+            'app.video.setPostProc(3,3,0);\n'
             ])
             
         if self.config.get('smart'):
