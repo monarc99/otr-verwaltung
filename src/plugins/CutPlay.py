@@ -48,14 +48,14 @@ class CutPlay(Plugin):
         edl_filename = os.path.join(self.app.config.get('folder_uncut_avis'), ".tmp.edl")
         f = open(edl_filename, "w")
        
-        f.write("0 %s 0\n" % (cutlist.cuts[0][1] - 1))        
+        f.write("0 %s 0\n" % (cutlist.cuts_seconds[0][0] - 1))        
        
-        for count, start, duration in cutlist.cuts:
+        for count, (start, duration) in enumerate(cutlist.cuts_seconds):
             end = start + duration
-            if count + 1 == len(cutlist.cuts):
+            if count + 1 == len(cutlist.cuts_seconds):
                 f.write("%s 50000 0\n" % (end))
             else:
-                f.write("%s %s 0\n" % (end, (cutlist.cuts[count+1][1] - 1)))
+                f.write("%s %s 0\n" % (end, (cutlist.cuts_seconds[count+1][0] - 1)))
         f.close()
         
         p = subprocess.Popen([self.app.config.get('mplayer'), "-edl", edl_filename, filename])                

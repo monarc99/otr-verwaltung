@@ -86,7 +86,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
                     file_conclusion.cut.cutlist.author = self.config.get('cutlist_username')
                     file_conclusion.cut.cutlist.intended_version = open(otrpath.get_path("VERSION"), 'r').read().strip()
-                    file_conclusion.cut.cutlist.smart = self.config.get('smart')
+                    file_conclusion.cut.cutlist.smart = self.config.get('smart')                   
 
                     file_conclusion.cut.cutlist.write_local_cutlist(file_conclusion.uncut_video, intended_app_name, file_conclusion.cut.my_rating)
                     
@@ -334,8 +334,18 @@ class DecodeOrCut(BaseAction):
                                        
                 if not error_message:
                     file_conclusion.cut.create_cutlist = True            
-                    file_conclusion.cut.cutlist.cuts = cuts
+                    file_conclusion.cut.cutlist.cuts_frames = cuts
                     file_conclusion.cut.cutlist.intended_app = basename(executable)                    
+                    
+                    fps, error = self.__get_fps(file_conclusion.uncut_video)
+                    if not error:
+                        file_conclusion.cut.cutlist.fps = fps
+                    else:
+                        file_conclusion.cut.cutlist.fps = 25.
+                        print "Achtung! Möglicherweise wurde eine falsche Fps-Anzahl eingetragen! (%s)" % error
+                    # calculate seconds
+                    for start_frame, duration_frames in cuts:
+                        file_conclusion.cut.cutlist.cuts_seconds.append((start_frame / fps, duration_frames / fps))
                 else:
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = error_message
@@ -363,8 +373,8 @@ class DecodeOrCut(BaseAction):
                 
                 if not exists(file_conclusion.cut.cutlist.local_filename):
                     file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
-            
+                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."          
+          
         # and finally cut the file
         for count, file_conclusion in enumerate(file_conclusions):            
             
@@ -443,6 +453,37 @@ class DecodeOrCut(BaseAction):
             
         return cut_video
    
+    def __get_fps(self, filename):
+        """ Gets the fps of a movie using mplayer. 
+            Returns without error:              
+                       fps, None
+                    with error:
+                       None, error_message """
+        
+        mplayer = self.config.get('mplayer')
+        
+        if not mplayer:
+            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Frames pro Sekunde benötigt."
+        
+        try:
+            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+        except OSError:
+            return None, "MPlayer wurde nicht gefunden!"            
+           
+        while True:
+            line = process.stdout.readline()
+                    
+            if process.poll() != None:
+                time.sleep(1)
+            
+                return None, "Mplayer-Fehlermeldung: " + process.stderr.read()
+        
+            if "VIDEO" in line:
+                try:
+                    return float(line[line.index("bpp")+3 : line.index("fps")]), None
+                except:
+                    return None, "FPS konnte nicht bestimmt werden " + line
+   
     def __get_aspect_ratio(self, filename):
         """ Gets the aspect ratio of a movie using mplayer. 
             Returns without error:              
@@ -484,7 +525,7 @@ class DecodeOrCut(BaseAction):
         except IOError:
             return None, "Konnte %s nicht finden, um Cutlist zu erstellen." % filename
 
-        cuts = [] # (count, start, duration)
+        cuts_frames = [] # (start, duration)
         count = 0
 
         for line in f.readlines():
@@ -494,16 +535,14 @@ class DecodeOrCut(BaseAction):
                 except (IndexError, ValueError), message:
                     return None, "Konnte Schnitte nicht lesen, um Cutlist zu erstellen. (%s)" % message
                 
-                cuts.append((count, int(start) / 25., int(duration) / 25. ))
+                cuts_frames.append((int(start), int(duration)))
                 
-                count += 1
-
-        if len(cuts) == 0:
+        if len(cuts_frames) == 0:
             return None, "Konnte keine Schnitte finden!"
 
         fileoperations.remove_file(filename)
 
-        return cuts, None       
+        return cuts_frames, None       
        
     def cut_file_manually(self, filename):
         """ Cuts a file manually with Avidemux or VirtualDub and gets cuts from
@@ -514,7 +553,7 @@ class DecodeOrCut(BaseAction):
         
         if program < 0:
             return config_value, None, None
-    
+            
         if program == Program.AVIDEMUX:       
 
             try:                   
@@ -538,7 +577,7 @@ class DecodeOrCut(BaseAction):
                     seg_id = int(parts[0].split(':')[-1])
                     start = int(parts[1].split(':')[-1])
                     size = int(parts[2].split(':')[-1])
-                    seg_lines.append((seg_id, start / 25., size / 25.))
+                    seg_lines.append((seg_id, start, size))
  
             # keep only necessary items            
             seg_lines.reverse()
@@ -553,13 +592,13 @@ class DecodeOrCut(BaseAction):
                 
             temp_cuts.reverse()
             
-            cuts = []
+            cuts_frames = []
             count = 0
             for start, duration in temp_cuts:
-                cuts.append((count, start, duration))
+                cuts_frames.append((start, duration))
                 count += 1                         
                 
-            if len(cuts) == 0:
+            if len(cuts_frames) == 0:
                 cutlist_error = "Es wurde nicht geschnitten."
             else:
                 cutlist_error = None
@@ -571,12 +610,12 @@ class DecodeOrCut(BaseAction):
             if error != None:
                 return error, None, None
                 
-            cuts, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('folder_uncut_avis'), "cutlist.vcf"))
+            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('folder_uncut_avis'), "cutlist.vcf"))
          
         if cutlist_error:            
             return cutlist_error, None, config_value
         else:
-            return None, cuts, config_value
+            return None, cuts_frames, config_value
              
     def cut_file_by_cutlist(self, filename, cutlist):
         """ Returns: cut_video, error """
@@ -589,12 +628,23 @@ class DecodeOrCut(BaseAction):
         error = cutlist.read_cuts()        
         if error:
             return None, error       
-        
+            
+        if not cutlist.cuts_frames:                        
+            fps, error = self.__get_fps(filename)
+            if not error:
+                cutlist.fps = fps
+            else:
+                return None, "Konnte FPS nicht bestimmen: " + error
+            
+            print "Calculate frame values from seconds."
+            for start, duration in cutlist.cuts_seconds:
+                cutlist.cuts_frames.append((start * cutlist.fps, duration * cutlist.fps))
+               
         if program == Program.AVIDEMUX:
-            cut_video, error = self.__cut_file_avidemux(filename, program_config_value, cutlist.cuts)
+            cut_video, error = self.__cut_file_avidemux(filename, program_config_value, cutlist.cuts_frames)
             
         else: # VIRTUALDUB                              
-            cut_video, error = self.__cut_file_virtualdub(filename, program_config_value, cutlist.cuts)
+            cut_video, error = self.__cut_file_virtualdub(filename, program_config_value, cutlist.cuts_frames)
             
         if error:
             return None, error
@@ -615,10 +665,8 @@ class DecodeOrCut(BaseAction):
             'app.clearSegments();\n'
             ])
             
-        for count, start, duration in cuts:
-            frame_start = start * 25   
-            frame_duration = duration * 25
-            f.write("app.addSegment(0, %s, %s);\n" %(str(int(frame_start)), str(int(frame_duration))))
+        for frame_start, frames_duration in cuts:
+            f.write("app.addSegment(0, %i, %i);\n" %(frame_start, frames_duration))
 
         cut_video = self.__generate_filename(filename)
                                 
@@ -716,8 +764,8 @@ class DecodeOrCut(BaseAction):
         f.write('VirtualDub.subset.Clear();\n')
 
         if not manually:
-            for count, start, duration in cuts:
-                f.write("VirtualDub.subset.AddRange(%s, %s);\n" % (str(start * 25), str(duration * 25)))
+            for frame_start, frames_duration in cuts:
+                f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration))
 
             cut_video = self.__generate_filename(filename)
                                 

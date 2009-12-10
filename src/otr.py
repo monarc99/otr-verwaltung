@@ -499,6 +499,8 @@ class App:
         f_edl = open(join(self.config.get('folder_new_otrkeys'), ".tmp.edl"), "w")
         f_sub = open(join(self.config.get('folder_new_otrkeys'), ".tmp.sub"), "w")    
         
+        # get cuts in seconds
+        
         edl_subtitles_cb(f_edl, f_sub, cuts)        
         
         f_edl.close()
@@ -529,7 +531,7 @@ class App:
 
             f_edl.write("0 ")      
 
-            for count, start, duration in cuts:
+            for start, duration in cuts:
                 end = start + duration
 
                 f_edl.write("%s 0\n" % (start - diff))
@@ -556,7 +558,7 @@ class App:
             self.__gui.message_error_box(error)
             return           
 
-        self.__show(cutlist.cuts, video_filename, edl_subtitles_cb)            
+        self.__show(cutlist.cuts_seconds, video_filename, edl_subtitles_cb)            
     
     def show_cuts_after_cut(self, video_filename, cutlist):
         """ #FIXME """
@@ -568,7 +570,7 @@ class App:
             length = 0
             sub_count = 0
                             
-            for count, start, duration in cuts:
+            for start, duration in cuts:
                 f_edl.write("%s %s 0\n" % (pre_diff + length, length + duration - diff))
                 length += duration
                 
@@ -586,7 +588,7 @@ class App:
             self.__gui.message_error_box(error)
             return           
 
-        self.__show(cutlist.cuts, video_filename, edl_subtitles_cb)
+        self.__show(cutlist.cuts_seconds, video_filename, edl_subtitles_cb)
     
     def format_seconds(self, seconds):
         """ #FIXME """

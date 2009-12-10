@@ -41,10 +41,12 @@ class Cutlist:
         self.intended_app = ''
         self.intended_version = ''
         self.smart = 0
+        self.fps = 0
 
         # own additions
         self.errors = False
-        self.cuts = [] # (count, start, duration) list
+        self.cuts_seconds = [] # (start, duration) list
+        self.cuts_frames = [] # (start, duration) list
         self.local_filename = None
         
   
@@ -111,9 +113,8 @@ class Cutlist:
         """ Reads cuts from local_filename.
             
             Returns: error message, otherwise None """
-
-        
-        if len(self.cuts) != 0:
+                    
+        if self.cuts_seconds or self.cuts_frames:
             return
         
         config_parser = ConfigParser.SafeConfigParser()        
@@ -127,9 +128,18 @@ class Cutlist:
             noofcuts = int(config_parser.get("General", "NoOfCuts"))
             
             for count in range(noofcuts):
-                self.cuts.append((count,
-                                  float(config_parser.get("Cut" + str(count), "Start")), 
-                                  float(config_parser.get("Cut" + str(count), "Duration"))))            
+                cut = "Cut" + str(count)
+            
+                if config_parser.has_option(cut, "StartFrame") and config_parser.has_option(cut, "DurationFrames"):
+                    start_frame = int(config_parser.get(cut, "StartFrame"))
+                    duration_frames = int(config_parser.get(cut, "DurationFrames"))
+                    self.cuts_frames.append((start_frame, duration_frames))                    
+                    print "Append frames: %i, %i" % (start_frame, duration_frames)
+                                    
+                start_second = float(config_parser.get(cut, "Start"))
+                duration_seconds = float(config_parser.get(cut, "Duration"))
+                self.cuts_seconds.append((start_second, duration_seconds))     
+                print "Append seconds: %f, %f" % (start_second, duration_seconds)                                             
 
         except ConfigParser.NoSectionError, message:
             return "Fehler in Cutlist: " + str(message)
@@ -168,14 +178,14 @@ class Cutlist:
                 "comment1=The following parts of the movie will be kept, the rest will be cut out.\n",
                 "ApplyToFile=%s\n" % os.path.basename(uncut_video),
                 "OriginalFileSizeBytes=%s\n" % str(fileoperations.get_size(uncut_video)),
-                "FramesPerSecond=25\n",
+                "FramesPerSecond=%s\n" % str(self.fps),
                 "IntendedCutApplicationName=%s\n" % intended_app_name,
                 "IntendedCutApplication=%s\n" % self.intended_app,
                 "IntendedCutApplicationVersion=\n",
                 "VDUseSmartRendering=%s\n" % str(int(self.smart)),
                 "VDSmartRenderingCodecFourCC=0x53444646\n",
                 "VDSmartRenderingCodecVersion=0x00000000\n",
-                "NoOfCuts=%s\n" % str(len(self.cuts)),
+                "NoOfCuts=%s\n" % str(len(self.cuts_frames)),
                 "comment2=All values are given in seconds.\n",
                 "\n",
                 "[Info]\n",
@@ -193,14 +203,16 @@ class Cutlist:
                 "UserComment=%s\n" % str(self.usercomment),
                 "\n"
             ])
-            
-            for count, start, duration in self.cuts:
+                      
+            for count, (start_frame, duration_frames) in enumerate(self.cuts_frames):
                 cutlist.writelines([
-                    "[Cut%s]\n" % str(count),
-                    "Start=%s\n" % str(start),
-                    "Duration=%s\n" % str(duration),
+                    "[Cut%i]\n" % count,
+                    "Start=%f\n" % (start_frame / self.fps),
+                    "StartFrame=%i\n" % start_frame,             
+                    "Duration=%f\n" % (duration_frames / self.fps),       
+                    "DurationFrames=%i\n" % duration_frames,
                     "\n"
-                ])                       
+                ])
                                                     
         except IOError:
             print "Konnte Cutlist-Datei nicht erstellen: " + filename            
