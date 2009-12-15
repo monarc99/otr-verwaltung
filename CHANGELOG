@@ -1,6 +1,7 @@
 0.8.1:
     * Bugfix: Falsche Nummerierung der Schnitte in Cutlisten.
     * Bugfix: US-TV: Asynchronität von Bild und Ton behoben
+    * Es werden Frameangaben geschrieben und verwendet.
 
 0.8, 9. Oktober:
     * Dateigrößen werden mit Nachkommastellen angezeigt
