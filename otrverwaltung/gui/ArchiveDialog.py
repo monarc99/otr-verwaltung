@@ -5,18 +5,20 @@ from os.path import basename
 
 import gtk
 
-from otrverwaltung.gui.basewindow import BaseWindow
+from otrverwaltung import path
 
-class DialogArchive(BaseWindow):
-    
-    def __init__(self, parent):                    
-        BaseWindow.__init__(self, "dialog_archive", parent)
-        
-        self.__setup_widgets()
-        
-    def __setup_widgets(self):
+class ArchiveDialog(gtk.Dialog, gtk.Buildable):
+    __gtype_name__ = "ArchiveDialog"
+
+    def __init__(self):
+        pass
+
+    def do_parser_finished(self, builder):
+        self.builder = builder
+        self.builder.connect_signals(self)
+
         # create folder treestore
-        treeview = self.get_widget('treeviewFolders')
+        treeview = self.builder.get_object('treeviewFolders')
         treeview.set_model(gtk.TreeStore(str))
 
         cell_renderer_folder_name = gtk.CellRendererText()
@@ -26,7 +28,7 @@ class DialogArchive(BaseWindow):
         treeview.append_column(tvcolumn)
 
         # create files-rename liststore
-        treeview = self.get_widget('treeviewFilesRename')
+        treeview = self.builder.get_object('treeviewFilesRename')
         treeview.set_model(gtk.ListStore(str))
         
         cell_renderer_new = gtk.CellRendererText()
@@ -43,11 +45,11 @@ class DialogArchive(BaseWindow):
     ###    
   
     def append_row_treeviewFilesRename(self, filename):
-        iter = self.get_widget('treeviewFilesRename').get_model().append([filename])    
+        iter = self.builder.get_object('treeviewFilesRename').get_model().append([filename])    
         return iter
         
     def append_row_treeviewFolders(self, parent, filename):   
-        iter = self.get_widget('treeviewFolders').get_model().append(parent, [filename])
+        iter = self.builder.get_object('treeviewFolders').get_model().append(parent, [filename])
         return iter
         
     ###
@@ -60,3 +62,12 @@ class DialogArchive(BaseWindow):
     def new_name_cell_edited(self, cell, path, new_text, model):
         # update new name of file in model
         model[path][0] = new_text
+        
+def NewArchiveDialog():
+    glade_filename = path.getdatapath('ui', 'ArchiveDialog.glade')
+    
+    builder = gtk.Builder()   
+    builder.add_from_file(glade_filename)
+    dialog = builder.get_object("archive_dialog")
+        
+    return dialog

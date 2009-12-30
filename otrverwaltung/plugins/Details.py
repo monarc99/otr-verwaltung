@@ -15,7 +15,7 @@ class Details(Plugin):
     Configurable = False
  
     def enable(self):
-        treeselection = self.gui.main_window.get_widget('treeview_files').get_selection()
+        treeselection = self.gui.main_window.builder.get_object('treeview_files').get_selection()
         self.on_treeselection_changed_id = treeselection.connect('changed', lambda callback: self.update_details())
                 
         # Typ
@@ -39,13 +39,13 @@ class Details(Plugin):
         table.show_all()
         
         # add to bottom bar
-        self.page_index = self.gui.main_window.get_widget('notebook_bottom').append_page(table, gtk.Label("Details"))
+        self.page_index = self.gui.main_window.builder.get_object('notebook_bottom').append_page(table, gtk.Label("Details"))
         
     def disable(self):                
-        treeselection = self.gui.main_window.get_widget('treeview_files').get_selection()
+        treeselection = self.gui.main_window.builder.get_object('treeview_files').get_selection()
         treeselection.disconnect(self.on_treeselection_changed_id)
     
-        self.gui.main_window.get_widget('notebook_bottom').remove_page(self.page_index)
+        self.gui.main_window.builder.get_object('notebook_bottom').remove_page(self.page_index)
                       
     def update_details(self):       
         try:

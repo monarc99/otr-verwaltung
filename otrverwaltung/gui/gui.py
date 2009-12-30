@@ -7,15 +7,7 @@ except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
 
-from otrverwaltung.gui.main_window import MainWindow
-from otrverwaltung.gui.preferences_window import PreferencesWindow
-from otrverwaltung.gui.dialog_archive import DialogArchive
-from otrverwaltung.gui.dialog_conclusion import DialogConclusion
-from otrverwaltung.gui.dialog_cut import DialogCut
-from otrverwaltung.gui.dialog_email_password import DialogEmailPassword
-from otrverwaltung.gui.dialog_rename import DialogRename
-from otrverwaltung.gui.dialog_planning import DialogPlanning
-from otrverwaltung.gui.dialog_plugins import DialogPlugins
+from otrverwaltung.gui import MainWindow, PreferencesWindow, ArchiveDialog, ConclusionDialog, CutDialog, EmailPasswordDialog, RenameDialog, PlanningDialog, PluginsDialog
 
 from otrverwaltung import path
 
@@ -25,18 +17,21 @@ class Gui:
         self.app = app
            
         # TODO: einheitliches benennungsschema für widgets: MainWindow oder main_window        
-        self.main_window = MainWindow(app, self)        
-        self.preferences_window = PreferencesWindow(app, self, self.main_window)
-        self.dialog_archive = DialogArchive(self.main_window)
-        self.dialog_conclusion = DialogConclusion(app, self, self.main_window)
-        self.dialog_cut = DialogCut(app, self, self.main_window)
-        self.dialog_email_password = DialogEmailPassword(self.main_window)
-        self.dialog_rename = DialogRename(self.main_window)
-        self.dialog_planning = DialogPlanning(self, self.main_window)
-        self.dialog_plugins = DialogPlugins(self, self.main_window)
+        self.main_window = MainWindow.NewMainWindow(app, self)        
+        self.main_window.post_init()
+        self.preferences_window = PreferencesWindow.NewPreferencesWindow(app, self)
+        self.preferences_window.post_init()
+        
+        self.dialog_archive = ArchiveDialog.NewArchiveDialog()
+        self.dialog_conclusion = ConclusionDialog.NewConclusionDialog(app, self)
+        self.dialog_cut = CutDialog.NewCutDialog(app, self)
+        self.dialog_email_password = EmailPasswordDialog.NewEmailPasswordDialog()
+        self.dialog_rename = RenameDialog.NewRenameDialog()
+        self.dialog_planning = PlanningDialog.NewPlanningDialog(self)
+        self.dialog_plugins = PluginsDialog.NewPluginsDialog(self)
 
         for window in [self.main_window]:
-            window.get_window().set_icon(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))      
+            window.set_icon(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))      
 
     def run(self):
         gtk.main()
@@ -87,7 +82,7 @@ class Gui:
         
     def __get_dialog(self, message_type, message_buttons, message_text):
         return gtk.MessageDialog(
-                    self.main_window.get_window(),
+                    self.main_window,
                     gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                     message_type,
                     message_buttons,

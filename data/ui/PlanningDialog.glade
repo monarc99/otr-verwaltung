@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkDialog" id="dialog_planning">
+  <object class="PlanningDialog" id="planning_dialog">
     <property name="border_width">4</property>
     <property name="title" translatable="yes">Geplante Sendung</property>
     <property name="modal">True</property>

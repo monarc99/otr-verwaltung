@@ -31,7 +31,7 @@ class Edit(BaseAction):
         self.__gui = gui
 
     def do(self, broadcast, planned_broadcasts):
-        index = self.__gui.main_window.get_widget('treeview_planning').get_model().get_value(broadcast, 0)
+        index = self.__gui.main_window.builder.get_object('treeview_planning').get_model().get_value(broadcast, 0)
         
         if self.__gui.dialog_planning.run_edit(planned_broadcasts[index]) == RESPONSE_OK:
             title, datetime, station = self.__gui.dialog_planning.get_values()
@@ -58,7 +58,7 @@ class Remove(BaseAction):
             # convert indices to references in the list
             items = []
             for iter in broadcasts:
-                index = self.__gui.main_window.get_widget('treeview_planning').get_model().get_value(iter, 0)
+                index = self.__gui.main_window.builder.get_object('treeview_planning').get_model().get_value(iter, 0)
                 items.append(planned_broadcasts[index])
             for item in items:
                 planned_broadcasts.remove(item)
@@ -72,7 +72,7 @@ class Search(BaseAction):
         
     def do(self, broadcasts, planned_broadcasts):
         for broadcast in broadcasts:
-            index = self.__gui.main_window.get_widget('treeview_planning').get_model().get_value(broadcast, 0)
+            index = self.__gui.main_window.builder.get_object('treeview_planning').get_model().get_value(broadcast, 0)
             broadcast = planned_broadcasts[index]
                         
             # build string: Titanic_08.12.24_20-15_pro7_

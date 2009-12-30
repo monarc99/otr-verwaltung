@@ -4,33 +4,31 @@
 import gtk
 from os.path import join, basename, exists
 
-from otrverwaltung.gui.basewindow import BaseWindow
-
 from otrverwaltung.constants import Cut_action
 import otrverwaltung.cutlists as cutlists_management
 from otrverwaltung import fileoperations
 from otrverwaltung import path
 
-class DialogCut(BaseWindow):
+class CutDialog(gtk.Dialog, gtk.Buildable):
     """ Dialog, um den Schnittmodus constants.Cut_action und ggf die Cutlist auszuwählen """ 
-   
-    def __init__(self, app, gui, parent):
-        self.gui = gui
-        self.app = app
-                
-        BaseWindow.__init__(self, "dialog_cut", parent)
+    
+    __gtype_name__ = "CutDialog"
 
-        self.__setup_widgets()
-        
+    def __init__(self):
+        pass
+
+    def do_parser_finished(self, builder):
+        self.builder = builder
+        self.builder.connect_signals(self)
+       
         self.cutlists = []        
         self.chosen_cutlist = None
-        
-    def __setup_widgets(self):   
+ 
         # warning sign
         self.pixbuf_warning = gtk.gdk.pixbuf_new_from_file(path.get_image_path('error.png'))      
                
         # setup the file treeview
-        treeview = self.get_widget('treeview_cutlists')
+        treeview = self.builder.get_object('treeview_cutlists')
         store = gtk.ListStore(
             str, # 0 id
             str, # 1 author
@@ -104,26 +102,26 @@ class DialogCut(BaseWindow):
             
     def setup(self, video_file, folder_cut_avis, cut_action_ask):
         self.filename = video_file
-        self.get_widget('label_file').set_markup("<b>%s</b>" % basename(video_file))
-        self.get_widget('label_warning').set_markup('<span size="small">Wichtig! Um eine Cutlist zu erstellen muss das Projekt im Ordner %s gespeichert werden (siehe Website->Einstieg->Funktionen). OTR-Verwaltung schneidet die Datei dann automatisch.</span>' % folder_cut_avis)
+        self.builder.get_object('label_file').set_markup("<b>%s</b>" % basename(video_file))
+        self.builder.get_object('label_warning').set_markup('<span size="small">Wichtig! Um eine Cutlist zu erstellen muss das Projekt im Ordner %s gespeichert werden (siehe Website->Einstieg->Funktionen). OTR-Verwaltung schneidet die Datei dann automatisch.</span>' % folder_cut_avis)
 
         if cut_action_ask:
-            self.get_widget('radio_best_cutlist').set_active(True)
+            self.builder.get_object('radio_best_cutlist').set_active(True)
         else:
-            self.get_widget('radio_choose_cutlist').set_active(True)
+            self.builder.get_object('radio_choose_cutlist').set_active(True)
 
         # looking for a local cutlist
         filename_cutlist = video_file + ".cutlist"
         if exists(filename_cutlist):
-            self.get_widget('label_cutlist').set_markup("<b>%s</b>" % filename_cutlist)
-            self.get_widget('radio_local_cutlist').set_sensitive(True)
+            self.builder.get_object('label_cutlist').set_markup("<b>%s</b>" % filename_cutlist)
+            self.builder.get_object('radio_local_cutlist').set_sensitive(True)
         else:
-            self.get_widget('label_cutlist').set_markup("Keine lokale Cutlist gefunden.")
-            self.get_widget('radio_local_cutlist').set_sensitive(False)
+            self.builder.get_object('label_cutlist').set_markup("Keine lokale Cutlist gefunden.")
+            self.builder.get_object('radio_local_cutlist').set_sensitive(False)
 
         # start looking for cutlists                
-        self.get_widget('treeview_cutlists').get_model().clear()                
-        self.get_widget('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
+        self.builder.get_object('treeview_cutlists').get_model().clear()                
+        self.builder.get_object('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
             
     def add_cutlist(self, c):                                           
         self.cutlists.append(c)      
@@ -153,27 +151,27 @@ class DialogCut(BaseWindow):
         data = [ c.id, c.author, "<b>%s</b>" % c.ratingbyauthor, "<b>%s</b>" % c.rating, c.ratingcount, c.countcuts, c.actualcontent, c.usercomment, c.filename, c.withframes, c.withtime, c.duration, c.errors, c.othererrordescription, c.downloadcount, c.autoname, c.filename_original ]
         data.append(errors)
         
-        self.get_widget('treeview_cutlists').get_model().append(data)  
+        self.builder.get_object('treeview_cutlists').get_model().append(data)  
        
     ###
     ### Signal handlers
     ###
     
     def _on_radio_manually_toggled(self, widget, data=None):
-        self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
+        self.builder.get_object('button_show_cuts').set_sensitive(not widget.get_active())
     
     def _on_radio_best_cutlist_toggled(self, widget, data=None):
-        self.get_widget('button_show_cuts').set_sensitive(not widget.get_active())
+        self.builder.get_object('button_show_cuts').set_sensitive(not widget.get_active())
         
     def _on_button_show_cuts_clicked(self, widget, data=None):
         cutlist = cutlists_management.Cutlist()
 
-        if self.get_widget('radio_local_cutlist').get_active():
+        if self.builder.get_object('radio_local_cutlist').get_active():
             
-            cutlist.local_filename = self.get_widget('label_cutlist').get_text()
+            cutlist.local_filename = self.builder.get_object('label_cutlist').get_text()
             
         else:
-            treeselection = self.get_widget('treeview_cutlists').get_selection()  
+            treeselection = self.builder.get_object('treeview_cutlists').get_selection()  
 
             if treeselection.count_selected_rows() == 0:                            
                 self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
@@ -199,14 +197,14 @@ class DialogCut(BaseWindow):
     def _on_selection_changed(self, selection, data=None):     
         model, paths = selection.get_selected_rows()
         if paths:
-            self.get_widget('radio_choose_cutlist').set_active(True)
+            self.builder.get_object('radio_choose_cutlist').set_active(True)
        
     def _on_buttonCutOK_clicked(self, widget, data=None):
-        if self.get_widget('radio_best_cutlist').get_active() == True:
-            self.get_window().response(Cut_action.BEST_CUTLIST)
+        if self.builder.get_object('radio_best_cutlist').get_active() == True:
+            self.response(Cut_action.BEST_CUTLIST)
 
-        elif self.get_widget('radio_choose_cutlist').get_active() == True:
-            treeselection = self.get_widget('treeview_cutlists').get_selection()  
+        elif self.builder.get_object('radio_choose_cutlist').get_active() == True:
+            treeselection = self.builder.get_object('treeview_cutlists').get_selection()  
                 
             if treeselection.count_selected_rows() == 0:                            
                 self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
@@ -219,11 +217,21 @@ class DialogCut(BaseWindow):
             for cutlist in self.cutlists:
                 if cutlist.id == cutlist_id:
                     self.chosen_cutlist = cutlist
-                    self.get_window().response(Cut_action.CHOOSE_CUTLIST)
+                    self.response(Cut_action.CHOOSE_CUTLIST)
                     return
             
-        elif self.get_widget('radio_local_cutlist').get_active() == True:
-            self.get_window().response(Cut_action.LOCAL_CUTLIST)
+        elif self.builder.get_object('radio_local_cutlist').get_active() == True:
+            self.response(Cut_action.LOCAL_CUTLIST)
         else:                    
-            self.get_window().response(Cut_action.MANUALLY)
+            self.response(Cut_action.MANUALLY)
 
+def NewCutDialog(app, gui):
+    glade_filename = path.getdatapath('ui', 'CutDialog.glade')
+    
+    builder = gtk.Builder()   
+    builder.add_from_file(glade_filename)
+    dialog = builder.get_object("cut_dialog")
+    dialog.app = app
+    dialog.gui = gui
+        
+    return dialog

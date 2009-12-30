@@ -19,11 +19,11 @@ class Play(Plugin):
         self.toolbutton = self.gui.main_window.add_toolbutton(gtk.image_new_from_file(self.get_path('play.png')), 'Abspielen', self.relevant_sections)
         self.toolbutton.connect('clicked', self.on_play_clicked)        
         
-        self.row_activate_id = self.gui.main_window.get_widget('treeview_files').connect('row-activated', self.on_row_activated)
+        self.row_activate_id = self.gui.main_window.builder.get_object('treeview_files').connect('row-activated', self.on_row_activated)
         
     def disable(self):
         self.gui.main_window.remove_toolbutton(self.toolbutton)        
-        self.gui.main_window.get_widget('treeview_files').disconnect(self.row_activate_id)
+        self.gui.main_window.builder.get_object('treeview_files').disconnect(self.row_activate_id)
        
     # plugin methods
     def start_player(self):        

@@ -18,12 +18,12 @@ class Archive(BaseAction):
         # widgets
         dialog = self.__gui.dialog_archive
        
-        treeview_files = self.__gui.dialog_archive.get_widget('treeviewFilesRename')
+        treeview_files = self.__gui.dialog_archive.builder.get_object('treeviewFilesRename')
         treestore_files = treeview_files.get_model()
-        treeview_folders = self.__gui.dialog_archive.get_widget('treeviewFolders')
+        treeview_folders = self.__gui.dialog_archive.builder.get_object('treeviewFolders')
         treestore_folders = treeview_folders.get_model()
                 
-        self.__gui.dialog_archive.get_widget('labelFiles').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
+        self.__gui.dialog_archive.builder.get_object('labelFiles').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
         
         # fill rename tree
         dict_files_iter = {}        
@@ -78,7 +78,7 @@ class Archive(BaseAction):
 
     # recursive
     def tree_folders(self, parent):              
-        dir = self.__gui.dialog_archive.get_widget('treeviewFolders').get_model().get_value(parent, 0)
+        dir = self.__gui.dialog_archive.builder.get_object('treeviewFolders').get_model().get_value(parent, 0)
             
         files = listdir(dir)            
 

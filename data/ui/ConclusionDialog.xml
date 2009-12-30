@@ -1,0 +1,9 @@
+<glade-catalog name="ConclusionDialog" domain="glade-3" 
+               depends="gtk+" version="1.0">
+  <glade-widget-classes>
+    <glade-widget-class title="ConclusionDialog" name="ConclusionDialog" 
+                        generic-name="ConclusionDialog" parent="GtkDialog"
+                        icon-name="widget-gtk-dialog"/>
+  </glade-widget-classes>
+
+</glade-catalog>

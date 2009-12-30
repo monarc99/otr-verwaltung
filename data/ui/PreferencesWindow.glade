@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkWindow" id="preferences_window">
+  <object class="PreferencesWindow" id="preferences_window">
     <property name="border_width">9</property>
     <property name="title" translatable="yes">Optionen</property>
     <property name="window_position">center</property>

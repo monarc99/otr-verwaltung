@@ -14,7 +14,7 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkDialog" id="dialog_plugins">
+  <object class="PluginsDialog" id="plugins_dialog">
     <property name="title" translatable="yes">Plugins</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>

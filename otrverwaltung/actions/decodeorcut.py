@@ -307,7 +307,7 @@ class DecodeOrCut(BaseAction):
                 self.cutlists_error = False
                 
                 def error_cb(error):            
-                    self.__gui.dialog_cut.get_widget('label_status').set_markup("<b>%s</b>" % error)
+                    self.__gui.dialog_cut.builder.get_object('label_status').set_markup("<b>%s</b>" % error)
                     self.cutlists_error = True
                      
                 def cutlist_found_cb(cutlist):
@@ -316,7 +316,7 @@ class DecodeOrCut(BaseAction):
                
                 def completed():
                     if not self.cutlists_error:
-                        self.__gui.dialog_cut.get_widget('label_status').set_markup("")
+                        self.__gui.dialog_cut.builder.get_object('label_status').set_markup("")
                
                 GeneratorTask(cutlists_management.download_cutlists, None, completed).start(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), error_cb, cutlist_found_cb)
                 

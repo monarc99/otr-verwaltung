@@ -8,23 +8,25 @@ import urllib
 import webbrowser
 import subprocess
 
-
 import gtk
 import pango
 
-from otrverwaltung.gui.basewindow import BaseWindow
 from otrverwaltung import path
 from otrverwaltung.constants import Action, Section, Cut_action
 from otrverwaltung.GeneratorTask import GeneratorTask
 
-class MainWindow(BaseWindow):
-    
-    def __init__(self, app, gui):
-        self.__app = app
-        self.__gui = gui      
-                
-        BaseWindow.__init__(self, "main_window")
-       
+class MainWindow(gtk.Window, gtk.Buildable):
+    __gtype_name__ = "MainWindow"
+
+    def __init__(self):
+        pass
+
+    def do_parser_finished(self, builder):      
+        self.builder = builder
+        self.builder.connect_signals(self)
+     
+    # TODO: only workaround. try to remove.     
+    def post_init(self):       
         self.__setup_toolbar()
         self.__setup_treeview_planning()
         self.__setup_treeview_files()
@@ -112,7 +114,7 @@ class MainWindow(BaseWindow):
         for section in sections:            
             self.__sets_of_toolbars[section].append(toolbutton)
 
-        self.set_toolbar(self.__app.section)
+        self.set_toolbar(self.app.section)
         return toolbutton
         
     def remove_toolbutton(self, toolbutton):
@@ -123,10 +125,10 @@ class MainWindow(BaseWindow):
             if toolbutton in self.__sets_of_toolbars[section]:
                 self.__sets_of_toolbars[section].remove(toolbutton)
 
-        self.set_toolbar(self.__app.section)    
+        self.set_toolbar(self.app.section)    
     
     def __setup_treeview_planning(self):
-        treeview = self.get_widget('treeview_planning') 
+        treeview = self.builder.get_object('treeview_planning') 
         store = gtk.TreeStore(int, str, str, str)                        
         treeview.set_model(store)
         
@@ -152,7 +154,7 @@ class MainWindow(BaseWindow):
         treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)    
     
     def __setup_treeview_files(self):
-        treeview = self.get_widget('treeview_files') 
+        treeview = self.builder.get_object('treeview_files') 
         store = gtk.TreeStore(str, float, float, bool) # filename, size, date, locked
         treeview.set_model(store)
             
@@ -206,46 +208,46 @@ class MainWindow(BaseWindow):
         self.__pix_folder = gtk.gdk.pixbuf_new_from_file(path.get_image_path('folder.png'))
 
     def __setup_widgets(self):        
-        self.get_widget('menu_bottom').set_active(self.__app.config.get('show_bottom'))
+        self.builder.get_object('menu_bottom').set_active(self.app.config.get('show_bottom'))
         
-        self.get_widget('image_status').clear()
+        self.builder.get_object('image_status').clear()
         
-        self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+        self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
         
         # delete-search button image
         image = gtk.Image()
         image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
-        self.get_widget('buttonClear').set_image(image)
+        self.builder.get_object('buttonClear').set_image(image)
                       
         # connect other signals
-        self.get_widget('radioPlanning').connect('clicked', self._on_sidebar_toggled, Section.PLANNING)
-        self.get_widget('radioUndecoded').connect('clicked', self._on_sidebar_toggled, Section.OTRKEY)
-        self.get_widget('radioUncut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_UNCUT)
-        self.get_widget('radioCut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_CUT)
-        self.get_widget('radioArchive').connect('clicked', self._on_sidebar_toggled, Section.ARCHIVE)  
-        self.get_widget('radioTrash').connect('clicked', self._on_sidebar_toggled, Section.TRASH)
+        self.builder.get_object('radioPlanning').connect('clicked', self._on_sidebar_toggled, Section.PLANNING)
+        self.builder.get_object('radioUndecoded').connect('clicked', self._on_sidebar_toggled, Section.OTRKEY)
+        self.builder.get_object('radioUncut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_UNCUT)
+        self.builder.get_object('radioCut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_CUT)
+        self.builder.get_object('radioArchive').connect('clicked', self._on_sidebar_toggled, Section.ARCHIVE)  
+        self.builder.get_object('radioTrash').connect('clicked', self._on_sidebar_toggled, Section.TRASH)
         
         # change background of sidebar
-        eventbox = self.get_widget('eventboxSidebar')
+        eventbox = self.builder.get_object('eventboxSidebar')
         cmap = eventbox.get_colormap()
         colour = cmap.alloc_color("lightgray")
         style = eventbox.get_style().copy()
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
 
-        style = self.get_widget('eventboxPlanningCurrentCount').get_style().copy()
+        style = self.builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
         pixmap, mask = gtk.gdk.pixbuf_new_from_file(path.get_image_path('badge.png')).render_pixmap_and_mask()
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
-        self.get_widget('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
-        self.get_widget('eventboxPlanningCurrentCount').set_style(style)
+        self.builder.get_object('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
+        self.builder.get_object('eventboxPlanningCurrentCount').set_style(style)
 
         # change font of sidebar     
         for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
-            self.get_widget(label).modify_font(pango.FontDescription("bold"))
+            self.builder.get_object(label).modify_font(pango.FontDescription("bold"))
 
         # change background of tasks and searchbar
         for eventbox in ['eventbox_search']:
-            eventbox = self.get_widget(eventbox)
+            eventbox = self.builder.get_object(eventbox)
             cmap = eventbox.get_colormap()
             colour = cmap.alloc_color("#FFF288")
             style = eventbox.get_style().copy()
@@ -259,15 +261,15 @@ class MainWindow(BaseWindow):
     
     def clear_files(self):
         """ Entfernt alle Einträge aus den Treeviews treeview_files und treeview_planning."""        
-        self.get_widget('treeview_files').get_model().clear()
-        self.get_widget('treeview_planning').get_model().clear()
+        self.builder.get_object('treeview_files').get_model().clear()
+        self.builder.get_object('treeview_planning').get_model().clear()
     
     def get_selected_filenames(self):
         """ Gibt die ausgewählten Dateinamen zurück. """
-        selection = self.get_widget('treeview_files').get_selection()
+        selection = self.builder.get_object('treeview_files').get_selection()
             
         def selected_row(model, path, iter, filenames):
-            filenames += [self.get_widget('treeview_files').get_model().get_value(iter, self.__FILENAME)]
+            filenames += [self.builder.get_object('treeview_files').get_model().get_value(iter, self.__FILENAME)]
         
         filenames = []        
         selection.selected_foreach(selected_row, filenames)      
@@ -284,7 +286,7 @@ class MainWindow(BaseWindow):
 
         data = [filename, size, date, isdir]
 
-        iter = self.get_widget('treeview_files').get_model().append(parent, data)
+        iter = self.builder.get_object('treeview_files').get_model().append(parent, data)
         return iter
    
     def humanize_size(self, bytes):
@@ -364,7 +366,7 @@ class MainWindow(BaseWindow):
             
     def get_selected_broadcasts(self):
         """ Gibt die ausgewählten geplanten Sendungen zurück. """
-        selection = self.get_widget('treeview_planning').get_selection()
+        selection = self.builder.get_object('treeview_planning').get_selection()
             
         def selected_row(model, path, iter, broadcasts):
             broadcasts += [iter]
@@ -382,7 +384,7 @@ class MainWindow(BaseWindow):
     
         now = time.time()
 
-        index = self.__app.planned_broadcasts.index(broadcast)
+        index = self.app.planned_broadcasts.index(broadcast)
 
         if broadcast.datetime < now: 
             # everything bold
@@ -390,13 +392,13 @@ class MainWindow(BaseWindow):
         else:
             data = [index, broadcast.title, datetime, broadcast.station]
               
-        iter = self.get_widget('treeview_planning').get_model().append(None, data)
+        iter = self.builder.get_object('treeview_planning').get_model().append(None, data)
         return iter
 
     def __tv_planning_sort(self, model, iter1, iter2, data):
         # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row              
-        time1 = self.__app.planned_broadcasts[model.get_value(iter1, 0)].datetime
-        time2 = self.__app.planned_broadcasts[model.get_value(iter2, 0)].datetime
+        time1 = self.app.planned_broadcasts[model.get_value(iter1, 0)].datetime
+        time2 = self.app.planned_broadcasts[model.get_value(iter2, 0)].datetime
 
         if time1 > time2:
             return 1
@@ -413,15 +415,15 @@ class MainWindow(BaseWindow):
         """ Fügt die entsprechenden Toolbuttons in die Toolbar ein.
               section """
         
-        for toolbutton in self.get_widget('toolbar').get_children():
-           self.get_widget('toolbar').remove(toolbutton)
+        for toolbutton in self.builder.get_object('toolbar').get_children():
+           self.builder.get_object('toolbar').remove(toolbutton)
         
         for toolbutton in self.__sets_of_toolbars[section]:        
-            self.get_widget('toolbar').insert(toolbutton, -1)
+            self.builder.get_object('toolbar').insert(toolbutton, -1)
                 
     def show_planning(self, planning):
-        self.get_widget('scrolledwindow_files').props.visible = not planning
-        self.get_widget('scrolledwindow_planning').props.visible = planning
+        self.builder.get_object('scrolledwindow_files').props.visible = not planning
+        self.builder.get_object('scrolledwindow_planning').props.visible = planning
      
     def block_gui(self, state):
         for button in ["decode", "cut", "decodeandcut"]:
@@ -430,15 +432,15 @@ class MainWindow(BaseWindow):
     def broadcasts_badge(self):
         count = 0
         now = time.time()
-        for broadcast in self.__app.planned_broadcasts:           
+        for broadcast in self.app.planned_broadcasts:           
             if broadcast.datetime < now:
                 count += 1
     
         if count == 0:
-            self.get_widget('eventboxPlanningCurrentCount').hide()
+            self.builder.get_object('eventboxPlanningCurrentCount').hide()
         else:
-            self.get_widget('eventboxPlanningCurrentCount').show()
-            self.get_widget('labelPlanningCurrentCount').set_text(str(count))
+            self.builder.get_object('eventboxPlanningCurrentCount').show()
+            self.builder.get_object('labelPlanningCurrentCount').set_text(str(count))
       
     def change_status(self, message_type, message, permanent=False):
         """ Zeigt ein Bild und einen Text in der Statusleiste an.
@@ -446,10 +448,10 @@ class MainWindow(BaseWindow):
               message Anzuzeigender Text
               permanent: wenn \e False, verschwindet die Nachricht nach 10s wieder."""
             
-        self.get_widget('label_statusbar').set_text(message)           
+        self.builder.get_object('label_statusbar').set_text(message)           
             
         if message_type == 0:            
-            self.get_widget('image_status').set_from_file(path.get_image_path("information.png"))
+            self.builder.get_object('image_status').set_from_file(path.get_image_path("information.png"))
         
         if not permanent:                
             def wait():
@@ -457,24 +459,24 @@ class MainWindow(BaseWindow):
                 time.sleep(10)
                    
             def completed():
-                self.get_widget('label_statusbar').set_text("")     
-                self.get_widget('image_status').clear()
+                self.builder.get_object('label_statusbar').set_text("")     
+                self.builder.get_object('image_status').clear()
                    
             GeneratorTask(wait, None, completed).start()         
    
     def set_tasks_visible(self, visible):
         """ Zeigt/Versteckt einen Text und einen Fortschrittsbalken, um Aufgaben auszuführen. """      
-        self.get_widget('box_tasks').props.visible = visible
-        self.get_widget('label_tasks').set_markup("")
-        self.get_widget('progressbar_tasks').set_fraction(0)
+        self.builder.get_object('box_tasks').props.visible = visible
+        self.builder.get_object('label_tasks').set_markup("")
+        self.builder.get_object('progressbar_tasks').set_fraction(0)
 
     def set_tasks_text(self, text):
         """ Zeigt den angegebenen Text im Aufgabenfenster an. """
-        self.get_widget('label_tasks').set_markup("<b>%s</b>" % text)
+        self.builder.get_object('label_tasks').set_markup("<b>%s</b>" % text)
 
     def set_tasks_progress(self, progress):
         """ Setzt den Fortschrittsbalken auf die angegebene %-Zahl. """
-        self.get_widget('progressbar_tasks').set_fraction(progress / 100.)
+        self.builder.get_object('progressbar_tasks').set_fraction(progress / 100.)
         
           
     #
@@ -504,7 +506,7 @@ class MainWindow(BaseWindow):
         gtk.about_dialog_set_url_hook(open_website)
 
         about_dialog = gtk.AboutDialog()        
-        about_dialog.set_transient_for(self.__gui.main_window.get_window())
+        about_dialog.set_transient_for(self.__gui.main_window)
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_name("OTR-Verwaltung")
         about_dialog.set_logo(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))
@@ -525,7 +527,7 @@ class MainWindow(BaseWindow):
         self.__gui.preferences_window.show()
     
     def _on_main_window_configure_event(self, widget, event, data=None):
-        self.size = self.get_window().get_size()       
+        self.size = self.get_size()       
    
     def _on_main_window_window_state_event(self, widget, event, data=None):
         state = event.new_window_state
@@ -538,7 +540,7 @@ class MainWindow(BaseWindow):
         gtk.main_quit()
    
     def _on_main_window_delete_event(self, widget, data=None):
-        if self.__app.locked:
+        if self.app.locked:
             if not self.__gui.question_box("Das Programm arbeitet noch. Soll wirklich abgebrochen werden?"):        
                 return True # won't be destroyed
         
@@ -546,7 +548,7 @@ class MainWindow(BaseWindow):
         gtk.main_quit()
            
     def _on_menuEditSearch_activate(self, widget, data=None):
-        entry_search = self.get_widget('entry_search')
+        entry_search = self.builder.get_object('entry_search')
         
         if entry_search.get_text() == "Durchsuchen":
             entry_search.set_text('')
@@ -554,33 +556,33 @@ class MainWindow(BaseWindow):
         entry_search.grab_focus()
     
     def _on_menu_bottom_toggled(self, widget, data=None):
-        self.__app.config.set('show_bottom', widget.get_active())
-        self.get_widget('box_bottom').props.visible = widget.get_active()
+        self.app.config.set('show_bottom', widget.get_active())
+        self.builder.get_object('box_bottom').props.visible = widget.get_active()
     
     # toolbar actions
     def _on_toolbutton_clicked(self, button, action, cut_action=None):        
         filenames = self.get_selected_filenames()
         broadcasts = self.get_selected_broadcasts()    
-        self.__app.perform_action(action, filenames, broadcasts, cut_action)
+        self.app.perform_action(action, filenames, broadcasts, cut_action)
                   
     # sidebar
     def _on_sidebar_toggled(self, widget, section):
         if widget.get_active() == True:
-            self.__app.show_section(section)            
+            self.app.show_section(section)            
     
     def _on_buttonClear_clicked(self, widget, data=None):
-        self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
-        self.get_widget('entry_search').set_text("Durchsuchen")
+        self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+        self.builder.get_object('entry_search').set_text("Durchsuchen")
    
     def _on_entry_search_button_press_event(self, widget, data=None):
-        self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
-        if self.get_widget('entry_search').get_text() == "Durchsuchen":
-            self.get_widget('entry_search').set_text("")
+        self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
+        if self.builder.get_object('entry_search').get_text() == "Durchsuchen":
+            self.builder.get_object('entry_search').set_text("")
     
     def _on_entry_search_focus_out_event(self, widget, data=None):
-        if self.get_widget('entry_search').get_text() == "":
-            self.get_widget('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
-            self.get_widget('entry_search').set_text("Durchsuchen")
+        if self.builder.get_object('entry_search').get_text() == "":
+            self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+            self.builder.get_object('entry_search').set_text("Durchsuchen")
             
     def _on_entry_search_changed(self, widget, data=None):
         search = widget.get_text()
@@ -589,47 +591,57 @@ class MainWindow(BaseWindow):
     
     def do_search(self, search):
         if search == "Durchsuchen" or search == "":
-            self.__app.stop_search()
+            self.app.stop_search()
             
-            self.get_widget('eventbox_search').hide()
+            self.builder.get_object('eventbox_search').hide()
             
             for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
-                self.get_widget(label).set_text("")
+                self.builder.get_object(label).set_text("")
         else:
-            self.get_widget('eventbox_search').show()
-            self.get_widget('label_search').set_markup("<b>Suchergebnisse für '%s'</b>" % search)
+            self.builder.get_object('eventbox_search').show()
+            self.builder.get_object('label_search').set_markup("<b>Suchergebnisse für '%s'</b>" % search)
         
-            counts_of_section = self.__app.start_search(search)
+            counts_of_section = self.app.start_search(search)
                   
-            self.get_widget('labelPlanningCount').set_text(counts_of_section[Section.PLANNING])                  
-            self.get_widget('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
-            self.get_widget('labelUncutCount').set_text(counts_of_section[Section.VIDEO_UNCUT])
-            self.get_widget('labelCutCount').set_text(counts_of_section[Section.VIDEO_CUT])     
-            self.get_widget('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
-            self.get_widget('labelTrashCount').set_text(counts_of_section[Section.TRASH])
+            self.builder.get_object('labelPlanningCount').set_text(counts_of_section[Section.PLANNING])                  
+            self.builder.get_object('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
+            self.builder.get_object('labelUncutCount').set_text(counts_of_section[Section.VIDEO_UNCUT])
+            self.builder.get_object('labelCutCount').set_text(counts_of_section[Section.VIDEO_CUT])     
+            self.builder.get_object('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
+            self.builder.get_object('labelTrashCount').set_text(counts_of_section[Section.TRASH])
                
     def _on_eventboxPlanningCurrentCount_button_release_event(self, widget, data=None):
         # show section
-        self.get_widget('radioPlanning').set_active(True)
+        self.builder.get_object('radioPlanning').set_active(True)
         
         # select already broadcasted
-        selection = self.get_widget('treeview_planning').get_selection()
+        selection = self.builder.get_object('treeview_planning').get_selection()
         selection.unselect_all()
         now = time.time()
                 
         def foreach(model, path, iter, data=None):
             index = model.get_value(iter, 0)
-            stamp = self.__app.planned_broadcasts[index].datetime
+            stamp = self.app.planned_broadcasts[index].datetime
 
             if stamp < now:
                 selection.select_iter(iter)
 
-        self.get_widget('treeview_planning').get_model().foreach(foreach)
+        self.builder.get_object('treeview_planning').get_model().foreach(foreach)
         
     # bottom
     def on_notebook_bottom_page_added(self, notebook, child, page_num, data=None):
-        self.get_widget('menu_bottom').set_sensitive(True)
+        self.builder.get_object('menu_bottom').set_sensitive(True)
     
     def on_notebook_bottom_page_removed(self, notebook, child, page_num, data=None):        
-        self.get_widget('menu_bottom').set_sensitive(False)
-        self.get_widget('menu_bottom').set_active(False)
+        self.builder.get_object('menu_bottom').set_sensitive(False)
+        self.builder.get_object('menu_bottom').set_active(False)
+        
+def NewMainWindow(app, gui):
+    glade_filename = path.getdatapath('ui', 'MainWindow.glade')
+
+    builder = gtk.Builder()   
+    builder.add_from_file(glade_filename)
+    window = builder.get_object("main_window")
+    window.app = app
+    window.gui = gui
+    return window      

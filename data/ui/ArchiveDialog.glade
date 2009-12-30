@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkDialog" id="dialog_archive">
+  <object class="ArchiveDialog" id="archive_dialog">
     <property name="width_request">600</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Archivieren</property>

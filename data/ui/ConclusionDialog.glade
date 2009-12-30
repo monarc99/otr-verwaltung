@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
+  <!-- interface-requires ConclusionDialog 1.0 -->
   <!-- interface-naming-policy project-wide -->
   <!-- interface-local-resource-path ../media -->
-  <object class="GtkDialog" id="dialog_conclusion">
+  <object class="ConclusionDialog" id="conclusion_dialog">
     <property name="width_request">700</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Zusammenfassung</property>
@@ -689,18 +690,18 @@
   </object>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
-    <property name="pixbuf">../images/play.png</property>
+    <property name="pixbuf">../media/play.png</property>
   </object>
   <object class="GtkImage" id="image4">
     <property name="visible">True</property>
-    <property name="pixbuf">../images/play.png</property>
+    <property name="pixbuf">../media/play.png</property>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
-    <property name="pixbuf">../images/play.png</property>
+    <property name="pixbuf">../media/play.png</property>
   </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
-    <property name="pixbuf">../images/play.png</property>
+    <property name="pixbuf">../media/play.png</property>
   </object>
 </interface>

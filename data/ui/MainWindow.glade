@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkWindow" id="main_window">
+  <object class="MainWindow" id="main_window">
     <property name="width_request">700</property>
     <property name="title" translatable="yes">OTR-Verwaltung</property>
     <property name="window_position">center</property>

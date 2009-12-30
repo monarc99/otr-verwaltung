@@ -149,8 +149,8 @@ class App:
         if self.config.get('window_settings'):
             maximize, width, height = self.config.get('window_settings').split(',')
             if int(maximize):
-                self.__gui.main_window.get_window().maximize()            
-            self.__gui.main_window.get_window().resize(int(width), int(height))
+                self.__gui.main_window.maximize()            
+            self.__gui.main_window.resize(int(width), int(height))
     
         # load plugins
         if local:
@@ -228,7 +228,7 @@ class App:
                 self.__append_row_treeview_files(None, f)
 
         # set message text
-        self.__gui.main_window.get_widget('labelMessage').set_markup(text)
+        self.__gui.main_window.builder.get_object('labelMessage').set_markup(text)
 
 
     # helper for different sections
@@ -296,7 +296,7 @@ class App:
     # recursive function for archive to add folders and files with a tree structure
     def __tree(self, parent=None, path=None):              
         if parent != None:            
-            dir = self.__gui.main_window.get_widget('treeview_files').get_model().get_value(parent, 0)
+            dir = self.__gui.main_window.builder.get_object('treeview_files').get_model().get_value(parent, 0)
         else:  # base path (archive directory)
             dir = path
 
@@ -458,14 +458,14 @@ class App:
        
         if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD, Action.PLAN_RSS]:
             if len(broadcasts) == 0 and not chosen_action in [Action.PLAN_ADD, Action.PLAN_RSS]:
-                if len(self.__gui.main_window.get_widget('treeview_planning').get_model()) > 0:
+                if len(self.__gui.main_window.builder.get_object('treeview_planning').get_model()) > 0:
                     if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
                         broadcasts = []                    
 
                         def foreach(model, path, iter, broadcasts):
                             broadcasts += [iter]
 
-                        self.__gui.main_window.get_widget('treeview_planning').get_model().foreach(foreach, broadcasts)
+                        self.__gui.main_window.builder.get_object('treeview_planning').get_model().foreach(foreach, broadcasts)
                     else:
                         return
                 else:
@@ -473,9 +473,9 @@ class App:
 
         elif filenames != None:
             if len(filenames) == 0 and chosen_action != Action.NEW_FOLDER:
-                if len(self.__gui.main_window.get_widget('treeview_files').get_model()) > 0:
+                if len(self.__gui.main_window.builder.get_object('treeview_files').get_model()) > 0:
                     if self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
-                        filenames = [row[0] for row in self.__gui.main_window.get_widget('treeview_files').get_model()]
+                        filenames = [row[0] for row in self.__gui.main_window.builder.get_object('treeview_files').get_model()]
                     else:
                         return
                 else:
