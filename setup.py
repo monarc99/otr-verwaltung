@@ -16,11 +16,11 @@
 ### END LICENSE
 
 ###################### DO NOT TOUCH THIS (HEAD TO THE SECOND PART) ######################
+import sys
 
 try:
     import DistUtilsExtra.auto
 except ImportError:
-    import sys
     print >> sys.stderr, 'To build otrverwaltung you need https://launchpad.net/python-distutils-extra'
     sys.exit(1)
 
@@ -98,15 +98,8 @@ DistUtilsExtra.auto.setup(
     author='Benjamin Elbers',
     author_email='elbersb@gmail.com',
     description='Dateien von onlinetvrecorder.com verwalten',
-    long_description="""Dateien von onlinetvrecorder.com verwalten:
-    - otrkey-Dateien dekodieren
-    - avi-Dateien (DivX und HQ) mit Cutlists schneiden (Avidemux und Virtualdub, auch unter Linux!)
-    - Cutlists nach dem Schneiden bewerten
-    - avi-Dateien mit Hilfe von EDL-Dateien geschnitten abspielen
-    - Schnitte vorher mit dem Mplayer betrachten
-    - Viele Dateien gleichzeitig verarbeiten
-    - u. v. m.""",
+    long_description='Dateien von onlinetvrecorder.com verwalten: Schneiden, Schnitte betrachten, Cutlists bewerten...',
     url='http://github.com/elbersb/otr-verwaltung',
-    cmdclass={'install': InstallAndUpdateDataDirectory}
+    cmdclass={'install': InstallAndUpdateDataDirectory}  
     )
 

@@ -484,15 +484,15 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
                
     def _on_menu_check_update_activate(self, widget, data=None):
-        current_version = open(path.get_path("VERSION"), 'r').read().strip()
+        current_version = "0.8.1" # TODO: VERSION
     
         try:
-           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/src/VERSION').read().strip()
+           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/otrverwaltung/VERSION').read().strip()
         except IOError:
-            self.__gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
+            self.gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
             return
         
-        self.__gui.message_info_box("Ihre Version ist:\n%s\n\nAktuelle Version ist:\n%s" % (current_version, svn_version))            
+        self.gui.message_info_box("Ihre Version ist:\n%s\n\nAktuelle Version ist:\n%s" % (current_version, svn_version))            
 
     
     def _on_menuHelpHelp_activate(self, widget, data=None):
@@ -506,13 +506,13 @@ class MainWindow(gtk.Window, gtk.Buildable):
         gtk.about_dialog_set_url_hook(open_website)
 
         about_dialog = gtk.AboutDialog()        
-        about_dialog.set_transient_for(self.__gui.main_window)
+        about_dialog.set_transient_for(self.gui.main_window)
         about_dialog.set_destroy_with_parent(True)
         about_dialog.set_name("OTR-Verwaltung")
         about_dialog.set_logo(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))
         
-        version = open(path.get_path("VERSION"), 'r')        
-        about_dialog.set_version(version.read().strip())
+        version = "0.8.1" # TODO: VERSION
+        about_dialog.set_version(version)
         about_dialog.set_website("http://otrverwaltung.host56.com/")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2009 Benjamin Elbers")
@@ -521,10 +521,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog.destroy()
     
     def _on_menuEditPlugins_activate(self, widget, data=None):
-        self.__gui.dialog_plugins.run()
+        self.gui.dialog_plugins._run()
 
     def _on_menuEditPreferences_activate(self, widget, data=None):
-        self.__gui.preferences_window.show()
+        self.gui.preferences_window.show()
     
     def _on_main_window_configure_event(self, widget, event, data=None):
         self.size = self.get_size()       
@@ -541,7 +541,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
    
     def _on_main_window_delete_event(self, widget, data=None):
         if self.app.locked:
-            if not self.__gui.question_box("Das Programm arbeitet noch. Soll wirklich abgebrochen werden?"):        
+            if not self.gui.question_box("Das Programm arbeitet noch. Soll wirklich abgebrochen werden?"):        
                 return True # won't be destroyed
         
     def _on_menuFileQuit_activate(self, widget, data=None):        

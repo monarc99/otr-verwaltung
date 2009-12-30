@@ -45,7 +45,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
     ### Convenience
     ###        
     
-    def run(self, file_conclusions, action, rename_by_schema):
+    def _run(self, file_conclusions, action, rename_by_schema):
         self.action = action
         self.rename_by_schema = rename_by_schema                       
         self.__file_conclusions = file_conclusions

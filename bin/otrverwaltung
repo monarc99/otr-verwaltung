@@ -154,7 +154,7 @@ class App:
     
         # load plugins
         if local:
-            plugin_paths = [path.get_path('plugins')]
+            plugin_paths = [path.getdatapath('plugins')]
             pluginconf_path = path.get_path('pluginconf')
         else:
             plugin_paths = path.get_plugin_paths()

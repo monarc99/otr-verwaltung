@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=OTR-Verwaltung
+Comment=Dateien von onlinetvrecorder.com verwalten: Schneiden, Schnitte betrachten, Cutlists bewerten...
+Categories=AudioVideo
+Exec=otrverwaltung
+Icon=/usr/share/otrverwaltung/media/icon.png
+Terminal=false
+Type=Application

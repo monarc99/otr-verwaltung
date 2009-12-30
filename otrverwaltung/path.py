@@ -8,7 +8,7 @@ import os
 import os
 from xdg import BaseDirectory
 
-data_dir = "../data"
+data_dir = '/usr/share/otrverwaltung/'
 
 def getdatapath(*args):
     """Retrieve otrverwaltung data path
@@ -38,7 +38,7 @@ def get_plugin_paths():
     plugins_home = get_config_path('plugins')
     if not isdir(plugins_home):
         os.mkdir(plugins_home)
-    plugins_usr = get_path('plugins')
+    plugins_usr = '/usr/share/otrverwaltung/plugins'
     return plugins_home, plugins_usr
     
 def get_gui_path(filename=None):

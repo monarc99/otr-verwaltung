@@ -17,7 +17,7 @@ class PluginsDialog(gtk.Dialog, gtk.Buildable):
         
         self.builder.get_object('treeview_plugins').get_selection().connect('changed', self._on_selection_changed)
         
-    def run(self):
+    def _run(self):
         self.builder.get_object('liststore_plugins').clear()
     
         for name, plugin in self.gui.app.plugin_system.plugins.iteritems():
@@ -57,7 +57,7 @@ class PluginsDialog(gtk.Dialog, gtk.Buildable):
         
         dialog = gtk.Dialog(store.get_value(iter, 1) + " - Einstellungen", parent=self, flags=gtk.DIALOG_MODAL, buttons=(gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE))
         dialog.set_border_width(2)
-        dialog.set_icon(gtk.gdk.pixbuf_new_from_file(otrpath.get_image_path('icon3.png')))
+        dialog.set_icon(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))
         
         dialog = self.gui.app.plugin_system.plugins[name].configurate(dialog)
         
