@@ -18,7 +18,7 @@ Es muss mindestens ein Schnittprogramm installiert sein: *Avidemux* lässt sich 
 
   Monarc99 hat dazu einen sehr hilfreichen `Beitrag im OTR-Forum <http://www.otrforum.com/showpost.php?p=247925&postcount=56>`_ verfasst.
 
-Empfohlen wird außerdem der MPlayer, der für viele Funktionen erforderlich ist und ebenfalls über die Paketverwaltung verfügbar ist (Wer HQ-Dateien schneidet, *muss* den MPlayer installieren).
+Empfohlen wird außerdem der MPlayer, der für viele Funktionen erforderlich ist und ebenfalls über die Paketverwaltung verfügbar ist (Wer HQ/HD-Dateien schneidet, *muss* den MPlayer installieren).
 
 Unter debian-basierten Distributionen (z.B. Ubuntu): ``sudo apt-get install avidemux mplayer``
 
@@ -28,17 +28,17 @@ Konfigurieren
 #############
 
 * *Normale avi-Dateien* können mit Avidemux (empfohlen) oder Virtualdub geschnitten werden. Um Dateien mit Cutlisten ohne Oberfläche zu schneiden, kann man auch avidemux2_cli installieren.
-* *HQ-Dateien* sollten immer mit Virtualdub geschnitten werden.
+* *HQ/HD-Dateien* sollten immer mit Virtualdub geschnitten werden.
 
 Beste Einstellungen:
 
-+-----+--------------------------------+---------------------------+
-|     |  mit Cutlist                   | manuell                   |
-+-----+--------------------------------+---------------------------+
-| avi |  avidemux *oder* avidemux2_cli | avidemux                  |
-+-----+--------------------------------+---------------------------+
-| HQ  |  /pfad/zu/vdub.exe             | /pfad/zu/VirtualDub.exe   |
-+-----+--------------------------------+---------------------------+
++--------+--------------------------------+---------------------------+
+|        |  mit Cutlist                   | manuell                   |
++--------+--------------------------------+---------------------------+
+| avi    |  avidemux *oder* avidemux2_cli | avidemux                  |
++--------+--------------------------------+---------------------------+
+| HQ/HD  |  /pfad/zu/vdub.exe             | /pfad/zu/VirtualDub.exe   |
++--------+--------------------------------+---------------------------+
 
 .. note:: Die genauen Programmnamen können variieren!
 

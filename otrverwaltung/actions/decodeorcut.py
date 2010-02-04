@@ -424,6 +424,8 @@ class DecodeOrCut(BaseAction):
         if extension == '.avi':
             if splitext(root)[1] == '.HQ':
                 return Format.HQ
+            elif splitext(root)[1] == '.HD':
+                return Format.HD
             else:
                 return Format.AVI
         elif extension == '.mp4':
@@ -435,10 +437,12 @@ class DecodeOrCut(BaseAction):
         if manually:
             programs = { Format.AVI : self.config.get('cut_avis_man_by'),
                          Format.HQ  : self.config.get('cut_hqs_man_by'),
+                         Format.HD  : self.config.get('cut_hqs_man_by'),
                          Format.MP4 : self.config.get('cut_mp4s_man_by') }
         else:
             programs = { Format.AVI : self.config.get('cut_avis_by'),
                          Format.HQ  : self.config.get('cut_hqs_by'),
+                         Format.HD  : self.config.get('cut_hqs_by'),                         
                          Format.MP4 : self.config.get('cut_mp4s_by') }
                      
         format = self.__get_format(filename)                 
@@ -474,54 +478,46 @@ class DecodeOrCut(BaseAction):
                        None, error_message """
         
         mplayer = self.config.get('mplayer')
-        
+            
         if not mplayer:
-            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Frames pro Sekunde benötigt."
-        
+            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der FPS benötigt."
+
         try:
-            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)       
         except OSError:
             return None, "MPlayer wurde nicht gefunden!"            
-           
-        while True:
-            line = process.stdout.readline()
-                    
-            if process.poll() != None:
-                time.sleep(1)
-            
-                return None, "Mplayer-Fehlermeldung: " + process.stderr.read()
         
+        stdout = process.communicate()[0]
+    
+        for line in stdout.split('\n'):
             if "VIDEO" in line:
                 try:
                     return float(line[line.index("bpp")+3 : line.index("fps")]), None
                 except:
                     return None, "FPS konnte nicht bestimmt werden " + line
-   
+      
+        return None, "FPS konnte nicht bestimmt werden."
+        
+    
     def __get_aspect_ratio(self, filename):
         """ Gets the aspect ratio of a movie using mplayer. 
             Returns without error:              
                        aspect_ratio, None
                     with error:
                        None, error_message """
-        
         mplayer = self.config.get('mplayer')
-        
+            
         if not mplayer:
-            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Aspect Ratio benötigt."
-        
+            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Aspekt Ratio benötigt."
+
         try:
-            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)       
         except OSError:
             return None, "MPlayer wurde nicht gefunden!"            
-           
-        while True:
-            line = process.stdout.readline()
-                    
-            if process.poll() != None:
-                time.sleep(1)
-            
-                return None, "Mplayer-Fehlermeldung: " + process.stderr.read()
         
+        stdout = process.communicate()[0]
+    
+        for line in stdout.split('\n'):
             if "Aspe" in line:
                 if "1.78:1" in line or "0.56:1" in line:
                     return "16:9", None
@@ -529,6 +525,8 @@ class DecodeOrCut(BaseAction):
                     return "4:3", None
                 else:
                     return None, "Aspekt konnte nicht bestimmt werden " + line
+      
+        return None, "Aspekt Ratio konnte nicht bestimmt werden."            
             
     def __create_cutlist_virtualdub(self, filename):
         """ returns: cuts, error_message """
@@ -742,11 +740,21 @@ class DecodeOrCut(BaseAction):
                 comp_data = codec.get_comp_data_h264_169()
             else:
                 comp_data = codec.get_comp_data_h264_43()
+        elif format == Format.HD:
+            aspect, error_message = self.__get_aspect_ratio(filename)
+            if not aspect:
+                return None, error_message                     
                 
+            if aspect == "16:9":
+                comp_data = codec.get_comp_data_hd_169()
+            else:
+                comp_data = codec.get_comp_data_hd_43()
+        
         elif format == Format.AVI:      
             comp_data = codec.get_comp_data_dx50()
+        
         else:
-            return None, "Format nicht unterstützt (Nur Avi DX50 und HQ H264 sind möglich)."
+            return None, "Format nicht unterstützt (Nur Avi DX50, HQ H264 und HD sind möglich)."
         
         # make file for virtualdub scripting engine
         if manually:

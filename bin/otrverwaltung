@@ -153,7 +153,7 @@ class App:
         self.locked = False
             
         # regex
-        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|mp4)$')
+        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|HD\.avi|mp4)$')
         self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
        
         # load gui
@@ -361,7 +361,9 @@ class App:
             if 'mp4' in format:
                 format = 'mp4'
             if 'HQ' in format:
-                format = 'HQ'            
+                format = 'HQ'
+            if 'HD' in format:
+                format = 'HD'
             else:
                 format = 'avi'
 
