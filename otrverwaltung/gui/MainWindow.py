@@ -1,5 +1,18 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+### BEGIN LICENSE
+# Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>
+#This program is free software: you can redistribute it and/or modify it 
+#under the terms of the GNU General Public License version 3, as published 
+#by the Free Software Foundation.
+#
+#This program is distributed in the hope that it will be useful, but 
+#WITHOUT ANY WARRANTY; without even the implied warranties of 
+#MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+#PURPOSE.  See the GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License along 
+#with this program.  If not, see <http://www.gnu.org/licenses/>.
+### END LICENSE
 
 from os.path import join, isdir, basename, splitext
 import sys
@@ -515,7 +528,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog.set_version(version)
         about_dialog.set_website("http://otrverwaltung.host56.com/")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
-        about_dialog.set_copyright("Copyright \xc2\xa9 2009 Benjamin Elbers")
+        about_dialog.set_copyright("Copyright \xc2\xa9 2010 Benjamin Elbers")
         about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>"])
         about_dialog.run()
         about_dialog.destroy()
