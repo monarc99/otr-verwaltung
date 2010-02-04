@@ -1,11 +1,14 @@
 OTR-Verwaltung
 ==============
 
-*Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>*
+Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>
 
-see http://otrverwaltung.host56.com/
+**Mehr Informationen auf der [Website](http://otrverwaltung.host56.com/).**
+
+![Screenshot](http://github.com/elbersb/otr-verwaltung/raw/master/data/media/screenshots/search.png)
 
 TODO
+----
 
 * http://www.otrforum.com/showpost.php?p=275672&postcount=297
 * Unterstützung für MERGED-Cutlists?
