@@ -21,13 +21,13 @@ import os
 import os
 from xdg import BaseDirectory
 
-data_dir = '/usr/share/otrverwaltung/'
+data_dir = '../data'
 
 def getdatapath(*args):
     """Retrieve otrverwaltung data path
 
-    This path is by default <mfm_lib_path>/../data/ in trunk
-    and /usr/share/mfm in an installed version but this path
+    This path is by default <otrverwaltung_lib_path>/../data/ in trunk
+    and /usr/share/otrverwaltung in an installed version but this path
     is specified at installation time.
     """
     return os.path.join(os.path.dirname(__file__), data_dir, *args)
