@@ -497,10 +497,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
                
     def _on_menu_check_update_activate(self, widget, data=None):
-        current_version = "0.8.1" # TODO: VERSION
-    
+        current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
+            
         try:
-           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/otrverwaltung/VERSION').read().strip()
+           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/data/VERSION').read().strip()
         except IOError:
             self.gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
             return
@@ -524,7 +524,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog.set_name("OTR-Verwaltung")
         about_dialog.set_logo(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))
         
-        version = "0.8.1" # TODO: VERSION
+        version = open(path.getdatapath("VERSION"), 'r').read().strip()
         about_dialog.set_version(version)
         about_dialog.set_website("http://otrverwaltung.host56.com/")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")

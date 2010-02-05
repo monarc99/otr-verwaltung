@@ -98,7 +98,7 @@ class DecodeOrCut(BaseAction):
 
                     file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
                     file_conclusion.cut.cutlist.author = self.config.get('cutlist_username')
-                    file_conclusion.cut.cutlist.intended_version = "0.8.1" # TODO: VERSION
+                    file_conclusion.cut.cutlist.intended_version = open(path.getdatapath("VERSION"), 'r').read().strip()
                     file_conclusion.cut.cutlist.smart = self.config.get('smart')                   
 
                     file_conclusion.cut.cutlist.write_local_cutlist(file_conclusion.uncut_video, intended_app_name, file_conclusion.cut.my_rating)
