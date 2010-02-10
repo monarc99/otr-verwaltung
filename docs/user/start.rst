@@ -13,7 +13,7 @@ Es muss mindestens ein Schnittprogramm installiert sein: *Avidemux* lässt sich 
 .. note:: 
   Nicht alle Kombinationen von VirtualDub und ffdshow funktionieren! 
   
-  * Empfehlung: beta4 oder beta5, *nicht* beta6
+  * Empfehlung: ffdshow rev 2946
   * VirtualDub: 1.7.8, vor allem, wenn die Datei auch auf Hardware-Playern abgespielt werden soll.
 
   Monarc99 hat dazu einen sehr hilfreichen `Beitrag im OTR-Forum <http://www.otrforum.com/showpost.php?p=247925&postcount=56>`_ verfasst.
