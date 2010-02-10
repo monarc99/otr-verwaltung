@@ -10,13 +10,13 @@ Mit OTR-Verwaltung lassen sich otrkey- und avi-Dateien von `onlinetvrecorder.com
 * Cutlists mit Avidemux oder VirtualDub selbst erstellen und hochladen
 * Schnitte vorher mit dem MPlayer betrachten
 
-.. image:: ../src/images/screenshots/otr.png
+.. image:: ../data/media/screenshots/otr.png
    :scale: 30
 
-.. image:: ../src/images/screenshots/search.png
+.. image:: ../data/media/screenshots/search.png
    :scale: 30
    
-.. image:: ../src/images/screenshots/conclusion.png
+.. image:: ../data/media/screenshots/conclusion.png
    :scale: 30
 
 Downloads

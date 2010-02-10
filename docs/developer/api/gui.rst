@@ -3,7 +3,7 @@ GUI
 
 .. toctree::    
 
-    main_window   
+    main_window
 
 .. autoclass:: gui.gui.Gui
     :members:

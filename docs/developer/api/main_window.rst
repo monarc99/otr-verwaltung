@@ -3,6 +3,6 @@ MainWindow
 
 FIXME: notebook_bottom
 
-.. autoclass:: gui.main_window.MainWindow
+.. autoclass:: gui.MainWindow
     :members:
     :undoc-members:

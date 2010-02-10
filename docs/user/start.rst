@@ -8,7 +8,7 @@ Es muss mindestens ein Schnittprogramm installiert sein: *Avidemux* lässt sich 
 
 1. Zunächst muss `Wine <http://www.winehq.org/download/>`_ in einer aktuellen Version (mind. 1.1.14) installiert werden.
 2. Anschließend muss `Virtualdub <http://sourceforge.net/project/showfiles.php?group_id=9649&package_id=9727&release_id=576135>`_ heruntergeladen werden und an einem geeigneten Ort entpackt werden.
-3. Da Virtualdub Codecs benötigt, muss man `ffdshow <http://sourceforge.net/projects/ffdshow-tryout/files/Old%20releases/generic%20builds/ffdshow_beta5_rev2033_20080705_clsid.exe/download>`_ installieren.
+3. Da Virtualdub Codecs benötigt, muss man `ffdshow (rev 2946) <http://sourceforge.net/projects/ffdshow-tryout/files/SVN%20builds%20by%20clsid/ffdshow_rev2946_20090515_clsid.exe>`_ installieren.
 
 .. note:: 
   Nicht alle Kombinationen von VirtualDub und ffdshow funktionieren! 

@@ -1,6 +1,6 @@
 App
 ===
 
-.. autoclass:: otr.App
+.. autoclass:: otrverwaltung.App
     :members:
     :undoc-members:
