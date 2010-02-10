@@ -1,5 +1,6 @@
 0.8.2:
-    * HD-Support.
+    * HD-Support. Achtung: Neue ffdshow-Version wird benötigt!
+    * Bugfix: Update-Funktion geht wieder.
 
 0.8.1:
     * Bugfix: Falsche Nummerierung der Schnitte in Cutlisten.
