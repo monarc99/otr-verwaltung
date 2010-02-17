@@ -356,13 +356,12 @@ class App:
             sender_gross = parts[3].capitalize()
 
             format = parts[0]
-            mp4 = False
             
             if 'mp4' in format:
                 format = 'mp4'
-            if 'HQ' in format:
+            elif 'HQ' in format:
                 format = 'HQ'
-            if 'HD' in format:
+            elif 'HD' in format:
                 format = 'HD'
             else:
                 format = 'avi'
