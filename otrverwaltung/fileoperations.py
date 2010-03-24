@@ -20,7 +20,7 @@ Zeigt bei Fehlern einen gtk.MessageDialog an."""
 import gtk
 import os
 import shutil
-from os.path import join, basename, exists, dirname
+from os.path import join, basename, exists, dirname, splitext
 
 # TODO: Achten auf :/\* etc. in Dateiname!
 # TODO: Fehler abfangen, fehlerwert zurückgeben, damit das Programm weitermachen kann
@@ -47,18 +47,14 @@ def remove_file(filename):
     
 def rename_file(old_filename, new_filename):
     """ Benennt eine Datei um. Wenn die Datei bereits existiert, wird der neue Name um eine Zahl erweitert. """
-    
-    print "[Fileoperations] Rename %s to %s" % (old_filename, new_filename)
-    
+       
     if old_filename == new_filename:
         __error("Umbenennen: Die beiden Dateinamen stimmen überein! (%s)" % old_filename)
         return
 
-    count = 1
-    while exists(new_filename):                  
-        new_filename = new_filename.split('.')
-        new_filename = "".join(new_filename[0:len(new_filename)-1]) + "." + str(count) + "." + new_filename[len(new_filename)-1]
-        count += 1
+    new_filename = make_unique_filename(new_filename)
+    
+    print "[Fileoperations] Rename %s to %s" % (old_filename, new_filename)
         
     try:        
         os.rename(old_filename, new_filename)
@@ -82,6 +78,17 @@ def move_file(filename, target):
             shutil.move(filename, target)
         except Exception:
             __error("Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
+
+def make_unique_filename(filename):
+    """ Gleicht den gegebenen Dateinamen an, sodass  """
+    new_filename = filename
+    count = 1
+    while exists(new_filename):
+        path, extension = splitext(filename)
+        new_filename = "%s.%i%s" % (path, count, extension)
+        count += 1
+
+    return new_filename
 
 def get_size(filename):
     """ Gibt die Dateigröße in Bytes zurück. """

@@ -140,7 +140,9 @@ class DecodeOrCut(BaseAction):
                     if not file_conclusion.cut.rename.endswith(extension):
                         file_conclusion.cut.rename += extension
                 
-                    new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))    
+                    new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))
+                    new_filename = fileoperations.make_unique_filename(new_filename)
+                    
                     if file_conclusion.cut_video != new_filename:
                         fileoperations.rename_file(file_conclusion.cut_video, new_filename)
         
