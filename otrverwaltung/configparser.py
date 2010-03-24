@@ -32,7 +32,10 @@ class Config:
         """ Sets a configuration option. """      
         datatype, value = self.__config_dic[option]
 
-        print "[Config] Get config option %s: %s" % (option, value)
+        if option in ['email', 'password']:
+            print "[Config] Get config option %s" % option
+        else:
+            print "[Config] Get config option %s: %s" % (option, value)
        
         return value
        
@@ -48,6 +51,9 @@ class Config:
             for method in self.on_changed[option]:
                 method(value)
        
+        if option in ['email', 'password']:
+            value = "*****"
+            
         print "[Config] Set config option %s to %s" % (option, value)
 
     def save(self):
