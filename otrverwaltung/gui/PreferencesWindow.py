@@ -75,6 +75,8 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
             new = self.app.rename_by_schema(self.example_filename, value)
             self.builder.get_object('label_schema').set_label("<i>%s</i> wird zu <i>%s</i>" % (self.example_filename, new))       
         self.app.config.connect('rename_schema', rename_schema_changed)
+        # "initial rename"
+        rename_schema_changed(self.builder.get_object('entry_schema').get_text())        
         
         FileChooserBinding(self.app.config, 'folder_new_otrkeys', self.builder.get_object('folderNewOtrkeys')),
         FileChooserBinding(self.app.config, 'folder_trash_otrkeys', self.builder.get_object('folderTrashOtrkeys')),
