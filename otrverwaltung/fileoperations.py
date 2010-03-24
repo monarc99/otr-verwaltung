@@ -60,6 +60,8 @@ def rename_file(old_filename, new_filename):
         os.rename(old_filename, new_filename)
     except Exception, e:
         __error("Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))
+    
+    return new_filename
 
 def move_file(filename, target):
     """ Verschiebt eine Datei in den angegebenen Ordner."""

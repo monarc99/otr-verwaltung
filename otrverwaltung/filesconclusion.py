@@ -35,6 +35,7 @@ class Cut:
         # filled in by dialog_conclusion
         self.my_rating = -1                 # rating, when cut by cutlist        
         self.rename = ""                    # renamed filename
+        self.archive_to = None              # directory, where the file should be archived
         self.create_cutlist = False         # create a cutlist?
         self.delete_uncut = True            # delete the uncut video after cut?
 

@@ -16,6 +16,7 @@
 
 import gtk, pango
 import os.path
+import os
 
 from otrverwaltung.constants import Action, Status, Cut_action
 from otrverwaltung import path
@@ -33,6 +34,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         button_play           V               V              V            V
         button_play_cut       V               V              V            V
         combobox_external_r   V               V              x!           x!       !
+        combobox_archive      V               V              V            V
         check_delete_uncut    V               V              V            V
         box_rename            V               V              V            V 
         box_create_cutlist    x!              x!             x!           V        ! """
@@ -47,30 +49,62 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         self.builder.connect_signals(self)
                           
         self.builder.get_object('check_create_cutlist').modify_font(pango.FontDescription("bold"))
+
+        # setup combobox_archive
+        def separator(model, iter, data=None):
+            return (model.get_value(iter, 0) == '-')
+        
+        cell = gtk.CellRendererText()
+        self.builder.get_object('combobox_archive').pack_start(cell, False)
+        self.builder.get_object('combobox_archive').add_attribute(cell, 'text', 1)
+        
+        cell = gtk.CellRendererPixbuf()
+        cell.set_property('xpad', 5)
+        self.builder.get_object('combobox_archive').pack_start(cell, False)
+        self.builder.get_object('combobox_archive').add_attribute(cell, 'pixbuf', 2)               
+        self.builder.get_object('combobox_archive').set_row_separator_func(separator)
               
-        for combobox in ['combobox_external_rating', 'combobox_own_rating']:
+        for combobox in ['combobox_external_rating', 'combobox_own_rating', 'combobox_archive']:
             cell = gtk.CellRendererText()
             cell.set_property('ellipsize', pango.ELLIPSIZE_END)
             self.builder.get_object(combobox).pack_start(cell, True)
             self.builder.get_object(combobox).add_attribute(cell, 'text', 0)
-        
+
     ###
     ### Convenience
     ###        
     
-    def _run(self, file_conclusions, action, rename_by_schema):
+    def _run(self, file_conclusions, action, rename_by_schema, archive_directory):
         self.action = action
         self.rename_by_schema = rename_by_schema                       
         self.__file_conclusions = file_conclusions
         self.forward_clicks = 0
 
+        # setup comboxbox_rating        
+        liststore = self.builder.get_object('liststore_archive') # foldername, indent, pixbuf, path
+        image = gtk.icon_theme_get_default().load_icon('folder', 16, gtk.ICON_LOOKUP_USE_BUILTIN)
+
+        # add nothing and the name of the archive folder
+        liststore.clear()
+        liststore.append(["Nicht archivieren", "", None, ""])
+        liststore.append(["-", "", None, ""])
+        liststore.append([archive_directory.split('/')[-1], "", image, archive_directory])
+        
+        fill_up = "—"
+        for root, dirs, files in os.walk(archive_directory):
+            directory = root.lstrip(archive_directory).split('/')
+
+            if not directory[0]: continue
+                            
+            liststore.append([directory[-1], fill_up * len(directory) , image, root])
+            
         self.show_all()
                 
         # basic show/hide
         widgets_hidden = []
         if self.action == Action.DECODE:
             self.builder.get_object('box_buttons').show() # show buttons, but hide all except play button
-            widgets_hidden = ['image_cut', 'label_cut', 'label_cut_status', 'button_play_cut', 'box_rating', 'check_delete_uncut', 'box_rename']            
+            widgets_hidden = ['image_cut', 'label_cut', 'label_cut_status', 'button_play_cut', 'box_rating', 'check_delete_uncut', 'box_rename', 'box_archive']            
         elif self.action == Action.CUT:
             widgets_hidden = ['image_decode', 'label_decode', 'label_decode_status']
             
@@ -168,6 +202,14 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
                 self.gui.set_model_from_list(self.builder.get_object('comboboxentry_rename'), rename_list)     
                 self.builder.get_object('comboboxentry_rename').child.set_text(self.file_conclusion.cut.rename)
 
+                archive_to = self.file_conclusion.cut.archive_to
+                if not archive_to:
+                    self.builder.get_object('combobox_archive').set_active(0)
+                else:
+                    for count, row in enumerate(self.builder.get_object('liststore_archive')):
+                        if archive_to == row[3]:
+                            self.builder.get_object('combobox_archive').set_active(count)
+
             if cut_action == Cut_action.BEST_CUTLIST or cut_action == Cut_action.CHOOSE_CUTLIST:
                 self.builder.get_object('box_rating').props.visible = cut_ok
                 self.builder.get_object('combobox_external_rating').set_active(self.file_conclusion.cut.my_rating + 1)
@@ -230,6 +272,16 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
     def _on_comboboxentry_rename_changed(self, widget, data=None):
         print "[Conclusion] cut.rename = ", widget.child.get_text()
         self.file_conclusion.cut.rename = widget.child.get_text()
+    
+    def _on_combobox_archive_changed(self, widget, data=None):
+        iter = widget.get_active_iter()
+        if iter:
+            archive_to = self.builder.get_object('liststore_archive').get_value(iter, 3)
+        else:
+            archive_to = ""
+            
+        print "[Conclusion] cut.archive_to = ", archive_to
+        self.file_conclusion.cut.archive_to = archive_to
     
     # box_create_cutlist           
     def _on_check_create_cutlist_toggled(self, widget, data=None):

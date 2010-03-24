@@ -81,7 +81,7 @@ class DecodeOrCut(BaseAction):
  
                     
         # show conclusion
-        file_conclusions = self.__gui.dialog_conclusion._run(file_conclusions, action, self.rename_by_schema)       
+        file_conclusions = self.__gui.dialog_conclusion._run(file_conclusions, action, self.rename_by_schema, self.config.get('folder_archive'))       
                       
         if cut:
              
@@ -144,13 +144,17 @@ class DecodeOrCut(BaseAction):
                     new_filename = fileoperations.make_unique_filename(new_filename)
                     
                     if file_conclusion.cut_video != new_filename:
-                        fileoperations.rename_file(file_conclusion.cut_video, new_filename)
+                        file_conclusion.cut_video = fileoperations.rename_file(file_conclusion.cut_video, new_filename)
+        
+            # move cut video to archive
+            for file_conclusion in file_conclusions:
+                if file_conclusion.cut.archive_to:
+                    fileoperations.move_file(file_conclusion.cut_video, file_conclusion.cut.archive_to)
         
             # move uncut video to trash if it's ok
             for file_conclusion in file_conclusions:
                 if file_conclusion.cut.status == Status.OK and file_conclusion.cut.delete_uncut:
                     # move to trash
-                    print file_conclusion.uncut_video, " to trash"
                     target = self.config.get('folder_trash_avis')
                     fileoperations.move_file(file_conclusion.uncut_video, target)        
         

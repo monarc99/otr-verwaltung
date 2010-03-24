@@ -150,7 +150,7 @@
             <child>
               <object class="GtkTable" id="box_buttons">
                 <property name="visible">True</property>
-                <property name="n_rows">3</property>
+                <property name="n_rows">4</property>
                 <property name="n_columns">2</property>
                 <property name="column_spacing">20</property>
                 <property name="row_spacing">6</property>
@@ -166,8 +166,8 @@
                   </object>
                   <packing>
                     <property name="right_attach">2</property>
-                    <property name="top_attach">2</property>
-                    <property name="bottom_attach">3</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
                     <property name="y_options">GTK_FILL</property>
                   </packing>
                 </child>
@@ -203,48 +203,6 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="box_rating">
-                    <property name="visible">True</property>
-                    <property name="spacing">5</property>
-                    <child>
-                      <object class="GtkLabel" id="label1">
-                        <property name="width_request">100</property>
-                        <property name="visible">True</property>
-                        <property name="xalign">1</property>
-                        <property name="label" translatable="yes">&lt;i&gt;Wertung:&lt;/i&gt;</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="combobox_external_rating">
-                        <property name="visible">True</property>
-                        <property name="tooltip_text" translatable="yes">0 - Dummy oder keine Cutlist
-1 - Anfang und Ende grob geschnitten
-2 - Anfang und Ende halbwegs genau geschnitten
-3 - Schnitt annehmbar und Werbung entfernt
-4 - doppelte Szenen nicht entfernt oder sch&#xF6;nere Schnitte m&#xF6;glich
-5 - s&#xE4;mtliches unerw&#xFC;nschtes Material framegenau entfernt</property>
-                        <property name="model">liststore_ratings</property>
-                        <property name="active">0</property>
-                        <signal name="changed" handler="_on_combobox_external_rating_changed"/>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkHBox" id="box_rename">
                     <property name="visible">True</property>
                     <property name="spacing">5</property>
@@ -274,6 +232,88 @@
                     <property name="left_attach">1</property>
                     <property name="right_attach">2</property>
                   </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="box_archive">
+                    <property name="visible">True</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="label4">
+                        <property name="width_request">100</property>
+                        <property name="visible">True</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">&lt;i&gt;Archivieren:&lt;/i&gt;</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="combobox_archive">
+                        <property name="visible">True</property>
+                        <property name="model">liststore_archive</property>
+                        <property name="active">0</property>
+                        <signal name="changed" handler="_on_combobox_archive_changed"/>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="box_rating">
+                    <property name="visible">True</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="label1">
+                        <property name="width_request">100</property>
+                        <property name="visible">True</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">&lt;i&gt;Wertung:&lt;/i&gt;</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBox" id="combobox_external_rating">
+                        <property name="visible">True</property>
+                        <property name="tooltip_markup">&lt;b&gt;Genaue Beschreibung:&lt;/b&gt;
+0 - Dummy oder keine Cutlist
+1 - Anfang und Ende grob geschnitten
+2 - Anfang und Ende halbwegs genau geschnitten
+3 - Schnitt annehmbar und Werbung entfernt
+4 - doppelte Szenen nicht entfernt oder sch&#xF6;nere Schnitte m&#xF6;glich
+5 - s&#xE4;mtliches unerw&#xFC;nschtes Material framegenau entfernt</property>
+                        <property name="model">liststore_ratings</property>
+                        <property name="active">0</property>
+                        <signal name="changed" handler="_on_combobox_external_rating_changed"/>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -343,6 +383,13 @@
                         <child>
                           <object class="GtkComboBox" id="combobox_own_rating">
                             <property name="visible">True</property>
+                            <property name="tooltip_markup">&lt;b&gt;Genaue Beschreibung:&lt;/b&gt;
+0 - Dummy oder keine Cutlist
+1 - Anfang und Ende grob geschnitten
+2 - Anfang und Ende halbwegs genau geschnitten
+3 - Schnitt annehmbar und Werbung entfernt
+4 - doppelte Szenen nicht entfernt oder sch&#xF6;nere Schnitte m&#xF6;glich
+5 - s&#xE4;mtliches unerw&#xFC;nschtes Material framegenau entfernt</property>
                             <property name="model">liststore_ratings</property>
                             <property name="active">0</property>
                             <signal name="changed" handler="_on_combobox_own_rating_changed"/>
@@ -703,5 +750,17 @@
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="pixbuf">../media/play.png</property>
+  </object>
+  <object class="GtkListStore" id="liststore_archive">
+    <columns>
+      <!-- column-name folder_name -->
+      <column type="gchararray"/>
+      <!-- column-name indent -->
+      <column type="gchararray"/>
+      <!-- column-name pixbuf -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name path -->
+      <column type="gchararray"/>
+    </columns>
   </object>
 </interface>
