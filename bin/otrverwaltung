@@ -72,6 +72,11 @@ else:
     logging.debug("Assuming path is correct")
     locale_dir = "/usr/share/locale"
     
+    try:
+        import otrverwaltung
+    except ImportError: # possible on systems where pycentral is not installed
+        sys.path.insert(0, "/usr/share/pyshared")           
+    
 import gettext, locale
 import gtk.glade
 gettext.install('otrverwaltung', locale_dir, True)
