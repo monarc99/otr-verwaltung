@@ -1,3 +1,9 @@
+0.9:
+    * Bugfix: Beim Umbennenen mit Schema wurde das Format nicht korrekt erkannt.
+    * Bugfix: RPM-Pakete sollten ab jetzt wieder ohne Anpassungen funktionieren.
+    * E-Mail und Passwort werden nicht mehr ins Terminal geschrieben.
+    * Im Zusammenfassungsdialog können Dateien nun direkt archiviert werden.
+
 0.8.2:
     * HD-Support. Achtung: Neue ffdshow-Version wird benötigt!
     * Bugfix: Update-Funktion geht wieder.

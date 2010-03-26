@@ -10,10 +10,7 @@ Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>
 TODO
 ----
 
-* http://www.otrforum.com/showpost.php?p=275672&postcount=297
-* Unterstützung für MERGED-Cutlists?
-* RSS-Feed (http://www.otrforum.com/showpost.php?p=248030&postcount=58)
+* Mencoder zum Schneiden: http://www.otrforum.com/showpost.php?p=275672&postcount=297
 * Beim Zusammenfassen-Dialog warnen, wenn der Dialog geschlossen wird, und noch nicht alle Dateien angeguckt wurden (Decodieren und Schneiden, Schneiden)
 * Dekodieren und Schneiden threaden
 * "Abbrechen"-Knopf
-* Woher Version?
