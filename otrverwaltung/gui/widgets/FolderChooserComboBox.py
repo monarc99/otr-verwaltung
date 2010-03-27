@@ -47,7 +47,7 @@ class FolderChooserComboBox(gtk.ComboBox):
 
      
     def __separator(self, model, iter, data=None):
-        return (model.get_value(iter, gtk.COL_NAME) == '-')
+        return (model.get_value(iter, self.COL_NAME) == '-')
     
     def get_active_path(self):
         iter = self.get_active_iter()
@@ -76,5 +76,3 @@ class FolderChooserComboBox(gtk.ComboBox):
             if not directory[0]: continue
                             
             self.liststore.append([directory[-1], image, fill_up * len(directory), root])
-        
-        self.set_active(0)

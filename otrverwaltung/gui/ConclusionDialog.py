@@ -19,6 +19,7 @@ import os.path
 import os
 
 from otrverwaltung.constants import Action, Status, Cut_action
+from otrverwaltung.gui.widgets.FolderChooserComboBox import FolderChooserComboBox
 from otrverwaltung import path
 
 class ConclusionDialog(gtk.Dialog, gtk.Buildable):
@@ -47,24 +48,13 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
     def do_parser_finished(self, builder):
         self.builder = builder
         self.builder.connect_signals(self)
-                          
+                   
         self.builder.get_object('check_create_cutlist').modify_font(pango.FontDescription("bold"))
-
-        # setup combobox_archive
-        def separator(model, iter, data=None):
-            return (model.get_value(iter, 0) == '-')
-        
-        cell = gtk.CellRendererText()
-        self.builder.get_object('combobox_archive').pack_start(cell, False)
-        self.builder.get_object('combobox_archive').add_attribute(cell, 'text', 1)
-        
-        cell = gtk.CellRendererPixbuf()
-        cell.set_property('xpad', 5)
-        self.builder.get_object('combobox_archive').pack_start(cell, False)
-        self.builder.get_object('combobox_archive').add_attribute(cell, 'pixbuf', 2)               
-        self.builder.get_object('combobox_archive').set_row_separator_func(separator)
-              
-        for combobox in ['combobox_external_rating', 'combobox_own_rating', 'combobox_archive']:
+          
+        self.combobox_archive = FolderChooserComboBox(add_empty_entry=True)        
+        self.builder.get_object('box_archive').pack_end(self.combobox_archive)
+             
+        for combobox in ['combobox_external_rating', 'combobox_own_rating']:
             cell = gtk.CellRendererText()
             cell.set_property('ellipsize', pango.ELLIPSIZE_END)
             self.builder.get_object(combobox).pack_start(cell, True)
@@ -72,33 +62,19 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
 
     ###
     ### Convenience
-    ###        
+    ###
     
     def _run(self, file_conclusions, action, rename_by_schema, archive_directory):
         self.action = action
         self.rename_by_schema = rename_by_schema                       
         self.__file_conclusions = file_conclusions
         self.forward_clicks = 0
-
-        # setup comboxbox_rating        
-        liststore = self.builder.get_object('liststore_archive') # foldername, indent, pixbuf, path
-        image = gtk.icon_theme_get_default().load_icon('folder', 16, gtk.ICON_LOOKUP_USE_BUILTIN)
-
-        # add nothing and the name of the archive folder
-        liststore.clear()
-        liststore.append(["Nicht archivieren", "", None, ""])
-        liststore.append(["-", "", None, ""])
-        liststore.append([archive_directory.split('/')[-1], "", image, archive_directory])
-        
-        fill_up = "—"
-        for root, dirs, files in os.walk(archive_directory):
-            directory = root.lstrip(archive_directory).split('/')
-
-            if not directory[0]: continue
-                            
-            liststore.append([directory[-1], fill_up * len(directory) , image, root])
             
         self.show_all()
+                
+        self.combobox_archive.fill(archive_directory)      
+        self.combobox_archive.set_active(0)
+        self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
                 
         # basic show/hide
         widgets_hidden = []
@@ -204,11 +180,11 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
 
                 archive_to = self.file_conclusion.cut.archive_to
                 if not archive_to:
-                    self.builder.get_object('combobox_archive').set_active(0)
+                    self.combobox_archive.set_active(0)
                 else:
-                    for count, row in enumerate(self.builder.get_object('liststore_archive')):
-                        if archive_to == row[3]:
-                            self.builder.get_object('combobox_archive').set_active(count)
+                    for count, row in enumerate(self.combobox_archive.liststore):
+                        if row[3] == archive_to:
+                            self.combobox_archive.set_active(count)
 
             if cut_action == Cut_action.BEST_CUTLIST or cut_action == Cut_action.CHOOSE_CUTLIST:
                 self.builder.get_object('box_rating').props.visible = cut_ok
@@ -274,12 +250,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         self.file_conclusion.cut.rename = widget.child.get_text()
     
     def _on_combobox_archive_changed(self, widget, data=None):
-        iter = widget.get_active_iter()
-        if iter:
-            archive_to = self.builder.get_object('liststore_archive').get_value(iter, 3)
-        else:
-            archive_to = ""
-            
+        archive_to = self.combobox_archive.get_active_path()            
         print "[Conclusion] cut.archive_to = ", archive_to
         self.file_conclusion.cut.archive_to = archive_to
     

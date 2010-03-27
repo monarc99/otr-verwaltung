@@ -251,15 +251,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBox" id="combobox_archive">
-                        <property name="visible">True</property>
-                        <property name="model">liststore_archive</property>
-                        <property name="active">0</property>
-                        <signal name="changed" handler="_on_combobox_archive_changed"/>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -750,17 +742,5 @@
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="pixbuf">../media/play.png</property>
-  </object>
-  <object class="GtkListStore" id="liststore_archive">
-    <columns>
-      <!-- column-name folder_name -->
-      <column type="gchararray"/>
-      <!-- column-name indent -->
-      <column type="gchararray"/>
-      <!-- column-name pixbuf -->
-      <column type="GdkPixbuf"/>
-      <!-- column-name path -->
-      <column type="gchararray"/>
-    </columns>
   </object>
 </interface>

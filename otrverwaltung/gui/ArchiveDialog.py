@@ -41,6 +41,7 @@ class ArchiveDialog(gtk.Dialog, gtk.Buildable):
   
     def run(self, filenames, archive_directory):
         self.combobox_folder.fill(archive_directory)
+        self.combobox_folder.set_active(0)
 
         self.builder.get_object('label_files').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
     
