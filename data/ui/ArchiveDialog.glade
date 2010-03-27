@@ -1,7 +1,16 @@
 <?xml version="1.0"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
+  <!-- interface-requires ArchiveDialog 1.0 -->
   <!-- interface-naming-policy project-wide -->
+  <object class="GtkListStore" id="liststore_rename">
+    <columns>
+      <!-- column-name renamed -->
+      <column type="gchararray"/>
+      <!-- column-name original -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="ArchiveDialog" id="archive_dialog">
     <property name="width_request">600</property>
     <property name="border_width">5</property>
@@ -17,16 +26,15 @@
         <property name="visible">True</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkVBox" id="vbox7">
+          <object class="GtkVBox" id="vbox_main">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkLabel" id="labelFiles">
+              <object class="GtkLabel" id="label_files">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">&lt;b&gt;labelFiles&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
+                <property name="label" translatable="yes">label_files</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -37,7 +45,8 @@
               <object class="GtkLabel" id="label14">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Sollen Dateien umbenannt werden?</property>
+                <property name="label" translatable="yes">&lt;b&gt;Sollen Dateien umbenannt werden?&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -49,12 +58,28 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hscrollbar_policy">automatic</property>
-                <property name="vscrollbar_policy">never</property>
+                <property name="vscrollbar_policy">automatic</property>
                 <child>
-                  <object class="GtkTreeView" id="treeviewFilesRename">
+                  <object class="GtkTreeView" id="treeview_rename">
                     <property name="height_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="model">liststore_rename</property>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                        <property name="title">Neuer Name (Doppelklick zum Bearbeiten):</property>
+                        <property name="expand">True</property>
+                        <child>
+                          <object class="GtkCellRendererText" id="cellrenderertext1">
+                            <property name="editable">True</property>
+                            <signal name="edited" handler="new_name_cell_edited"/>
+                          </object>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -75,7 +100,8 @@
               <object class="GtkLabel" id="label200">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Wohin soll(en) die Datei(en) archiviert werden?</property>
+                <property name="label" translatable="yes">&lt;b&gt;Wohin soll(en) die Datei(en) archiviert werden?&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -83,23 +109,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolledwindow4">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">automatic</property>
-                <property name="vscrollbar_policy">automatic</property>
-                <child>
-                  <object class="GtkTreeView" id="treeviewFolders">
-                    <property name="height_request">200</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="headers_visible">False</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="position">5</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -112,7 +122,7 @@
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="archive_buttonCancel">
-                <property name="label" translatable="yes">gtk-cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -126,7 +136,7 @@
             </child>
             <child>
               <object class="GtkButton" id="archive_buttonOK">
-                <property name="label" translatable="yes">gtk-ok</property>
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>

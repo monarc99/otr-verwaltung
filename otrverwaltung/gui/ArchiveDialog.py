@@ -19,6 +19,7 @@ from os.path import basename
 import gtk
 
 from otrverwaltung import path
+from otrverwaltung.gui.widgets.FolderChooserComboBox import FolderChooserComboBox
 
 class ArchiveDialog(gtk.Dialog, gtk.Buildable):
     __gtype_name__ = "ArchiveDialog"
@@ -30,51 +31,41 @@ class ArchiveDialog(gtk.Dialog, gtk.Buildable):
         self.builder = builder
         self.builder.connect_signals(self)
 
-        # create folder treestore
-        treeview = self.builder.get_object('treeviewFolders')
-        treeview.set_model(gtk.TreeStore(str))
-
-        cell_renderer_folder_name = gtk.CellRendererText()
-        tvcolumn = gtk.TreeViewColumn(None, cell_renderer_folder_name, text = 0)
-        tvcolumn.set_cell_data_func(cell_renderer_folder_name, self.folder_name)        
-        
-        treeview.append_column(tvcolumn)
-
-        # create files-rename liststore
-        treeview = self.builder.get_object('treeviewFilesRename')
-        treeview.set_model(gtk.ListStore(str))
-        
-        cell_renderer_new = gtk.CellRendererText()
-        cell_renderer_new.set_property('editable', True)
-        cell_renderer_new.connect('edited', self.new_name_cell_edited, treeview.get_model())
-        tvcolumn_new = gtk.TreeViewColumn("Neuer Name (Doppelklick zum Bearbeiten):", cell_renderer_new, text=0)     
-        
-        treeview.append_column(tvcolumn_new)
-        
-        selection = treeview.get_selection()    
-    
+        self.combobox_folder = FolderChooserComboBox()
+        self.combobox_folder.show()        
+        self.builder.get_object('vbox_main').pack_end(self.combobox_folder, expand=False)
+            
     ###
     ### Convenience methods
     ###    
   
-    def append_row_treeviewFilesRename(self, filename):
-        iter = self.builder.get_object('treeviewFilesRename').get_model().append([filename])    
-        return iter
+    def run(self, filenames, archive_directory):
+        self.combobox_folder.fill(archive_directory)
+
+        self.builder.get_object('label_files').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
+    
+        for filename in filenames:
+            self.builder.get_object('liststore_rename').append([basename(filename), filename])
+    
+        result = gtk.Dialog.run(self)
         
-    def append_row_treeviewFolders(self, parent, filename):   
-        iter = self.builder.get_object('treeviewFolders').get_model().append(parent, [filename])
-        return iter
+        if result == gtk.RESPONSE_OK:
+            renamed_filenames = {}
+            for row in self.builder.get_object('liststore_rename'):
+                renamed, original = row[0], row[1]
+                renamed_filenames[original] = renamed
         
+            return True, renamed_filenames, self.combobox_folder.get_active_path()
+        else:
+            return False, None, None
+                  
     ###
     ### Signal handlers
     ###    
-    
-    def folder_name(self, column, cell, model, iter):
-        cell.set_property('text', basename(model.get_value(iter, 0)))
-    
-    def new_name_cell_edited(self, cell, path, new_text, model):
+        
+    def new_name_cell_edited(self, cell, path, new_text):
         # update new name of file in model
-        model[path][0] = new_text
+        self.builder.get_object('liststore_rename')[path][0] = new_text
         
 def NewArchiveDialog():
     glade_filename = path.getdatapath('ui', 'ArchiveDialog.glade')
