@@ -1,3 +1,6 @@
+:
+    * Bugfix: http://www.otrforum.com/showthread.php/59666, Danke @Artemis1121
+
 0.8.3:
     * Bugfix: Beim Umbennenen mit Schema wurde das Format nicht korrekt erkannt.
     * Bugfix: RPM-Pakete sollten ab jetzt wieder ohne Anpassungen funktionieren.

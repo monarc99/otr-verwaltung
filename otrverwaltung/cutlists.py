@@ -252,7 +252,9 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
 
     if choose_cutlists_by == 0: # by size
         size = fileoperations.get_size(filename)
-        url = "%sgetxml.php?ofsb=%s" % (server, str(size))
+        urls = ["%sgetxml.php?ofsb=%s" % (server, str(size)),
+                # siehe http://www.otrforum.com/showthread.php?t=59666
+                "%sgetxml.php?ofsb=%s" % (server, str((size+2*1024**3)%(4*1024**3)- 2*1024**3))]
     
     else: # by name
         root, extension = os.path.splitext(os.path.basename(filename))
@@ -260,51 +262,53 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
         if cutlist_mp4_as_hq and extension == '.mp4':
             root += ".HQ"
     
-        url = "%sgetxml.php?name=%s" % (server, root)
+        urls = ["%sgetxml.php?name=%s" % (server, root)]
 
-    print url
-                  
-    try:
-        handle = urllib.urlopen(url)
-    except IOError:  
-        if error_cb: error_cb("Verbindungsprobleme")
-        return "Verbindungsprobleme", None
-                   
-    try:
-        dom_cutlists = xml.dom.minidom.parse(handle)
-        handle.close()
-        dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
-    except:
-        if error_cb: error_cb("Keine Cutlists gefunden")
-        return "Keine Cutlists gefunden", None
-                    
-    cutlists = []           
-        
-    for cutlist in dom_cutlists:
-                                                                               
-        c = Cutlist()
-
-        c.id                        = __read_value(cutlist, "id")
-        c.author                    = __read_value(cutlist, "author")
-        c.ratingbyauthor            = __read_value(cutlist, "ratingbyauthor")
-        c.rating                    = __read_value(cutlist, "rating")
-        c.ratingcount               = __read_value(cutlist, "ratingcount")
-        c.countcuts                 = __read_value(cutlist, "cuts")
-        c.actualcontent             = __read_value(cutlist, "actualcontent")
-        c.usercomment               = __read_value(cutlist, "usercomment")
-        c.filename                  = __read_value(cutlist, "filename")
-        c.withframes                = __read_value(cutlist, "withframes")
-        c.withtime                  = __read_value(cutlist, "withtime")
-        c.duration                  = __read_value(cutlist, "duration")
-        c.errors                    = __read_value(cutlist, "errors")
-        c.othererrordescription     = __read_value(cutlist, "othererrordescription")
-        c.downloadcount             = __read_value(cutlist, "downloadcount")
-        c.autoname                  = __read_value(cutlist, "autoname")
-        c.filename_original         = __read_value(cutlist, "filename_original")
-
-        if cutlist_found_cb: cutlist_found_cb(c)
+    cutlists = []                      
+    
+    for url in urls:
+        print "[Cutlists] Download by : %s" % url
+        try:
+            handle = urllib.urlopen(url)
+        except IOError:  
+            if error_cb: error_cb("Verbindungsprobleme")
+            return "Verbindungsprobleme", None
+                       
+        try:
+            dom_cutlists = xml.dom.minidom.parse(handle)
+            handle.close()
+            dom_cutlists = dom_cutlists.getElementsByTagName('cutlist')
+        except:
+            if error_cb: error_cb("Keine Cutlists gefunden")
+            return "Keine Cutlists gefunden", None
             
-        cutlists.append(c)
+        for cutlist in dom_cutlists:
+                                                                                   
+            c = Cutlist()
+
+            c.id                        = __read_value(cutlist, "id")
+            c.author                    = __read_value(cutlist, "author")
+            c.ratingbyauthor            = __read_value(cutlist, "ratingbyauthor")
+            c.rating                    = __read_value(cutlist, "rating")
+            c.ratingcount               = __read_value(cutlist, "ratingcount")
+            c.countcuts                 = __read_value(cutlist, "cuts")
+            c.actualcontent             = __read_value(cutlist, "actualcontent")
+            c.usercomment               = __read_value(cutlist, "usercomment")
+            c.filename                  = __read_value(cutlist, "filename")
+            c.withframes                = __read_value(cutlist, "withframes")
+            c.withtime                  = __read_value(cutlist, "withtime")
+            c.duration                  = __read_value(cutlist, "duration")
+            c.errors                    = __read_value(cutlist, "errors")
+            c.othererrordescription     = __read_value(cutlist, "othererrordescription")
+            c.downloadcount             = __read_value(cutlist, "downloadcount")
+            c.autoname                  = __read_value(cutlist, "autoname")
+            c.filename_original         = __read_value(cutlist, "filename_original")
+
+            ids = [cutlist.id for cutlist in cutlists]
+            if not c.id in ids:
+                if cutlist_found_cb: cutlist_found_cb(c)
+                   
+                cutlists.append(c)
 
     if len(cutlists) == 0:
         return "Keine Cutlists gefunden", None
