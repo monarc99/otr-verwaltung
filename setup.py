@@ -93,7 +93,7 @@ class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
 
 DistUtilsExtra.auto.setup(
     name='otrverwaltung',
-    version='0.8.2',
+    version=open('data/VERSION', 'r').read().strip(),
     license='GPL-3',
     author='Benjamin Elbers',
     author_email='elbersb@gmail.com',
