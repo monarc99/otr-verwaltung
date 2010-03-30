@@ -33,7 +33,7 @@ class Gui:
         self.main_window = MainWindow.NewMainWindow(app, self)        
         self.main_window.post_init()
         self.preferences_window = PreferencesWindow.NewPreferencesWindow(app, self)
-        self.preferences_window.post_init()
+        self.preferences_window.bind_config(app.config)
         
         self.dialog_archive = ArchiveDialog.NewArchiveDialog()
         self.dialog_conclusion = ConclusionDialog.NewConclusionDialog(app, self)

@@ -81,7 +81,7 @@ class DecodeOrCut(BaseAction):
  
                     
         # show conclusion
-        file_conclusions = self.__gui.dialog_conclusion._run(file_conclusions, action, self.rename_by_schema, self.config.get('folder_archive'))       
+        file_conclusions = self.__gui.dialog_conclusion._run(file_conclusions, action, self.rename_by_schema, self.config.get('general', 'folder_archive'))       
                       
         if cut:
              
@@ -97,9 +97,9 @@ class DecodeOrCut(BaseAction):
                         intended_app_name = "Avidemux"
 
                     file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
-                    file_conclusion.cut.cutlist.author = self.config.get('cutlist_username')
+                    file_conclusion.cut.cutlist.author = self.config.get('general', 'cutlist_username')
                     file_conclusion.cut.cutlist.intended_version = open(path.getdatapath("VERSION"), 'r').read().strip()
-                    file_conclusion.cut.cutlist.smart = self.config.get('smart')                   
+                    file_conclusion.cut.cutlist.smart = self.config.get('general', 'smart')                   
 
                     file_conclusion.cut.cutlist.write_local_cutlist(file_conclusion.uncut_video, intended_app_name, file_conclusion.cut.my_rating)
                     
@@ -110,11 +110,11 @@ class DecodeOrCut(BaseAction):
                 error_messages = []
 
                 for cutlist in cutlists:
-                    error_message = cutlist.upload(self.config.get('server'), self.config.get('cutlist_hash'))
+                    error_message = cutlist.upload(self.config.get('general', 'server'), self.config.get('general', 'cutlist_hash'))
                     if error_message: 
                         error_messages.append(error_message)
                     else:
-                        if self.config.get('delete_cutlists'):
+                        if self.config.get('general', 'delete_cutlists'):
                             fileoperations.remove_file(cutlist.local_filename)
                  
                 count = len(cutlists)
@@ -140,7 +140,7 @@ class DecodeOrCut(BaseAction):
                     if not file_conclusion.cut.rename.endswith(extension):
                         file_conclusion.cut.rename += extension
                 
-                    new_filename = join(self.config.get('folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))
+                    new_filename = join(self.config.get('general', 'folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))
                     new_filename = fileoperations.make_unique_filename(new_filename)
                     
                     if file_conclusion.cut_video != new_filename:
@@ -155,11 +155,11 @@ class DecodeOrCut(BaseAction):
             for file_conclusion in file_conclusions:
                 if file_conclusion.cut.status == Status.OK and file_conclusion.cut.delete_uncut:
                     # move to trash
-                    target = self.config.get('folder_trash_avis')
+                    target = self.config.get('general', 'folder_trash_avis')
                     fileoperations.move_file(file_conclusion.uncut_video, target)        
         
             # remove local cutlists      
-            if self.config.get('delete_cutlists'):
+            if self.config.get('general', 'delete_cutlists'):
                 for file_conclusion in file_conclusions:
                     if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #and file_conclusion.cut.status == Status.OK:
                         if exists(file_conclusion.cut.cutlist.local_filename):
@@ -173,7 +173,7 @@ class DecodeOrCut(BaseAction):
                 for file_conclusion in file_conclusions:                    
                     if file_conclusion.cut.my_rating > -1:
                         print "Rate with ", file_conclusion.cut.my_rating
-                        success, message = file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('server'))
+                        success, message = file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('general', 'server'))
                         if success:
                             count += 1
                         else:
@@ -198,14 +198,14 @@ class DecodeOrCut(BaseAction):
     def decode(self, file_conclusions):          
             
         # no decoder        
-        if not "decode" in self.config.get('decoder'): # no decoder specified
+        if not "decode" in self.config.get('general', 'decoder'): # no decoder specified
             # dialog box: no decoder
             self.__gui.message_error_box("Es ist kein korrekter Dekoder angegeben!")
             return False
         
         # retrieve email and password
-        email = self.config.get('email')
-        password = base64.b64decode(self.config.get('password')) 
+        email = self.config.get('general', 'email')
+        password = base64.b64decode(self.config.get('general', 'password')) 
 
         if not email or not password:
             self.__gui.dialog_email_password.set_email_password(email, password)       
@@ -230,9 +230,9 @@ class DecodeOrCut(BaseAction):
                    
             verify = True                   
 
-            command = [self.config.get('decoder'), "-i", file_conclusion.otrkey, "-e", email, "-p", password, "-o", self.config.get('folder_uncut_avis')]
+            command = [self.config.get('general', 'decoder'), "-i", file_conclusion.otrkey, "-e", email, "-p", password, "-o", self.config.get('general', 'folder_uncut_avis')]
                       
-            if not self.config.get('verify_decoded'):
+            if not self.config.get('general', 'verify_decoded'):
                 verify = False
                 command += ["-q"]              
 
@@ -283,10 +283,10 @@ class DecodeOrCut(BaseAction):
             if len(errors) == 0: # dekodieren erfolgreich                
                 file_conclusion.decode.status = Status.OK
                 
-                file_conclusion.uncut_video = join(self.config.get('folder_uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
+                file_conclusion.uncut_video = join(self.config.get('general', 'folder_uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
                              
                 # move otrkey to trash
-                target = self.config.get('folder_trash_otrkeys')
+                target = self.config.get('general', 'folder_trash_otrkeys')
                 fileoperations.move_file(file_conclusion.otrkey, target)
             else:            
                 file_conclusion.decode.status = Status.ERROR
@@ -300,7 +300,7 @@ class DecodeOrCut(BaseAction):
         self.__gui.main_window.block_gui(True)          
              
         if not default_cut_action:
-            default_cut_action = self.config.get('cut_action')                                         
+            default_cut_action = self.config.get('general', 'cut_action')                                         
                
         for count, file_conclusion in enumerate(file_conclusions):
             self.__gui.main_window.set_tasks_text("Cutlist %s/%s wählen" % (count + 1, len(file_conclusions)))
@@ -319,7 +319,7 @@ class DecodeOrCut(BaseAction):
                 # show dialog                
                 self.__gui.dialog_cut.setup(
                     file_conclusion.uncut_video,
-                    self.config.get('folder_cut_avis'),
+                    self.config.get('general', 'folder_cut_avis'),
                     default_cut_action == Cut_action.ASK)                    
                     
                 cutlists = []                              
@@ -337,7 +337,7 @@ class DecodeOrCut(BaseAction):
                     if not self.cutlists_error:
                         self.__gui.dialog_cut.builder.get_object('label_status').set_markup("")
                
-                GeneratorTask(cutlists_management.download_cutlists, None, completed).start(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'), error_cb, cutlist_found_cb)
+                GeneratorTask(cutlists_management.download_cutlists, None, completed).start(file_conclusion.uncut_video, self.config.get('general', 'server'), self.config.get('general', 'choose_cutlists_by'), self.config.get('general', 'cutlist_mp4_as_hq'), error_cb, cutlist_found_cb)
                 
                 response = self.__gui.dialog_cut.run()                
                 self.__gui.dialog_cut.hide()
@@ -370,7 +370,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.message = error_message
                     
             elif file_conclusion.cut.cut_action == Cut_action.BEST_CUTLIST:
-                error, cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_video, self.config.get('server'), self.config.get('choose_cutlists_by'), self.config.get('cutlist_mp4_as_hq'))
+                error, cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_video, self.config.get('general', 'server'), self.config.get('general', 'choose_cutlists_by'), self.config.get('general', 'cutlist_mp4_as_hq'))
                 
                 if error:
                     file_conclusion.cut.status = Status.ERROR
@@ -406,7 +406,7 @@ class DecodeOrCut(BaseAction):
             
             # download cutlist
             if file_conclusion.cut.cut_action in [Cut_action.BEST_CUTLIST, Cut_action.CHOOSE_CUTLIST]:
-                file_conclusion.cut.cutlist.download(self.config.get('server'), file_conclusion.uncut_video)   
+                file_conclusion.cut.cutlist.download(self.config.get('general', 'server'), file_conclusion.uncut_video)   
 
             cut_video, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)                
 
@@ -417,7 +417,7 @@ class DecodeOrCut(BaseAction):
                 file_conclusion.cut.status = Status.OK
                 file_conclusion.cut_video = cut_video
                 
-                if self.config.get('rename_cut'):                        
+                if self.config.get('general', 'rename_cut'):                        
                     file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
                 else:
                     file_conclusion.cut.rename = basename(cut_video)               
@@ -441,15 +441,15 @@ class DecodeOrCut(BaseAction):
 
     def __get_program(self, filename, manually=False):   
         if manually:
-            programs = { Format.AVI : self.config.get('cut_avis_man_by'),
-                         Format.HQ  : self.config.get('cut_hqs_man_by'),
-                         Format.HD  : self.config.get('cut_hqs_man_by'),
-                         Format.MP4 : self.config.get('cut_mp4s_man_by') }
+            programs = { Format.AVI : self.config.get('general', 'cut_avis_man_by'),
+                         Format.HQ  : self.config.get('general', 'cut_hqs_man_by'),
+                         Format.HD  : self.config.get('general', 'cut_hqs_man_by'),
+                         Format.MP4 : self.config.get('general', 'cut_mp4s_man_by') }
         else:
-            programs = { Format.AVI : self.config.get('cut_avis_by'),
-                         Format.HQ  : self.config.get('cut_hqs_by'),
-                         Format.HD  : self.config.get('cut_hqs_by'),                         
-                         Format.MP4 : self.config.get('cut_mp4s_by') }
+            programs = { Format.AVI : self.config.get('general', 'cut_avis_by'),
+                         Format.HQ  : self.config.get('general', 'cut_hqs_by'),
+                         Format.HD  : self.config.get('general', 'cut_hqs_by'),                         
+                         Format.MP4 : self.config.get('general', 'cut_mp4s_by') }
                      
         format = self.__get_format(filename)                 
 
@@ -472,7 +472,7 @@ class DecodeOrCut(BaseAction):
                 
         new_name = root + "-cut" + extension
                 
-        cut_video = join(self.config.get('folder_cut_avis'), new_name)        
+        cut_video = join(self.config.get('general', 'folder_cut_avis'), new_name)        
             
         return cut_video
    
@@ -483,7 +483,7 @@ class DecodeOrCut(BaseAction):
                     with error:
                        None, error_message """
         
-        mplayer = self.config.get('mplayer')
+        mplayer = self.config.get('general', 'mplayer')
             
         if not mplayer:
             return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der FPS benötigt."
@@ -511,7 +511,7 @@ class DecodeOrCut(BaseAction):
                        aspect_ratio, None
                     with error:
                        None, error_message """
-        mplayer = self.config.get('mplayer')
+        mplayer = self.config.get('general', 'mplayer')
             
         if not mplayer:
             return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Aspekt Ratio benötigt."
@@ -627,7 +627,7 @@ class DecodeOrCut(BaseAction):
             if error != None:
                 return error, None, None
                 
-            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('folder_uncut_avis'), "cutlist.vcf"))
+            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"))
          
         if cutlist_error:            
             return cutlist_error, None, config_value
@@ -692,7 +692,7 @@ class DecodeOrCut(BaseAction):
             'app.video.setPostProc(3,3,0);\n'
             ])
             
-        if self.config.get('smart'):
+        if self.config.get('general', 'smart'):
             f.write('app.video.codec("Copy","CQ=4","0");\n')
             
         f.writelines([
@@ -778,7 +778,7 @@ class DecodeOrCut(BaseAction):
         if not manually:
             f.write('VirtualDub.Open("%s");\n' % filename)
             
-        if self.config.get('smart'):
+        if self.config.get('general', 'smart'):
             f.writelines([               
                 'VirtualDub.video.SetMode(1);\n',
                 'VirtualDub.video.SetSmartRendering(1);\n',

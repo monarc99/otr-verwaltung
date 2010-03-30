@@ -1,3 +1,2 @@
 # ignore built files from makedeb.sh
-otrverwaltung/conf
-otrverwaltung/pluginconf
+conf

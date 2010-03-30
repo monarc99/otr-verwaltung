@@ -15,10 +15,7 @@
 ### END LICENSE
 
 import sys
-from os.path import join, isdir
-import os
-
-import os
+import os.path
 from xdg import BaseDirectory
 
 data_dir = '../data'
@@ -35,30 +32,19 @@ def getdatapath(*args):
 def get_storage_dir(filename=""):
     return os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung", filename)
 
-def get_config_path(filename):
-    home = os.environ.get('HOME')
-    config_dir = join(home, '.otr-verwaltung')
-    if not isdir(config_dir):
-        os.mkdir(config_dir)
-    return join(config_dir, filename)
-    # TODO: Change eventually:
-    # return os.path.join(BaseDirectory.xdg_config_home, "mfm", filename)
+def get_config_dir(filename=""):
+    return os.path.join(BaseDirectory.xdg_config_home, "otrverwaltung", filename)
 
 def get_path(filename=""):
-    return join(sys.path[0], "otrverwaltung", filename)
+    return os.path.join(sys.path[0], "otrverwaltung", filename)
 
 def get_plugin_paths():
-    plugins_home = get_config_path('plugins')
-    if not isdir(plugins_home):
-        os.mkdir(plugins_home)
+    plugins_home = get_storage_dir("plugins") 
     plugins_usr = '/usr/share/otrverwaltung/plugins'
     return plugins_home, plugins_usr
     
-def get_gui_path(filename=None):
-    if filename == None:
-        return join(get_path(), "gui")
-    else:
-        return join(get_path(), join("gui", filename))
+def get_gui_path(filename=''):
+    return os.path.join(get_path(), "gui", filename)
     
 def get_image_path(filename=""):
-    return join(getdatapath("media", filename))
+    return getdatapath("media", filename)

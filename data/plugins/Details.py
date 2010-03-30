@@ -70,7 +70,7 @@ class Details(Plugin):
             self.reset_details("")
             return
 
-        mplayer = self.app.config.get('mplayer')
+        mplayer = self.app.config.get('general', 'mplayer')
 
         if not mplayer:
             self.reset_details("Der MPlayer ist nicht installiert!")

@@ -90,7 +90,7 @@ for module in gettext, gtk.glade:
 from otrverwaltung.gui import gui
 from otrverwaltung.pluginsystem import PluginSystem
 from otrverwaltung.actions import actions
-from otrverwaltung.configparser import Config
+from otrverwaltung.config import Config
 from otrverwaltung import fileoperations
 import otrverwaltung.cutlists as cutlists_management
 from otrverwaltung.constants import Section, Action, Cut_action
@@ -103,56 +103,56 @@ class App:
     section = Section.OTRKEY
     """ Die aktuell angezeigt `~constants.Section`. Zum Ändern sollte die Funktion `~otr.App.show_section` verwendet werden. """
     
-    def __init__(self):     
-        config_dic = {
-            'folder_new_otrkeys':   (str, ''),
-            'folder_uncut_avis':    (str, ''),
-            'folder_cut_avis':      (str, ''),
-            'folder_trash_otrkeys': (str, ''),
-            'folder_trash_avis':    (str, ''),
-            'folder_trash':         (str, ''), #TODO: remove soon, only for compability
-            'folder_archive':       (str, ''),
-            'decoder':              (str, ''),
-            'save_email_password':  (bool, False),
-            'email':                (str, ''),
-            'password':             (str, ''),
-            'verify_decoded':       (bool, False),          
-            'cut_avis_by':          (str, 'avidemux'),
-            'cut_hqs_by':           (str, ''),
-            'cut_mp4s_by':          (str, 'avidemux'),
-            'cut_avis_man_by':      (str, 'avidemux'),
-            'cut_hqs_man_by':       (str, ''),
-            'cut_mp4s_man_by':      (str, 'avidemux'),
-            'server':               (str, 'http://cutlist.at/'),
-            'cut_action':           (int, Cut_action.ASK),
-            'delete_cutlists':      (bool, True),
-            'smart':                (bool, True),
-            'choose_cutlists_by':   (int, 0), # 0 = size, 1=name
-            'cutlist_username':     (str, ''),
-            'mplayer':              (str, 'mplayer'),
-            'planned_items':        (str, ''),
-            'rename_cut':           (bool, True),
-            'rename_schema':        (str, '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})'),
-            'cutlist_mp4_as_hq':    (bool, False), # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
-            'show_bottom':          (bool, False),
-            'enabled_plugins':      (str, 'Play'),
-            'cutlist_hash':         (str, hashlib.md5(str(time.time())).hexdigest()),
-            'window_settings':      (str, '')
+    def __init__(self):        
+   
+        configuration = {
+            'general': {
+                'folder_new_otrkeys': '',
+                'folder_uncut_avis': '',
+                'folder_cut_avis': '',
+                'folder_trash_otrkeys': '',
+                'folder_trash_avis': '',
+                'folder_archive': '',
+                'decoder': '',
+                'save_email_password': False,
+                'email': '',
+                'password': '',
+                'verify_decoded': False,
+                'cut_avis_by': 'avidemux',
+                'cut_hqs_by':           '',
+                'cut_mp4s_by': 'avidemux',
+                'cut_avis_man_by': 'avidemux',
+                'cut_hqs_man_by': '',
+                'cut_mp4s_man_by': 'avidemux',
+                'server': 'http://cutlist.at/',
+                'cut_action': Cut_action.ASK,
+                'delete_cutlists': True,
+                'smart': True,
+                'choose_cutlists_by': 0, # 0 = size, 1=name
+                'cutlist_username': '',
+                'mplayer': 'mplayer',
+                'planned_items': '',
+                'rename_cut': True,
+                'rename_schema': '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})',
+                'cutlist_mp4_as_hq': False, # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
+                'show_bottom': False,                
+                'cutlist_hash': hashlib.md5(str(time.time())).hexdigest(),
+                'window_settings': ''
+            },
+            'plugins': {
+                'enabled': 'Play',
+                'config': {} # used as plugin config storage
+            }
+                         
         }
-                   
-        # read configs
+        
         if local:
-            print "[Config] Path: ", path.get_path('conf')
-            self.config = Config(path.get_path('conf'), config_dic)
+            self.config = Config(os.path.join(launch_dir, "..", "conf"), configuration)    
         else:
-            print "[Config] Path: ", path.get_config_path('conf')
-            self.config = Config(path.get_config_path('conf'), config_dic)
-        self.config.read()                
-
-        # TODO: remove soon, only for compability
-        if not self.config.get('folder_trash_otrkeys') or not self.config.get('folder_trash_avis'):
-            self.config.set('folder_trash_otrkeys', self.config.get('folder_trash'))
-            self.config.set('folder_trash_avis', self.config.get('folder_trash'))
+            # TODO: Remove this line after one release
+            configuration = self.import_old_config(configuration)
+                    
+            self.config = Config(path.get_config_dir("conf"), configuration)
 
         self.__search_text = ""
         self.locked = False
@@ -162,11 +162,12 @@ class App:
         self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
        
         # load gui
-        self.__gui = gui.Gui(self)
-        self.__gui.preferences_window.update_config_values()
+        self.__gui = gui.Gui(self)    
+
+        self.config.load()
     
-        if self.config.get('window_settings'):
-            maximize, width, height = self.config.get('window_settings').split(',')
+        if self.config.get('general', 'window_settings'):
+            maximize, width, height = self.config.get('general', 'window_settings').split(',')
             if int(maximize):
                 self.__gui.main_window.maximize()            
             self.__gui.main_window.resize(int(width), int(height))
@@ -174,20 +175,62 @@ class App:
         # load plugins
         if local:
             plugin_paths = [path.getdatapath('plugins')]
-            pluginconf_path = path.get_path('pluginconf')
         else:
             plugin_paths = path.get_plugin_paths()
-            pluginconf_path = path.get_config_path('pluginconf')
     
-        self.plugin_system = PluginSystem(self, self.__gui, pluginconf_path, plugin_paths, self.config.get('enabled_plugins'))
+        self.plugin_system = PluginSystem(self, self.__gui, plugin_paths, self.config.get('plugins', 'enabled'), self.config.get('plugins', 'config'))
     
         # show undecoded otrkeys         
         self.show_section(Section.OTRKEY)
         
         self.planned_broadcasts = Planning()
-        self.planned_broadcasts.read_config(self.config.get('planned_items'))
+        self.planned_broadcasts.read_config(self.config.get('general', 'planned_items'))
         
         self.__gui.main_window.broadcasts_badge()                           
+       
+    def import_old_config(self, configuration):
+        # TODO: Remove after one release          
+        
+        # try to move plugins
+        import shutil
+        src = join(os.environ.get('HOME'), '.otr-verwaltung', 'plugins')
+        dst = path.get_storage_dir("plugins")
+        try:
+            shutil.copytree(src, dst)                    
+        except:
+            pass
+        
+        try:
+            config = join(os.environ.get('HOME'), '.otr-verwaltung', 'conf')            
+            config = open(config, 'r')
+        except:
+            return configuration
+                       
+        # read file
+        for line in config:
+            if not '=' in line:
+                continue
+            key, value = line.split('=', 1)
+            key, value = key.strip(), value.strip()
+            
+            if key in configuration['general'].keys():
+                datatype = type(configuration['general'][key])
+                
+                #print "%5s: %15s=%15s" % (datatype, key.strip(), value)
+                if datatype == bool:
+                    value = bool(int(value))
+                else:
+                    value = datatype(value)
+                
+                print "IMPORT: %s of %s" % (key, datatype)
+                configuration['general'][key] = value
+
+            elif key=="enabled_plugins":
+                configuration['plugins']['enabled'] = value      
+                
+        os.rename(join(os.environ.get('HOME'), '.otr-verwaltung'), join(os.environ.get('HOME'), '.otr-verwaltung_ALT'))
+           
+        return configuration 
              
     ### 
     ### Show sections
@@ -262,7 +305,7 @@ class App:
              
     def __section_otrkey(self):
         text = "Diese Dateien wurden noch nicht dekodiert." 
-        path = self.config.get('folder_new_otrkeys')
+        path = self.config.get('general', 'folder_new_otrkeys')
         
         if path == "":
             return text, []
@@ -273,7 +316,7 @@ class App:
          
     def __section_video_uncut(self):
         text = "Diese Dateien wurden noch nicht geschnitten."
-        path = self.config.get('folder_uncut_avis')
+        path = self.config.get('general', 'folder_uncut_avis')
         
         files = [join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search(f)]
             
@@ -282,7 +325,7 @@ class App:
     def __section_video_cut(self):
         text = "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."
                 
-        path = self.config.get('folder_cut_avis')
+        path = self.config.get('general', 'folder_cut_avis')
         
         files = []                
         for f in os.listdir(path):
@@ -295,8 +338,8 @@ class App:
         
     def __section_trash(self):
         text = "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
-        path_otrkeys = self.config.get('folder_trash_otrkeys')
-        path_avis = self.config.get('folder_trash_avis')
+        path_otrkeys = self.config.get('general', 'folder_trash_otrkeys')
+        path_avis = self.config.get('general', 'folder_trash_avis')
                     
         files = [join(path_otrkeys, f) for f in os.listdir(path_otrkeys) if f.endswith('.otrkey') and self.search(f)]
         files += [join(path_avis, f) for f in os.listdir(path_avis) if self.cut_video.match(f) and self.search(f)]
@@ -306,7 +349,7 @@ class App:
     def __section_archive(self):
         text = "Diese Dateien wurden ins Archiv verschoben."
 
-        path = self.config.get('folder_archive')
+        path = self.config.get('general', 'folder_archive')
         
         self.__tree(None, path)        
         
@@ -341,7 +384,7 @@ class App:
         """ Gibt den nach dem angegebenen Schema umbenannten Dateinamen zurück. Wird `schema` leer gelassen, so wird das eingestellte Schema verwendet. """
     
         if schema == "":
-            schema = self.config.get('rename_schema')        
+            schema = self.config.get('general', 'rename_schema')        
         
         if self.uncut_video.match(filename):           
             
@@ -425,7 +468,7 @@ class App:
          
         # archive 
         files = []       
-        for root, dirs, wfiles in os.walk(self.config.get('folder_archive')):
+        for root, dirs, wfiles in os.walk(self.config.get('general', 'folder_archive')):
             for f in wfiles:                
                 if self.cut_video.match(f) and self.search(f):
                     files += [join(root, f)]
@@ -516,10 +559,10 @@ class App:
             action.do(filenames)
     
         elif chosen_action == Action.RESTORE: 
-            action.do(filenames, self.config.get('folder_new_otrkeys'), self.config.get('folder_uncut_avis'), self.config.get('folder_cut_avis'), self.uncut_video)
+            action.do(filenames, self.config.get('general', 'folder_new_otrkeys'), self.config.get('general', 'folder_uncut_avis'), self.config.get('general', 'folder_cut_avis'), self.uncut_video)
     
         elif chosen_action == Action.DELETE:
-            action.do(filenames, self.config.get('folder_trash_otrkeys'), self.config.get('folder_trash_avis'))      
+            action.do(filenames, self.config.get('general', 'folder_trash_otrkeys'), self.config.get('general', 'folder_trash_avis'))      
 
         elif chosen_action == Action.PLAN_REMOVE: 
             action.do(broadcasts, self.planned_broadcasts) 
@@ -534,14 +577,14 @@ class App:
             action.do(broadcasts[0], self.planned_broadcasts)       
             
         elif chosen_action == Action.PLAN_RSS:
-            action.do(self.planned_broadcasts, self.config.get('email'), self.config.get('password')) 
+            action.do(self.planned_broadcasts, self.config.get('general', 'email'), self.config.get('general', 'password')) 
     
         elif chosen_action == Action.ARCHIVE: 
-            action.do(filenames, self.config.get('folder_archive'))
+            action.do(filenames, self.config.get('general', 'folder_archive'))
      
         elif chosen_action == Action.NEW_FOLDER:
             if len(filenames) == 0:
-                action.do(self.config.get('folder_archive'))
+                action.do(self.config.get('general', 'folder_archive'))
             else:
                 action.do(filenames[0])
         
@@ -559,8 +602,8 @@ class App:
         subprocess.Popen(['xdg-open', filename])
     
     def __show(self, cuts, video_filename, edl_subtitles_cb):        
-        f_edl = open(join(self.config.get('folder_new_otrkeys'), ".tmp.edl"), "w")
-        f_sub = open(join(self.config.get('folder_new_otrkeys'), ".tmp.sub"), "w")    
+        f_edl = open(join(self.config.get('general', 'folder_new_otrkeys'), ".tmp.edl"), "w")
+        f_sub = open(join(self.config.get('general', 'folder_new_otrkeys'), ".tmp.sub"), "w")    
         
         # get cuts in seconds
         
@@ -569,10 +612,10 @@ class App:
         f_edl.close()
         f_sub.close()
         
-        f_edl = join(self.config.get('folder_new_otrkeys'), ".tmp.edl")
-        f_sub = join(self.config.get('folder_new_otrkeys'), ".tmp.sub")
+        f_edl = join(self.config.get('general', 'folder_new_otrkeys'), ".tmp.edl")
+        f_sub = join(self.config.get('general', 'folder_new_otrkeys'), ".tmp.sub")
             
-        p = subprocess.Popen([self.config.get('mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
+        p = subprocess.Popen([self.config.get('general', 'mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
        
         # wait
         while p.poll() == None:
@@ -667,29 +710,26 @@ class App:
     def run(self):
         """ #FIXME """
         
-        self.__gui.main_window.show()      
-        
+        self.__gui.main_window.show()        
 
-        if self.config.get('folder_new_otrkeys') == "":      
+        if self.config.get('general', 'folder_new_otrkeys') == "":      
             self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
             self.__gui.preferences_window.show()
                
         self.__gui.run()
         
         # write to config
-        self.config.set('planned_items', self.planned_broadcasts.get_config())               
-        self.config.set('enabled_plugins', self.plugin_system.get_enabled_config())
-        
+        self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())               
+        enabled, config = self.plugin_system.get_config()
+        self.config.set('plugins', 'enabled', enabled)
+        self.config.set('plugins', 'config', config)
 
         maximized = str(int(self.__gui.main_window.maximized))
         width = str(self.__gui.main_window.size[0])
         height = str(self.__gui.main_window.size[1])
         
         settings = ','.join([maximized, width, height])
-        self.config.set('window_settings', settings)
-        
-        # save plugins' configuration
-        self.plugin_system.save_config()
+        self.config.set('general', 'window_settings', settings)
  
 if __name__ == '__main__':            
     app = App()

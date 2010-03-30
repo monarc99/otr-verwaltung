@@ -15,9 +15,6 @@
 ### END LICENSE
 
 import os, os.path, sys
-import ConfigParser
-
-from otrverwaltung import path
 
 class Plugin:  
     """ Basisklasse für Plugins """
@@ -63,21 +60,14 @@ class Plugin:
                 
 class PluginSystem:
     
-    def __init__(self, app, gui, conf_path, plugin_paths, enabled_plugins=''):
-        self.plugins = {} # name : plugin instance
+    def __init__(self, app, gui, plugin_paths, enabled_plugins, plugins_config):
+        self.plugins = {} # value : plugin instance
         self.enabled_plugins = [plugin for plugin in enabled_plugins.split(':') if plugin] # list of names
-        self.conf_path = conf_path
-       
-        # read config
-        print "[Plugins] Config path: ", conf_path
-        self.parser = ConfigParser.ConfigParser()
-        if os.path.isfile(conf_path):           
-            self.parser.read(conf_path)            
-       
+
         print "[Plugins] Paths to search: ", plugin_paths
                                      
         for path in plugin_paths:                  
-            sys.path.append(path)           
+            sys.path.append(path)
             
             for file in os.listdir(path):
                 plugin_name, extension = os.path.splitext(file)
@@ -91,10 +81,8 @@ class PluginSystem:
                     
                     self.plugins[plugin_name] = getattr(plugin_module, plugin_name)(app, gui, os.path.dirname(plugin_module.__file__))
                     
-                    config = {}
-                    if self.parser.has_section(plugin_name):
-                        for key, value in self.parser.items(plugin_name):
-                            self.plugins[plugin_name].Config[key] = value
+                    if plugin_name in plugins_config:
+                        self.plugins[plugin_name].Config.update(plugins_config[plugin_name])
                     
                     print "[Plugins] Found: ", plugin_name
                         
@@ -114,18 +102,13 @@ class PluginSystem:
     def disable(self, name):
         self.enabled_plugins.remove(name)
         self.plugins[name].disable()
+           
+    def get_config(self):
+        plugins_config = {}
+        for plugin_name in self.plugins:
+            if self.plugins[plugin_name].Configurable:
+                plugins_config[plugin_name] = self.plugins[plugin_name].Config
     
-    def save_config(self):
-        for plugin_name, plugin in self.plugins.iteritems():
-            if not self.parser.has_section(plugin_name):
-                self.parser.add_section(plugin_name)
-            
-            for option, value in plugin.Config.iteritems():                
-                self.parser.set(plugin_name, option, value)
-                print "[Plugins] Config (%s): set %s to %s" % (plugin_name, option, value)
-                
-        self.parser.write(open(self.conf_path, 'w'))
+        enabled_plugins = ":".join(self.enabled_plugins)
         
-    def get_enabled_config(self):
-        return ":".join(self.enabled_plugins)
-
+        return enabled_plugins, plugins_config

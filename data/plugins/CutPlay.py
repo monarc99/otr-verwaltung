@@ -43,22 +43,22 @@ class CutPlay(Plugin):
     def on_cut_play_clicked(self, widget, data=None):   
         filename = self.gui.main_window.get_selected_filenames()[0]
         
-        error, cutlists = cutlists_management.download_cutlists(filename, self.app.config.get('server'), self.app.config.get('choose_cutlists_by'), self.app.config.get('cutlist_mp4_as_hq')) 
+        error, cutlists = cutlists_management.download_cutlists(filename, self.app.config.get('general', 'server'), self.app.config.get('general', 'choose_cutlists_by'), self.app.config.get('general', 'cutlist_mp4_as_hq')) 
         if error:
             return
             
         cutlist = cutlists_management.get_best_cutlist(cutlists)
-        cutlist.download(self.app.config.get('server'), filename)
+        cutlist.download(self.app.config.get('general', 'server'), filename)
         cutlist.read_cuts()       
        
         # delete cutlist?        
-        if self.app.config.get('delete_cutlists'):
+        if self.app.config.get('general', 'delete_cutlists'):
             fileoperations.remove_file(cutlist.local_filename)  
        
         # make edl
         # http://www.mplayerhq.hu/DOCS/HTML/en/edl.html
         # [Begin Second] [End Second] [0=Skip/1=Mute]
-        edl_filename = os.path.join(self.app.config.get('folder_uncut_avis'), ".tmp.edl")
+        edl_filename = os.path.join(self.app.config.get('general', 'folder_uncut_avis'), ".tmp.edl")
         f = open(edl_filename, "w")
        
         f.write("0 %s 0\n" % (cutlist.cuts_seconds[0][0] - 1))        
@@ -71,7 +71,7 @@ class CutPlay(Plugin):
                 f.write("%s %s 0\n" % (end, (cutlist.cuts_seconds[count+1][0] - 1)))
         f.close()
         
-        p = subprocess.Popen([self.app.config.get('mplayer'), "-edl", edl_filename, filename])                
+        p = subprocess.Popen([self.app.config.get('general', 'mplayer'), "-edl", edl_filename, filename])                
         
         while p.poll() == None:
             time.sleep(1)

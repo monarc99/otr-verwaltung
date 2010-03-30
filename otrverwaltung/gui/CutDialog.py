@@ -196,7 +196,7 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
                         
             cutlist.id = cutlist_id
                                     
-            error = cutlist.download(self.app.config.get('server'), self.filename)
+            error = cutlist.download(self.app.config.get('general', 'server'), self.filename)
 
             if error:
                 self.gui.message_error_box(error)

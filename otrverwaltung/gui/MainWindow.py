@@ -221,7 +221,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.__pix_folder = gtk.gdk.pixbuf_new_from_file(path.get_image_path('folder.png'))
 
     def __setup_widgets(self):        
-        self.builder.get_object('menu_bottom').set_active(self.app.config.get('show_bottom'))
+        self.builder.get_object('menu_bottom').set_active(self.app.config.get('general', 'show_bottom'))
         
         self.builder.get_object('image_status').clear()
         
@@ -569,7 +569,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         entry_search.grab_focus()
     
     def _on_menu_bottom_toggled(self, widget, data=None):
-        self.app.config.set('show_bottom', widget.get_active())
+        self.app.config.set('general', 'show_bottom', widget.get_active())
         self.builder.get_object('box_bottom').props.visible = widget.get_active()
     
     # toolbar actions
