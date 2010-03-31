@@ -15,12 +15,10 @@
 ### END LICENSE
 
 class PlanningItem():
-    def __init__(self, status, title, datetime, station, rss_otrkey=""):
-        self.status = status        
+    def __init__(self, title, datetime, station):
         self.title = title
         self.datetime = datetime
-        self.station = station
-        self.rss_otrkey = rss_otrkey        
+        self.station = station  
 
 class Planning(list):
 
@@ -28,22 +26,21 @@ class Planning(list):
         pass         
         
     def append(self, *data):       
-        self += [PlanningItem(*data)]
-        
-    def get_from_rss(self):
-        return [broadcast for broadcast in self if broadcast.status == 1]            
+        item = PlanningItem(*data)
+        self += [item]
+        return item    
                 
     def read_config(self, config_data):
         for item in config_data.split(';'):                        
             try:
                 values = item.split(',')
                 
-                if len(values) == 3: # compability
-                    values = [0, values[0], values[1], values[2], ""]
+                if len(values) == 5: # compability
+                    values = [values[1], values[2], values[3]]
                 
-                assert len(values) == 5               
+                assert len(values) == 3
                 
-                self.append(int(values[0]), values[1], int(values[2]), values[3], values[4])
+                self.append(values[0], int(values[1]), values[2])
             except AssertionError:
                 print "Assertion failed: ", values
                 continue
@@ -51,6 +48,6 @@ class Planning(list):
     def get_config(self):
         string = ''
         for broadcast in self:
-            string += str(broadcast.status) + ',' + broadcast.title + ',' + str(broadcast.datetime) + ',' + broadcast.station + ',' + broadcast.rss_otrkey + ';'
+            string += "%s,%i,%s;" % (broadcast.title, broadcast.datetime, broadcast.station)
             
         return string

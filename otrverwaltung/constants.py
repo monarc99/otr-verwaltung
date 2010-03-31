@@ -15,8 +15,9 @@
 ### END LICENSE
 
 class Section:
-    """ Die verschiedenen Ansichten """
+    """ Die verschiedenen Ansichten """    
     PLANNING    = 6
+    DOWNLOAD    = 7
     """ Geplante Sendungen"""
     OTRKEY      = 0
     """ Nicht dekodiert """

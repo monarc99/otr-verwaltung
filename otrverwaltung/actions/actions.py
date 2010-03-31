@@ -29,7 +29,6 @@ actions = {
     Action.PLAN_REMOVE  : planning.Remove,
     Action.PLAN_EDIT    : planning.Edit,
     Action.PLAN_SEARCH  : planning.Search,
-    Action.PLAN_RSS     : planning.RSS,
     
     # decode and cut
     Action.DECODEANDCUT : decodeorcut.DecodeOrCut,

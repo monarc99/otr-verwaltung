@@ -185,6 +185,8 @@ class App:
         
         self.planned_broadcasts = Planning()
         self.planned_broadcasts.read_config(self.config.get('general', 'planned_items'))
+        for count, broadcast in enumerate(self.planned_broadcasts):
+            self.__gui.main_window.append_row_planning(self.planned_broadcasts[count])
         
         self.__gui.main_window.broadcasts_badge()                           
        
@@ -248,33 +250,38 @@ class App:
         
         # set toolbar
         self.__gui.main_window.set_toolbar(section)
+        
+        self.section_info = {        
+            Section.PLANNING: ('scrolledwindow_planning', "Diese Aufnahmen wurden geplant." ),
+            Section.DOWNLOAD: ('scrolledwindow_download', "Diese Dateien werden gerade heruntergeladen."),
+            Section.OTRKEY: ('scrolledwindow_files', "Diese Dateien wurden noch nicht dekodiert." ),
+            Section.VIDEO_UNCUT: ('scrolledwindow_files', "Diese Dateien wurden noch nicht geschnitten."),
+            Section.VIDEO_CUT: ('scrolledwindow_files', "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."),
+            Section.ARCHIVE: ('scrolledwindow_files',  "Diese Dateien wurden ins Archiv verschoben."),
+            Section.TRASH: ('scrolledwindow_files', "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden.")
+        }
                 
         self.__gui.main_window.clear_files()
         files = []
-        text = ""
         
-        if section == Section.PLANNING:
-            text = self.__section_planning()
-      
-            self.__gui.main_window.show_planning(True)
-        else:
-            self.__gui.main_window.show_planning(False)
-        
+        treeview, text = self.section_info[section]
+        self.__gui.main_window.show_treeview(treeview)
+                
         if section == Section.OTRKEY:
-            text, files = self.__section_otrkey()
+            files = self.__section_otrkey()
         
         elif section == Section.VIDEO_UNCUT:
-            text, files = self.__section_video_uncut()   
+            files = self.__section_video_uncut()   
 
         elif section == Section.VIDEO_CUT:
-            text, files = self.__section_video_cut()   
+            files = self.__section_video_cut()   
 
         elif section == Section.TRASH:
-            text, files = self.__section_trash()   
+            files = self.__section_trash()   
 
         elif section == Section.ARCHIVE: 
             # returns NO files       
-            text = self.__section_archive()
+            self.__section_archive()
 
         if len(files) > 0: # this is not executed when the section is "Archive"
             if len(files) == 1:
@@ -292,39 +299,25 @@ class App:
         # set message text
         self.__gui.main_window.builder.get_object('labelMessage').set_markup(text)
 
-
-    # helper for different sections
-    def __section_planning(self):
-        text = "Diese Aufnahmen wurden geplant." 
-       
-        for count, broadcast in enumerate(self.planned_broadcasts):
-            if self.search(broadcast.title):
-                self.__gui.main_window.append_row_planning(self.planned_broadcasts[count])
-            
-        return text
-             
+    # helper for different sections   
     def __section_otrkey(self):
-        text = "Diese Dateien wurden noch nicht dekodiert." 
         path = self.config.get('general', 'folder_new_otrkeys')
         
         if path == "":
-            return text, []
+            return []
         
         files = [join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
             
-        return (text, files)
+        return files
          
     def __section_video_uncut(self):
-        text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config.get('general', 'folder_uncut_avis')
         
         files = [join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search(f)]
             
-        return (text, files)
+        return files
         
-    def __section_video_cut(self):
-        text = "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."
-                
+    def __section_video_cut(self):    
         path = self.config.get('general', 'folder_cut_avis')
         
         files = []                
@@ -334,26 +327,21 @@ class App:
                     if self.search(f):
                         files += [join(path, f)]
         
-        return (text, files)
+        return files
         
     def __section_trash(self):
-        text = "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path_otrkeys = self.config.get('general', 'folder_trash_otrkeys')
         path_avis = self.config.get('general', 'folder_trash_avis')
                     
         files = [join(path_otrkeys, f) for f in os.listdir(path_otrkeys) if f.endswith('.otrkey') and self.search(f)]
         files += [join(path_avis, f) for f in os.listdir(path_avis) if self.cut_video.match(f) and self.search(f)]
                 
-        return (text, files)
+        return files
 
     def __section_archive(self):
-        text = "Diese Dateien wurden ins Archiv verschoben."
-
         path = self.config.get('general', 'folder_archive')
         
-        self.__tree(None, path)        
-        
-        return text            
+        self.__tree(None, path)
                  
     # recursive function for archive to add folders and files with a tree structure
     def __tree(self, parent=None, path=None):              
@@ -449,8 +437,7 @@ class App:
         """ #FIXME """
 
         self.__search_text = search.lower()
-
-        items = []        
+   
         # create dict of counts
         counts = {}
 
@@ -458,14 +445,10 @@ class App:
                                 (self.__section_video_uncut, Section.VIDEO_UNCUT),
                                 (self.__section_video_cut, Section.VIDEO_CUT),
                                 (self.__section_trash, Section.TRASH)]:
-            files = []
-            text, items = method()   
+            items = method()   
             count = len(items)
-            if count > 0:
-                counts[section] = "(%s)" % count
-            else:
-                counts[section] = ""
-         
+            counts[section] = "(%s)" % count
+
         # archive 
         files = []       
         for root, dirs, wfiles in os.walk(self.config.get('general', 'folder_archive')):
@@ -474,23 +457,8 @@ class App:
                     files += [join(root, f)]
 
         count = len(files)
-        if count > 0:
-            counts[Section.ARCHIVE] = "(%s)" % count
-        else:
-            counts[Section.ARCHIVE] = ""
+        counts[Section.ARCHIVE] = "(%s)" % count
 
-        # planning
-        items = []
-        for count, broadcast in enumerate(self.planned_broadcasts):
-            if self.search(broadcast.title):
-                items += [count]
-
-        count = len(items)
-        if count > 0:
-            counts[Section.PLANNING] = "(%s)" % count
-        else:
-            counts[Section.PLANNING] = ""
-        
         self.show_section(self.section)                   
         
         return counts
@@ -719,7 +687,7 @@ class App:
         self.__gui.run()
         
         # write to config
-        self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())               
+        self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())            
         enabled, config = self.plugin_system.get_config()
         self.config.set('plugins', 'enabled', enabled)
         self.config.set('plugins', 'config', config)
