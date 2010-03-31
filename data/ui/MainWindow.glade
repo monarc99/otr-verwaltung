@@ -572,6 +572,7 @@
                             <property name="can_focus">True</property>
                             <child>
                               <object class="GtkTreeViewColumn" id="treeviewcolumn_broadcasttitle">
+                                <property name="resizable">True</property>
                                 <property name="title">Sendung</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="cellrenderer_broadcasttitle"/>
@@ -580,6 +581,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="treeviewcolumn_broadcastdatetime">
+                                <property name="resizable">True</property>
                                 <property name="title">Datum/Zeit</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="cellrenderer_broadcastdatetime"/>
@@ -588,6 +590,7 @@
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn" id="treeviewcolumn_broadcaststation">
+                                <property name="resizable">True</property>
                                 <property name="title">Sender</property>
                                 <child>
                                   <object class="GtkCellRendererText" id="cellrenderer_broadcaststation"/>

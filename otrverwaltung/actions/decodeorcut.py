@@ -33,13 +33,14 @@ from otrverwaltung.GeneratorTask import GeneratorTask
 
 class DecodeOrCut(BaseAction):
     
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = True
+        self.__app = app
+        self.config = app.config
         self.__gui = gui
 
-    def do(self, action, filenames, config, rename_by_schema, cut_action=None):
-        self.config = config
-        self.rename_by_schema = rename_by_schema
+    def do(self, action, filenames, cut_action=None):
+        self.rename_by_schema = self.__app.rename_by_schema
         
         decode, cut = False, False            
             

@@ -18,17 +18,19 @@ from otrverwaltung.actions import decodeorcut
 from otrverwaltung.actions import planning
 from otrverwaltung.actions import archive
 from otrverwaltung.actions import files
+from otrverwaltung.actions import download
 
 from otrverwaltung.constants import Action
-    
-# TODO: ein bisschen sinnlos; actions können auch direkt aufgerufen werden, oder?    
-    
+       
 actions = {
     # planning
     Action.PLAN_ADD     : planning.Add,
     Action.PLAN_REMOVE  : planning.Remove,
     Action.PLAN_EDIT    : planning.Edit,
     Action.PLAN_SEARCH  : planning.Search,
+    
+    # download
+    Action.DOWNLOAD_ADD : download.Add,
     
     # decode and cut
     Action.DECODEANDCUT : decodeorcut.DecodeOrCut,
@@ -45,7 +47,7 @@ actions = {
     Action.REAL_DELETE  : files.RealDelete
         }
         
-def get_action(action, gui):
-    action = actions[action](gui)
+def get_action(action, app, gui):
+    action = actions[action](app, gui)
     
     return action

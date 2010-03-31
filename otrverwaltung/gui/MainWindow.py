@@ -80,6 +80,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
             ('plan_remove', 'film_delete.png', "Löschen", Action.PLAN_REMOVE),
             ('plan_edit', 'film_edit.png', "Bearbeiten", Action.PLAN_EDIT),
             ('plan_search', 'film_search.png', "Auf Mirror suchen", Action.PLAN_SEARCH),
+            ('download_add', 'add_download.png', "Download hinzufügen", Action.DOWNLOAD_ADD),
             ]
         
         self.__toolbar_buttons = {}
@@ -98,7 +99,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
              
         self.__sets_of_toolbars = {
             Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],
-            Section.DOWNLOAD:    [],
+            Section.DOWNLOAD:    [ 'download_add' ],
             Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete' ],
             Section.VIDEO_UNCUT: [ 'cut', 'delete', 'archive', ],
             Section.VIDEO_CUT:   [ 'archive', 'delete', 'cut', 'rename' ],
@@ -278,15 +279,9 @@ class MainWindow(gtk.Window, gtk.Buildable):
     
     def get_selected_filenames(self):
         """ Gibt die ausgewählten Dateinamen zurück. """
-        selection = self.builder.get_object('treeview_files').get_selection()
-            
-        def selected_row(model, path, iter, filenames):
-            filenames += [self.builder.get_object('treeview_files').get_model().get_value(iter, self.__FILENAME)]
-        
-        filenames = []        
-        selection.selected_foreach(selected_row, filenames)      
+        model, selected_rows = self.builder.get_object('treeview_files').get_selection().get_selected_rows()
 
-        return filenames
+        return [model.get_value(model.get_iter(row), self.__FILENAME) for row in selected_rows]
         
     def append_row_files(self, parent, filename, size, date, isdir=False):      
         """ Fügt eine neue Datei zu treeview_files hinzu.
@@ -375,19 +370,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
     # treeview_planning
     #
-            
-    def get_selected_broadcasts(self):
-        """ Gibt die ausgewählten geplanten Sendungen zurück. """
-        selection = self.builder.get_object('treeview_planning').get_selection()
-            
-        def selected_row(model, path, iter, broadcasts):
-            broadcasts += [iter]
-        
-        broadcasts = []        
-        selection.selected_foreach(selected_row, broadcasts)      
-
-        return broadcasts
-    
+               
     def __treeview_planning_title(self, column, cell, model, iter, data=None):
         broadcast = model.get_value(iter, 0)
         
@@ -581,10 +564,8 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.builder.get_object('box_bottom').props.visible = widget.get_active()
     
     # toolbar actions
-    def _on_toolbutton_clicked(self, button, action, cut_action=None):        
-        filenames = self.get_selected_filenames()
-        broadcasts = self.get_selected_broadcasts()    
-        self.app.perform_action(action, filenames, broadcasts, cut_action)
+    def _on_toolbutton_clicked(self, button, action, cut_action=None):         
+        self.app.perform_action(action, cut_action)
                   
     # sidebar
     def _on_sidebar_toggled(self, widget, section):

@@ -25,14 +25,15 @@ import hashlib
 from otrverwaltung.actions.baseaction import BaseAction
 
 class Add(BaseAction):    
-    def __init__(self, gui):
-        self.update_list = True
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
         self.__gui = gui
 
-    def do(self, planned_broadcasts):
+    def do(self):
         if self.__gui.dialog_planning.run_new() == RESPONSE_OK:           
             broadcast, datetime, station = self.__gui.dialog_planning.get_values()
-            item = planned_broadcasts.append(broadcast, datetime, station)
+            item = self.__app.planned_broadcasts.append(broadcast, datetime, station)
 
             self.__gui.main_window.append_row_planning(item)
             self.__gui.main_window.broadcasts_badge()
@@ -40,13 +41,13 @@ class Add(BaseAction):
         self.__gui.dialog_planning.hide()
         
 class Edit(BaseAction):    
-    def __init__(self, gui):
-        self.update_list = True
+    def __init__(self, app, gui):
+        self.update_list = False
         self.__gui = gui
 
-    def do(self, broadcast_iter, planned_broadcasts):        
+    def do(self, broadcast_iters):
         model = self.__gui.main_window.builder.get_object('treeview_planning').get_model()
-        broadcast = model.get_value(broadcast_iter, 0)
+        broadcast = model.get_value(broadcast_iters[0], 0)
             
         if self.__gui.dialog_planning.run_edit(broadcast) == RESPONSE_OK:
             title, datetime, station = self.__gui.dialog_planning.get_values()
@@ -59,11 +60,12 @@ class Edit(BaseAction):
         self.__gui.dialog_planning.hide()
 
 class Remove(BaseAction):    
-    def __init__(self, gui):
-        self.update_list = True
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
         self.__gui = gui
 
-    def do(self, broadcast_iters, planned_broadcasts):
+    def do(self, broadcast_iters):
         if len(broadcast_iters) == 1:
             message = "Es ist eine Sendung ausgewählt. Soll diese Sendung "
         else:
@@ -78,18 +80,18 @@ class Remove(BaseAction):
             for row_reference in row_references:
                 iter = model.get_iter(row_reference.get_path())
                 # remove from list
-                planned_broadcasts.remove(model.get_value(iter, 0))
+                self.__app.planned_broadcasts.remove(model.get_value(iter, 0))
                 # remove treeview row
                 del model[iter]
             
             self.__gui.main_window.broadcasts_badge()            
             
 class Search(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = False
         self.__gui = gui
         
-    def do(self, broadcast_iters, planned_broadcasts):
+    def do(self, broadcast_iters):
         model = self.__gui.main_window.builder.get_object('treeview_planning').get_model()
         for broadcast_iter in broadcast_iters:
             broadcast = model.get_value(broadcast_iter, 0)

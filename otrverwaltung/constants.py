@@ -32,7 +32,8 @@ class Action:
     PLAN_REMOVE     = 12
     PLAN_EDIT       = 13
     PLAN_SEARCH     = 14
-    PLAN_RSS        = 15
+    # download
+    DOWNLOAD_ADD    = 16    
     # decode and cut
     DECODE          = 0
     DECODEANDCUT    = 1

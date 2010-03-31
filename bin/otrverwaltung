@@ -484,85 +484,62 @@ class App:
     ### Actions
     ###        
     
-    def perform_action(self, chosen_action, filenames=None, broadcasts=None, cut_action=None):
-        """ #FIXME """
-       
-        if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD, Action.PLAN_RSS]:
-            if len(broadcasts) == 0 and not chosen_action in [Action.PLAN_ADD, Action.PLAN_RSS]:
-                if len(self.__gui.main_window.builder.get_object('treeview_planning').get_model()) > 0:
-                    if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
-                        broadcasts = []                    
+    def perform_action(self, chosen_action, cut_action=None):
+        
+        action = actions.get_action(chosen_action, self, self.__gui)        
+        
+        if chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE]:
+            model, selected_rows = self.__gui.main_window.builder.get_object('treeview_planning').get_selection().get_selected_rows()
+            
+            if len(model) == 0: return            
+            
+            if len(selected_rows) == 0:            
+                if chosen_action != Action.PLAN_EDIT and self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
+                    selected_rows = [row.path for row in selected_rows]
+                    for row in model:
+                        selected_rows.append(row.path)
+                else:
+                    return
+           
+            selected_rows = [model.get_iter(path) for path in selected_rows]
+            self.locked = True
+            action.do(selected_rows)
+                     
+        elif chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT, Action.RENAME, Action.REAL_DELETE, Action.RESTORE, Action.DELETE, Action.ARCHIVE]:
+            filenames = self.__gui.main_window.get_selected_filenames()
 
-                        def foreach(model, path, iter, broadcasts):
-                            broadcasts += [iter]
-
-                        self.__gui.main_window.builder.get_object('treeview_planning').get_model().foreach(foreach, broadcasts)
-                    else:
-                        return
+            if len(filenames) == 0:
+                model = self.__gui.main_window.builder.get_object('treeview_files').get_model()
+    
+                if len(model) != 0 and self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
+                    filenames = [row[0] for row in model]
                 else:
                     return
 
-        elif filenames != None:
-            if len(filenames) == 0 and chosen_action != Action.NEW_FOLDER:
-                if len(self.__gui.main_window.builder.get_object('treeview_files').get_model()) > 0:
-                    if self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
-                        filenames = [row[0] for row in self.__gui.main_window.builder.get_object('treeview_files').get_model()]
-                    else:
-                        return
-                else:
-                    return          
+            self.locked = True
+            if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:
+                action.do(chosen_action, filenames, cut_action)
+            else:
+                action.do(filenames)
 
-        action = actions.get_action(chosen_action, self.__gui)
-
-        self.locked = True
-               
-        # different actions:
-        if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:             
-            action.do(chosen_action, filenames, self.config, self.rename_by_schema, cut_action)
-    
-        elif chosen_action == Action.RENAME: 
-            action.do(filenames)
-    
-        elif chosen_action == Action.REAL_DELETE: 
-            action.do(filenames)
-    
-        elif chosen_action == Action.RESTORE: 
-            action.do(filenames, self.config.get('general', 'folder_new_otrkeys'), self.config.get('general', 'folder_uncut_avis'), self.config.get('general', 'folder_cut_avis'), self.uncut_video)
-    
-        elif chosen_action == Action.DELETE:
-            action.do(filenames, self.config.get('general', 'folder_trash_otrkeys'), self.config.get('general', 'folder_trash_avis'))      
-
-        elif chosen_action == Action.PLAN_REMOVE: 
-            action.do(broadcasts, self.planned_broadcasts) 
-    
-        elif chosen_action == Action.PLAN_SEARCH: 
-            action.do(broadcasts, self.planned_broadcasts)            
-    
-        elif chosen_action == Action.PLAN_ADD: 
-            action.do(self.planned_broadcasts)
-    
-        elif chosen_action == Action.PLAN_EDIT: 
-            action.do(broadcasts[0], self.planned_broadcasts)       
-            
-        elif chosen_action == Action.PLAN_RSS:
-            action.do(self.planned_broadcasts, self.config.get('general', 'email'), self.config.get('general', 'password')) 
-    
-        elif chosen_action == Action.ARCHIVE: 
-            action.do(filenames, self.config.get('general', 'folder_archive'))
-     
         elif chosen_action == Action.NEW_FOLDER:
+            filenames = self.__gui.main_window.get_selected_filenames()
+            self.locked = True
             if len(filenames) == 0:
                 action.do(self.config.get('general', 'folder_archive'))
             else:
                 action.do(filenames[0])
-        
+
+        else:
+            self.locked = True
+            action.do()
+
         self.locked = False
         
         # update view?
         if action.update_list:            
             self.__gui.main_window.do_search(self.__search_text)
-            self.show_section(self.section)
-            
+            self.show_section(self.section)            
     
     def play_file(self, filename):
         """ #FIXME """        
