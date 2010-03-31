@@ -4,17 +4,20 @@
 ### END LICENSE
 
 import gtk
-import urllib
+import urllib, urllib2
 import re
+import subprocess
+import base64
 
 from otrverwaltung.GeneratorTask import GeneratorTask
+from otrverwaltung import cutlists
 from otrverwaltung import path
 
 class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     __gtype_name__ = "AddDownloadDialog"
 
     def __init__(self):
-        pass
+        self.mode = 0
 
     def do_parser_finished(self, builder):
         self.builder = builder
@@ -40,6 +43,38 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             length = "%s min" % length
             
             yield [filename, name, station, date, time, format, length, int(mirrors)]
+    
+    def gather_information(self):
+        without_otrkey = self.filename[:-7]
+        
+        # search for torrents
+        email = self.config.get('general', 'email')
+        password = base64.b64decode(self.config.get('general', 'password')) 
+        params = urllib.urlencode({'email': email, 'pass': password, 'btn_login': 'Login'})
+        website = urllib.urlopen("http://www.onlinetvrecorder.com/index.php", params)
+        sessid = website.info().getheader('Set-Cookie')
+        sessid = sessid[sessid.index("=") + 1:sessid.index(";")]
+
+        if not "Dekodierungen" in website.read(): 
+            print "FEHLER: Login nicht erfolgreich."
+        else:
+            params = urllib.urlencode({'aktion': 'tracker', 'search': without_otrkey})
+            request = urllib2.Request("http://www.onlinetvrecorder.com/index.php?%s" % params, headers={ 'Cookie': "PHPSESSID=" + sessid})
+            response = urllib2.urlopen(request)
+            
+            result = re.findall(r"<td valign=top bgcolor='' nowrap>([0-9]*)</td>", response.read())
+            
+            if result:       
+                yield 'torrent', int(result[0]), int(result[1])
+            else:
+                yield 'torrent', 0, 0
+                
+        # search for cutlists
+        error, cutlists_found = cutlists.download_cutlists(without_otrkey, self.config.get('general', 'server'), 1, False)
+        if error:
+            print "Cutlist-Error: ", error
+        else:   
+            yield 'cutlist', cutlists_found
                 
     # signals #
     def treeview_programs_selection_changed(self, treeselection, data=None):
@@ -79,27 +114,64 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     def on_treeview_programs_row_activated(self, treeview, path, view_column, data=None):
         iter = treeview.get_model().get_iter(path)
         self.forward(iter)
+    
+    def on_checkbutton_cut_toggled(self, widget, data=None):
+        if widget.get_active():
+            self.builder.get_object('checkbutton_decode').set_active(True)
+    
+    def on_radiobutton_torrent_toggled(self, widget, data=None):
+        self.builder.get_object('box_normal').set_sensitive(not widget.get_active())
+    
+    def on_button_mirror_search_clicked(self, widget, data=None):
+        subprocess.call(["xdg-open", "http://otrkeyfinder.com/?search=%s" % self.filename])
+    
+    def on_button_cancel_clicked(self, widget, data=None):
+        self.response(-6)
         
     def on_button_ok_clicked(self, widget, data=None):
-        selection = self.builder.get_object('treeview_programs').get_selection()        
-        model, iter = selection.get_selected()
-        self.forward(iter)
+        if self.mode == 0: # search for files
+            selection = self.builder.get_object('treeview_programs').get_selection()        
+            model, iter = selection.get_selected()
+            self.forward(iter)
+
+        else: # actual download
+            self.response(-5)
         
     def forward(self, iter):
-        filename, mirrors = self.builder.get_object('liststore_programs').get(iter, 0, 7)
+        self.filename, mirrors = self.builder.get_object('liststore_programs').get(iter, 0, 7)        
         
         self.builder.get_object('scrolledwindow_programs').hide()
         self.builder.get_object('vbox_searching').show()
         self.builder.get_object('label_status').set_markup("")
-        self.builder.get_object('button_search').set_sensitive(False)
+        self.builder.get_object('hbox_search_controls').set_sensitive(False)
+        self.builder.get_object('button_ok').set_sensitive(False)
         self.builder.get_object('label_searching_status').set_markup("<b>Informationen werden gesammelt...</b>")        
-        print filename
-        print mirrors
+        
+        def callback(value, *args):
+            if value == 'torrent':
+                self.builder.get_object('label_torrent').set_markup("Download via Torrent (<b>%i Seeder, %i Leecher</b>)" % args)
+            elif value == 'cutlist':
+                if len(args[0]) == 0:
+                    self.builder.get_object('checkbutton_cut').set_sensitive(False)
+                else:
+                    for cutlist in args[0]:
+                        print cutlist
+        
+        def stop():
+            self.builder.get_object('vbox_search').hide()
+            self.builder.get_object('vbox_download').show()
+            self.builder.get_object('button_ok').set_label("_Download")
+            self.builder.get_object('button_ok').set_sensitive(True)
+            self.builder.get_object('label_download_status').set_markup("Es soll die Datei\n<b>%s</b>\nheruntergeladen werden." % self.filename)
+            self.builder.get_object('button_mirror_search').set_label("Auf %i Mirrors suchen" % mirrors)
+        
+        GeneratorTask(self.gather_information, callback, stop).start()        
 
-def NewAddDownloadDialog():
+def NewAddDownloadDialog(config):
     glade_filename = path.getdatapath('ui', 'AddDownloadDialog.glade')
     
     builder = gtk.Builder()   
     builder.add_from_file(glade_filename)
     dialog = builder.get_object("add_download_dialog")
+    dialog.config = config
     return dialog

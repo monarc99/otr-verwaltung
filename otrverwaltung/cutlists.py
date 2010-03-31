@@ -244,10 +244,11 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
             filename            - movie filename
             server              - cutlist server
             choose_cutlists_by  - 0 by size, 1 by name
+            cutlist_mp4_as_hq   - 
             error_cb            - callback: an error occurs (message)
             cutlist_found_cb    - callback: a cutlist is found (Cutlist instance)
         
-        Returns: a list of Cutlist instances    
+        Returns: error, a list of Cutlist instances    
     """
 
     if choose_cutlists_by == 0: # by size
@@ -257,14 +258,17 @@ def download_cutlists(filename, server, choose_cutlists_by, cutlist_mp4_as_hq, e
                 "%sgetxml.php?ofsb=%s" % (server, str((size+2*1024**3)%(4*1024**3)- 2*1024**3))]
     
     else: # by name
-        root, extension = os.path.splitext(os.path.basename(filename))
+        if "/" in filename:
+            root, extension = os.path.splitext(os.path.basename(filename))
+        else:
+            root = filename
        
         if cutlist_mp4_as_hq and extension == '.mp4':
             root += ".HQ"
     
         urls = ["%sgetxml.php?name=%s" % (server, root)]
 
-    cutlists = []                      
+    cutlists = []
     
     for url in urls:
         print "[Cutlists] Download by : %s" % url

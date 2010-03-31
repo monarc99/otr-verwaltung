@@ -22,10 +22,12 @@ from otrverwaltung.actions.baseaction import BaseAction
 class Add(BaseAction):
     def __init__(self, app, gui):
         self.update_list = False
+        self.__app = app
         self.__gui = gui
 
     def do(self):
-        dialog = AddDownloadDialog.NewAddDownloadDialog()
+        dialog = AddDownloadDialog.NewAddDownloadDialog(self.__app.config)
+        
         if dialog.run() == gtk.RESPONSE_OK:
             dialog.destroy()
         else:
