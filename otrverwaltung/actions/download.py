@@ -14,6 +14,9 @@
 #with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
+import gtk
+from otrverwaltung.gui import AddDownloadDialog
+
 from otrverwaltung.actions.baseaction import BaseAction
 
 class Add(BaseAction):
@@ -22,4 +25,12 @@ class Add(BaseAction):
         self.__gui = gui
 
     def do(self):
-        print "add download"
+        dialog = AddDownloadDialog.NewAddDownloadDialog()
+        if dialog.run() == gtk.RESPONSE_OK:
+            dialog.destroy()
+        else:
+            dialog.destroy()
+            return
+            
+                
+
