@@ -372,14 +372,32 @@ heruntergeladen werden.</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkCheckButton" id="checkbutton_cut">
-                            <property name="label" translatable="yes">Geschnitten downloaden</property>
+                          <object class="GtkHBox" id="hbox4">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="xalign">0.54000002145767212</property>
-                            <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_checkbutton_cut_toggled"/>
+                            <child>
+                              <object class="GtkCheckButton" id="checkbutton_cut">
+                                <property name="label" translatable="yes">Geschnitten downloaden</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="xalign">0.54000002145767212</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="on_checkbutton_cut_toggled"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_error">
+                                <property name="visible">True</property>
+                                <property name="xalign">1</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -402,18 +420,14 @@ heruntergeladen werden.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScrolledWindow" id="scrolledwindow1">
+                              <object class="GtkScrolledWindow" id="scrolledwindow_cutlists">
                                 <property name="height_request">100</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hscrollbar_policy">automatic</property>
                                 <property name="vscrollbar_policy">automatic</property>
                                 <child>
-                                  <object class="GtkTreeView" id="treeview1">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="model">liststore1</property>
-                                  </object>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
@@ -447,7 +461,7 @@ heruntergeladen werden.</property>
                       <object class="GtkLabel" id="label_torrent">
                         <property name="visible">True</property>
                         <property name="ypad">4</property>
-                        <property name="label" translatable="yes">Download via Torrent (&lt;b&gt;OTR-Daten nicht korrekt!&lt;/b&gt;)</property>
+                        <property name="label" translatable="yes">Download via Torrent (&lt;b&gt;Fehler&lt;/b&gt;)</property>
                         <property name="use_markup">True</property>
                       </object>
                     </child>

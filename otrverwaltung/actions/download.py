@@ -16,6 +16,7 @@
 
 import gtk
 from otrverwaltung.gui import AddDownloadDialog
+import base64
 
 from otrverwaltung.actions.baseaction import BaseAction
 
@@ -26,9 +27,25 @@ class Add(BaseAction):
         self.__gui = gui
 
     def do(self):
-        dialog = AddDownloadDialog.NewAddDownloadDialog(self.__app.config)
+        dialog = AddDownloadDialog.NewAddDownloadDialog(self.__gui, self.__app.config)
         
-        if dialog.run() == gtk.RESPONSE_OK:
+        if dialog.run() == gtk.RESPONSE_OK:           
+            options = dialog.get_download_options()
+            
+            if options[0] == 'torrent':
+                print "xdg-open torrent-location"
+            else: # normal
+                email = self.__app.config.get('general', 'email')
+                password = base64.b64decode(self.__app.config.get('general', 'password')) 
+                
+                if options[1] == 'decode':
+                    print "exec: ./otrdecoder -n -i %s -o %s -e %s -p %s" % (options[2], self.__app.config.get('general', 'folder_uncut_avis'), email, password)
+                elif options[1] == 'decodeandcut':
+                    print "download (link: %s) and decode and cut with cutlist #%s by qotr" % (options[2], options[3])
+                    print "exec: ./otrdecoder -n -i %s -o %s -e %s -p %s -C %sgetfile.php?id=%s" % (options[2], self.__app.config.get('general', 'folder_cut_avis'), email, password, self.__app.config.get('general', 'server') , options[3])
+                else:                
+                    print "exec: wget %s" % options[1]
+            
             dialog.destroy()
         else:
             dialog.destroy()
