@@ -71,10 +71,11 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         self.forward_clicks = 0
             
         self.show_all()
-                
-        self.combobox_archive.fill(archive_directory)      
-        self.combobox_archive.set_active(0)
-        self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
+        
+        if action != Action.DECODE:        
+            self.combobox_archive.fill(archive_directory)
+            self.combobox_archive.set_active(0)
+            self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
                 
         # basic show/hide
         widgets_hidden = []
@@ -157,7 +158,8 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
                         
             # set visibility
             self.builder.get_object('button_play').props.visible = cut_ok
-            self.builder.get_object('button_play_cut').props.visible = cut_ok           
+            self.builder.get_object('button_play_cut').props.visible = cut_ok
+            self.builder.get_object('box_archive').props.visible = cut_ok                      
             
             self.builder.get_object('check_delete_uncut').props.visible = cut_ok            
             if cut_ok:
