@@ -37,7 +37,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     
     def get_download_options(self):
         if self.builder.get_object('radiobutton_torrent').get_active():
-            return ('torrent',)
+            return ('torrent', self.user_id)
         else:
             link = self.builder.get_object('entry_link').get_text()
             
@@ -86,11 +86,13 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             else:
                 params = urllib.urlencode({'aktion': 'tracker', 'search': without_otrkey})
                 request = urllib2.Request("http://www.onlinetvrecorder.com/index.php?%s" % params, headers={ 'Cookie': "PHPSESSID=" + sessid})
-                response = urllib2.urlopen(request)
-                
-                result = re.findall(r"<td valign=top bgcolor='' nowrap>([0-9]*)</td>", response.read())
-                
-                if result:       
+                response = urllib2.urlopen(request).read()
+
+                result = re.findall(r"<td valign=top bgcolor='' nowrap>([0-9]*)</td>", response)
+
+                self.user_id = re.findall(r'"userid","([0-9]*)"', response)[0]
+                            
+                if result:                           
                     yield 'torrent', int(result[0]), int(result[1])
                 else:
                     yield 'torrent', 0, 0
@@ -204,8 +206,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
         
         def callback(value, *args):
             # torrent
-            if value == 'torrent_error':
-                print args[0]
+            if value == 'torrent_error':                
                 self.builder.get_object('label_torrent').set_markup("Download via Torrent (<b>%s</b>)" % args[0])
             elif value == 'torrent':
                 self.builder.get_object('label_torrent').set_markup("Download via Torrent (<b>%i Seeder, %i Leecher</b>)" % args)

@@ -17,6 +17,8 @@
 import gtk
 from otrverwaltung.gui import AddDownloadDialog
 import base64
+import urllib
+import hashlib
 
 from otrverwaltung.actions.baseaction import BaseAction
 
@@ -32,19 +34,41 @@ class Add(BaseAction):
         if dialog.run() == gtk.RESPONSE_OK:           
             options = dialog.get_download_options()
             
+            password = base64.b64decode(self.__app.config.get('general', 'password')) 
+            
             if options[0] == 'torrent':
-                print "xdg-open torrent-location"
+                user_id = options[1]
+                hash = hashlib.md5(password).hexdigest()
+                
+                url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
+                # TODO: Error handling
+                urllib.urlretrieve(url, "/tmp/torrent")
+                
+                command = ['xdg-open', '/tmp/torrent' ]
+            
             else: # normal
-                email = self.__app.config.get('general', 'email')
-                password = base64.b64decode(self.__app.config.get('general', 'password')) 
+                email = self.__app.config.get('general', 'email')                
+                cache_dir = self.__app.config.get('general', 'folder_trash_otrkeys')
+                decoder = self.__app.config.get('general', 'decoder')
                 
                 if options[1] == 'decode':
-                    print "exec: ./otrdecoder -n -i %s -o %s -e %s -p %s" % (options[2], self.__app.config.get('general', 'folder_uncut_avis'), email, password)
+                    output = self.__app.config.get('general', 'folder_uncut_avis')
+                    
+                    command = [decoder, "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password]
+                    
                 elif options[1] == 'decodeandcut':
-                    print "download (link: %s) and decode and cut with cutlist #%s by qotr" % (options[2], options[3])
-                    print "exec: ./otrdecoder -n -i %s -o %s -e %s -p %s -C %sgetfile.php?id=%s" % (options[2], self.__app.config.get('general', 'folder_cut_avis'), email, password, self.__app.config.get('general', 'server') , options[3])
+                    server = self.__app.config.get('general', 'server')
+                    output = self.__app.config.get('general', 'folder_cut_avis')
+                    cutlist_link = "%sgetfile.php?id=%s" % (server , options[3])
+                                    
+                    command = [decoder, "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password, "-C", cutlist_link]
                 else:                
-                    print "exec: wget %s" % options[1]
+                    output = self.__app.config.get('general', 'folder_new_otrkeys')
+                    command = ["wget", "-c", "-P", output, options[1]]
+            
+            print
+            print " ".join(command)
+            print
             
             dialog.destroy()
         else:
