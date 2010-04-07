@@ -104,15 +104,10 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
             string = "Nicht durchgeführt"
             
         if message:
-            if "No connection to server" in message:
-                message = "Keine Verbindung zum Server"
-            elif "Output file already exists" in message:
-                message = "Ausgabedatei existiert bereits"
-            
             if status == Status.ERROR:
                 message = "<b>%s</b>" % message
             
-            string += ": %s" % unicode(message, "iso-8859-15")
+            string += ": %s" % message
                 
         return string                
                 
