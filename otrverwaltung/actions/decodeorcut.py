@@ -541,7 +541,7 @@ class DecodeOrCut(BaseAction):
         try:
             f = open(filename, 'r')
         except IOError:
-            return None, "Konnte %s nicht finden, um Cutlist zu erstellen." % filename
+            return None, "Die VirtualDub-Projektdatei konnte nicht gelesen werden.\nWurde das Projekt in VirtualDub nicht gespeichert?\n(Datei: %s)." % filename
 
         cuts_frames = [] # (start, duration)
         count = 0

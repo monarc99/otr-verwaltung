@@ -67,6 +67,10 @@ class PluginSystem:
         print "[Plugins] Paths to search: ", plugin_paths
                                      
         for path in plugin_paths:                  
+            if not os.path.isdir(path):
+                print "[Plugins] %s is not a directory." % path
+                continue
+
             sys.path.append(path)
             
             for file in os.listdir(path):
