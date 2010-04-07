@@ -71,10 +71,11 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         self.forward_clicks = 0
             
         self.show_all()
-                
-        self.combobox_archive.fill(archive_directory)      
-        self.combobox_archive.set_active(0)
-        self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
+       
+        if self.action != Action.DECODE:         
+            self.combobox_archive.fill(archive_directory)      
+            self.combobox_archive.set_active(0)
+            self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
                 
         # basic show/hide
         widgets_hidden = []
