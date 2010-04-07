@@ -42,8 +42,6 @@ Beste Einstellungen:
 
 .. note:: Die genauen Programmnamen können variieren!
 
-.. note:: Wird avidemux2_cli benutzt, **müssen** :ref:`die Abfragen von Avidemux abgeschaltet werden <nachfragen_avidemux>`.
-
 Funktionen
 ##########
 
