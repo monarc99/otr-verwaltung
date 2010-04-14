@@ -91,9 +91,9 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
             cutlist.local_filename = self.builder.get_object('label_cutlist').get_text()
             
         else:
-            cutlist.id = self.treeview_cutlists.get_selected_id()
+            cutlist = self.treeview_cutlists.get_selected()
             
-            if not cutlist.id:
+            if not cutlist:
                 self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
                 return
                                     
@@ -118,17 +118,14 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
             self.response(Cut_action.BEST_CUTLIST)
 
         elif self.builder.get_object('radio_choose_cutlist').get_active() == True:
-            cutlist_id = self.treeview_cutlists.get_selected_id()
+            cutlist = self.treeview_cutlists.get_selected()
                 
-            if not cutlist_id:
+            if not cutlist:
                 self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
                 return
         
-            for cutlist in self.cutlists:
-                if cutlist.id == cutlist_id:
-                    self.chosen_cutlist = cutlist
-                    self.response(Cut_action.CHOOSE_CUTLIST)
-                    return
+            self.chosen_cutlist = cutlist
+            self.response(Cut_action.CHOOSE_CUTLIST)            
             
         elif self.builder.get_object('radio_local_cutlist').get_active() == True:
             self.response(Cut_action.LOCAL_CUTLIST)

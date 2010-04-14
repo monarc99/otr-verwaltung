@@ -71,13 +71,13 @@ class CutlistsTreeView(gtk.TreeView):
             col.set_resizable(True)        
             self.append_column(col)
        
-    def get_selected_id(self):
+    def get_selected(self):
         model, selected_row = self.get_selection().get_selected()
         if selected_row:
-            return model.get_value(selected_row, 0).id
+            return model.get_value(selected_row, 0)
         else:
-            return None
-               
+            return None       
+                      
     def _treeview_standard(self, column, cell, model, iter, attribute_name):
         cutlist = model.get_value(iter, 0)
         cell.set_property('text', getattr(cutlist, attribute_name))

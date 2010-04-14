@@ -42,7 +42,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             link = self.builder.get_object('entry_link').get_text()
             
             if self.builder.get_object('checkbutton_cut').get_active():
-                cutlist_id = self.cutlists_treeview.get_selected_id()
+                cutlist_id = self.cutlists_treeview.get_selected().id
                 return ('normal', 'decodeandcut', link, cutlist_id)
             
             if self.builder.get_object('checkbutton_decode').get_active():
@@ -186,7 +186,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
                     self.gui.message_error_box("Es ist kein Download-Link eingetragen!")
                     return
                 if self.builder.get_object('checkbutton_cut').get_active():
-                    if not self.cutlists_treeview.get_selected_id():
+                    if not self.cutlists_treeview.get_selected():
                         self.gui.message_error_box("Es ist keine Cutlist ausgewählt!")
                         return 
                         
