@@ -713,7 +713,7 @@ class DecodeOrCut(BaseAction):
         
         # start avidemux: 
         try:
-            avidemux = subprocess.Popen([config_value, "--force-smart", "--run", "tmp.js", "--quit"], stderr=subprocess.PIPE)
+            avidemux = subprocess.Popen([config_value, "--nogui", "--force-smart", "--run", "tmp.js", "--quit"], stderr=subprocess.PIPE)
         except OSError:
             return None, "Avidemux konnte nicht aufgerufen werden: " + config_value
         
