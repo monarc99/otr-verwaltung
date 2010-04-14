@@ -185,8 +185,8 @@ class App:
         
         self.planned_broadcasts = Planning()
         self.planned_broadcasts.read_config(self.config.get('general', 'planned_items'))
-        for count, broadcast in enumerate(self.planned_broadcasts):
-            self.__gui.main_window.append_row_planning(self.planned_broadcasts[count])
+        for broadcast in self.planned_broadcasts:
+            self.__gui.main_window.append_row_planning(broadcast)
         
         self.__gui.main_window.broadcasts_badge()                           
        

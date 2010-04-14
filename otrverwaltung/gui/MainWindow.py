@@ -620,15 +620,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
         selection.unselect_all()
         now = time.time()
                 
-        def foreach(model, path, iter, data=None):
-            index = model.get_value(iter, 0)
-            stamp = self.app.planned_broadcasts[index].datetime
-
-            if stamp < now:
-                selection.select_iter(iter)
-
-        self.builder.get_object('treeview_planning').get_model().foreach(foreach)
-        
+        for row in self.builder.get_object('treeview_planning').get_model():
+            if row[0].datetime < now:
+                selection.select_iter(row.iter)
+                      
     # bottom
     def on_notebook_bottom_page_added(self, notebook, child, page_num, data=None):
         self.builder.get_object('menu_bottom').set_sensitive(True)
