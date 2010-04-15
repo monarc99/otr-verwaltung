@@ -16,6 +16,7 @@
 
 import gtk
 from otrverwaltung.gui import AddDownloadDialog
+from otrverwaltung.downloader import DownloadTypes, Download
 import base64
 import urllib
 import hashlib
@@ -54,26 +55,28 @@ class Add(BaseAction):
                 if options[1] == 'decode':
                     output = self.__app.config.get('general', 'folder_uncut_avis')
                     
-                    command = [decoder, "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password]
-                    
+                    command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password]
+                    download = Download(command, dialog.filename, DownloadTypes.OTR_DECODE)     
+                                        
                 elif options[1] == 'decodeandcut':
                     server = self.__app.config.get('general', 'server')
                     output = self.__app.config.get('general', 'folder_cut_avis')
                     cutlist_link = "%sgetfile.php?id=%s" % (server , options[3])
                                     
-                    command = [decoder, "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password, "-C", cutlist_link]
+                    command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password, "-C", cutlist_link]
+                    download = Download(command, dialog.filename, DownloadTypes.OTR_CUT)                    
+                    
                 else:                
                     output = self.__app.config.get('general', 'folder_new_otrkeys')
                     command = ["wget", "-c", "-P", output, options[1]]
-            
-            print
-            print " ".join(command)
-            print
-            
+                    download = Download(command, dialog.filename, DownloadTypes.WGET)
+                    
+                self.__gui.main_window.treeview_download.add_objects(download)
+                download.start() 
+                                       
             dialog.destroy()
         else:
             dialog.destroy()
             return
-            
                 
 

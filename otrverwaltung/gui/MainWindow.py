@@ -26,6 +26,7 @@ import pango
 
 from otrverwaltung import path
 from otrverwaltung.constants import Action, Section, Cut_action
+from otrverwaltung.gui.widgets.BetterTreeView import BetterTreeView
 from otrverwaltung.GeneratorTask import GeneratorTask
 
 class MainWindow(gtk.Window, gtk.Buildable):
@@ -42,6 +43,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
     def post_init(self):       
         self.__setup_toolbar()
         self.__setup_treeview_planning()
+        self.__setup_treeview_download()
         self.__setup_treeview_files()
         self.__setup_widgets()
     
@@ -140,7 +142,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
                 self.__sets_of_toolbars[section].remove(toolbutton)
 
         self.set_toolbar(self.app.section)    
-    
+        
     def __setup_treeview_planning(self):
         treeview = self.builder.get_object('treeview_planning') 
           
@@ -161,6 +163,28 @@ class MainWindow(gtk.Window, gtk.Buildable):
         column.set_cell_data_func(renderer, self.__treeview_planning_datetime)
         column, renderer = self.builder.get_object('treeviewcolumn_broadcaststation'), self.builder.get_object('cellrenderer_broadcaststation')
         column.set_cell_data_func(renderer, self.__treeview_planning_station)
+    
+    def __setup_treeview_download(self):
+        
+        def callback_size(column, cell, model, iter, data=None):
+            obj = model.get_value(iter, 0)
+            if obj.size:
+                cell.set_property('text', self.humanize_size(obj.size))
+            else:
+                cell.set_property('text', 'Unbekannt')
+                    
+        columns = [
+            ("Dateiname", 'filename', None),
+            ("Größe", None, callback_size),
+            ("%", 'progress', None),
+            ("Geschwindigkeit", 'speed', None),
+            ("Restzeit", 'est', None)
+        ]        
+        
+        self.treeview_download = BetterTreeView(columns)
+        self.treeview_download.connect('row-activated', self.on_treeview_download_row_activated)
+        self.treeview_download.show()
+        self.builder.get_object('scrolledwindow_download').add(self.treeview_download)
     
     def __setup_treeview_files(self):
         treeview = self.builder.get_object('treeview_files') 
@@ -486,6 +510,11 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
     #  Signal handlers
     #
+        
+    def on_treeview_download_row_activated(self, treeview, path, view_colum, data=None):    
+        iter = treeview.get_model().get_iter(path)
+        log = treeview.get_model().get_value(iter, 0).log
+        self.gui.message_info_box("\n".join(log))
                
     def _on_menu_check_update_activate(self, widget, data=None):
         current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
