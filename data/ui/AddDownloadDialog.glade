@@ -26,6 +26,8 @@
   </object>
   <object class="GtkListStore" id="liststore1"/>
   <object class="AddDownloadDialog" id="add_download_dialog">
+    <property name="width_request">600</property>
+    <property name="height_request">400</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Datei suchen und downloaden</property>
     <property name="window_position">center-on-parent</property>
@@ -97,8 +99,6 @@
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow_programs">
-                    <property name="width_request">600</property>
-                    <property name="height_request">300</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hscrollbar_policy">automatic</property>
@@ -258,18 +258,37 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">4</property>
                 <child>
-                  <object class="GtkLabel" id="label_download_status">
+                  <object class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
-                    <property name="xalign">0</property>
-                    <property name="label" translatable="yes">Es soll die Datei
+                    <child>
+                      <object class="GtkLabel" id="label_download_status">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Es soll die Datei
 &lt;b&gt;abc.otrkey&lt;/b&gt;
 heruntergeladen werden.</property>
-                    <property name="use_markup">True</property>
-                    <property name="wrap">True</property>
-                    <property name="selectable">True</property>
+                        <property name="use_markup">True</property>
+                        <property name="wrap">True</property>
+                        <property name="selectable">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="image_spinner_download">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-missing-image</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -334,6 +353,7 @@ heruntergeladen werden.</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x2022;</property>
+                                <signal name="changed" handler="on_entry_link_changed"/>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -378,6 +398,7 @@ heruntergeladen werden.</property>
                               <object class="GtkCheckButton" id="checkbutton_cut">
                                 <property name="label" translatable="yes">Geschnitten downloaden</property>
                                 <property name="visible">True</property>
+                                <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="xalign">0.54000002145767212</property>
@@ -393,6 +414,8 @@ heruntergeladen werden.</property>
                               <object class="GtkLabel" id="label_error">
                                 <property name="visible">True</property>
                                 <property name="xalign">1</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Cutlisten werden heruntergeladen...&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
                               </object>
                               <packing>
                                 <property name="position">1</property>
@@ -452,6 +475,7 @@ heruntergeladen werden.</property>
                 <child>
                   <object class="GtkRadioButton" id="radiobutton_torrent">
                     <property name="visible">True</property>
+                    <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
@@ -461,7 +485,7 @@ heruntergeladen werden.</property>
                       <object class="GtkLabel" id="label_torrent">
                         <property name="visible">True</property>
                         <property name="ypad">4</property>
-                        <property name="label" translatable="yes">Download via Torrent (&lt;b&gt;Fehler&lt;/b&gt;)</property>
+                        <property name="label" translatable="yes">Download via Torrent (&lt;b&gt;Torrents werden gesucht...&lt;/b&gt;)</property>
                         <property name="use_markup">True</property>
                       </object>
                     </child>

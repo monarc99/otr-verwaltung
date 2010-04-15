@@ -31,6 +31,7 @@ actions = {
     
     # download
     Action.DOWNLOAD_ADD : download.Add,
+    Action.DOWNLOAD_ADD_LINK : download.AddLink,
     
     # decode and cut
     Action.DECODEANDCUT : decodeorcut.DecodeOrCut,

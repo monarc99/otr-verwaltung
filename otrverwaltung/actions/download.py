@@ -23,6 +23,57 @@ import hashlib
 
 from otrverwaltung.actions.baseaction import BaseAction
 
+def add_download(via_link, app, gui):
+    dialog = AddDownloadDialog.NewAddDownloadDialog(gui, app.config, via_link)
+        
+    if dialog.run() == gtk.RESPONSE_OK:           
+        options = dialog.get_download_options()
+        
+        password = base64.b64decode(app.config.get('general', 'password')) 
+        
+        if options[0] == 'torrent':
+            user_id = options[1]
+            hash = hashlib.md5(password).hexdigest()
+            
+            url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
+            # TODO: Error handling
+            urllib.urlretrieve(url, "/tmp/torrent")
+            
+            # TODO: execute
+            command = ['xdg-open', '/tmp/torrent' ]
+        
+        else: # normal
+            email = app.config.get('general', 'email')                
+            cache_dir = app.config.get('general', 'folder_trash_otrkeys')
+            decoder = app.config.get('general', 'decoder')
+            
+            if options[1] == 'decode':
+                output = app.config.get('general', 'folder_uncut_avis')
+                
+                command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password]
+                download = Download(command, dialog.filename, DownloadTypes.OTR_DECODE)     
+                                    
+            elif options[1] == 'decodeandcut':
+                server = app.config.get('general', 'server')
+                output = app.config.get('general', 'folder_cut_avis')
+                cutlist_link = "%sgetfile.php?id=%s" % (server , options[3])
+                                
+                command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password, "-C", cutlist_link]
+                download = Download(command, dialog.filename, DownloadTypes.OTR_CUT)                    
+                
+            else:                
+                output = app.config.get('general', 'folder_new_otrkeys')
+                command = ["wget", "-c", "-P", output, options[1]]
+                download = Download(command, dialog.filename, DownloadTypes.WGET)
+                
+            gui.main_window.treeview_download.add_objects(download)
+            download.start() 
+                                    
+        dialog.destroy()
+    else:
+        dialog.destroy()
+        return
+    
 class Add(BaseAction):
     def __init__(self, app, gui):
         self.update_list = False
@@ -30,53 +81,13 @@ class Add(BaseAction):
         self.__gui = gui
 
     def do(self):
-        dialog = AddDownloadDialog.NewAddDownloadDialog(self.__gui, self.__app.config)
+        add_download(False, self.__app, self.__gui)
         
-        if dialog.run() == gtk.RESPONSE_OK:           
-            options = dialog.get_download_options()
-            
-            password = base64.b64decode(self.__app.config.get('general', 'password')) 
-            
-            if options[0] == 'torrent':
-                user_id = options[1]
-                hash = hashlib.md5(password).hexdigest()
-                
-                url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
-                # TODO: Error handling
-                urllib.urlretrieve(url, "/tmp/torrent")
-                
-                command = ['xdg-open', '/tmp/torrent' ]
-            
-            else: # normal
-                email = self.__app.config.get('general', 'email')                
-                cache_dir = self.__app.config.get('general', 'folder_trash_otrkeys')
-                decoder = self.__app.config.get('general', 'decoder')
-                
-                if options[1] == 'decode':
-                    output = self.__app.config.get('general', 'folder_uncut_avis')
-                    
-                    command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password]
-                    download = Download(command, dialog.filename, DownloadTypes.OTR_DECODE)     
-                                        
-                elif options[1] == 'decodeandcut':
-                    server = self.__app.config.get('general', 'server')
-                    output = self.__app.config.get('general', 'folder_cut_avis')
-                    cutlist_link = "%sgetfile.php?id=%s" % (server , options[3])
-                                    
-                    command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password, "-C", cutlist_link]
-                    download = Download(command, dialog.filename, DownloadTypes.OTR_CUT)                    
-                    
-                else:                
-                    output = self.__app.config.get('general', 'folder_new_otrkeys')
-                    command = ["wget", "-c", "-P", output, options[1]]
-                    download = Download(command, dialog.filename, DownloadTypes.WGET)
-                    
-                self.__gui.main_window.treeview_download.add_objects(download)
-                download.start() 
-                                       
-            dialog.destroy()
-        else:
-            dialog.destroy()
-            return
-                
+class AddLink(BaseAction):            
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
+        self.__gui = gui
 
+    def do(self):
+        add_download(True, self.__app, self.__gui)

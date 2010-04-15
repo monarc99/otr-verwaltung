@@ -33,7 +33,8 @@ class Action:
     PLAN_EDIT       = 13
     PLAN_SEARCH     = 14
     # download
-    DOWNLOAD_ADD    = 16    
+    DOWNLOAD_ADD      = 16
+    DOWNLOAD_ADD_LINK = 17  
     # decode and cut
     DECODE          = 0
     DECODEANDCUT    = 1
