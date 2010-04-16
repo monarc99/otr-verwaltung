@@ -77,7 +77,12 @@ class PluginSystem:
                 plugin_name, extension = os.path.splitext(file)
                 
                 if extension == ".py":                        
-                    plugin_module = __import__(plugin_name)
+                    try:
+                        plugin_module = __import__(plugin_name)
+                    except Exception, error:
+                        print "[Plugins] Error in >%s< plugin: %s" % (plugin_name, error)
+                        continue
+
                     # instanciate plugin
                     
                     if not hasattr(plugin_module, plugin_name):
