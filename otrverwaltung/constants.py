@@ -34,7 +34,9 @@ class Action:
     PLAN_SEARCH     = 14
     # download
     DOWNLOAD_ADD      = 16
-    DOWNLOAD_ADD_LINK = 17  
+    DOWNLOAD_ADD_LINK = 17
+    DOWNLOAD_START    = 18
+    DOWNLOAD_STOP     = 19
     # decode and cut
     DECODE          = 0
     DECODEANDCUT    = 1

@@ -91,3 +91,21 @@ class AddLink(BaseAction):
 
     def do(self):
         add_download(True, self.__app, self.__gui)
+        
+class Stop(BaseAction):
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
+        self.__gui = gui
+
+    def do(self):
+        print "stop download"
+        
+class Start(BaseAction):
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
+        self.__gui = gui
+
+    def do(self):
+        print "start download"        
