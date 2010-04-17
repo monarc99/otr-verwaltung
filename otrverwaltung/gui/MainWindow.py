@@ -509,7 +509,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
 
     
     def _on_menuHelpHelp_activate(self, widget, data=None):
-        webbrowser.open("http://otrverwaltung.host56.com/")
+        webbrowser.open("http://elbersb.de/otrverwaltung?q=usage")
                       
     def _on_menuHelpAbout_activate(self, widget, data=None):
 
@@ -526,7 +526,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         
         version = open(path.getdatapath("VERSION"), 'r').read().strip()
         about_dialog.set_version(version)
-        about_dialog.set_website("http://otrverwaltung.host56.com/")
+        about_dialog.set_website("http://elbersb.de/otrverwaltung")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2010 Benjamin Elbers")
         about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>"])

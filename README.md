@@ -3,7 +3,7 @@ OTR-Verwaltung
 
 Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>
 
-**Mehr Informationen auf der [Website](http://otrverwaltung.host56.com/).**
+**Mehr Informationen auf der [Website](http://elbersb.de/otrverwaltung).**
 
 ![Screenshot](http://github.com/elbersb/otr-verwaltung/raw/master/data/media/screenshots/search.png)
 
