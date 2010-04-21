@@ -25,7 +25,7 @@ import gtk
 import pango
 
 from otrverwaltung import path
-from otrverwaltung.constants import Action, Section, Cut_action
+from otrverwaltung.constants import Action, Section, Cut_action, DownloadStatus
 from otrverwaltung.gui.widgets.BetterTreeView import BetterTreeView
 from otrverwaltung.GeneratorTask import GeneratorTask
 
@@ -176,7 +176,20 @@ class MainWindow(gtk.Window, gtk.Buildable):
             else:
                 cell.set_property('text', 'Unbekannt')
                     
+        def callback_status(column, cell, model, iter, data=None):
+            obj = model.get_value(iter, 0)
+
+            text = {
+                -1 : '',
+                DownloadStatus.RUNNING : "running",
+                DownloadStatus.STOPPED : "stopped",
+                DownloadStatus.ERROR : "error",
+                DownloadStatus.FINISHED : "finished"
+            }
+            cell.set_property('text', text[obj.status])            
+                
         columns = [
+            ("Status", None, callback_status),
             ("Dateiname", 'filename', None),
             ("Größe", None, callback_size),
             ("%", 'progress', None),

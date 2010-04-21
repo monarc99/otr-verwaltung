@@ -20,6 +20,7 @@ import time
 import sys
 
 from otrverwaltung.GeneratorTask import GeneratorTask
+from otrverwaltung.constants import DownloadStatus
 
 class DownloadTypes:
     TORRENT     = 0
@@ -39,7 +40,9 @@ class Download:
         self.size = ""
         self.progress = "?"
         self.speed = "?" 
-        self.est = "?"        
+        self.est = "?"  
+        
+        self.status = -1      
         
         self.__task = None
         self.__process = None
@@ -51,8 +54,10 @@ class Download:
         
     def _download(self):   
         self.log = []
+        
+        self.status = DownloadStatus.RUNNING
       
-        if self.download_type == DownloadTypes.BASIC:
+        if self.download_type == DownloadTypes.BASIC:            
             self.__process = subprocess.Popen(self.command['wget'], stderr=subprocess.PIPE)
             while self.__process.poll() == None:
                 line = self.__process.stderr.readline().strip()
@@ -71,6 +76,7 @@ class Download:
                             self.speed = result[0][1]
                             if self.progress == "100%":
                                 yield "Download.....100%"
+                                self.status = DownloadStatus.FINISHED
                                 self.est = "Fertig."
                             else:
                                 self.est = result[0][2]
@@ -104,6 +110,7 @@ class Download:
                         self.progress = result[0]
                         if self.progress == "100%":
                             yield "Download.....100%"
+                            self.status = DownloadStatus.FINISHED
                             self.est = "Fertig."
                         
                     result = re.findall("[0-9]{1,3}%.*: (.*)", line)
@@ -117,30 +124,26 @@ class Download:
                     line += char
                     
             stderr = self.__process.stderr.read()
-            for err in stderr.split('\n'):
+            for err in stderr.split('\n'):                
                 yield err.strip()
+                if "Fehler" in err:
+                    self.status = DownloadStatus.ERROR
                 
     def start(self):    
         def loop(*args):
             self.log.append(args[0])
-        
-        def completed():
-            self.__task = None
-    
-        if not self.__task:
-            self.__task = GeneratorTask(self._download, loop, completed)
+            
+        if not self.status == DownloadStatus.RUNNING:
+            self.__task = GeneratorTask(self._download, loop)
             self.__task.start()
         
-    def stop(self):
-        print "[Downloader] Stop download of ", self.filename
-    
+    def stop(self):    
         self._clear()
         self.update_view()        
-    
+        self.status = DownloadStatus.STOPPED    
+            
         if self.__process:
-            print "[Downloader] ... kill ", self.filename
             self.__process.kill()
     
         if self.__task:
             self.__task.stop()
-            self.__task = None

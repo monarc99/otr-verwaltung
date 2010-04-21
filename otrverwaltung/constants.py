@@ -70,3 +70,9 @@ class Format:
 class Program:
     AVIDEMUX    = 0
     VIRTUALDUB  = 1
+    
+class DownloadStatus:
+    RUNNING     = 0
+    STOPPED     = 1
+    ERROR       = 2
+    FINISHED    = 3    
