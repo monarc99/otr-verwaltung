@@ -23,7 +23,9 @@ from otrverwaltung.GeneratorTask import GeneratorTask
 
 class DownloadTypes:
     TORRENT     = 0
-    WGET        = 1
+
+    BASIC       = 4
+
     OTR_DECODE  = 2
     OTR_CUT     = 3    
 
@@ -45,7 +47,7 @@ class Download:
         
     def _download(self):     
         if self.download_type == DownloadTypes.WGET:
-            self.__process = subprocess.Popen(self.command, stderr=subprocess.PIPE)
+            self.__process = subprocess.Popen(self.command['wget'], stderr=subprocess.PIPE)
             while self.__process.poll() == None:
                 line = self.__process.stderr.readline().strip()
                         
@@ -76,7 +78,10 @@ class Download:
             
             yield self.__process.stderr.read().strip()
             
-        elif self.download_type in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:       
+        elif self.download_type in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
+            for count, p in enumerate(self.command):
+                self.command[count] = "'%s'" % p
+
             self.__process = subprocess.Popen("%s  >/tmp/stdout 2>&1" % " ".join(self.command), shell=True)
 
             # TODO: cleanup

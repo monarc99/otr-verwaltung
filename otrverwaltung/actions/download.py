@@ -20,8 +20,11 @@ from otrverwaltung.downloader import DownloadTypes, Download
 import base64
 import urllib
 import hashlib
+import os.path
+import subprocess
 
 from otrverwaltung.actions.baseaction import BaseAction
+from otrverwaltung.GeneratorTask import GeneratorTask
 
 def add_download(via_link, app, gui):
     dialog = AddDownloadDialog.NewAddDownloadDialog(gui, app.config, via_link)
@@ -36,12 +39,21 @@ def add_download(via_link, app, gui):
             hash = hashlib.md5(password).hexdigest()
             
             url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
-            # TODO: Error handling
-            urllib.urlretrieve(url, "/tmp/torrent")
             
-            # TODO: execute
-            command = ['xdg-open', '/tmp/torrent' ]
+            def download_torrent(url):
+                try:
+                    urllib.urlretrieve(url, "/tmp/torrent")
+                except IOError, error:
+                    yield "Torrentdatei konnte nicht heruntergeladen werden (%s)!" % error
+                    return
+
+                subprocess.call(['xdg-open', '/tmp/torrent' ])
+
+            def error(text):
+                gui.main_window.change_status(-1, text)
         
+            GeneratorTask(download_torrent, error).start(url)
+
         else: # normal
             email = app.config.get('general', 'email')                
             cache_dir = app.config.get('general', 'folder_trash_otrkeys')
@@ -63,8 +75,13 @@ def add_download(via_link, app, gui):
                 
             else:                
                 output = app.config.get('general', 'folder_new_otrkeys')
-                command = ["wget", "-c", "-P", output, options[1]]
-                download = Download(command, dialog.filename, DownloadTypes.WGET)
+                commands = {
+                    'wget': ["wget", "-c", "-P", output, options[1]],
+                    'curl': ["curl", "-o", os.path.join(output, dialog.filename), options[1]],
+                    'aria': ["aria2c", "-d", output, options[1]],
+                }
+
+                download = Download(command, dialog.filename, DownloadTypes.BASIC)
                 
             gui.main_window.treeview_download.add_objects(download)
             download.start() 
