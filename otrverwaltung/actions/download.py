@@ -81,7 +81,7 @@ def add_download(via_link, app, gui):
                     'aria': ["aria2c", "-d", output, options[1]],
                 }
 
-                download = Download(command, dialog.filename, DownloadTypes.BASIC)
+                download = Download(commands, dialog.filename, DownloadTypes.BASIC)
                 
             gui.main_window.treeview_download.add_objects(download)
             download.start() 
@@ -115,8 +115,9 @@ class Stop(BaseAction):
         self.__app = app
         self.__gui = gui
 
-    def do(self):
-        print "stop download"
+    def do(self, downloads):
+        for download in downloads:
+            download.stop()
         
 class Start(BaseAction):
     def __init__(self, app, gui):
@@ -124,5 +125,6 @@ class Start(BaseAction):
         self.__app = app
         self.__gui = gui
 
-    def do(self):
-        print "start download"        
+    def do(self, downloads):
+        for download in downloads:
+            download.start()

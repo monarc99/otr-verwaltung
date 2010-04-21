@@ -39,14 +39,20 @@ class Download:
         self.size = ""
         self.progress = "?"
         self.speed = "?" 
-        self.est = "?"
-        self.log = []
+        self.est = "?"        
         
         self.__task = None
         self.__process = None
+    
+    def _clear(self):
+        self.progress = ""
+        self.est = ""
+        self.speed = ""    
         
-    def _download(self):     
-        if self.download_type == DownloadTypes.WGET:
+    def _download(self):   
+        self.log = []
+      
+        if self.download_type == DownloadTypes.BASIC:
             self.__process = subprocess.Popen(self.command['wget'], stderr=subprocess.PIPE)
             while self.__process.poll() == None:
                 line = self.__process.stderr.readline().strip()
@@ -79,45 +85,62 @@ class Download:
             yield self.__process.stderr.read().strip()
             
         elif self.download_type in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
-            for count, p in enumerate(self.command):
-                self.command[count] = "'%s'" % p
+            self.__process = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            self.__process = subprocess.Popen("%s  >/tmp/stdout 2>&1" % " ".join(self.command), shell=True)
-
-            # TODO: cleanup
+            line = ''
             while self.__process.poll()==None:
-                file = open('/tmp/stdout', 'r')
-                stdout = file.readlines()                
-                file.close()
-                                
-                if len(stdout)>0 and "%" in stdout[-1]:
-                    result = re.findall("([0-9]{1,3}%).*: (.*)", stdout[-1].strip())
-                    if result:
-                        self.progress = result[0][0]
-                        self.speed = result[0][1]
-                        self.update_view()
-                        
-                time.sleep(2)
+                char = self.__process.stdout.read(1)
                 
-            file = open('/tmp/stdout', 'r')
-            self.log = file.readlines()
-            file.close()
-            
+                if char=='\r' or char=='\n':
+                    line = line.strip()
+                    if not line:
+                        continue
+                        
+                    if not "%" in line:
+                        yield line
+                    
+                    result = re.findall("[0-9]{1,3}%", line)
+                    if result:
+                        self.progress = result[0]
+                        if self.progress == "100%":
+                            yield "Download.....100%"
+                            self.est = "Fertig."
+                        
+                    result = re.findall("[0-9]{1,3}%.*: (.*)", line)
+                    if result:
+                        self.speed = result[0]
+                    
+                    self.update_view()
+                    
+                    line = ''
+                else:
+                    line += char
+                    
+            stderr = self.__process.stderr.read()
+            for err in stderr.split('\n'):
+                yield err.strip()
+                
     def start(self):    
         def loop(*args):
             self.log.append(args[0])
         
         def completed():
-            pass
+            self.__task = None
     
-        self.__task = GeneratorTask(self._download, loop, completed)
-        self.__task.start()
+        if not self.__task:
+            self.__task = GeneratorTask(self._download, loop, completed)
+            self.__task.start()
         
     def stop(self):
+        print "[Downloader] Stop download of ", self.filename
+    
+        self._clear()
+        self.update_view()        
+    
+        if self.__process:
+            print "[Downloader] ... kill ", self.filename
+            self.__process.kill()
+    
         if self.__task:
             self.__task.stop()
             self.__task = None
-            
-        if self.__process:
-            self.__process.kill()
-            self.__process = None

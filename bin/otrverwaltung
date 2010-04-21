@@ -522,6 +522,15 @@ class App:
             else:
                 action.do(filenames)
 
+        elif chosen_action in [Action.DOWNLOAD_START, Action.DOWNLOAD_STOP]:
+            model, selected_rows = self.__gui.main_window.treeview_download.get_selection().get_selected_rows()
+                      
+            if len(selected_rows) == 0:
+                return
+           
+            downloads = [model.get_value(model.get_iter(path), 0) for path in selected_rows]
+            action.do(downloads)
+
         elif chosen_action == Action.NEW_FOLDER:
             filenames = self.__gui.main_window.get_selected_filenames()
             self.locked = True

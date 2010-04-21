@@ -188,6 +188,9 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.treeview_download.connect('row-activated', self.on_treeview_download_row_activated)
         self.treeview_download.show()
         self.builder.get_object('scrolledwindow_download').add(self.treeview_download)
+        
+        treeselection = self.treeview_download.get_selection()
+        treeselection.set_mode(gtk.SELECTION_MULTIPLE)        
     
     def __setup_treeview_files(self):
         treeview = self.builder.get_object('treeview_files') 

@@ -129,7 +129,8 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
                 
     def gather_information(self):
         self.builder.get_object('image_spinner_download').show()
-        self.builder.get_object('label_download_status').set_markup("Es soll die Datei\n<b>%s</b>\nheruntergeladen werden." % self.filename)        
+        self.builder.get_object('label_download_status').set_markup("Es soll die Datei\n<b>%s</b>\nheruntergeladen werden." % self.filename)
+        self.cutlists_treeview.get_model().clear()
     
         without_otrkey = self.filename[:-7]
         
@@ -201,6 +202,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
         result = re.findall("([A-Za-z._\-0-9]*\.otrkey)", download_link)
         if result:            
             self.filename = result[0]
+            
             GeneratorTask(self.gather_information, self.gather_information_callback, self.gather_information_stop).start()
         else:
             pass # TODO: fehlermeldung

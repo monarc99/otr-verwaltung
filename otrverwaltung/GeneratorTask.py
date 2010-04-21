@@ -28,7 +28,7 @@ class GeneratorTask(object):
        
         for ret in self.generator(*args, **kwargs):
             if self._stopped:
-                thread.exit()
+                break
                 
             if self.loop_callback is not None:           
                 gobject.idle_add(self._loop, ret)
