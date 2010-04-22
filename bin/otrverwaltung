@@ -181,7 +181,7 @@ class App:
         self.plugin_system = PluginSystem(self, self.__gui, plugin_paths, self.config.get('plugins', 'enabled'), self.config.get('plugins', 'config'))
     
         # show undecoded otrkeys         
-        self.show_section(Section.OTRKEY)
+        self.show_section(Section.DOWNLOAD)
         
         self.planned_broadcasts = Planning()
         self.planned_broadcasts.read_config(self.config.get('general', 'planned_items'))

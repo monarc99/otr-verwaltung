@@ -37,18 +37,17 @@ class Download:
         self.filename = filename
         self.download_type = download_type
         
-        self.size = ""
-        self.progress = "?"
+        self.size = None
+        self.progress = 0
         self.speed = "?" 
         self.est = "?"  
         
-        self.status = -1      
+        self.status = -1
         
         self.__task = None
         self.__process = None
     
     def _clear(self):
-        self.progress = ""
         self.est = ""
         self.speed = ""    
         
@@ -66,15 +65,15 @@ class Download:
                     if not self.size:
                         result = re.findall(': ([0-9]*) \(', line)
                         if result:
-                            self.size = result[0]                            
+                            self.size = int(result[0])
                     
                     if "%" in line:                                                
-                        result = re.findall('([0-9]{1,3}%) (.*)[ =](.*)', line)
+                        result = re.findall('([0-9]{1,3})% (.*)[ =](.*)', line)
 
                         if result:
-                            self.progress = result[0][0]
+                            self.progress = int(result[0][0])
                             self.speed = result[0][1]
-                            if self.progress == "100%":
+                            if self.progress == 100:
                                 yield "Download.....100%"
                                 self.status = DownloadStatus.FINISHED
                                 self.est = "Fertig."
@@ -105,10 +104,10 @@ class Download:
                     if not "%" in line:
                         yield line
                     
-                    result = re.findall("[0-9]{1,3}%", line)
+                    result = re.findall("([0-9]{1,3})%", line)
                     if result:
-                        self.progress = result[0]
-                        if self.progress == "100%":
+                        self.progress = int(result[0])
+                        if self.progress == 100:
                             yield "Download.....100%"
                             self.status = DownloadStatus.FINISHED
                             self.est = "Fertig."

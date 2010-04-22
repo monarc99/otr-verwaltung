@@ -45,9 +45,6 @@ class BetterTreeView(gtk.TreeView):
         obj = model.get_value(iter, 0)
         cell.set_property('text', getattr(obj, attribute))
     
-    def __update_view(self):
-        self.queue_draw()
-    
     def add_objects(self, *args):
         for obj in args:
             obj.update_view = self.__update_view

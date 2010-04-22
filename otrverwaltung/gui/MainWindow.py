@@ -26,7 +26,7 @@ import pango
 
 from otrverwaltung import path
 from otrverwaltung.constants import Action, Section, Cut_action, DownloadStatus
-from otrverwaltung.gui.widgets.BetterTreeView import BetterTreeView
+from otrverwaltung.gui.widgets.DownloadsTreeView import DownloadsTreeView
 from otrverwaltung.GeneratorTask import GeneratorTask
 
 class MainWindow(gtk.Window, gtk.Buildable):
@@ -168,36 +168,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         column.set_cell_data_func(renderer, self.__treeview_planning_station)
     
     def __setup_treeview_download(self):
-        
-        def callback_size(column, cell, model, iter, data=None):
-            obj = model.get_value(iter, 0)
-            if obj.size:
-                cell.set_property('text', self.humanize_size(obj.size))
-            else:
-                cell.set_property('text', 'Unbekannt')
-                    
-        def callback_status(column, cell, model, iter, data=None):
-            obj = model.get_value(iter, 0)
-
-            text = {
-                -1 : '',
-                DownloadStatus.RUNNING : "running",
-                DownloadStatus.STOPPED : "stopped",
-                DownloadStatus.ERROR : "error",
-                DownloadStatus.FINISHED : "finished"
-            }
-            cell.set_property('text', text[obj.status])            
-                
-        columns = [
-            ("Status", None, callback_status),
-            ("Dateiname", 'filename', None),
-            ("Größe", None, callback_size),
-            ("%", 'progress', None),
-            ("Geschwindigkeit", 'speed', None),
-            ("Restzeit", 'est', None)
-        ]        
-        
-        self.treeview_download = BetterTreeView(columns)
+        self.treeview_download = DownloadsTreeView()
         self.treeview_download.connect('row-activated', self.on_treeview_download_row_activated)
         self.treeview_download.show()
         self.builder.get_object('scrolledwindow_download').add(self.treeview_download)
