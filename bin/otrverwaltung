@@ -24,12 +24,12 @@ import time
 import hashlib
 import optparse
 import logging
+import dbus, dbus.service, dbus.glib
 
 try:
     from gtk import events_pending, main_iteration
-    from gtk import gdk
     import gobject
-    gdk.threads_init()    
+    gobject.threads_init()
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
@@ -44,6 +44,7 @@ def parse_opts():
                       help="Verbose messages", default=False)
     oparse.add_option("-d", "--debug", action="store_true",
                       help="Debug messages", default=False)
+    oparse.add_option("-l", "--link", help="Add a link")
 
     opts, rest = oparse.parse_args()
     return opts
@@ -54,6 +55,7 @@ if opts.debug:
     logging.root.setLevel(logging.DEBUG)
 elif opts.verbose:
     logging.root.setLevel(logging.INFO)
+link = opts.link
 
 # Setup path
 
@@ -162,7 +164,8 @@ class App:
         self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
        
         # load gui
-        self.__gui = gui.Gui(self)    
+        self.__gui = gui.Gui(self)  # for backwards compability
+        self.gui = self.__gui
 
         self.config.load()
     
@@ -661,7 +664,7 @@ class App:
         
         return "%02d:%02d:%02d,%03d" % (hrs, mins, secs, ms)
                       
-    def run(self):
+    def run(self, link=None):
         """ #FIXME """
         
         self.__gui.main_window.show()        
@@ -669,6 +672,9 @@ class App:
         if self.config.get('general', 'folder_new_otrkeys') == "":      
             self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
             self.__gui.preferences_window.show()
+               
+        if link:
+            self.add_download_link(link)
                
         self.__gui.run()
         
@@ -684,9 +690,33 @@ class App:
         
         settings = ','.join([maximized, width, height])
         self.config.set('general', 'window_settings', settings)
+    
+    def add_download_link(self, link):
+        action = actions.get_action(Action.DOWNLOAD_ADD_LINK, self, self.__gui)
+        action.do(link)        
  
-if __name__ == '__main__':            
-    app = App()
-    app.run()
-    app.config.save()
+class OTRVerwaltungService(dbus.service.Object):
+    def __init__(self, app):
+        self.app = app
+        bus_name = dbus.service.BusName('elbersb.otrverwaltung', bus = dbus.SessionBus())
+        dbus.service.Object.__init__(self, bus_name, '/elbersb/otrverwaltung')
 
+    @dbus.service.method(dbus_interface='elbersb.otrverwaltung')
+    def show_window(self):
+        self.app.gui.main_window.present()
+        
+    @dbus.service.method(dbus_interface='elbersb.otrverwaltung')        
+    def add_link(self, link):        
+        self.app.add_download_link(link)        
+        
+if __name__ == "__main__":   
+    if dbus.SessionBus().request_name("elbersb.otrverwaltung") != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        print "OTR-Verwaltung läuft bereits. Zeige Fenster."
+        dbus.SessionBus().get_object("elbersb.otrverwaltung", "/elbersb/otrverwaltung").get_dbus_method("show_window")()
+        if link:            
+            dbus.SessionBus().get_object("elbersb.otrverwaltung", "/elbersb/otrverwaltung").get_dbus_method("add_link")(link)            
+    else:      
+        app = App()
+        service = OTRVerwaltungService(app)
+        app.run(link)
+        app.config.save()

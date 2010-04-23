@@ -26,8 +26,10 @@ import subprocess
 from otrverwaltung.actions.baseaction import BaseAction
 from otrverwaltung.GeneratorTask import GeneratorTask
 
-def add_download(via_link, app, gui):
-    dialog = AddDownloadDialog.NewAddDownloadDialog(gui, app.config, via_link)
+def add_download(via_link, app, gui, link=None):
+    link = link.replace("otr://", "")
+
+    dialog = AddDownloadDialog.NewAddDownloadDialog(gui, app.config, via_link, link)
         
     if dialog.run() == gtk.RESPONSE_OK:           
         options = dialog.get_download_options()
@@ -106,8 +108,8 @@ class AddLink(BaseAction):
         self.__app = app
         self.__gui = gui
 
-    def do(self):
-        add_download(True, self.__app, self.__gui)
+    def do(self, link=None):
+        add_download(True, self.__app, self.__gui, link)
         
 class Stop(BaseAction):
     def __init__(self, app, gui):

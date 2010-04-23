@@ -99,7 +99,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     # GATHER_INFORMATION
     #
     
-    def forward(self, iter=None):
+    def forward(self, iter=None, link=None):
         """ iter=None  --> programs search was skipped 
             iter!=None --> iter is the selected program """
     
@@ -110,7 +110,9 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
         self.builder.get_object('button_ok').set_label("_Download")
         self.builder.get_object('button_ok').set_sensitive(True)  
         
-        if iter:
+        if link:
+             self.builder.get_object('entry_link').set_text(link)       
+        elif iter:
             self.filename, mirrors = self.builder.get_object('liststore_programs').get(iter, 0, 7)
             
             if mirrors == 1:
@@ -275,7 +277,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             
             self.response(-5)       
 
-def NewAddDownloadDialog(gui, config, via_link):
+def NewAddDownloadDialog(gui, config, via_link, link=None):
     glade_filename = path.getdatapath('ui', 'AddDownloadDialog.glade')
     
     builder = gtk.Builder()   
@@ -284,5 +286,5 @@ def NewAddDownloadDialog(gui, config, via_link):
     dialog.gui = gui
     dialog.config = config
     if via_link:
-        dialog.forward()
+        dialog.forward(link=link)
     return dialog
