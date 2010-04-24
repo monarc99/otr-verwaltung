@@ -390,6 +390,7 @@ class App:
             titel_list.reverse()
             titel = " ".join(titel_list)
             titel_mit = "_".join(titel_list)
+            titel_dot = ".".join(titel_list)
 
             stunde, minute = parts[4].split('-')
             jahr, monat, tag = parts[5].split('.')           
@@ -412,6 +413,7 @@ class App:
             values = {
                 'titel' : titel,
                 'titel_' : titel_mit,
+                'titel.' : titel_dot,
                 'sender' : parts[3],
                 'SENDER': sender_gross,
                 'tag': tag,

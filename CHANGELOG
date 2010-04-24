@@ -1,5 +1,9 @@
-:
+0.8.4, 17. April 10:
     * Bugfix: http://www.otrforum.com/showthread.php/59666, Danke @Artemis1121
+    * Es wird nun getestet, ob das "plugins"-Verzeichnis existiert
+    * Bugfix im Zusammenfassung-Dialog
+    * Die Fragen von Avidemux sollten nun automatisch abgeschaltet sein
+    * Auch wenn in einem Plugin Fehler sind, startet OTR-Verwaltung
 
 0.8.3:
     * Bugfix: Beim Umbennenen mit Schema wurde das Format nicht korrekt erkannt.
