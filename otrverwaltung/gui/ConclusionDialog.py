@@ -72,6 +72,11 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
             
         self.show_all()
 
+        if len(file_conclusions) == 1:
+            self.builder.get_object('button_back').hide()
+            self.builder.get_object('button_forward').hide()
+            self.builder.get_object('label_count').hide()
+
         if self.action != Action.DECODE:         
             self.combobox_archive.fill(archive_directory)      
             self.combobox_archive.set_active(0)
