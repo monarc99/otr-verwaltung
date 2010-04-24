@@ -186,9 +186,8 @@ class App:
         else:
             plugin_paths = path.get_plugin_paths()
     
-        self.plugin_system = PluginSystem(self, self.__gui, plugin_paths, self.config.get('plugins', 'enabled'), self.config.get('plugins', 'config'))
-    
-        # show undecoded otrkeys         
+        self.plugin_system = PluginSystem(self, self.__gui, plugin_paths, self.config.get('plugins', 'enabled'), self.config.get('plugins', 'config'))    
+        
         self.show_section(Section.DOWNLOAD)
         
         self.planned_broadcasts = Planning()
@@ -683,6 +682,12 @@ class App:
                
         self.__gui.run()
         
+        # kill all downloader processes
+        for row in self.gui.main_window.treeview_download.liststore:
+            row[0].stop()
+
+        # TODO: save downloads to disk
+
         # write to config
         self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())            
         enabled, config = self.plugin_system.get_config()

@@ -232,7 +232,10 @@ class Download:
         self.status = DownloadStatus.STOPPED    
             
         if self.__process:
-            self.__process.kill()
+            try:
+                self.__process.kill()
+            except OSError:
+                pass
     
         if self.__task:
             self.__task.stop()
