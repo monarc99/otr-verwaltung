@@ -22,6 +22,7 @@ import os.path
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.cutlists import Cutlist
 from otrverwaltung.constants import DownloadStatus
+from otrverwaltung import fileoperations
 
 class DownloadTypes:
     TORRENT     = 0
@@ -40,8 +41,8 @@ class Download:
            
         self.size = None
         self.progress = 0
-        self.speed = "?" 
-        self.est = "?"  
+        self.speed = "" 
+        self.est = ""  
         
         self.status = -1
         
@@ -63,6 +64,7 @@ class Download:
             self.cutlist_server, self.cutlist_id = cutlist
         else:
             self.download_type = DownloadTypes.OTR_DECODE
+        self.cache_dir = cache_dir
         self.command = [decoder, "-b", "0", "-n", "-i", self.link, "-o", self.output, "-c", cache_dir, "-e", email, "-p", password]        
     
     def _clear(self):
@@ -70,9 +72,8 @@ class Download:
         self.speed = ""    
       
     def _finished(self):
-        yield "Download.....100%"
         self.status = DownloadStatus.FINISHED
-        self.est = "Fertig."
+        self.est = ""
         
     def _download(self):   
         self.log = []
@@ -183,10 +184,6 @@ class Download:
                     result = re.findall("([0-9]{1,3})%", line)
                     if result:
                         self.progress = int(result[0])
-                        if self.progress == 100:
-                            yield "Download.....100%"
-                            self.status = DownloadStatus.FINISHED
-                            self.est = "Fertig."
                         
                     result = re.findall("[0-9]{1,3}%.*: (.*)", line)
                     if result:
@@ -203,6 +200,23 @@ class Download:
                 yield err.strip()
                 if "Fehler" in err:
                     self.status = DownloadStatus.ERROR
+            
+            if not self.status in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
+                self._finished()
+                # remove otrkey and .segments file
+                fileoperations.remove_file(os.path.join(self.cache_dir, self.filename))
+                fileoperations.remove_file(os.path.join(self.cache_dir, self.filename + '.segments'))
+
+                if self.download_type == DownloadTypes.OTR_CUT:
+                    # rename file to "cut" filename
+                    filename = os.path.join(self.output, self.filename.rstrip(".otrkey"))
+                    new_filename, extension = os.path.splitext(filename)
+                    new_filename += ".cut" + extension
+                    fileoperations.rename_file(filename, new_filename)
+                                       
+                    #TODO: Zusammenfassungsdialoganzeigemöglichkeit einblenden
+                    
+                self.update_view()
                 
     def start(self):    
         def loop(*args):
