@@ -108,9 +108,13 @@ class CellRendererDownload(gtk.GenericCellRenderer):
             self.cellrenderer_filename.set_property('markup', value.filename)            
             self.cellrenderer_progress.set_property('value', value.progress)
             info_text, text = "", ""
+
             if value.status != -1:
                 text, pixbuf = self.statuses[value.status]            
                 self.cellrenderer_pixbuf.set_property('pixbuf', pixbuf)
+            
+                if value.message_short:
+                    text += ': %s' % value.message_short
             
             infos = []
             if value.size:

@@ -45,6 +45,7 @@ class Download:
         self.est = ""  
         
         self.status = -1
+        self.message_short = ''
         
         self.__task = None
         self.__process = None
@@ -82,7 +83,14 @@ class Download:
       
         if self.download_type == DownloadTypes.BASIC:            
             if self.preferred_downloader == 'wget':
-                self.__process = subprocess.Popen(self.commands['wget'], stderr=subprocess.PIPE)
+                try:                
+                    self.__process = subprocess.Popen(self.commands['wget'], stderr=subprocess.PIPE)
+                except OSError, error:
+                    self.status = DownloadStatus.ERROR
+                    self.message_short = 'Wget ist nicht installiert.'
+                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.commands['wget']), error)
+                    return
+                    
                 sleep = 0
                 while self.__process.poll() == None:                    
                     line = self.__process.stderr.readline().strip()
@@ -112,10 +120,18 @@ class Download:
                         
                     time.sleep(sleep)
                 
+                ### Process is terminated
                 yield self.__process.stderr.read().strip()
             
             else:
-                self.__process = subprocess.Popen(self.commands['aria2c'], stdout=subprocess.PIPE)
+                try:                
+                    self.__process = subprocess.Popen(self.commands['aria2c'], stdout=subprocess.PIPE)
+                except OSError, error:
+                    self.status = DownloadStatus.ERROR
+                    self.message_short = 'Aria2c ist nicht installiert.'
+                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.commands['aria2c']), error)
+                    return
+                    
                 while True:
                     error_code = self.__process.poll()
                     if error_code:
@@ -154,6 +170,7 @@ class Download:
 
                     time.sleep(1)
                 
+                ### Process is terminated                
                 yield self.__process.stdout.read().strip()
                 
             self.update_view()
@@ -167,7 +184,13 @@ class Download:
             else:
                 command = self.command
             
-            self.__process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                self.__process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            except OSError, error:
+                    self.status = DownloadStatus.ERROR
+                    self.message_short = 'Dekoder nicht gefunden.'
+                    yield "Der Pfad zum Dekoder scheint nicht korrekt zu sein. Der folgende Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
+                    return
 
             line = ''
             while self.__process.poll()==None:
@@ -194,12 +217,18 @@ class Download:
                     line = ''
                 else:
                     line += char
+            
+            ### Process is terminated
                     
             stderr = self.__process.stderr.read()
-            for err in stderr.split('\n'):                
-                yield err.strip()
-                if "Fehler" in err:
-                    self.status = DownloadStatus.ERROR
+            if "invalid option" in stderr:
+                self.status = DownloadStatus.ERROR
+                self.message_short = 'Der Dekoder ist veraltet.'
+                yield "Es ist ein veralteter Dekoder angegeben!\n"
+                
+            yield stderr.strip()
+            if "fehler" in stderr.lower() or 'error' in stderr.lower():
+                self.status = DownloadStatus.ERROR                
             
             if not self.status in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
