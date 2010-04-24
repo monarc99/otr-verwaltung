@@ -105,7 +105,11 @@ class CellRendererDownload(gtk.GenericCellRenderer):
         
     def do_set_property(self, pspec, value):
         if pspec.name == 'download':
-            self.cellrenderer_filename.set_property('markup', value.filename)            
+            if value.filename:
+                self.cellrenderer_filename.set_property('markup', value.filename)            
+            else:
+                self.cellrenderer_filename.set_property('markup', 'Dateiname nicht bekannt.')            
+                
             self.cellrenderer_progress.set_property('value', value.progress)
             info_text, text = "", ""
 

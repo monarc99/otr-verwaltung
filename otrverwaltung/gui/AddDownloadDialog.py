@@ -100,8 +100,9 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     #
     
     def forward(self, iter=None, link=None):
-        """ iter=None  --> programs search was skipped 
-            iter!=None --> iter is the selected program """
+        """ iter==None --> programs search was skipped 
+            iter!=None --> iter is the selected program 
+            link!=None --> executable was called with 'link' argument """
     
         self.mode = 1 # download
 
@@ -110,9 +111,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
         self.builder.get_object('button_ok').set_label("_Download")
         self.builder.get_object('button_ok').set_sensitive(True)  
         
-        if link:
-             self.builder.get_object('entry_link').set_text(link)       
-        elif iter:
+        if iter:
             self.filename, mirrors = self.builder.get_object('liststore_programs').get(iter, 0, 7)
             
             if mirrors == 1:
@@ -122,12 +121,15 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             
             GeneratorTask(self.gather_information, self.gather_information_callback, self.gather_information_stop).start()          
         else:
-            self.builder.get_object('label_download_status').set_markup("Füge einen Downloadlink in das Feld ein!")
-            self.builder.get_object('button_mirror_search').hide()
             self.builder.get_object('image_spinner_download').hide()
+            self.builder.get_object('button_mirror_search').hide()
             self.builder.get_object('label_torrent').set_markup("Download via Torrent")               
             self.builder.get_object('label_error').set_markup('')
-            
+
+            if link:
+                self.builder.get_object('entry_link').set_text(link)
+            else:
+                self.builder.get_object('label_download_status').set_markup("Füge einen Downloadlink in das Feld ein!")
                 
     def gather_information(self):
         self.builder.get_object('image_spinner_download').show()
@@ -202,13 +204,12 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     def on_entry_link_changed(self, widget, data=None):
         download_link = widget.get_text()
         result = re.findall("([A-Za-z._\-0-9]*\.otrkey)", download_link)
-        if result:            
+        if result:
             self.filename = result[0]
             
             GeneratorTask(self.gather_information, self.gather_information_callback, self.gather_information_stop).start()
         else:
-            pass # TODO: fehlermeldung
-            # dekodieren wird nicht unterstützt
+            pass
     
     def treeview_cutlists_selection_changed(self, treeselection, data=None):
         model, iter = treeselection.get_selected()
