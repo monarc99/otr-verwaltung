@@ -75,6 +75,14 @@ class Download:
     def _finished(self):
         self.status = DownloadStatus.FINISHED
         self.est = ""
+
+    def _check_for_errors(self, text):
+        words = ['error', 'fehler']
+        for word in words:
+            if word in text.lower():
+                self.status = DownloadStatus.ERROR
+                return True
+        return False
         
     def _download(self):   
         self.log = []
@@ -134,8 +142,8 @@ class Download:
                     
                 while True:
                     error_code = self.__process.poll()
-                    if error_code:
-                        if self.status != DownloadStatus.STOPPED:                            
+                    if error_code != None:
+                        if not self.status in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
                             if error_code == 0:
                                 self._finished()
                             else:
@@ -143,6 +151,7 @@ class Download:
                         break
                     
                     line = self.__process.stdout.readline().strip()
+                    self._check_for_errors(line)
                             
                     if "%" in line:
                         if not self.size:
@@ -171,7 +180,9 @@ class Download:
                     time.sleep(1)
                 
                 ### Process is terminated                
-                yield self.__process.stdout.read().strip()
+                stdout = self.__process.stdout.read().strip()
+                self._check_for_errors(stdout)
+                yield stdout
                 
             self.update_view()
             
@@ -227,8 +238,7 @@ class Download:
                 yield "Es ist ein veralteter Dekoder angegeben!\n"
                 
             yield stderr.strip()
-            if "fehler" in stderr.lower() or 'error' in stderr.lower():
-                self.status = DownloadStatus.ERROR                
+            self._check_for_errors(stderr)
             
             if not self.status in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
