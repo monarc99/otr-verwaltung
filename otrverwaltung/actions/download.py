@@ -16,7 +16,7 @@
 
 import gtk
 from otrverwaltung.gui import AddDownloadDialog
-from otrverwaltung.downloader import DownloadTypes, Download
+from otrverwaltung.downloader import Download
 import base64
 import urllib
 import hashlib
@@ -27,7 +27,8 @@ from otrverwaltung.actions.baseaction import BaseAction
 from otrverwaltung.GeneratorTask import GeneratorTask
 
 def add_download(via_link, app, gui, link=None):
-    link = link.replace("otr://", "")
+    if link:
+        link = link.replace("otr://", "")
 
     dialog = AddDownloadDialog.NewAddDownloadDialog(gui, app.config, via_link, link)
         
@@ -39,59 +40,49 @@ def add_download(via_link, app, gui, link=None):
         if options[0] == 'torrent':
             user_id = options[1]
             hash = hashlib.md5(password).hexdigest()
-            
             url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
-            
-            def download_torrent(url):
+                        
+            def download_torrent(url, filename):
                 try:
-                    urllib.urlretrieve(url, "/tmp/torrent")
+                    urllib.urlretrieve(url, "/tmp/%s.torrent" % filename)
+                    subprocess.call(['xdg-open', '/tmp/%s.torrent' % filename])
                 except IOError, error:
                     yield "Torrentdatei konnte nicht heruntergeladen werden (%s)!" % error
-                    return
-
-                subprocess.call(['xdg-open', '/tmp/torrent' ])
+                except OSError, error:
+                    yield "Torrentdatei konnte nicht geöffnet werden (%s)!" % error
 
             def error(text):
                 gui.main_window.change_status(-1, text)
         
-            GeneratorTask(download_torrent, error).start(url)
+            GeneratorTask(download_torrent, error).start(url, dialog.filename)
 
         else: # normal
             email = app.config.get('general', 'email')                
             cache_dir = app.config.get('general', 'folder_trash_otrkeys')
             decoder = app.config.get('general', 'decoder')
             
-            if options[1] == 'decode':
-                output = app.config.get('general', 'folder_uncut_avis')
-                
-                command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password]
-                download = Download(command, dialog.filename, DownloadTypes.OTR_DECODE)     
+            if options[1] == 'decode':            
+                download = Download(dialog.filename, link=options[2], output=app.config.get('general', 'folder_uncut_avis'))
+                download.download_decode(decoder, cache_dir, email, password)
                                     
             elif options[1] == 'decodeandcut':
-                server = app.config.get('general', 'server')
-                output = app.config.get('general', 'folder_cut_avis')
-                cutlist_link = "%sgetfile.php?id=%s" % (server , options[3])
-                                
-                command = [decoder, "-b", "0", "-n", "-i", options[2], "-o", output, "-c", cache_dir, "-e", email, "-p", password, "-C", cutlist_link]
-                download = Download(command, dialog.filename, DownloadTypes.OTR_CUT)                    
+                cutlist = (app.config.get('general', 'server'), options[3]) # save server and id
                 
-            else:                
-                output = app.config.get('general', 'folder_new_otrkeys')
-                commands = {
-                    'wget': ["wget", "-c", "-P", output, options[1]],
-                    'curl': ["curl", "-o", os.path.join(output, dialog.filename), options[1]],
-                    'aria': ["aria2c", "-d", output, options[1]],
-                }
+                download = Download(dialog.filename, link=options[2], output=app.config.get('general', 'folder_cut_avis'))
+                download.download_decode(decoder, cache_dir, email, password, cutlist)
+                
+            else:          
+                download = Download(dialog.filename, link=options[1], output=app.config.get('general', 'folder_new_otrkeys'))
+                preferred = app.config.get('downloader', 'preferred_downloader')
+                if preferred != 'wget':
+                    preferred = 'aria2c'                    
 
-                download = Download(commands, dialog.filename, DownloadTypes.BASIC)
+                download.download_basic(preferred, app.config.get('downloader', 'aria2c'), app.config.get('downloader', 'wget'))
                 
             gui.main_window.treeview_download.add_objects(download)
             download.start() 
                                     
-        dialog.destroy()
-    else:
-        dialog.destroy()
-        return
+    dialog.destroy()
     
 class Add(BaseAction):
     def __init__(self, app, gui):

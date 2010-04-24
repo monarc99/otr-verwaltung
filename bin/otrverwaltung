@@ -141,6 +141,11 @@ class App:
                 'cutlist_hash': hashlib.md5(str(time.time())).hexdigest(),
                 'window_settings': ''
             },
+            'downloader': {
+                'preferred_downloader' : '',
+                'aria2c': ['aria2c'],
+                'wget': ['wget']
+            },
             'plugins': {
                 'enabled': 'Play',
                 'config': {} # used as plugin config storage
