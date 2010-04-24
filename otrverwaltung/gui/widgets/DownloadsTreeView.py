@@ -22,34 +22,6 @@ from otrverwaltung import path
 
 class DownloadsTreeView(gtk.TreeView):
 
-#        def callback_size(column, cell, model, iter, data=None):
-#            obj = model.get_value(iter, 0)
-#            if obj.size:
-#                cell.set_property('text', self.humanize_size(obj.size))
-#            else:
-#                cell.set_property('text', 'Unbekannt')
-#                    
-#        def callback_status(column, cell, model, iter, data=None):
-#            obj = model.get_value(iter, 0)
-
-#            text = {
-#                -1 : '',
-#                DownloadStatus.RUNNING : "running",
-#                DownloadStatus.STOPPED : "stopped",
-#                DownloadStatus.ERROR : "error",
-#                DownloadStatus.FINISHED : "finished"
-#            }
-#            cell.set_property('text', text[obj.status])            
-#                
-#        columns = [
-#            ("Status", None, callback_status),
-#            ("Dateiname", 'filename', None),
-#            ("Größe", None, callback_size),
-#            ("%", 'progress', None),
-#            ("Geschwindigkeit", 'speed', None),
-#            ("Restzeit", 'est', None)
-#        ]        
-
     def __init__(self):
         gtk.TreeView.__init__(self)
         
@@ -135,15 +107,24 @@ class CellRendererDownload(gtk.GenericCellRenderer):
         if pspec.name == 'download':
             self.cellrenderer_filename.set_property('markup', value.filename)            
             self.cellrenderer_progress.set_property('value', value.progress)
-            info_text = ""
+            info_text, text = "", ""
             if value.status != -1:
                 text, pixbuf = self.statuses[value.status]            
                 self.cellrenderer_pixbuf.set_property('pixbuf', pixbuf)
-                info_text += "<i>%s</i> - " % text
             
-            size = self.humanize_size(value.size) if value.size else "?"
+            infos = []
+            if value.size:
+                infos.append("Größe: %s" % self.humanize_size(value.size))
+            if value.speed:
+                infos.append("Geschwindigkeit: %s" % value.speed)
+            if value.est:
+                infos.append("Verbleibende Zeit: %s" % value.est)
             
-            info_text += "Größe: %s, Geschwindigkeit: %s, Verbleibende Zeit: %s" % (size, value.speed, value.est)
+            if infos:
+                info_text += "<i>%s</i> - " % text + ", ".join(infos)
+            else:
+                info_text += "<i>%s</i>" % text
+
             self.cellrenderer_info.set_property('markup', info_text)
 
     def humanize_size(self, bytes):
