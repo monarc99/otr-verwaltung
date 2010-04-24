@@ -266,7 +266,7 @@
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Es soll die Datei
-&lt;b&gt;abc.otrkey&lt;/b&gt;
+&lt;b&gt;?&lt;/b&gt;
 heruntergeladen werden.</property>
                         <property name="use_markup">True</property>
                         <property name="wrap">True</property>
@@ -381,6 +381,18 @@ heruntergeladen werden.</property>
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkLabel" id="label4">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">&lt;span font-size='small'&gt;Hinweis: Dekodiert/Geschnitten downloaden sind Features, die von onlinetvrecorder.com entwickelt werden und noch experimentiell sind. F&#xFC;r weitere Details siehe otrforum.com.&lt;/span&gt;</property>
+                            <property name="use_markup">True</property>
+                            <property name="wrap">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkCheckButton" id="checkbutton_decode">
                             <property name="label" translatable="yes">Dekodiert downloaden</property>
                             <property name="visible">True</property>
@@ -390,7 +402,7 @@ heruntergeladen werden.</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -426,7 +438,7 @@ heruntergeladen werden.</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
@@ -461,7 +473,7 @@ heruntergeladen werden.</property>
                             </child>
                           </object>
                           <packing>
-                            <property name="position">3</property>
+                            <property name="position">4</property>
                           </packing>
                         </child>
                       </object>
@@ -487,7 +499,8 @@ heruntergeladen werden.</property>
                       <object class="GtkLabel" id="label_torrent">
                         <property name="visible">True</property>
                         <property name="ypad">4</property>
-                        <property name="label" translatable="yes">Download via Torrent (&lt;b&gt;Torrents werden gesucht...&lt;/b&gt;)</property>
+                        <property name="label" translatable="yes">Download via Torrent (&lt;b&gt;Torrents werden gesucht...&lt;/b&gt;)
+&lt;span size='small'&gt;Es wird das Standard-Torrentprogramm ge&#xF6;ffnet.&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                     </child>
