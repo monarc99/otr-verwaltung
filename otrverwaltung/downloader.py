@@ -21,16 +21,8 @@ import os.path
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.cutlists import Cutlist
-from otrverwaltung.constants import DownloadStatus
+from otrverwaltung.constants import DownloadStatus, DownloadTypes
 from otrverwaltung import fileoperations
-
-class DownloadTypes:
-    TORRENT     = 0
-
-    BASIC       = 4
-
-    OTR_DECODE  = 2
-    OTR_CUT     = 3    
 
 class Download:
     
@@ -39,64 +31,160 @@ class Download:
         self.link = link
         self.output = output
            
-        self.size = None
-        self.progress = 0
-        self.speed = "" 
-        self.est = ""  
-        
-        self.status = -1
-        self.message_short = ''
-        
+        self.information = {
+            'status' : -1,
+            'size' : None,
+            'progress' : 0,
+            'speed' : '',
+            'est' : '',
+            'message_short' : ''
+        }
+                
         self.__task = None
         self.__process = None
     
-    def download_basic(self, preferred_downloader, aria2c, wget):
-        self.download_type = DownloadTypes.BASIC
-        self.preferred_downloader = preferred_downloader
+    def download_torrent(self, aria2c_torrent):
+        self.information['download_type'] = DownloadTypes.TORRENT
+        self.command = aria2c_torrent + ["-d", self.output, self.link]
         
-        self.commands = {
+        self.information['message_short'] = 'Torrent-Download'
+        # additional torrent information
+        self.information['seeders'] = None
+        self.information['upspeed'] = None
+        self.information['uploaded'] = None
+    
+    def download_basic(self, preferred_downloader, aria2c, wget):
+        self.information['download_type'] = DownloadTypes.BASIC
+        self.information['preferred_downloader'] = preferred_downloader
+        
+        self.command = {
             'aria2c': aria2c + ["-d", self.output, self.link],
             'wget'  : wget + ["-c", "-P", self.output, self.link]
         }
     
     def download_decode(self, decoder, cache_dir, email, password, cutlist=None):
         if cutlist:
-            self.download_type = DownloadTypes.OTR_CUT
-            self.cutlist_server, self.cutlist_id = cutlist
+            self.information['download_type'] = DownloadTypes.OTR_CUT
+            self.information['cutlist_server'] = cutlist[0] 
+            self.information['cutlist_id'] = cutlist[1]
         else:
-            self.download_type = DownloadTypes.OTR_DECODE
-        self.cache_dir = cache_dir
+            self.information['download_type'] = DownloadTypes.OTR_DECODE
+        self.information['cache_dir'] = cache_dir
         self.command = [decoder, "-b", "0", "-n", "-i", self.link, "-o", self.output, "-c", cache_dir, "-e", email, "-p", password]        
     
     def _clear(self):
-        self.est = ""
-        self.speed = ""    
+        self.information['est'] = ""
+        self.information['speed'] = ""    
       
     def _finished(self):
-        self.status = DownloadStatus.FINISHED
-        self.est = ""
+        self.information['status'] = DownloadStatus.FINISHED
+        self.information['progress'] = 100
+        self.information['est'] = ""
 
+    # unused by now
+    def _parse_time(time):
+        """ Takes a string '5m' or '6h2m59s' and calculates seconds. """
+        m = re.match('((?P<h>[0-9]*)h)?((?P<m>[0-9]{1,2})m)?((?P<s>[0-9]{1,2})s)?', time)
+        if m:
+            d = m.groupdict()
+            time = 60 * 60 * int(m.group('h')) if m.group('h') else 0
+            time = (time + 60 * int(m.group('m'))) if m.group('m') else time
+            time = (time + int(m.group('s'))) if m.group('s') else time
+            return time
+        else:
+            return 0
+    
     def _check_for_errors(self, text):
         words = ['error', 'fehler']
         for word in words:
             if word in text.lower():
-                self.status = DownloadStatus.ERROR
+                self.information['status'] = DownloadStatus.ERROR
                 return True
         return False
         
     def _download(self):   
         self.log = []
         
-        self.status = DownloadStatus.RUNNING
+        self.information['status'] = DownloadStatus.RUNNING
       
-        if self.download_type == DownloadTypes.BASIC:            
-            if self.preferred_downloader == 'wget':
+        if self.information['download_type'] == DownloadTypes.TORRENT:
+            try:                
+                self.__process = subprocess.Popen(self.command, stdout=subprocess.PIPE)
+            except OSError, error:
+                self.information['status'] = DownloadStatus.ERROR
+                self.information['message_short'] = 'Aria2c ist nicht installiert.'
+                yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.command['aria2c']), error)
+                return
+                
+            while True:
+                error_code = self.__process.poll()
+                if error_code != None:
+                    if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
+                        if error_code == 0:
+                            self._finished()
+                        else:
+                            self.information['status'] = DownloadStatus.ERROR
+                    break
+                          
+                line = self.__process.stdout.readline().strip()
+                self._check_for_errors(line)
+        
+                if "%" in line:
+                    # get size
+                    if not self.information['size']:
+                        try:
+                            # aria2c gives size always in MiB (hopefully)
+                            size = re.findall('SIZE:.*/(.*)MiB\(', line)[0]
+                            size = size.replace(',', '')
+                            size = int(round(float(size))) * 1024 * 1024
+                            self.information['size'] = size
+                            yield line
+                        except:
+                            pass
+
+                    # get progress
+                    result = re.findall('([0-9]{1,3})%', line) 
+                    if result:                            
+                        self.information['progress'] = int(result[0])   
+
+                    # get speed, est                
+                    if "UP" in line:
+                        result = re.findall('SPD:(.*) UP:(.*)\((.*)\) ETA:(.*)]', line)
+                        if result:                   
+                            self.information['speed'] = result[0][0]
+                            self.information['upspeed'] = result[0][1]
+                            self.information['uploaded'] = result[0][2]
+                            self.information['est'] = result[0][3]                        
+                    else:
+                        result = re.findall('SPD:(.*) .*ETA:(.*)]', line)
+                        if result:                   
+                            self.information['speed'] = result[0][0]
+                            self.information['est'] = result[0][1]                                           
+                        
+                    # get seeder info
+                    result = re.findall('SEED:([0-9]*) ', line)                   
+                    if result:
+                        self.information['seeders'] = result[0]
+                    
+                    self.update_view()
+                else:        
+                    yield line
+
+                time.sleep(1)
+            
+            ### Process is terminated                
+            stdout = self.__process.stdout.read().strip()
+            self._check_for_errors(stdout)
+            yield stdout
+      
+        elif self.information['download_type'] == DownloadTypes.BASIC:            
+            if self.information['preferred_downloader'] == 'wget':
                 try:                
-                    self.__process = subprocess.Popen(self.commands['wget'], stderr=subprocess.PIPE)
+                    self.__process = subprocess.Popen(self.command['wget'], stderr=subprocess.PIPE)
                 except OSError, error:
-                    self.status = DownloadStatus.ERROR
-                    self.message_short = 'Wget ist nicht installiert.'
-                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.commands['wget']), error)
+                    self.information['status'] = DownloadStatus.ERROR
+                    self.information['message_short'] = 'Wget ist nicht installiert.'
+                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.command['wget']), error)
                     return
                     
                 sleep = 0
@@ -104,22 +192,22 @@ class Download:
                     line = self.__process.stderr.readline().strip()
                             
                     if line:
-                        if not self.size:
+                        if not self.information['size']:
                             result = re.findall(': ([0-9]*) \(', line)
                             if result:
-                                self.size = int(result[0])
+                                self.information['size'] = int(result[0])
                         
                         if "%" in line: 
                             sleep = 1                                               
                             result = re.findall('([0-9]{1,3})% (.*)[ =](.*)', line)
 
                             if result:
-                                self.progress = int(result[0][0])
-                                self.speed = result[0][1]
-                                if self.progress == 100:
+                                self.information['progress'] = int(result[0][0])
+                                self.information['speed'] = result[0][1]
+                                if self.information['progress'] == 100:
                                     self._finished()
                                 else:
-                                    self.est = result[0][2]
+                                    self.information['est'] = result[0][2]
                        
                         else:        
                             yield line    
@@ -133,35 +221,35 @@ class Download:
             
             else:
                 try:                
-                    self.__process = subprocess.Popen(self.commands['aria2c'], stdout=subprocess.PIPE)
+                    self.__process = subprocess.Popen(self.command['aria2c'], stdout=subprocess.PIPE)
                 except OSError, error:
-                    self.status = DownloadStatus.ERROR
-                    self.message_short = 'Aria2c ist nicht installiert.'
-                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.commands['aria2c']), error)
+                    self.information['status'] = DownloadStatus.ERROR
+                    self.information['message_short'] = 'Aria2c ist nicht installiert.'
+                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.command['aria2c']), error)
                     return
                     
                 while True:
                     error_code = self.__process.poll()
                     if error_code != None:
-                        if not self.status in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
+                        if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
                             if error_code == 0:
                                 self._finished()
                             else:
-                                self.status = DownloadStatus.ERROR
+                                self.information['status'] = DownloadStatus.ERROR
                         break
                     
                     line = self.__process.stdout.readline().strip()
                     self._check_for_errors(line)
                             
                     if "%" in line:
-                        if not self.size:
+                        if not self.information['size']:
                             try:
                                 # aria2c gives size always in MiB (hopefully)
                                 size = re.findall('.*FileAlloc.*/(.*)\(', line)[0]
                                 size = size.strip('MiB')
                                 size = size.replace(',', '')
                                 size = int(round(float(size))) * 1024 * 1024
-                                self.size = size
+                                self.information['size'] = size
                                 self.update_view()
                                 yield line
                             except:
@@ -170,9 +258,9 @@ class Download:
                         result = re.findall('\(([0-9]{1,3})%\).*SPD:(.*) ETA:(.*)]', line)
        
                         if result:                            
-                            self.progress = int(result[0][0])
-                            self.speed = result[0][1]
-                            self.est = result[0][2]                       
+                            self.information['progress'] = int(result[0][0])
+                            self.information['speed'] = result[0][1]
+                            self.information['est'] = result[0][2]                       
                             self.update_view()
                     else:        
                         yield line
@@ -186,8 +274,8 @@ class Download:
                 
             self.update_view()
             
-        elif self.download_type in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
-            if self.download_type == DownloadTypes.OTR_CUT:
+        elif self.information['download_type'] in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
+            if self.information['download_type'] == DownloadTypes.OTR_CUT:
                 cutlist = Cutlist()
                 cutlist.id = self.cutlist_id
                 cutlist.download(self.cutlist_server, os.path.join(self.output, self.filename))
@@ -198,8 +286,8 @@ class Download:
             try:
                 self.__process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except OSError, error:
-                    self.status = DownloadStatus.ERROR
-                    self.message_short = 'Dekoder nicht gefunden.'
+                    self.information['status'] = DownloadStatus.ERROR
+                    self.information['message_short'] = 'Dekoder nicht gefunden.'
                     yield "Der Pfad zum Dekoder scheint nicht korrekt zu sein. Der folgende Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
                     return
 
@@ -217,11 +305,11 @@ class Download:
                     
                     result = re.findall("([0-9]{1,3})%", line)
                     if result:
-                        self.progress = int(result[0])
+                        self.information['progress'] = int(result[0])
                         
                     result = re.findall("[0-9]{1,3}%.*: (.*)", line)
                     if result:
-                        self.speed = result[0]
+                        self.information['speed'] = result[0]
                     
                     self.update_view()
                     
@@ -233,20 +321,20 @@ class Download:
                     
             stderr = self.__process.stderr.read()
             if "invalid option" in stderr:
-                self.status = DownloadStatus.ERROR
-                self.message_short = 'Der Dekoder ist veraltet.'
+                self.information['status'] = DownloadStatus.ERROR
+                self.information['message_short'] = 'Der Dekoder ist veraltet.'
                 yield "Es ist ein veralteter Dekoder angegeben!\n"
                 
             yield stderr.strip()
             self._check_for_errors(stderr)
             
-            if not self.status in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
+            if not self.information['status'] in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
                 # remove otrkey and .segments file
-                fileoperations.remove_file(os.path.join(self.cache_dir, self.filename))
-                fileoperations.remove_file(os.path.join(self.cache_dir, self.filename + '.segments'))
+                fileoperations.remove_file(os.path.join(self.information['cache_dir'], self.filename))
+                fileoperations.remove_file(os.path.join(self.information['cache_dir'], self.filename + '.segments'))
 
-                if self.download_type == DownloadTypes.OTR_CUT:
+                if self.information['download_type'] == DownloadTypes.OTR_CUT:
                     # rename file to "cut" filename
                     filename = os.path.join(self.output, self.filename.rstrip(".otrkey"))
                     new_filename, extension = os.path.splitext(filename)
@@ -261,20 +349,21 @@ class Download:
         def loop(*args):
             self.log.append(args[0])
             
-        if not self.status == DownloadStatus.RUNNING:
+        if not self.information['status'] == DownloadStatus.RUNNING:
             self.__task = GeneratorTask(self._download, loop)
             self.__task.start()
         
     def stop(self):    
-        self._clear()
-        self.update_view()        
-        self.status = DownloadStatus.STOPPED    
-            
-        if self.__process:
-            try:
-                self.__process.kill()
-            except OSError:
-                pass
-    
-        if self.__task:
-            self.__task.stop()
+        if self.information['status'] == DownloadStatus.RUNNING:
+            self._clear()
+            self.update_view()        
+            self.information['status'] = DownloadStatus.STOPPED    
+                
+            if self.__process:
+                try:
+                    self.__process.kill()
+                except OSError:
+                    pass
+        
+            if self.__task:
+                self.__task.stop()

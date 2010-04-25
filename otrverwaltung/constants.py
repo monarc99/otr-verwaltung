@@ -71,6 +71,12 @@ class Program:
     AVIDEMUX    = 0
     VIRTUALDUB  = 1
     
+class DownloadTypes:
+    TORRENT     = 0
+    BASIC       = 1
+    OTR_DECODE  = 2
+    OTR_CUT     = 3      
+    
 class DownloadStatus:
     RUNNING     = 0
     STOPPED     = 1

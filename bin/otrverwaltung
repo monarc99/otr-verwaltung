@@ -144,7 +144,8 @@ class App:
             'downloader': {
                 'preferred_downloader' : '',
                 'aria2c': ['aria2c'],
-                'wget': ['wget']
+                'wget': ['wget'],
+                'aria2c_torrent': ['aria2c']
             },
             'plugins': {
                 'enabled': 'Play',

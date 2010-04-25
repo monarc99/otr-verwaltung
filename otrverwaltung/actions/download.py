@@ -41,20 +41,23 @@ def add_download(via_link, app, gui, link=None):
             user_id = options[1]
             hash = hashlib.md5(password).hexdigest()
             url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
-                        
-            def download_torrent(url, filename):
-                try:
-                    urllib.urlretrieve(url, "/tmp/%s.torrent" % filename)
-                    subprocess.call(['xdg-open', '/tmp/%s.torrent' % filename])
-                except IOError, error:
-                    yield "Torrentdatei konnte nicht heruntergeladen werden (%s)!" % error
-                except OSError, error:
-                    yield "Torrentdatei konnte nicht geöffnet werden (%s)!" % error
+                      
+#            def download_torrent(url, filename):
+#                try:
+#                    urllib.urlretrieve(url, "/tmp/%s.torrent" % filename)
+#                    subprocess.call(['xdg-open', '/tmp/%s.torrent' % filename])
+#                except IOError, error:
+#                    yield "Torrentdatei konnte nicht heruntergeladen werden (%s)!" % error
+#                except OSError, error:
+#                    yield "Torrentdatei konnte nicht geöffnet werden (%s)!" % error
+#
+#            def error(text):
+#                gui.main_window.change_status(-1, text)
+#        
+#            GeneratorTask(download_torrent, error).start(url, dialog.filename)
 
-            def error(text):
-                gui.main_window.change_status(-1, text)
-        
-            GeneratorTask(download_torrent, error).start(url, dialog.filename)
+            download = Download(dialog.filename, link=url, output=app.config.get('general', 'folder_new_otrkeys'))
+            download.download_torrent(app.config.get('downloader', 'aria2c_torrent')) 
 
         else: # normal
             email = app.config.get('general', 'email')                
@@ -79,8 +82,8 @@ def add_download(via_link, app, gui, link=None):
 
                 download.download_basic(preferred, app.config.get('downloader', 'aria2c'), app.config.get('downloader', 'wget'))
                 
-            gui.main_window.treeview_download.add_objects(download)
-            download.start() 
+        gui.main_window.treeview_download.add_objects(download)
+        download.start()
                                     
     dialog.destroy()
     

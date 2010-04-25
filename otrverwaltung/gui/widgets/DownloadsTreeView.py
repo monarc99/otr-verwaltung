@@ -17,7 +17,7 @@
 import gtk
 import gobject
 
-from otrverwaltung.constants import DownloadStatus
+from otrverwaltung.constants import DownloadStatus, DownloadTypes
 from otrverwaltung import path
 
 class DownloadsTreeView(gtk.TreeView):
@@ -110,23 +110,27 @@ class CellRendererDownload(gtk.GenericCellRenderer):
             else:
                 self.cellrenderer_filename.set_property('markup', 'Dateiname nicht bekannt.')            
                 
-            self.cellrenderer_progress.set_property('value', value.progress)
+            self.cellrenderer_progress.set_property('value', value.information['progress'])
             info_text, text = "", ""
 
-            if value.status != -1:
-                text, pixbuf = self.statuses[value.status]            
+            if value.information['status'] != -1:
+                text, pixbuf = self.statuses[value.information['status']]            
                 self.cellrenderer_pixbuf.set_property('pixbuf', pixbuf)
             
-                if value.message_short:
-                    text += ': %s' % value.message_short
+                if value.information['message_short']:
+                    text += ' - %s' % value.information['message_short']
             
             infos = []
-            if value.size:
-                infos.append("Größe: %s" % self.humanize_size(value.size))
-            if value.speed:
-                infos.append("Geschwindigkeit: %s" % value.speed)
-            if value.est:
-                infos.append("Verbleibende Zeit: %s" % value.est)
+            if value.information['size']:
+                infos.append("Größe: %s" % self.humanize_size(value.information['size']))
+            if value.information['speed']:
+                infos.append("Geschwindigkeit: %s" % value.information['speed'])
+            if value.information['est']:
+                infos.append("Verbleibende Zeit: %s" % value.information['est'])
+            
+            if value.information['download_type'] == DownloadTypes.TORRENT:
+                if value.information['seeders'] is not None:
+                    infos.append("%s Seeder" % value.information['seeders'])
             
             if infos:
                 info_text += "<i>%s</i> - " % text + ", ".join(infos)
