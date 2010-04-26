@@ -39,7 +39,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     
     def get_download_options(self):
         if self.builder.get_object('radiobutton_torrent').get_active():
-            return ('torrent', self.user_id)
+            return ('torrent',)
         else:
             link = self.builder.get_object('entry_link').get_text()
             
@@ -154,9 +154,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
                 request = urllib2.Request("http://www.onlinetvrecorder.com/index.php?%s" % params, headers={ 'Cookie': "PHPSESSID=" + sessid})
                 response = urllib2.urlopen(request).read()
 
-                result = re.findall(r"<td valign=top bgcolor='' nowrap>([0-9]*)</td>", response)
-
-                self.user_id = re.findall(r'"userid","([0-9]*)"', response)[0]
+                result = re.findall(r"<td valign=top bgcolor='' nowrap>([0-9]*)</td>", response)                
                             
                 if result:                           
                     yield 'torrent', int(result[0]), int(result[1])

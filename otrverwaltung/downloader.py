@@ -18,6 +18,8 @@ import subprocess
 import re
 import time
 import os.path
+import base64
+import hashlib
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.cutlists import Cutlist
@@ -26,51 +28,53 @@ from otrverwaltung import fileoperations
 
 class Download:
     
-    def __init__(self, filename, link, output):         
+    def __init__(self, config, filename, link=None):
+        """ Torrent: link=None """
+    
+        self._config = config
+           
         self.filename = filename
         self.link = link
-        self.output = output
            
         self.information = {
+            'output' : '',
             'status' : -1,
             'size' : None,
             'progress' : 0,
             'speed' : '',
             'est' : '',
-            'message_short' : ''
+            'message_short' : '',
+            # Torrent
+            'seeders': None,
+            'upspeed': None,
+            'uploaded': None
         }
                 
         self.__task = None
         self.__process = None
     
-    def download_torrent(self, aria2c_torrent):
-        self.information['download_type'] = DownloadTypes.TORRENT
-        self.command = aria2c_torrent + ["-d", self.output, self.link]
-        
-        self.information['message_short'] = 'Torrent-Download'
-        # additional torrent information
-        self.information['seeders'] = None
-        self.information['upspeed'] = None
-        self.information['uploaded'] = None
+    #
+    # Init methods for action
+    # 
     
-    def download_basic(self, preferred_downloader, aria2c, wget):
+    def download_torrent(self):
+        self.information['download_type'] = DownloadTypes.TORRENT
+           
+    def download_basic(self, preferred_downloader):
         self.information['download_type'] = DownloadTypes.BASIC
         self.information['preferred_downloader'] = preferred_downloader
-        
-        self.command = {
-            'aria2c': aria2c + ["-d", self.output, self.link],
-            'wget'  : wget + ["-c", "-P", self.output, self.link]
-        }
     
-    def download_decode(self, decoder, cache_dir, email, password, cutlist=None):
-        if cutlist:
-            self.information['download_type'] = DownloadTypes.OTR_CUT
-            self.information['cutlist_server'] = cutlist[0] 
-            self.information['cutlist_id'] = cutlist[1]
+    def download_decode(self, cutlist_id=None):
+        if cutlist_id:
+            self.information['download_type'] = DownloadTypes.OTR_CUT  
+            self.information['cutlist_id'] = cutlist_id
+            self.information['cutlist'] = None
         else:
             self.information['download_type'] = DownloadTypes.OTR_DECODE
-        self.information['cache_dir'] = cache_dir
-        self.command = [decoder, "-b", "0", "-n", "-i", self.link, "-o", self.output, "-c", cache_dir, "-e", email, "-p", password]        
+                
+    #
+    # Convenience methods used only by this class
+    #
     
     def _clear(self):
         self.information['est'] = ""
@@ -101,6 +105,10 @@ class Download:
                 self.information['status'] = DownloadStatus.ERROR
                 return True
         return False
+   
+    #
+    # Download
+    #     
         
     def _download(self):   
         self.log = []
@@ -108,12 +116,21 @@ class Download:
         self.information['status'] = DownloadStatus.RUNNING
       
         if self.information['download_type'] == DownloadTypes.TORRENT:
+            password = base64.b64decode(self._config.get('general', 'password'))
+            hash = hashlib.md5(password).hexdigest()
+            email = self._config.get('general', 'email')            
+            url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, email, hash)
+            
+            self.information['message_short'] = 'Torrent-Download'
+            self.information['output'] = self._config.get('general', 'folder_new_otrkeys')
+            command = self._config.get('downloader', 'aria2c_torrent') + ["-d", self.information['output'], url]
+            
             try:                
-                self.__process = subprocess.Popen(self.command, stdout=subprocess.PIPE)
+                self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
             except OSError, error:
                 self.information['status'] = DownloadStatus.ERROR
                 self.information['message_short'] = 'Aria2c ist nicht installiert.'
-                yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.command['aria2c']), error)
+                yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command['aria2c']), error)
                 return
                 
             while True:
@@ -178,13 +195,17 @@ class Download:
             yield stdout
       
         elif self.information['download_type'] == DownloadTypes.BASIC:            
-            if self.information['preferred_downloader'] == 'wget':
+            self.information['output'] = self._config.get('general', 'folder_new_otrkeys')
+            
+            if self.information['preferred_downloader'] == 'wget':                
+                command = self._config.get('downloader', 'wget') + ["-c", "-P", self.information['output'], self.link]
+                
                 try:                
-                    self.__process = subprocess.Popen(self.command['wget'], stderr=subprocess.PIPE)
+                    self.__process = subprocess.Popen(command, stderr=subprocess.PIPE)
                 except OSError, error:
                     self.information['status'] = DownloadStatus.ERROR
                     self.information['message_short'] = 'Wget ist nicht installiert.'
-                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.command['wget']), error)
+                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
                     return
                     
                 sleep = 0
@@ -220,12 +241,13 @@ class Download:
                 yield self.__process.stderr.read().strip()
             
             else:
+                command = self._config.get('downloader', 'aria2c') + ["-d", self.information['output'], self.link]
                 try:                
-                    self.__process = subprocess.Popen(self.command['aria2c'], stdout=subprocess.PIPE)
+                    self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
                 except OSError, error:
                     self.information['status'] = DownloadStatus.ERROR
                     self.information['message_short'] = 'Aria2c ist nicht installiert.'
-                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(self.command['aria2c']), error)
+                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
                     return
                     
                 while True:
@@ -238,8 +260,7 @@ class Download:
                                 self.information['status'] = DownloadStatus.ERROR
                         break
                     
-                    line = self.__process.stdout.readline().strip()
-                    self._check_for_errors(line)
+                    line = self.__process.stdout.readline().strip()                    
                             
                     if "%" in line:
                         if not self.information['size']:
@@ -275,13 +296,24 @@ class Download:
             self.update_view()
             
         elif self.information['download_type'] in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
+            decoder = self._config.get('general', 'decoder')
+            email = self._config.get('general', 'email')
+            password = base64.b64decode(self._config.get('general', 'password'))        
+            cache_dir = self._config.get('general', 'folder_trash_otrkeys')
+            command = [decoder, "-b", "0", "-n", "-i", self.link, "-e", email, "-p", password, "-c", cache_dir]
+            
             if self.information['download_type'] == DownloadTypes.OTR_CUT:
-                cutlist = Cutlist()
-                cutlist.id = self.cutlist_id
-                cutlist.download(self.cutlist_server, os.path.join(self.output, self.filename))
-                command = self.command + ["-C", cutlist.local_filename]
+                self.information['output'] = self._config.get('general', 'folder_cut_avis')
+                if not self.information['cutlist']:
+                    cutlist = Cutlist()
+                    cutlist.id = self.information['cutlist_id']
+                    cutlist.download(self._config.get('general', 'server'), os.path.join(self.information['output'], self.filename))
+                    self.information['cutlist'] = cutlist
+                    
+                command += ["-o", self.information['output'], "-C", self.information['cutlist'].local_filename]
             else:
-                command = self.command
+                self.information['output'] = self._config.get('general', 'folder_uncut_avis')                  
+                command += ["-o", self.information['output']]
             
             try:
                 self.__process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -331,8 +363,8 @@ class Download:
             if not self.information['status'] in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
                 # remove otrkey and .segments file
-                fileoperations.remove_file(os.path.join(self.information['cache_dir'], self.filename))
-                fileoperations.remove_file(os.path.join(self.information['cache_dir'], self.filename + '.segments'))
+                fileoperations.remove_file(os.path.join(cache_dir, self.filename))
+                fileoperations.remove_file(os.path.join(cache_dir, self.filename + '.segments'))
 
                 if self.information['download_type'] == DownloadTypes.OTR_CUT:
                     # rename file to "cut" filename
@@ -348,7 +380,7 @@ class Download:
     def start(self):    
         def loop(*args):
             self.log.append(args[0])
-            
+        
         if not self.information['status'] == DownloadStatus.RUNNING:
             self.__task = GeneratorTask(self._download, loop)
             self.__task.start()

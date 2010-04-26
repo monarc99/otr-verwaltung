@@ -17,14 +17,8 @@
 import gtk
 from otrverwaltung.gui import AddDownloadDialog
 from otrverwaltung.downloader import Download
-import base64
-import urllib
-import hashlib
-import os.path
-import subprocess
 
 from otrverwaltung.actions.baseaction import BaseAction
-from otrverwaltung.GeneratorTask import GeneratorTask
 
 def add_download(via_link, app, gui, link=None):
     if link:
@@ -34,14 +28,8 @@ def add_download(via_link, app, gui, link=None):
         
     if dialog.run() == gtk.RESPONSE_OK:           
         options = dialog.get_download_options()
-        
-        password = base64.b64decode(app.config.get('general', 'password')) 
-        
+                
         if options[0] == 'torrent':
-            user_id = options[1]
-            hash = hashlib.md5(password).hexdigest()
-            url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&userid=%s&mode=free&hash=%s' % (dialog.filename, user_id, hash)
-                      
 #            def download_torrent(url, filename):
 #                try:
 #                    urllib.urlretrieve(url, "/tmp/%s.torrent" % filename)
@@ -56,31 +44,22 @@ def add_download(via_link, app, gui, link=None):
 #        
 #            GeneratorTask(download_torrent, error).start(url, dialog.filename)
 
-            download = Download(dialog.filename, link=url, output=app.config.get('general', 'folder_new_otrkeys'))
-            download.download_torrent(app.config.get('downloader', 'aria2c_torrent')) 
+            download = Download(app.config, dialog.filename)
+            download.download_torrent() 
 
         else: # normal
-            email = app.config.get('general', 'email')                
-            cache_dir = app.config.get('general', 'folder_trash_otrkeys')
-            decoder = app.config.get('general', 'decoder')
             
             if options[1] == 'decode':            
-                download = Download(dialog.filename, link=options[2], output=app.config.get('general', 'folder_uncut_avis'))
-                download.download_decode(decoder, cache_dir, email, password)
-                                    
-            elif options[1] == 'decodeandcut':
-                cutlist = (app.config.get('general', 'server'), options[3]) # save server and id
-                
-                download = Download(dialog.filename, link=options[2], output=app.config.get('general', 'folder_cut_avis'))
-                download.download_decode(decoder, cache_dir, email, password, cutlist)
-                
+                download = Download(app.config, dialog.filename, link=options[2])
+                download.download_decode()
+                                                    
+            elif options[1] == 'decodeandcut':                
+                download = Download(app.config, dialog.filename, link=options[2])
+                download.download_decode(options[3])   
+                             
             else:          
-                download = Download(dialog.filename, link=options[1], output=app.config.get('general', 'folder_new_otrkeys'))
-                preferred = app.config.get('downloader', 'preferred_downloader')
-                if preferred != 'wget':
-                    preferred = 'aria2c'                    
-
-                download.download_basic(preferred, app.config.get('downloader', 'aria2c'), app.config.get('downloader', 'wget'))
+                download = Download(app.config, dialog.filename, link=options[1])
+                download.download_basic(app.config.get('downloader', 'preferred_downloader'))
                 
         gui.main_window.treeview_download.add_objects(download)
         download.start()
