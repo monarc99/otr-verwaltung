@@ -35,21 +35,27 @@ def __error(message_text):
                 
     dialog.run()
     dialog.destroy()
+
+def handle_error(error_cb, message):
+    if error_cb:
+        error_cb(message)
+    else:
+        print message
                     
-def remove_file(filename):
+def remove_file(filename, error_cb=__error):
     """ Entfernt die angegebene Datei. """
 
     print "[Fileoperations] Remove ", filename
     try:
         os.remove(filename)
     except Exception, e:
-        __error("Fehler beim Löschen von %s (%s)." % (filename, e))
+        handle_error(error_cb, "Fehler beim Löschen von %s (%s)." % (filename, e))
     
-def rename_file(old_filename, new_filename):
+def rename_file(old_filename, new_filename, error_cb=__error):
     """ Benennt eine Datei um. Wenn die Datei bereits existiert, wird der neue Name um eine Zahl erweitert. """
        
     if old_filename == new_filename:
-        __error("Umbenennen: Die beiden Dateinamen stimmen überein! (%s)" % old_filename)
+        handle_error(error_cb, "Umbenennen: Die beiden Dateinamen stimmen überein! (%s)" % old_filename)
         return
 
     new_filename = make_unique_filename(new_filename)
@@ -59,17 +65,18 @@ def rename_file(old_filename, new_filename):
     try:        
         os.rename(old_filename, new_filename)
     except Exception, e:
-        __error("Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))
+        handle_error(error_cb, "Fehler beim Umbenennen von %s nach %s (%s)." % (old_filename, new_filename, e))
+        return
     
     return new_filename
 
-def move_file(filename, target):
+def move_file(filename, target, error_cb=__error):
     """ Verschiebt eine Datei in den angegebenen Ordner."""
     
     new_filename = join(target, basename(filename))
     
     if exists(new_filename):
-        __error("Umbenennen: Die Datei existiert bereits! (%s)" % new_filename)
+        handle_error(error_cb, "Umbenennen: Die Datei existiert bereits! (%s)" % new_filename)
         return
     
     print "[Fileoperations] Move %s to %s" % (filename, target)
@@ -79,7 +86,7 @@ def move_file(filename, target):
         try:
             shutil.move(filename, target)
         except Exception:
-            __error("Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
+            handle_error(error_cb, "Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
 
 def make_unique_filename(filename):
     """ Gleicht den gegebenen Dateinamen an, sodass  """

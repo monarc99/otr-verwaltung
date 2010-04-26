@@ -387,27 +387,30 @@ class Download:
             
             ### Process is terminated
                     
-            stderr = self.__process.stderr.read()
-            if "invalid option" in stderr:
+            stderr = self.__process.stderr.read().strip()
+            if stderr:
                 self.information['status'] = DownloadStatus.ERROR
-                self.information['message_short'] = 'Der Dekoder ist veraltet.'
-                yield "Es ist ein veralteter Dekoder angegeben!\n"
-                
-            yield stderr.strip()
+                if "invalid option" in stderr:           
+                    self.information['message_short'] = 'Der Dekoder ist veraltet.'
+                    yield "Es ist ein veralteter Dekoder angegeben!\n"
+                else:
+                    self.information['message_short'] = stderr
+                    yield stderr
+         
             self._check_for_errors(stderr)
             
             if not self.information['status'] in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
                 # remove otrkey and .segments file
-                fileoperations.remove_file(os.path.join(cache_dir, self.filename))
-                fileoperations.remove_file(os.path.join(cache_dir, self.filename + '.segments'))
+                fileoperations.remove_file(os.path.join(cache_dir, self.filename), None)
+                fileoperations.remove_file(os.path.join(cache_dir, self.filename + '.segments'), None)
 
                 if self.information['download_type'] == DownloadTypes.OTR_CUT:
                     # rename file to "cut" filename
-                    filename = os.path.join(self.output, self.filename.rstrip(".otrkey"))
+                    filename = os.path.join(self.information['output'], self.filename.rstrip(".otrkey"))
                     new_filename, extension = os.path.splitext(filename)
                     new_filename += ".cut" + extension
-                    fileoperations.rename_file(filename, new_filename)
+                    fileoperations.rename_file(filename, new_filename, None)
                                        
                     #TODO: Zusammenfassungsdialoganzeigemöglichkeit einblenden
                     
