@@ -504,7 +504,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
     def on_treeview_download_row_activated(self, treeview, path, view_colum, data=None):    
         iter = treeview.get_model().get_iter(path)
         log = treeview.get_model().get_value(iter, 0).log
-        self.gui.message_info_box("\n".join(log))
+        self.gui.message_info_box(log)
                
     def _on_menu_check_update_activate(self, widget, data=None):
         current_version = open(path.getdatapath("VERSION"), 'r').read().strip()

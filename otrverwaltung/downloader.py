@@ -112,14 +112,13 @@ class Download:
     #     
         
     def _download(self):   
-        self.log = []
+        self.log = ''
         
         self.information['status'] = DownloadStatus.RUNNING
       
         if self.information['download_type'] == DownloadTypes.TORRENT:            
             # download torrent if necessary
-            torrent_filename = os.path.join(self._config.get('general', 'folder_new_otrkeys'), self.filename + '.torrent')
-            print torrent_filename
+            torrent_filename = os.path.join(self._config.get('general', 'folder_new_otrkeys'), self.filename + '.torrent')            
             if not os.path.exists(torrent_filename):
                 password = base64.b64decode(self._config.get('general', 'password'))
                 hash = hashlib.md5(password).hexdigest()
@@ -401,7 +400,7 @@ class Download:
                 
     def start(self):    
         def loop(*args):
-            self.log.append(args[0])
+            self.log += "%s\n" % args[0]
         
         if not self.information['status'] == DownloadStatus.RUNNING:
             self.__task = GeneratorTask(self._download, loop)
