@@ -567,6 +567,14 @@ class MainWindow(gtk.Window, gtk.Buildable):
             if not self.gui.question_box("Das Programm arbeitet noch. Soll wirklich abgebrochen werden?"):        
                 return True # won't be destroyed
         
+        for row in self.treeview_download.liststore:
+            if row[0].information['status'] == DownloadStatus.RUNNING:
+                if not self.gui.question_box("Es gibt noch laufende Downloads. Soll wirklich abgebrochen werden?"):
+                    return True # won't be destroyed
+                break
+
+        return False
+
     def _on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
            
