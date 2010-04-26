@@ -328,7 +328,13 @@ class Download:
                 if not self.information['cutlist']:
                     cutlist = Cutlist()
                     cutlist.id = self.information['cutlist_id']
-                    cutlist.download(self._config.get('general', 'server'), os.path.join(self.information['output'], self.filename))
+                    error = cutlist.download(self._config.get('general', 'server'), os.path.join(self.information['output'], self.filename))
+                    if error:
+                        self.information['status'] = DownloadStatus.ERROR
+                        self.information['message_short'] = 'Cutlist konnte nicht geladen werden.'
+                        yield error
+                        return                        
+                        
                     self.information['cutlist'] = cutlist
                     
                 command += ["-o", self.information['output'], "-C", self.information['cutlist'].local_filename]
