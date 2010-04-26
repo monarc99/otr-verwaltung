@@ -30,20 +30,6 @@ def add_download(via_link, app, gui, link=None):
         options = dialog.get_download_options()
                 
         if options[0] == 'torrent':
-#            def download_torrent(url, filename):
-#                try:
-#                    urllib.urlretrieve(url, "/tmp/%s.torrent" % filename)
-#                    subprocess.call(['xdg-open', '/tmp/%s.torrent' % filename])
-#                except IOError, error:
-#                    yield "Torrentdatei konnte nicht heruntergeladen werden (%s)!" % error
-#                except OSError, error:
-#                    yield "Torrentdatei konnte nicht geöffnet werden (%s)!" % error
-#
-#            def error(text):
-#                gui.main_window.change_status(-1, text)
-#        
-#            GeneratorTask(download_torrent, error).start(url, dialog.filename)
-
             download = Download(app.config, dialog.filename)
             download.download_torrent() 
 

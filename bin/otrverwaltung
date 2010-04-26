@@ -143,9 +143,9 @@ class App:
             },
             'downloader': {
                 'preferred_downloader' : '',
-                'aria2c': ['aria2c'],
+                'aria2c': ['aria2c', "--allow-overwrite", "true"],
                 'wget': ['wget'],
-                'aria2c_torrent': ['aria2c']
+                'aria2c_torrent': ['aria2c', "--allow-overwrite", "true"]
             },
             'plugins': {
                 'enabled': 'Play',

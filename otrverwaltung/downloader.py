@@ -20,6 +20,7 @@ import time
 import os.path
 import base64
 import hashlib
+import urllib
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.cutlists import Cutlist
@@ -115,15 +116,36 @@ class Download:
         
         self.information['status'] = DownloadStatus.RUNNING
       
-        if self.information['download_type'] == DownloadTypes.TORRENT:
-            password = base64.b64decode(self._config.get('general', 'password'))
-            hash = hashlib.md5(password).hexdigest()
-            email = self._config.get('general', 'email')            
-            url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, email, hash)
+        if self.information['download_type'] == DownloadTypes.TORRENT:            
+            # download torrent if necessary
+            torrent_filename = os.path.join(self._config.get('general', 'folder_new_otrkeys'), self.filename + '.torrent')
+            print torrent_filename
+            if not os.path.exists(torrent_filename):
+                password = base64.b64decode(self._config.get('general', 'password'))
+                hash = hashlib.md5(password).hexdigest()
+                email = self._config.get('general', 'email')            
+                url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, email, hash)
+                try:
+                    urllib.urlretrieve(url, torrent_filename)
+                    # read filename
+                    f = open(torrent_filename, 'r')
+                    line = f.readlines()[0]
+                except IOError, error:
+                    self.information['status'] = DownloadStatus.ERROR
+                    self.information['message_short'] = 'Torrentdatei konnte nicht geladen werden.'
+                    yield "Torrentdatei konnte nicht heruntergeladen werden (%s)!" % error
+                    return
+                    
+                if "Hash wrong" in line:
+                    os.remove(torrent_filename)
+                    self.information['status'] = DownloadStatus.ERROR
+                    self.information['message_short'] = 'OTR-Daten nicht korrekt!'
+                    yield 'OTR-Daten nicht korrekt!'
+                    return                    
             
             self.information['message_short'] = 'Torrent-Download'
             self.information['output'] = self._config.get('general', 'folder_new_otrkeys')
-            command = self._config.get('downloader', 'aria2c_torrent') + ["-d", self.information['output'], url]
+            command = self._config.get('downloader', 'aria2c_torrent') + ["-d", self.information['output'], "-T", torrent_filename]
             
             try:                
                 self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
