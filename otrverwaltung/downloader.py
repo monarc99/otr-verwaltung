@@ -145,13 +145,14 @@ class Download:
             self.information['message_short'] = 'Torrent-Download'
             self.information['output'] = self._config.get('general', 'folder_new_otrkeys')
             command = self._config.get('downloader', 'aria2c_torrent') + ["-d", self.information['output'], "-T", torrent_filename]
+            yield "Ausgeführt wird:\n%s\n" % " ".join(command)
             
             try:                
                 self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
             except OSError, error:
                 self.information['status'] = DownloadStatus.ERROR
                 self.information['message_short'] = 'Aria2c ist nicht installiert.'
-                yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command['aria2c']), error)
+                yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\nFehlermeldung: %s" % error
                 return
                 
             while True:
@@ -220,13 +221,14 @@ class Download:
             
             if self.information['preferred_downloader'] == 'wget':                
                 command = self._config.get('downloader', 'wget') + ["-c", "-P", self.information['output'], self.link]
+                yield "Ausgeführt wird:\n%s\n" % " ".join(command)
                 
                 try:                
                     self.__process = subprocess.Popen(command, stderr=subprocess.PIPE)
                 except OSError, error:
                     self.information['status'] = DownloadStatus.ERROR
                     self.information['message_short'] = 'Wget ist nicht installiert.'
-                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
+                    yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s" % error
                     return
                     
                 sleep = 0
@@ -263,12 +265,13 @@ class Download:
             
             else:
                 command = self._config.get('downloader', 'aria2c') + ["-d", self.information['output'], self.link]
+                yield "Ausgeführt wird:\n%s\n" % " ".join(command)
                 try:                
                     self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
                 except OSError, error:
                     self.information['status'] = DownloadStatus.ERROR
                     self.information['message_short'] = 'Aria2c ist nicht installiert.'
-                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
+                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s" % error
                     return
                     
                 while True:
@@ -342,13 +345,19 @@ class Download:
                 self.information['output'] = self._config.get('general', 'folder_uncut_avis')                  
                 command += ["-o", self.information['output']]
             
+            # write command to log, but strip out email and password            
+            log = list(command)
+            log[log.index('-p') + 1] = '*******'
+            log[log.index('-e') + 1] = '*******'
+            yield "Ausgeführt wird:\n%s\n" % " ".join(log)
+            
             try:
                 self.__process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except OSError, error:
-                    self.information['status'] = DownloadStatus.ERROR
-                    self.information['message_short'] = 'Dekoder nicht gefunden.'
-                    yield "Der Pfad zum Dekoder scheint nicht korrekt zu sein. Der folgende Befehl konnte nicht ausgeführt werden:\n%s\n\nFehlermeldung: %s" % (" ".join(command), error)
-                    return
+                self.information['status'] = DownloadStatus.ERROR
+                self.information['message_short'] = 'Dekoder nicht gefunden.'
+                yield "Der Pfad zum Dekoder scheint nicht korrekt zu sein. Der folgende Befehl konnte nicht ausgeführt werden\nFehlermeldung: %s" % error
+                return
 
             line = ''
             while self.__process.poll()==None:
