@@ -532,7 +532,7 @@ class App:
             else:
                 action.do(filenames)
 
-        elif chosen_action in [Action.DOWNLOAD_START, Action.DOWNLOAD_STOP]:
+        elif chosen_action in [Action.DOWNLOAD_START, Action.DOWNLOAD_STOP, Action.DOWNLOAD_REMOVE]:
             model, selected_rows = self.__gui.main_window.treeview_download.get_selection().get_selected_rows()
                       
             if len(selected_rows) == 0:

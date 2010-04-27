@@ -86,6 +86,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
             ('download_add_link', 'add_download.png', "Link hinzufügen", Action.DOWNLOAD_ADD_LINK),
             ('download_start', 'download_start.png', "Start", Action.DOWNLOAD_START),
             ('download_stop', 'download_stop.png', "Stop", Action.DOWNLOAD_STOP),
+            ('download_remove', 'delete.png', "Aus Liste Löschen", Action.DOWNLOAD_REMOVE),
             ]
         
         self.__toolbar_buttons = {}
@@ -104,7 +105,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
              
         self.__sets_of_toolbars = {
             Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],
-            Section.DOWNLOAD:    [ 'download_add_link', 'download_start', 'download_stop' ],
+            Section.DOWNLOAD:    [ 'download_add_link', 'download_start', 'download_stop', 'download_remove' ],
             Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete' ],
             Section.VIDEO_UNCUT: [ 'cut', 'delete', 'archive', ],
             Section.VIDEO_CUT:   [ 'archive', 'delete', 'cut', 'rename' ],

@@ -89,3 +89,29 @@ class Start(BaseAction):
     def do(self, downloads):
         for download in downloads:
             download.start()
+
+class Remove(BaseAction):
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
+        self.__gui = gui
+
+    def do(self, downloads):
+        downloads_count = len(downloads)
+        if downloads_count == 1:
+            question = "Soll der Download wirklich entfernt werden?"
+        else:
+            question = "Sollen %i Downloads wirklich entfernt werden?" % downloads_count
+
+        if self.__gui.question_box(question):
+            model = self.__gui.main_window.treeview_download.get_model()
+
+            refs = []
+            for row in model:
+                if row[0] in downloads:
+                    row[0].stop()
+                    refs.append(gtk.TreeRowReference(model, row.path))
+
+            for ref in refs:
+                iter = model.get_iter(ref.get_path())
+                model.remove(iter)

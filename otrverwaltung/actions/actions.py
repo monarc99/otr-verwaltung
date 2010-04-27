@@ -34,6 +34,7 @@ actions = {
     Action.DOWNLOAD_ADD_LINK : download.AddLink,
     Action.DOWNLOAD_START    : download.Start,
     Action.DOWNLOAD_STOP     : download.Stop,
+    Action.DOWNLOAD_REMOVE   : download.Remove,
     
     # decode and cut
     Action.DECODEANDCUT : decodeorcut.DecodeOrCut,

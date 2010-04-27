@@ -37,6 +37,7 @@ class Action:
     DOWNLOAD_ADD_LINK = 17
     DOWNLOAD_START    = 18
     DOWNLOAD_STOP     = 19
+    DOWNLOAD_REMOVE   = 20
     # decode and cut
     DECODE          = 0
     DECODEANDCUT    = 1
