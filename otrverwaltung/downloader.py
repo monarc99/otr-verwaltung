@@ -102,6 +102,7 @@ class Download:
         
     def _download(self):   
         self.log = ''
+        self.information['message_short'] = ''
         
         self.information['status'] = DownloadStatus.RUNNING
       
@@ -404,11 +405,12 @@ class Download:
                 if "invalid option" in stderr:           
                     self.information['message_short'] = 'Der Dekoder ist veraltet.'
                     yield "Es ist ein veralteter Dekoder angegeben!\n"
+                elif "maximale Anzahl":
+                    self.information['message_short'] = 'Maximale Anzahl der Dekodierungen erreicht.'
+                    yield unicode(stderr, 'iso-8859-1')
                 else:
                     self.information['message_short'] = stderr
                     yield stderr
-         
-            self._check_for_errors(stderr)
             
             if not self.information['status'] in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
