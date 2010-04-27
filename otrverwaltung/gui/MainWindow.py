@@ -568,7 +568,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
                 return True # won't be destroyed
         
         for row in self.treeview_download.liststore:
-            if row[0].information['status'] == DownloadStatus.RUNNING:
+            if row[0].information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
                 if not self.gui.question_box("Es gibt noch laufende Downloads. Soll wirklich abgebrochen werden?"):
                     return True # won't be destroyed
                 break

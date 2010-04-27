@@ -48,7 +48,8 @@ class Download:
             # Torrent
             'seeders': None,
             'upspeed': None,
-            'uploaded': None
+            'uploaded': None,
+            'ratio': None
         }
                 
         self.__task = None
@@ -76,11 +77,7 @@ class Download:
     #
     # Convenience methods used only by this class
     #
-    
-    def _clear(self):
-        self.information['est'] = ""
-        self.information['speed'] = ""    
-      
+          
     def _finished(self):
         self.information['status'] = DownloadStatus.FINISHED
         self.information['progress'] = 100
@@ -98,15 +95,7 @@ class Download:
             return time
         else:
             return 0
-    
-    def _check_for_errors(self, text):
-        words = ['error', 'fehler']
-        for word in words:
-            if word in text.lower():
-                self.information['status'] = DownloadStatus.ERROR
-                return True
-        return False
-   
+       
     #
     # Download
     #     
@@ -140,9 +129,8 @@ class Download:
                     self.information['status'] = DownloadStatus.ERROR
                     self.information['message_short'] = 'OTR-Daten nicht korrekt!'
                     yield 'OTR-Daten nicht korrekt!'
-                    return                    
+                    return
             
-            self.information['message_short'] = 'Torrent-Download'
             self.information['output'] = self._config.get('general', 'folder_new_otrkeys')
             command = self._config.get('downloader', 'aria2c_torrent') + ["-d", self.information['output'], "-T", torrent_filename]
             yield "Ausgeführt wird:\n%s\n" % " ".join(command)
@@ -155,20 +143,34 @@ class Download:
                 yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\nFehlermeldung: %s" % error
                 return
                 
-            while True:
-                error_code = self.__process.poll()
-                if error_code != None:
-                    if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
-                        if error_code == 0:
-                            self._finished()
-                        else:
-                            self.information['status'] = DownloadStatus.ERROR
-                    break
-                          
-                line = self.__process.stdout.readline().strip()
-                self._check_for_errors(line)
-        
-                if "%" in line:
+            while self.__process.poll() == None:                          
+                line = self.__process.stdout.readline().strip()                
+            
+                if "Checksum" in line:
+                    result = re.findall('Checksum:.*\((.*%)\)', line)
+                    if result:
+                        self.information['message_short'] = 'Überprüfen...%s' % result[0]
+            
+                elif "SEEDING" in line:
+                    self.information['message_short'] = 'Seeden...'
+                    self.information['status'] = DownloadStatus.SEEDING # _NOT_ DownloadStatus.FINISHED
+                    self.information['progress'] = 100
+                    self.information['est'] = ''
+                    self.information['speed'] = ''
+                    self.information['seeders'] = None
+                    
+                    result = re.findall('ratio:(.*)\)', line)
+                    if result:
+                        print 'ratio: ', result[0]
+                        self.information['ratio'] = result[0]
+                    
+                    result = re.findall('UP:(.*)\((.*)\)', line)
+                    if result:                   
+                        self.information['upspeed'] = result[0][0]
+                        self.information['uploaded'] = result[0][1]
+                    
+                elif "%" in line:
+                    self.information['message_short'] = ''
                     # get size
                     if not self.information['size']:
                         try:
@@ -204,17 +206,21 @@ class Download:
                     result = re.findall('SEED:([0-9]*) ', line)                   
                     if result:
                         self.information['seeders'] = result[0]
-                    
-                    self.update_view()
                 else:        
                     yield line
+                self.update_view()
 
                 time.sleep(1)
             
             ### Process is terminated                
             stdout = self.__process.stdout.read().strip()
-            self._check_for_errors(stdout)
             yield stdout
+
+            # A torrent download only stops:
+            #   a) when the user clicks 'stop'
+            #   b) when an error occured
+            if self.information['status'] != DownloadStatus.STOPPED:                
+                self.information['status'] = DownloadStatus.ERROR            
       
         elif self.information['download_type'] == DownloadTypes.BASIC:            
             self.information['output'] = self._config.get('general', 'folder_new_otrkeys')
@@ -231,8 +237,16 @@ class Download:
                     yield "Ist Wget installiert? Der Befehl konnte nicht ausgeführt werden:\n%s" % error
                     return
                     
-                sleep = 0
-                while self.__process.poll() == None:                    
+                while True:
+                    exit_code = self.__process.poll()
+                    if exit_code != None:
+                        if self.information['status'] != DownloadStatus.STOPPED:
+                            if exit_code==0:
+                                self._finished()
+                            else:
+                                self.information['status'] = DownloadStatus.ERROR
+                        break
+                    
                     line = self.__process.stderr.readline().strip()
                             
                     if line:
@@ -242,13 +256,18 @@ class Download:
                                 self.information['size'] = int(result[0])
                         
                         if "%" in line: 
-                            sleep = 1                                               
                             result = re.findall('([0-9]{1,3})% (.*)[ =](.*)', line)
 
                             if result:
-                                self.information['progress'] = int(result[0][0])
+                                progress = int(result[0][0])
+                                if self.information['progress'] == progress:
+                                    continue
+                                else:
+                                    self.information['progress'] = progress
+                                    
                                 self.information['speed'] = result[0][1]
-                                if self.information['progress'] == 100:
+                                
+                                if progress == 100:
                                     self._finished()
                                 else:
                                     self.information['est'] = result[0][2]
@@ -258,8 +277,6 @@ class Download:
                                         
                         self.update_view()
                         
-                    time.sleep(sleep)
-                
                 ### Process is terminated
                 yield self.__process.stderr.read().strip()
             
@@ -274,16 +291,7 @@ class Download:
                     yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s" % error
                     return
                     
-                while True:
-                    error_code = self.__process.poll()
-                    if error_code != None:
-                        if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
-                            if error_code == 0:
-                                self._finished()
-                            else:
-                                self.information['status'] = DownloadStatus.ERROR
-                        break
-                    
+                while self.__process.poll() == None:                    
                     line = self.__process.stdout.readline().strip()                    
                             
                     if "%" in line:
@@ -313,11 +321,14 @@ class Download:
                     time.sleep(1)
                 
                 ### Process is terminated                
-                stdout = self.__process.stdout.read().strip()
-                self._check_for_errors(stdout)
+                stdout = self.__process.stdout.read().strip()                
                 yield stdout
-                
-            self.update_view()
+                if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
+                    time.sleep(1) # wait for log being updated - very ugly
+                    if 'download completed' in self.log:
+                        self._finished()
+                    else:
+                        self.information['status'] = DownloadStatus.ERROR
             
         elif self.information['download_type'] in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
             decoder = self._config.get('general', 'decoder')
@@ -414,21 +425,23 @@ class Download:
                                        
                     #TODO: Zusammenfassungsdialoganzeigemöglichkeit einblenden
                     
-                self.update_view()
+        self.update_view()
                 
     def start(self):    
         def loop(*args):
             self.log += "%s\n" % args[0]
         
-        if not self.information['status'] == DownloadStatus.RUNNING:
+        if not self.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
             self.__task = GeneratorTask(self._download, loop)
             self.__task.start()
         
-    def stop(self):    
-        if self.information['status'] == DownloadStatus.RUNNING:
-            self._clear()
-            self.update_view()        
-            self.information['status'] = DownloadStatus.STOPPED    
+    def stop(self):
+        if self.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
+            self.information['status'] = DownloadStatus.STOPPED
+            self.information['message_short'] = ""
+            self.information['est'] = ""
+            self.information['speed'] = ""
+            self.update_view()
                 
             if self.__process:
                 try:

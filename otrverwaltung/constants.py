@@ -81,4 +81,5 @@ class DownloadStatus:
     RUNNING     = 0
     STOPPED     = 1
     ERROR       = 2
-    FINISHED    = 3    
+    FINISHED    = 3
+    SEEDING     = 4

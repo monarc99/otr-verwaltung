@@ -62,10 +62,18 @@ class CellRendererDownload(gtk.GenericCellRenderer):
         self.set_property('mode', gtk.CELL_RENDERER_MODE_ACTIVATABLE)
 
         self.statuses = {
-            DownloadStatus.RUNNING : ("Laufend", gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'download_start.png'))),
-            DownloadStatus.STOPPED : ("Gestoppt", gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'download_stop.png'))),
-            DownloadStatus.ERROR : ("Fehler", gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'error.png'))),
-            DownloadStatus.FINISHED : ("Fertig!", gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'finished.png')))
+            DownloadStatus.RUNNING : gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'download_start.png')),
+            DownloadStatus.STOPPED : gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'download_stop.png')),
+            DownloadStatus.ERROR : gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'error.png')),
+            DownloadStatus.FINISHED : gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'finished.png')),
+            DownloadStatus.SEEDING : gtk.gdk.pixbuf_new_from_file(path.getdatapath('media', 'finished.png'))
+        }
+        
+        self.types = {
+            DownloadTypes.TORRENT : 'Torrent-Download',
+            DownloadTypes.BASIC : 'Normaler Download',
+            DownloadTypes.OTR_DECODE : 'OTR-Download mit Dekodieren',
+            DownloadTypes.OTR_CUT : 'OTR-Download mit Schneiden'
         }
 
         self.cellrenderer_pixbuf = gtk.CellRendererPixbuf()        
@@ -113,12 +121,14 @@ class CellRendererDownload(gtk.GenericCellRenderer):
             self.cellrenderer_progress.set_property('value', value.information['progress'])
             info_text, text = "", ""
 
+            text = self.types[value.information['download_type']]
+
             if value.information['status'] != -1:
-                text, pixbuf = self.statuses[value.information['status']]            
+                pixbuf = self.statuses[value.information['status']]            
                 self.cellrenderer_pixbuf.set_property('pixbuf', pixbuf)
             
-                if value.information['message_short']:
-                    text += ' - %s' % value.information['message_short']
+            if value.information['message_short']:
+                text += ' - %s' % value.information['message_short']
             
             infos = []
             if value.information['size']:
