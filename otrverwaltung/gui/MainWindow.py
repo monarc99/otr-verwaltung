@@ -27,6 +27,7 @@ import pango
 from otrverwaltung import path
 from otrverwaltung.constants import Action, Section, Cut_action, DownloadStatus
 from otrverwaltung.gui.widgets.DownloadsTreeView import DownloadsTreeView
+from otrverwaltung.gui import DownloadPropertiesDialog
 from otrverwaltung.GeneratorTask import GeneratorTask
 
 class MainWindow(gtk.Window, gtk.Buildable):
@@ -502,11 +503,17 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #  Signal handlers
     #
         
-    def on_treeview_download_row_activated(self, treeview, path, view_colum, data=None):    
+    def on_treeview_download_row_activated(self, treeview, path, view_colum, data=None):
         iter = treeview.get_model().get_iter(path)
-        log = treeview.get_model().get_value(iter, 0).log
-        self.gui.message_info_box(log)
-               
+        download = treeview.get_model().get_value(iter, 0)
+        dialog = DownloadPropertiesDialog.NewDownloadPropertiesDialog()
+        dialog.run(download)
+        if dialog.changed:
+            download.stop()
+            if self.gui.question_box("Soll der Download wieder gestartet werden?"):
+                download.start()
+        dialog.destroy()
+
     def _on_menu_check_update_activate(self, widget, data=None):
         current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
             

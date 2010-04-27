@@ -145,8 +145,8 @@ class Download:
                 return
                 
             while self.__process.poll() == None:                          
-                line = self.__process.stdout.readline().strip()                
-            
+                line = self.__process.stdout.readline().strip()
+
                 if "Checksum" in line:
                     result = re.findall('Checksum:.*\((.*%)\)', line)
                     if result:
@@ -160,9 +160,8 @@ class Download:
                     self.information['speed'] = ''
                     self.information['seeders'] = None
                     
-                    result = re.findall('ratio:(.*)\)', line)
+                    result = re.findall('ratio:(.*)\) ', line)
                     if result:
-                        print 'ratio: ', result[0]
                         self.information['ratio'] = result[0]
                     
                     result = re.findall('UP:(.*)\((.*)\)', line)
