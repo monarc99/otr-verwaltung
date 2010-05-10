@@ -230,8 +230,6 @@ class Download:
                     yield line
                 self.update_view()
 
-                time.sleep(1)
-            
             ### Process is terminated                
             stdout = self.__process.stdout.read().strip()
             yield stdout
@@ -337,8 +335,6 @@ class Download:
                             self.update_view()
                     else:        
                         yield line
-
-                    time.sleep(1)
                 
                 ### Process is terminated                
                 stdout = self.__process.stdout.read().strip()                
