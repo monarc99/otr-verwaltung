@@ -313,6 +313,12 @@ class Download:
                     line = self.__process.stdout.readline().strip()                    
                             
                     if "%" in line:
+                        if "FileAlloc" in line:
+                            result = re.findall('FileAlloc:.*\(([0-9]{1,3}%)', line)
+                            self.information['message_short'] = 'Datei wird angelegt...%s' % result[0]
+                        else:
+                            self.information['message_short'] = ''
+
                         if not self.information['size']:
                             try:
                                 # aria2c gives size always in MiB (hopefully)
@@ -327,7 +333,7 @@ class Download:
                                 pass
                     
                         result = re.findall('\(([0-9]{1,3})%\).*SPD:(.*) ETA:(.*)]', line)
-       
+
                         if result:                            
                             self.information['progress'] = int(result[0][0])
                             self.information['speed'] = result[0][1]
