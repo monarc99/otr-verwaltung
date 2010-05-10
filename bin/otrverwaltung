@@ -137,7 +137,9 @@ class App:
                 'cutlist_mp4_as_hq': False, # for mp4s, when searching cutlist by name, add an HQ --> Name.HQ.mp4
                 'show_bottom': False,                
                 'cutlist_hash': hashlib.md5(str(time.time())).hexdigest(),
-                'window_settings': ''
+                'window_settings': '',
+                'pre_cut_show': 11,
+                'after_cut_show': 5
             },
             'plugins': {
                 'enabled': 'Play',
@@ -628,36 +630,50 @@ class App:
         fileoperations.remove_file(f_edl)
         fileoperations.remove_file(f_sub)
         
-    def show_cuts(self, video_filename, cutlist):       
+    def show_cuts(self, video_filename, cutlist):
         """ #FIXME """
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):            
-            diff = 11
-            pre_diff = 5
+            diff = self.config.get('general', 'pre_cut_show')
+            pre_diff = self.config.get('general', 'after_cut_show')
             
             sub_count = 0
 
             f_edl.write("0 ")      
 
-            for start, duration in cuts:
+            for count, (start, duration) in enumerate(cuts):
                 end = start + duration
 
                 f_edl.write("%s 0\n" % (start - diff))
                 f_edl.write("%s %s 0\n" % (start + pre_diff, end - diff))
                 f_edl.write("%s " % (end + pre_diff))
 
-                for second in range(diff):
-                    sub_count += 1
-                    f_sub.write("%s\n" % sub_count)
-                    f_sub.write("%s --> %s\n" % (self.format_seconds(start-diff+second), self.format_seconds(start-diff+second+1)))
-                    f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))            
-                    
-                for second in range(diff):
-                    sub_count += 1
-                    f_sub.write("%s\n" % sub_count)
-                    f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
-                    f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))
-                
+                if count == 0:
+                    for second in range(diff):
+                        sub_count += 1
+                        f_sub.write("%s\n" % sub_count)
+                        f_sub.write("%s --> %s\n" % (self.format_seconds(start-diff+second), self.format_seconds(start-diff+second+1)))
+                        f_sub.write("Sendung beginnt in %s Sekunden...\n\n" % str(diff - second))
+                else:
+                    for second in range(diff):
+                        sub_count += 1
+                        f_sub.write("%s\n" % sub_count)
+                        f_sub.write("%s --> %s\n" % (self.format_seconds(start-diff+second), self.format_seconds(start-diff+second+1)))
+                        f_sub.write("Werbung #%i endet in %s Sekunden...\n\n" % (count, str(diff - second)))
+
+                if count == (len(cuts) - 1):
+                    for second in range(diff):
+                        sub_count += 1
+                        f_sub.write("%s\n" % sub_count)
+                        f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
+                        f_sub.write("Sendung endet in %s Sekunden...\n\n" % str(diff - second))
+                else:
+                    for second in range(diff):
+                        sub_count += 1
+                        f_sub.write("%s\n" % sub_count)
+                        f_sub.write("%s --> %s\n" % (self.format_seconds(end-diff+second), self.format_seconds(end-diff+second+1)))
+                        f_sub.write("Werbung #%i beginnt in %s Sekunden...\n\n" % (count + 1, str(diff - second)))
+
             f_edl.write("50000 0")
          
         error = cutlist.read_cuts()
@@ -672,13 +688,13 @@ class App:
         """ #FIXME """
         
         def edl_subtitles_cb(f_edl, f_sub, cuts):                    
-            diff = 11
-            pre_diff = 5
+            diff = self.config.get('general', 'pre_cut_show')
+            pre_diff = self.config.get('general', 'after_cut_show')
                         
             length = 0
             sub_count = 0
                             
-            for start, duration in cuts:
+            for count, (start, duration) in enumerate(cuts):
                 f_edl.write("%s %s 0\n" % (pre_diff + length, length + duration - diff))
                 length += duration
                 
@@ -687,7 +703,10 @@ class App:
                     sub_count += 1
                     f_sub.write("%s\n" % sub_count)
                     f_sub.write("%s --> %s\n" % (self.format_seconds(length - diff + second), self.format_seconds(length - diff + second + 1)))
-                    f_sub.write("Zum Schnitt noch %s Sekunden...\n\n" % str(diff - second))                      
+                    if count == len(cuts) - 1:
+                        f_sub.write("Sendung endet in %s Sekunden...\n\n" % str(diff - second))
+                    else:
+                        f_sub.write("Schnitt in %s Sekunden...\n\n" % str(diff - second))
 
 
         error = cutlist.read_cuts()
