@@ -146,9 +146,9 @@ class App:
             'downloader': {
                 'resume_on_startup': True,
                 'preferred_downloader' : '',
-                'aria2c': ['aria2c', "--allow-overwrite", "true"],
+                'aria2c': ['aria2c', "--allow-overwrite=true", "--continue"],
                 'wget': ['wget'],
-                'aria2c_torrent': ['aria2c', '-V', 'true']
+                'aria2c_torrent': ["aria2c", "--check-integrity=true", "--continue" ]
             },
             'plugins': {
                 'enabled': 'Play',
