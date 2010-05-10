@@ -472,5 +472,5 @@ class Download:
                 except OSError:
                     pass
         
-            if self.__task:
-                self.__task.stop()
+            #if self.__task:
+            #    self.__task.stop()

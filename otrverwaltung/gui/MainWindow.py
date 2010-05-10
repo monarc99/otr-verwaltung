@@ -87,7 +87,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
             ('download_add_link', 'add_download.png', "Link hinzufügen", Action.DOWNLOAD_ADD_LINK),
             ('download_start', 'download_start.png', "Start", Action.DOWNLOAD_START),
             ('download_stop', 'download_stop.png', "Stop", Action.DOWNLOAD_STOP),
-            ('download_remove', 'delete.png', "Aus Liste Löschen", Action.DOWNLOAD_REMOVE),
+            ('download_remove', 'delete.png', "Löschen", Action.DOWNLOAD_REMOVE),
             ]
         
         self.__toolbar_buttons = {}

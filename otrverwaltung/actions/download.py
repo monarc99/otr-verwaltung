@@ -15,8 +15,11 @@
 ### END LICENSE
 
 import gtk
+import os.path
 from otrverwaltung.gui import AddDownloadDialog
 from otrverwaltung.downloader import Download
+from otrverwaltung import fileoperations
+from otrverwaltung.constants import DownloadStatus
 
 from otrverwaltung.actions.baseaction import BaseAction
 
@@ -103,15 +106,46 @@ class Remove(BaseAction):
         else:
             question = "Sollen %i Downloads wirklich entfernt werden?" % downloads_count
 
-        if self.__gui.question_box(question):
+        dialog = gtk.MessageDialog(self.__gui.main_window, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, question)
+        checkbutton = gtk.CheckButton('Die heruntergeladene Datei in den Müll verschieben\n(Fertige Downloads werden nicht verschoben)')
+        checkbutton.set_active(True)
+        checkbutton.show()
+        dialog.vbox.pack_end(checkbutton)
+        response = dialog.run()
+
+        if response == gtk.RESPONSE_YES:
             model = self.__gui.main_window.treeview_download.get_model()
 
             refs = []
             for row in model:
                 if row[0] in downloads:
-                    row[0].stop()
                     refs.append(gtk.TreeRowReference(model, row.path))
+
+                    files = [
+                        os.path.join(row[0].information['output'], row[0].filename + '.torrent'),
+                        os.path.join(row[0].information['output'], row[0].filename + '.aria2'),
+                        os.path.join(row[0].information['output'], row[0].filename + '.cutlist'),
+                        os.path.join(self.__app.config.get('general', 'folder_trash_otrkeys'), row[0].filename + '.segments'),
+                    ]
+
+                    for file in files:
+                        if os.path.exists(file):
+                            fileoperations.remove_file(file, None)
+
+                    if checkbutton.get_active() and not row[0].information['status'] in [DownloadStatus.FINISHED, DownloadStatus.SEEDING]:
+                        otrkey = os.path.join(row[0].information['output'], row[0].filename)
+                        # move otrkey to trash
+                        if os.path.exists(otrkey):
+                            fileoperations.move_file(otrkey, self.__app.config.get('general', 'folder_trash_otrkeys'), None)
+                        # move avi file of otrdecoder to trash
+                        avi_file = os.path.splitext(otrkey)[0]
+                        if os.path.exists(avi_file):
+                            fileoperations.move_file(avi_file, self.__app.config.get('general', 'folder_trash_avis'), None)
+
+                    row[0].stop()
 
             for ref in refs:
                 iter = model.get_iter(ref.get_path())
                 model.remove(iter)
+
+        dialog.destroy()
