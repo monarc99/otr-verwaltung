@@ -25,6 +25,7 @@ import hashlib
 import optparse
 import logging
 import dbus, dbus.service, dbus.glib
+import simplejson
 
 try:
     from gtk import events_pending, main_iteration
@@ -95,8 +96,9 @@ from otrverwaltung.actions import actions
 from otrverwaltung.config import Config
 from otrverwaltung import fileoperations
 import otrverwaltung.cutlists as cutlists_management
-from otrverwaltung.constants import Section, Action, Cut_action
+from otrverwaltung.constants import Section, Action, Cut_action, DownloadStatus
 from otrverwaltung.planning import Planning
+from otrverwaltung.downloader import Download
 from otrverwaltung import path
 
 class App:
@@ -142,6 +144,7 @@ class App:
                 'window_settings': ''
             },
             'downloader': {
+                'resume_on_startup': True,
                 'preferred_downloader' : '',
                 'aria2c': ['aria2c', "--allow-overwrite", "true"],
                 'wget': ['wget'],
@@ -181,6 +184,23 @@ class App:
                 self.__gui.main_window.maximize()            
             self.__gui.main_window.resize(int(width), int(height))
     
+        # load downloads
+        downloads = []
+        try:
+            file = open(path.get_storage_dir("data"), 'r')
+            print file
+            downloads = simplejson.loads(file.read())['downloads']
+        except (IOError, ValueError), message:
+            print "Can't read downloads: %s" % message
+
+        for json_download in downloads:
+            download = Download(self.config)
+            download.from_json(json_download)
+            self.gui.main_window.treeview_download.add_objects(download)
+
+            if self.config.get('downloader', 'resume_on_startup') and download.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
+                download.start(force=True)
+
         # load plugins
         if local:
             plugin_paths = [path.getdatapath('plugins')]
@@ -685,11 +705,21 @@ class App:
                
         self.__gui.run()
         
-        # kill all downloader processes
+        # save downloads
+        downloads = []
+        for row in self.gui.main_window.treeview_download.liststore:
+            downloads.append(row[0].to_json())
+
+        try:
+            file = open(path.get_storage_dir("data"), 'w')
+            file.write(simplejson.dumps({'downloads': downloads}))
+            file.close()
+        except IOError, message:
+            print _("Can't write downloads: %s") % message
+
+        # kill downloads
         for row in self.gui.main_window.treeview_download.liststore:
             row[0].stop()
-
-        # TODO: save downloads to disk
 
         # write to config
         self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())            

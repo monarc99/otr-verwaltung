@@ -29,7 +29,7 @@ from otrverwaltung import fileoperations
 
 class Download:
     
-    def __init__(self, config, filename, link=None):
+    def __init__(self, config, filename=None, link=None):
         """ Torrent: link=None """
     
         self._config = config
@@ -54,7 +54,27 @@ class Download:
                 
         self.__task = None
         self.__process = None
+
+    #
+    # Storage
+    #
+
+    def to_json(self):
+        information = self.information.copy()
+        if 'cutlist' in information.keys():
+            information['cutlist'] = None
     
+        return {
+            'information' : information,
+            'filename': self.filename,
+            'link': self.link
+        }
+
+    def from_json(self, json):
+        self.information = json['information']
+        self.filename = json['filename']
+        self.link = json['link']
+
     #
     # Init methods for action
     # 
@@ -428,11 +448,11 @@ class Download:
                     
         self.update_view()
                 
-    def start(self):    
+    def start(self, force=False):
         def loop(*args):
             self.log += "%s\n" % args[0]
         
-        if not self.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
+        if force or not self.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
             self.__task = GeneratorTask(self._download, loop)
             self.__task.start()
         
