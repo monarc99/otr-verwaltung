@@ -45,6 +45,7 @@ class ArchiveDialog(gtk.Dialog, gtk.Buildable):
 
         self.builder.get_object('label_files').set_text("%s Datei(en) zum Archivieren ausgewählt." % len(filenames))
     
+        self.builder.get_object('liststore_rename').clear()
         for filename in filenames:
             self.builder.get_object('liststore_rename').append([basename(filename), filename])
     

@@ -46,6 +46,6 @@ class Archive(BaseAction):
                 if new_name != original:
                     fileoperations.rename_file(original, new_name)
     
-                fileoperations.move_file(new_name, archive_to)                   
+                fileoperations.move_file(new_name, archive_to)
                     
-        dialog.destroy()
+        dialog.hide()

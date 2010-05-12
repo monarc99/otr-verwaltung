@@ -71,7 +71,7 @@ class FolderChooserComboBox(gtk.ComboBox):
         
         fill_up = "—"
         for root, dirs, files in os.walk(path):
-            directory = root.lstrip(path).split('/')
+            directory = root[len(path)+1:].split('/')
 
             if not directory[0]: continue
                             
