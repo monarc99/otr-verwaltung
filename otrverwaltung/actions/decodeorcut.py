@@ -290,6 +290,12 @@ class DecodeOrCut(BaseAction):
                 fileoperations.move_file(file_conclusion.otrkey, target)
             else:            
                 file_conclusion.decode.status = Status.ERROR
+
+                try:
+                    unicode(error_message)
+                except UnicodeDecodeError:
+                    error_message = unicode(error_message, 'iso-8859-1')
+
                 file_conclusion.decode.message = error_message
                 
         return True
