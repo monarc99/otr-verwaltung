@@ -14,7 +14,6 @@
     <child>
       <object class="GtkVBox" id="vbox_main">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
@@ -169,6 +168,62 @@
           </packing>
         </child>
         <child>
+          <object class="GtkEventBox" id="box_conclusion">
+            <child>
+              <object class="GtkVBox" id="vbox1">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkHBox" id="hbox2">
+                    <property name="visible">True</property>
+                    <property name="border_width">4</property>
+                    <property name="spacing">15</property>
+                    <child>
+                      <object class="GtkLabel" id="label_conclusion">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Es sind 3 Dateien fertig</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_show_conclusion">
+                        <property name="label" translatable="yes">Anzeigen</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_button_show_conclusion_clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHSeparator" id="hseparator1">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkHPaned" id="paned_main">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -182,7 +237,6 @@
                   <object class="GtkVBox" id="vbox6">
                     <property name="visible">True</property>
                     <property name="border_width">8</property>
-                    <property name="orientation">vertical</property>
                     <property name="spacing">4</property>
                     <child>
                       <object class="GtkHBox" id="hbox4">
@@ -334,7 +388,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radioDownload</property>
                           </object>
@@ -528,11 +581,9 @@
               <object class="GtkVPaned" id="paned_right">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkVBox" id="vbox_treeview">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="labelMessage">
                         <property name="visible">True</property>
@@ -570,6 +621,7 @@
                           <object class="GtkTreeView" id="treeview_planning">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="headers_clickable">False</property>
                             <child>
                               <object class="GtkTreeViewColumn" id="treeviewcolumn_broadcasttitle">
                                 <property name="resizable">True</property>
@@ -665,7 +717,7 @@
             </child>
           </object>
           <packing>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -735,7 +787,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

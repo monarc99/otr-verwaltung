@@ -24,18 +24,21 @@ import urllib
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.cutlists import Cutlist
-from otrverwaltung.constants import DownloadStatus, DownloadTypes
+from otrverwaltung.conclusions import FileConclusion
+from otrverwaltung.constants import DownloadStatus, DownloadTypes, Action, Cut_action, Status
 from otrverwaltung import fileoperations
 
 class Download:
     
-    def __init__(self, config, filename=None, link=None):
+    def __init__(self, app, config, filename=None, link=None):
         """ Torrent: link=None """
     
+        self._app = app
         self._config = config
            
         self.filename = filename
         self.link = link
+        self.log = ""
            
         self.information = {
             'output' : '',
@@ -436,17 +439,30 @@ class Download:
             if not self.information['status'] in [DownloadStatus.ERROR, DownloadStatus.STOPPED]:
                 self._finished()
                 # remove otrkey and .segments file
-                fileoperations.remove_file(os.path.join(cache_dir, self.filename), None)
+                otrkey = os.path.join(cache_dir, self.filename)
+                fileoperations.remove_file(otrkey, None)
                 fileoperations.remove_file(os.path.join(cache_dir, self.filename + '.segments'), None)
 
                 if self.information['download_type'] == DownloadTypes.OTR_CUT:
-                    # rename file to "cut" filename
+                    # rename file to "cut" filename                    
                     filename = os.path.join(self.information['output'], self.filename.rstrip(".otrkey"))
                     new_filename, extension = os.path.splitext(filename)
                     new_filename += ".cut" + extension
                     fileoperations.rename_file(filename, new_filename, None)
-                                       
-                    #TODO: Zusammenfassungsdialoganzeigemöglichkeit einblenden
+
+                    conclusion = FileConclusion(Action.DECODEANDCUT, otrkey=otrkey, uncut_video=filename)
+                    conclusion.decode.status = Status.OK
+                    conclusion.cut_video = new_filename
+                    conclusion.cut.cutlist = self.information['cutlist']
+                    conclusion.cut.cutlist.read_from_file()
+                    conclusion.cut.status = Status.OK
+                    conclusion.cut.cut_action = Cut_action.CHOOSE_CUTLIST
+                    if self._config.get('general', 'rename_cut'):                        
+                        conclusion.cut.rename = self._app.rename_by_schema(self.filename.rstrip(".otrkey"))
+                    else:
+                        conclusion.cut.rename = os.path.basename(new_filename)
+                    
+                    self._app.conclusions_manager.add_conclusions(conclusion)
                     
         self.update_view()
                 
@@ -471,6 +487,3 @@ class Download:
                     self.__process.kill()
                 except OSError:
                     pass
-        
-            #if self.__task:
-            #    self.__task.stop()

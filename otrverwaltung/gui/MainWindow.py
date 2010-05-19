@@ -261,6 +261,14 @@ class MainWindow(gtk.Window, gtk.Buildable):
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
 
+        # change background of conclusin bar
+        eventbox = self.builder.get_object('box_conclusion')
+        cmap = eventbox.get_colormap()
+        colour = cmap.alloc_color("#E8E7B6")
+        style = eventbox.get_style().copy()
+        style.bg[gtk.STATE_NORMAL] = colour
+        eventbox.set_style(style)        
+
         style = self.builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
         pixmap, mask = gtk.gdk.pixbuf_new_from_file(path.get_image_path('badge.png')).render_pixmap_and_mask()
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
@@ -448,6 +456,9 @@ class MainWindow(gtk.Window, gtk.Buildable):
     def block_gui(self, state):
         for button in ["decode", "cut", "decodeandcut"]:
             self.__toolbar_buttons[button].set_sensitive(not state)
+    
+    def on_button_show_conclusion_clicked(self, widget, data=None):
+        self.app.conclusions_manager.show_conclusions()
      
     def broadcasts_badge(self):
         count = 0

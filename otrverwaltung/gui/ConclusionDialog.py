@@ -64,35 +64,19 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
     ### Convenience
     ###
     
-    def _run(self, file_conclusions, action, rename_by_schema, archive_directory):
-        self.action = action
+    def _run(self, file_conclusions, rename_by_schema, archive_directory):        
         self.rename_by_schema = rename_by_schema                       
         self.__file_conclusions = file_conclusions
         self.forward_clicks = 0
             
-        self.show_all()
-
         if len(file_conclusions) == 1:
             self.builder.get_object('button_back').hide()
             self.builder.get_object('button_forward').hide()
             self.builder.get_object('label_count').hide()
 
-        if self.action != Action.DECODE:         
-            self.combobox_archive.fill(archive_directory)      
-            self.combobox_archive.set_active(0)
-            self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
-                
-        # basic show/hide
-        widgets_hidden = []
-        if self.action == Action.DECODE:
-            self.builder.get_object('box_buttons').show() # show buttons, but hide all except play button
-            widgets_hidden = ['image_cut', 'label_cut', 'label_cut_status', 'button_play_cut', 'box_rating', 'check_delete_uncut', 'box_rename', 'box_archive']            
-        elif self.action == Action.CUT:
-            widgets_hidden = ['image_decode', 'label_decode', 'label_decode_status']
-            
-        for widget in widgets_hidden:
-            self.builder.get_object(widget).hide()
-                
+        self.combobox_archive.fill(archive_directory)        
+        self.combobox_archive.connect('changed', self._on_combobox_archive_changed)
+                               
         self.show_conclusion(0)       
 
         self.run()
@@ -133,23 +117,36 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         self.file_conclusion = self.__file_conclusions[self.conclusion_iter]
         self.builder.get_object('label_count').set_text("Zeige Datei %s/%s" % (str(new_iter + 1), len(self.__file_conclusions)))
 
+        # basic show/hide
+        action = self.file_conclusion.action
+        self.show_all()
+        widgets_hidden = []
+        if action == Action.DECODE:
+            self.builder.get_object('box_buttons').show() # show buttons, but hide all except play button
+            widgets_hidden = ['image_cut', 'label_cut', 'label_cut_status', 'button_play_cut', 'box_rating', 'check_delete_uncut', 'box_rename', 'box_archive']
+        elif action == Action.CUT:
+            widgets_hidden = ['image_decode', 'label_decode', 'label_decode_status']
+
+        for widget in widgets_hidden:
+            self.builder.get_object(widget).hide()
+
         # enable back- and forward button?
         self.builder.get_object('button_back').set_sensitive(not self.conclusion_iter == 0)
         self.builder.get_object('button_forward').set_sensitive(not (self.conclusion_iter + 1 == len(self.__file_conclusions)))               
                 
         # status message
-        if self.action != Action.DECODE:
+        if action != Action.DECODE:
             status, message = self.file_conclusion.cut.status, self.file_conclusion.cut.message
             self.builder.get_object('label_cut_status').set_markup(self.__status_to_s(status, message))
             self.builder.get_object('label_filename').set_markup("<b>%s</b>" % os.path.basename(self.file_conclusion.uncut_video))
         
-        if self.action != Action.CUT:
+        if action != Action.CUT:
             status, message = self.file_conclusion.decode.status, self.file_conclusion.decode.message
             self.builder.get_object('label_decode_status').set_markup(self.__status_to_s(status, message))
             self.builder.get_object('label_filename').set_markup("<b>%s</b>" % os.path.basename(self.file_conclusion.otrkey))
         
         # fine tuning              
-        if self.action == Action.DECODE:
+        if action == Action.DECODE:
             self.builder.get_object('box_create_cutlist').hide()
         
         else:
@@ -220,7 +217,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
             else:
                 self.builder.get_object('box_create_cutlist').hide()
                 
-        if self.action != Action.CUT:
+        if action != Action.CUT:
             self.builder.get_object('button_play').props.visible = (self.file_conclusion.decode.status == Status.OK)
 
     ###
@@ -230,7 +227,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
     # box_buttons
     
     def _on_button_play_clicked(self, widget, data=None):
-        if self.action == Action.DECODE or (self.action == Action.DECODEANDCUT and self.file_conclusion.cut.status != Status.OK):
+        if self.file_conclusion.action == Action.DECODE or (self.file_conclusion.action == Action.DECODEANDCUT and self.file_conclusion.cut.status != Status.OK):
             self.app.play_file(self.file_conclusion.uncut_video)
         else:
             self.app.play_file(self.file_conclusion.cut_video)
@@ -252,9 +249,10 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         self.file_conclusion.cut.rename = widget.child.get_text()
     
     def _on_combobox_archive_changed(self, widget, data=None):
-        archive_to = self.combobox_archive.get_active_path()            
-        print "[Conclusion] cut.archive_to = ", archive_to
-        self.file_conclusion.cut.archive_to = archive_to
+        if self.file_conclusion != Action.DECODE:
+            archive_to = self.combobox_archive.get_active_path()            
+            print "[Conclusion] cut.archive_to = ", archive_to
+            self.file_conclusion.cut.archive_to = archive_to
     
     # box_create_cutlist           
     def _on_check_create_cutlist_toggled(self, widget, data=None):

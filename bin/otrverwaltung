@@ -99,6 +99,7 @@ import otrverwaltung.cutlists as cutlists_management
 from otrverwaltung.constants import Section, Action, Cut_action, DownloadStatus
 from otrverwaltung.planning import Planning
 from otrverwaltung.downloader import Download
+from otrverwaltung.conclusions import ConclusionsManager
 from otrverwaltung import path
 
 class App:
@@ -194,12 +195,15 @@ class App:
             print "Can't read downloads: %s" % message
 
         for json_download in downloads:
-            download = Download(self.config)
+            download = Download(self, self.config)
             download.from_json(json_download)
             self.gui.main_window.treeview_download.add_objects(download)
 
             if self.config.get('downloader', 'resume_on_startup') and download.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
                 download.start(force=True)
+
+        # conclusions_manager
+        self.conclusions_manager = ConclusionsManager(self)
 
         # load plugins
         if local:

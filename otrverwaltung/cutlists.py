@@ -121,6 +121,19 @@ class Cutlist:
             self.local_filename, headers = urllib.urlretrieve(url, self.local_filename)
         except IOError, error:
             return "Cutlist konnte nicht heruntergeladen werden (%s)." % error
+    
+    def read_from_file(self):
+        config_parser = ConfigParser.SafeConfigParser()
+        
+        try:
+            config_parser.read(self.local_filename)
+            
+            self.filename = config_parser.get('Info', 'SuggestedMovieName')
+            self.author = config_parser.get('Info', 'Author')
+            self.rating = config_parser.get('Info', 'RatingByAuthor')
+            self.usercomment = config_parser.get('Info', 'UserComment')
+        except:
+            print "Malformed cutlist: ", message        
       
     def read_cuts(self):
         """ Reads cuts from local_filename.

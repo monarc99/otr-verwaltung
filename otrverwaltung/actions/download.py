@@ -33,21 +33,21 @@ def add_download(via_link, app, gui, link=None):
         options = dialog.get_download_options()
                 
         if options[0] == 'torrent':
-            download = Download(app.config, dialog.filename)
+            download = Download(app, app.config, dialog.filename)
             download.download_torrent() 
 
         else: # normal
             
             if options[1] == 'decode':            
-                download = Download(app.config, dialog.filename, link=options[2])
+                download = Download(app, app.config, dialog.filename, link=options[2])
                 download.download_decode()
                                                     
             elif options[1] == 'decodeandcut':                
-                download = Download(app.config, dialog.filename, link=options[2])
+                download = Download(app, app.config, dialog.filename, link=options[2])
                 download.download_decode(options[3])   
                              
             else:          
-                download = Download(app.config, dialog.filename, link=options[1])
+                download = Download(app, app.config, dialog.filename, link=options[1])
                 download.download_basic(app.config.get('downloader', 'preferred_downloader'))
                 
         gui.main_window.treeview_download.add_objects(download)
