@@ -201,7 +201,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
     
     def on_entry_link_changed(self, widget, data=None):
         download_link = widget.get_text()
-        result = re.findall("([A-Za-z._\-0-9]*\.otrkey)", download_link)
+        result = re.findall("([A-Za-z._\-0-9]*_TVOON_DE[a-z0-9.]*\.otrkey)", download_link)
         if result:
             self.filename = result[0]
             
