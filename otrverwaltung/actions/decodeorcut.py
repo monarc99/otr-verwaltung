@@ -264,6 +264,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.create_cutlist = True            
                     file_conclusion.cut.cutlist.cuts_frames = cuts
                     file_conclusion.cut.cutlist.intended_app = basename(executable)                    
+                    file_conclusion.cut.cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten'
                     
                     fps, error = self.__get_fps(file_conclusion.uncut_video)
                     if not error:
