@@ -25,7 +25,7 @@ import hashlib
 import optparse
 import logging
 import dbus, dbus.service, dbus.glib
-import simplejson
+import simplejson as json
 
 try:
     from gtk import events_pending, main_iteration
@@ -190,7 +190,7 @@ class App:
         try:
             file = open(path.get_storage_dir("data"), 'r')
             print file
-            downloads = simplejson.loads(file.read())['downloads']
+            downloads = json.loads(file.read())['downloads']
         except (IOError, ValueError), message:
             print "Can't read downloads: %s" % message
 
@@ -716,7 +716,7 @@ class App:
 
         try:
             file = open(path.get_storage_dir("data"), 'w')
-            file.write(simplejson.dumps({'downloads': downloads}))
+            file.write(json.dumps({'downloads': downloads}))
             file.close()
         except IOError, message:
             print _("Can't write downloads: %s") % message

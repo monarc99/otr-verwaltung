@@ -14,7 +14,7 @@
 #with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
-import json
+import simplejson as json
 import os.path
 
 class Config:
