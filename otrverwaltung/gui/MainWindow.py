@@ -25,7 +25,9 @@ import gtk
 import pango
 
 from otrverwaltung import path
-from otrverwaltung.constants import Action, Section, Cut_action
+from otrverwaltung.constants import Action, Section, Cut_action, DownloadStatus
+from otrverwaltung.gui.widgets.DownloadsTreeView import DownloadsTreeView
+from otrverwaltung.gui import DownloadPropertiesDialog
 from otrverwaltung.GeneratorTask import GeneratorTask
 
 class MainWindow(gtk.Window, gtk.Buildable):
@@ -42,6 +44,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
     def post_init(self):       
         self.__setup_toolbar()
         self.__setup_treeview_planning()
+        self.__setup_treeview_download()
         self.__setup_treeview_files()
         self.__setup_widgets()
     
@@ -80,7 +83,11 @@ class MainWindow(gtk.Window, gtk.Buildable):
             ('plan_remove', 'film_delete.png', "Löschen", Action.PLAN_REMOVE),
             ('plan_edit', 'film_edit.png', "Bearbeiten", Action.PLAN_EDIT),
             ('plan_search', 'film_search.png', "Auf Mirror suchen", Action.PLAN_SEARCH),
-            ('plan_rss', 'rss_go.png', "Von OTR aktualisieren", Action.PLAN_RSS)
+            ('download_add', 'add_download.png', "Download hinzufügen", Action.DOWNLOAD_ADD),
+            ('download_add_link', 'add_download.png', "Link hinzufügen", Action.DOWNLOAD_ADD_LINK),
+            ('download_start', 'download_start.png', "Start", Action.DOWNLOAD_START),
+            ('download_stop', 'download_stop.png', "Stop", Action.DOWNLOAD_STOP),
+            ('download_remove', 'delete.png', "Löschen", Action.DOWNLOAD_REMOVE),
             ]
         
         self.__toolbar_buttons = {}
@@ -98,7 +105,8 @@ class MainWindow(gtk.Window, gtk.Buildable):
             self.__toolbar_buttons[key].show()
              
         self.__sets_of_toolbars = {
-            Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],# 'plan_rss' ],
+            Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],
+            Section.DOWNLOAD:    [ 'download_add_link', 'download_start', 'download_stop', 'download_remove' ],
             Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete' ],
             Section.VIDEO_UNCUT: [ 'cut', 'delete', 'archive', ],
             Section.VIDEO_CUT:   [ 'archive', 'delete', 'cut', 'rename' ],
@@ -139,25 +147,13 @@ class MainWindow(gtk.Window, gtk.Buildable):
                 self.__sets_of_toolbars[section].remove(toolbutton)
 
         self.set_toolbar(self.app.section)    
-    
+        
     def __setup_treeview_planning(self):
         treeview = self.builder.get_object('treeview_planning') 
-        store = gtk.TreeStore(int, str, str, str)                        
-        treeview.set_model(store)
-        
-        # create the TreeViewColumns to display the data
-        column_names = [ 'Sendung', 'Datum/Zeit', 'Sender' ]
-        tvcolumns = [None] * len(column_names)
-                             
-        tvcolumns[0] = gtk.TreeViewColumn(column_names[0], gtk.CellRendererText(), markup=1)
-        tvcolumns[1] = gtk.TreeViewColumn(column_names[1], gtk.CellRendererText(), markup=2)        
-        tvcolumns[2] = gtk.TreeViewColumn(column_names[2], gtk.CellRendererText(), markup=3)
-       
-        # append the columns
-        for col in tvcolumns:
-            col.set_resizable(True)
-            treeview.append_column(col)
-        
+          
+        model = gtk.ListStore(object)
+        treeview.set_model(model)
+               
         # allow multiple selection
         treeselection = treeview.get_selection()
         treeselection.set_mode(gtk.SELECTION_MULTIPLE)
@@ -165,6 +161,22 @@ class MainWindow(gtk.Window, gtk.Buildable):
         # sorting
         treeview.get_model().set_sort_func(0, self.__tv_planning_sort, None)
         treeview.get_model().set_sort_column_id(0, gtk.SORT_ASCENDING)    
+        
+        column, renderer = self.builder.get_object('treeviewcolumn_broadcasttitle'), self.builder.get_object('cellrenderer_broadcasttitle')
+        column.set_cell_data_func(renderer, self.__treeview_planning_title)
+        column, renderer = self.builder.get_object('treeviewcolumn_broadcastdatetime'), self.builder.get_object('cellrenderer_broadcastdatetime')
+        column.set_cell_data_func(renderer, self.__treeview_planning_datetime)
+        column, renderer = self.builder.get_object('treeviewcolumn_broadcaststation'), self.builder.get_object('cellrenderer_broadcaststation')
+        column.set_cell_data_func(renderer, self.__treeview_planning_station)
+    
+    def __setup_treeview_download(self):
+        self.treeview_download = DownloadsTreeView()
+        self.treeview_download.connect('row-activated', self.on_treeview_download_row_activated)
+        self.treeview_download.show()
+        self.builder.get_object('scrolledwindow_download').add(self.treeview_download)
+        
+        treeselection = self.treeview_download.get_selection()
+        treeselection.set_mode(gtk.SELECTION_MULTIPLE)        
     
     def __setup_treeview_files(self):
         treeview = self.builder.get_object('treeview_files') 
@@ -234,6 +246,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
                       
         # connect other signals
         self.builder.get_object('radioPlanning').connect('clicked', self._on_sidebar_toggled, Section.PLANNING)
+        self.builder.get_object('radioDownload').connect('clicked', self._on_sidebar_toggled, Section.DOWNLOAD)
         self.builder.get_object('radioUndecoded').connect('clicked', self._on_sidebar_toggled, Section.OTRKEY)
         self.builder.get_object('radioUncut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_UNCUT)
         self.builder.get_object('radioCut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_CUT)
@@ -248,6 +261,14 @@ class MainWindow(gtk.Window, gtk.Buildable):
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)
 
+        # change background of conclusin bar
+        eventbox = self.builder.get_object('box_conclusion')
+        cmap = eventbox.get_colormap()
+        colour = cmap.alloc_color("#E8E7B6")
+        style = eventbox.get_style().copy()
+        style.bg[gtk.STATE_NORMAL] = colour
+        eventbox.set_style(style)        
+
         style = self.builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
         pixmap, mask = gtk.gdk.pixbuf_new_from_file(path.get_image_path('badge.png')).render_pixmap_and_mask()
         style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
@@ -255,7 +276,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.builder.get_object('eventboxPlanningCurrentCount').set_style(style)
 
         # change font of sidebar     
-        for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
+        for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
             self.builder.get_object(label).modify_font(pango.FontDescription("bold"))
 
         # change background of tasks and searchbar
@@ -273,21 +294,18 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
     
     def clear_files(self):
-        """ Entfernt alle Einträge aus den Treeviews treeview_files und treeview_planning."""        
+        """ Entfernt alle Einträge aus den Treeviews treeview_files."""        
         self.builder.get_object('treeview_files').get_model().clear()
-        self.builder.get_object('treeview_planning').get_model().clear()
+    
+    def show_treeview(self, visible_treeview):
+        for treeview in ["scrolledwindow_planning", "scrolledwindow_download", "scrolledwindow_files"]:  
+            self.builder.get_object(treeview).props.visible = (treeview == visible_treeview)
     
     def get_selected_filenames(self):
         """ Gibt die ausgewählten Dateinamen zurück. """
-        selection = self.builder.get_object('treeview_files').get_selection()
-            
-        def selected_row(model, path, iter, filenames):
-            filenames += [self.builder.get_object('treeview_files').get_model().get_value(iter, self.__FILENAME)]
-        
-        filenames = []        
-        selection.selected_foreach(selected_row, filenames)      
+        model, selected_rows = self.builder.get_object('treeview_files').get_selection().get_selected_rows()
 
-        return filenames
+        return [model.get_value(model.get_iter(row), self.__FILENAME) for row in selected_rows]
         
     def append_row_files(self, parent, filename, size, date, isdir=False):      
         """ Fügt eine neue Datei zu treeview_files hinzu.
@@ -376,42 +394,43 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
     # treeview_planning
     #
-            
-    def get_selected_broadcasts(self):
-        """ Gibt die ausgewählten geplanten Sendungen zurück. """
-        selection = self.builder.get_object('treeview_planning').get_selection()
-            
-        def selected_row(model, path, iter, broadcasts):
-            broadcasts += [iter]
+               
+    def __treeview_planning_title(self, column, cell, model, iter, data=None):
+        broadcast = model.get_value(iter, 0)
         
-        broadcasts = []        
-        selection.selected_foreach(selected_row, broadcasts)      
-
-        return broadcasts
+        if broadcast.datetime < time.time(): 
+            cell.set_property('markup', "<b>%s</b>" % broadcast.title)
+        else:
+            cell.set_property('markup', broadcast.title)
+    
+    def __treeview_planning_datetime(self, column, cell, model, iter, data=None):
+        broadcast = model.get_value(iter, 0)
+        datetime = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(broadcast.datetime))
+        
+        if broadcast.datetime < time.time(): 
+            cell.set_property('markup', "<b>%s</b>" % datetime)
+        else:
+            cell.set_property('markup', datetime)
+    
+    def __treeview_planning_station(self, column, cell, model, iter, data=None):
+        broadcast = model.get_value(iter, 0)
+     
+        if broadcast.datetime < time.time(): 
+            cell.set_property('markup', "<b>%s</b>" % broadcast.station)
+        else:
+            cell.set_property('markup', broadcast.station)
                
     def append_row_planning(self, broadcast):
         """ Fügt eine geplante Sendung zu treeview_planning hinzu.
              broadcast Instanz von planning.PlanningItem """
-        
-        datetime = time.strftime("%a, %d.%m.%Y, %H:%M", time.localtime(broadcast.datetime))
-    
-        now = time.time()
-
-        index = self.app.planned_broadcasts.index(broadcast)
-
-        if broadcast.datetime < now: 
-            # everything bold
-            data = [index, "<b>%s</b>" % broadcast.title, "<b>%s</b>" % datetime, "<b>%s</b>" % broadcast.station]
-        else:
-            data = [index, broadcast.title, datetime, broadcast.station]
-              
-        iter = self.builder.get_object('treeview_planning').get_model().append(None, data)
+  
+        iter = self.builder.get_object('treeview_planning').get_model().append([broadcast])
         return iter
 
     def __tv_planning_sort(self, model, iter1, iter2, data):
         # -1 if the iter1 row should precede the iter2 row; 0, if the rows are equal; and, 1 if the iter2 row should precede the iter1 row              
-        time1 = self.app.planned_broadcasts[model.get_value(iter1, 0)].datetime
-        time2 = self.app.planned_broadcasts[model.get_value(iter2, 0)].datetime
+        time1 = model.get_value(iter1, 0).datetime
+        time2 = model.get_value(iter2, 0).datetime
 
         if time1 > time2:
             return 1
@@ -432,15 +451,14 @@ class MainWindow(gtk.Window, gtk.Buildable):
            self.builder.get_object('toolbar').remove(toolbutton)
         
         for toolbutton in self.__sets_of_toolbars[section]:        
-            self.builder.get_object('toolbar').insert(toolbutton, -1)
-                
-    def show_planning(self, planning):
-        self.builder.get_object('scrolledwindow_files').props.visible = not planning
-        self.builder.get_object('scrolledwindow_planning').props.visible = planning
+            self.builder.get_object('toolbar').insert(toolbutton, -1)    
      
     def block_gui(self, state):
         for button in ["decode", "cut", "decodeandcut"]:
             self.__toolbar_buttons[button].set_sensitive(not state)
+    
+    def on_button_show_conclusion_clicked(self, widget, data=None):
+        self.app.conclusions_manager.show_conclusions()
      
     def broadcasts_badge(self):
         count = 0
@@ -495,7 +513,18 @@ class MainWindow(gtk.Window, gtk.Buildable):
     #
     #  Signal handlers
     #
-               
+        
+    def on_treeview_download_row_activated(self, treeview, path, view_colum, data=None):
+        iter = treeview.get_model().get_iter(path)
+        download = treeview.get_model().get_value(iter, 0)
+        dialog = DownloadPropertiesDialog.NewDownloadPropertiesDialog()
+        dialog.run(download)
+        if dialog.changed:
+            download.stop()
+            if self.gui.question_box("Soll der Download wieder gestartet werden?"):
+                download.start()
+        dialog.destroy()
+
     def _on_menu_check_update_activate(self, widget, data=None):
         current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
             
@@ -557,6 +586,14 @@ class MainWindow(gtk.Window, gtk.Buildable):
             if not self.gui.question_box("Das Programm arbeitet noch. Soll wirklich abgebrochen werden?"):        
                 return True # won't be destroyed
         
+        for row in self.treeview_download.liststore:
+            if row[0].information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
+                if not self.gui.question_box("Es gibt noch laufende Downloads. Soll wirklich abgebrochen werden?"):
+                    return True # won't be destroyed
+                break
+
+        return False
+
     def _on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
            
@@ -573,10 +610,8 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.builder.get_object('box_bottom').props.visible = widget.get_active()
     
     # toolbar actions
-    def _on_toolbutton_clicked(self, button, action, cut_action=None):        
-        filenames = self.get_selected_filenames()
-        broadcasts = self.get_selected_broadcasts()    
-        self.app.perform_action(action, filenames, broadcasts, cut_action)
+    def _on_toolbutton_clicked(self, button, action, cut_action=None):         
+        self.app.perform_action(action, cut_action)
                   
     # sidebar
     def _on_sidebar_toggled(self, widget, section):
@@ -608,7 +643,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
             
             self.builder.get_object('eventbox_search').hide()
             
-            for label in ['labelPlanningCount', 'labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
+            for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
                 self.builder.get_object(label).set_text("")
         else:
             self.builder.get_object('eventbox_search').show()
@@ -616,7 +651,6 @@ class MainWindow(gtk.Window, gtk.Buildable):
         
             counts_of_section = self.app.start_search(search)
                   
-            self.builder.get_object('labelPlanningCount').set_text(counts_of_section[Section.PLANNING])                  
             self.builder.get_object('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
             self.builder.get_object('labelUncutCount').set_text(counts_of_section[Section.VIDEO_UNCUT])
             self.builder.get_object('labelCutCount').set_text(counts_of_section[Section.VIDEO_CUT])     
@@ -632,15 +666,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
         selection.unselect_all()
         now = time.time()
                 
-        def foreach(model, path, iter, data=None):
-            index = model.get_value(iter, 0)
-            stamp = self.app.planned_broadcasts[index].datetime
-
-            if stamp < now:
-                selection.select_iter(iter)
-
-        self.builder.get_object('treeview_planning').get_model().foreach(foreach)
-        
+        for row in self.builder.get_object('treeview_planning').get_model():
+            if row[0].datetime < now:
+                selection.select_iter(row.iter)
+                      
     # bottom
     def on_notebook_bottom_page_added(self, notebook, child, page_num, data=None):
         self.builder.get_object('menu_bottom').set_sensitive(True)

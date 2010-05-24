@@ -15,8 +15,9 @@
 ### END LICENSE
 
 class Section:
-    """ Die verschiedenen Ansichten """
+    """ Die verschiedenen Ansichten """    
     PLANNING    = 6
+    DOWNLOAD    = 7
     """ Geplante Sendungen"""
     OTRKEY      = 0
     """ Nicht dekodiert """
@@ -31,7 +32,12 @@ class Action:
     PLAN_REMOVE     = 12
     PLAN_EDIT       = 13
     PLAN_SEARCH     = 14
-    PLAN_RSS        = 15
+    # download
+    DOWNLOAD_ADD      = 16
+    DOWNLOAD_ADD_LINK = 17
+    DOWNLOAD_START    = 18
+    DOWNLOAD_STOP     = 19
+    DOWNLOAD_REMOVE   = 20
     # decode and cut
     DECODE          = 0
     DECODEANDCUT    = 1
@@ -65,3 +71,16 @@ class Format:
 class Program:
     AVIDEMUX    = 0
     VIRTUALDUB  = 1
+    
+class DownloadTypes:
+    TORRENT     = 0
+    BASIC       = 1
+    OTR_DECODE  = 2
+    OTR_CUT     = 3      
+    
+class DownloadStatus:
+    RUNNING     = 0
+    STOPPED     = 1
+    ERROR       = 2
+    FINISHED    = 3
+    SEEDING     = 4

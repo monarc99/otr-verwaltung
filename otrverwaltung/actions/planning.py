@@ -14,6 +14,7 @@
 #with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
+import gtk
 from gtk import RESPONSE_OK
 import time
 import webbrowser
@@ -24,69 +25,76 @@ import hashlib
 from otrverwaltung.actions.baseaction import BaseAction
 
 class Add(BaseAction):    
-    def __init__(self, gui):
-        self.update_list = True
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
         self.__gui = gui
 
-    def do(self, planned_broadcasts):
+    def do(self):
         if self.__gui.dialog_planning.run_new() == RESPONSE_OK:           
             broadcast, datetime, station = self.__gui.dialog_planning.get_values()
-            planned_broadcasts.append(0, broadcast, datetime, station)
-            
+            item = self.__app.planned_broadcasts.append(broadcast, datetime, station)
+
+            self.__gui.main_window.append_row_planning(item)
             self.__gui.main_window.broadcasts_badge()
             
         self.__gui.dialog_planning.hide()
         
-
 class Edit(BaseAction):    
-    def __init__(self, gui):
-        self.update_list = True
+    def __init__(self, app, gui):
+        self.update_list = False
         self.__gui = gui
 
-    def do(self, broadcast, planned_broadcasts):
-        index = self.__gui.main_window.builder.get_object('treeview_planning').get_model().get_value(broadcast, 0)
-        
-        if self.__gui.dialog_planning.run_edit(planned_broadcasts[index]) == RESPONSE_OK:
-            title, datetime, station = self.__gui.dialog_planning.get_values()
-            planned_broadcasts[index].title = title
-            planned_broadcasts[index].datetime = datetime
-            planned_broadcasts[index].station = station
+    def do(self, broadcast_iters):
+        model = self.__gui.main_window.builder.get_object('treeview_planning').get_model()
+        broadcast = model.get_value(broadcast_iters[0], 0)
             
+        if self.__gui.dialog_planning.run_edit(broadcast) == RESPONSE_OK:
+            title, datetime, station = self.__gui.dialog_planning.get_values()
+            broadcast.title = title
+            broadcast.datetime = datetime
+            broadcast.station = station
+                        
             self.__gui.main_window.broadcasts_badge()            
             
         self.__gui.dialog_planning.hide()
 
 class Remove(BaseAction):    
-    def __init__(self, gui):
-        self.update_list = True
+    def __init__(self, app, gui):
+        self.update_list = False
+        self.__app = app
         self.__gui = gui
 
-    def do(self, broadcasts, planned_broadcasts):
-        if len(broadcasts) == 1:
+    def do(self, broadcast_iters):
+        if len(broadcast_iters) == 1:
             message = "Es ist eine Sendung ausgewählt. Soll diese Sendung "
         else:
-            message = "Es sind %s Sendungen ausgewählt. Sollen diese Sendungen " % len(broadcasts)
+            message = "Es sind %s Sendungen ausgewählt. Sollen diese Sendungen " % len(broadcast_iters)
         
         if self.__gui.question_box(message + "gelöscht werden?"):
-            # convert indices to references in the list
-            items = []
-            for iter in broadcasts:
-                index = self.__gui.main_window.builder.get_object('treeview_planning').get_model().get_value(iter, 0)
-                items.append(planned_broadcasts[index])
-            for item in items:
-                planned_broadcasts.remove(item)
+            model = self.__gui.main_window.builder.get_object('treeview_planning').get_model()
+            planning_items = [model.get_value(iter, 0) for iter in broadcast_iters]
+
+            # remove rows            
+            row_references = [gtk.TreeRowReference(model, model.get_path(iter)) for iter in broadcast_iters]
+            for row_reference in row_references:
+                iter = model.get_iter(row_reference.get_path())
+                # remove from list
+                self.__app.planned_broadcasts.remove(model.get_value(iter, 0))
+                # remove treeview row
+                del model[iter]
             
             self.__gui.main_window.broadcasts_badge()            
             
 class Search(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = False
         self.__gui = gui
         
-    def do(self, broadcasts, planned_broadcasts):
-        for broadcast in broadcasts:
-            index = self.__gui.main_window.builder.get_object('treeview_planning').get_model().get_value(broadcast, 0)
-            broadcast = planned_broadcasts[index]
+    def do(self, broadcast_iters):
+        model = self.__gui.main_window.builder.get_object('treeview_planning').get_model()
+        for broadcast_iter in broadcast_iters:
+            broadcast = model.get_value(broadcast_iter, 0)
                         
             # build string: Titanic_08.12.24_20-15_pro7_
             string = broadcast.title.replace(' ', '_') + ' '
@@ -94,42 +102,3 @@ class Search(BaseAction):
             string += broadcast.station + "_"
             
             webbrowser.open("http://www.otr-search.com/?q=%s" % string)
-            
-class RSS(BaseAction):
-    def __init__(self, gui):
-        self.update_list = True
-        self.__gui = gui
-    
-    def do(self, planned_broadcasts, email, password):
-        if not email or not rss_hash:
-            self.__gui.message_error_box("E-Mail oder Hash sind nicht richtig eingetragen!")
-        
-        url = "http://www.onlinetvrecorder.com/rss/my.php?email=%s&hash=%s" % (email, hashlib.md5(password).hexdigest())    
-        print url        
-        
-        rss_file = urllib2.urlopen(url)
-        print rss_file.read()
-                 
-        # rss_otrkeys = []                  
-                 
-        # dom = xml.dom.minidom.parse(rss_file)
-        # handle.close()
-        # dom_x = dom_cutlists.getElementsByTagName('x')
-
-        # elements = cutlist_element.getElementsByTagName(node_name)
-        # for node in elements[0].childNodes:
-        #    return node.nodeValue                    
-        
-        from_rss = planned_broadcasts.get_from_rss()
-        
-        for rss_otrkey in rss_otrkeys:
-            # search for this otrkey in existing broadcasts
-            for local_rss_otrkey in from_rss:
-                if rss_otrkey == local_rss_otrkey:
-                    continue # already local
-                
-                # get: title, datetime, station from rss_otrkey
-                title = None               
-                datetime = None
-                station = None
-                planned_broadcasts.append(1, title, datetime, station, rss_otrkey)

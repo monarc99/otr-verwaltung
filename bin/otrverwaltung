@@ -24,12 +24,13 @@ import time
 import hashlib
 import optparse
 import logging
+import dbus, dbus.service, dbus.glib
+import simplejson as json
 
 try:
     from gtk import events_pending, main_iteration
-    from gtk import gdk
     import gobject
-    gdk.threads_init()    
+    gobject.threads_init()
 except:
     print "PyGTK/GTK is missing."
     sys.exit(-1)
@@ -44,6 +45,7 @@ def parse_opts():
                       help="Verbose messages", default=False)
     oparse.add_option("-d", "--debug", action="store_true",
                       help="Debug messages", default=False)
+    oparse.add_option("-l", "--link", help="Add a link")
 
     opts, rest = oparse.parse_args()
     return opts
@@ -54,6 +56,7 @@ if opts.debug:
     logging.root.setLevel(logging.DEBUG)
 elif opts.verbose:
     logging.root.setLevel(logging.INFO)
+link = opts.link
 
 # Setup path
 
@@ -93,8 +96,10 @@ from otrverwaltung.actions import actions
 from otrverwaltung.config import Config
 from otrverwaltung import fileoperations
 import otrverwaltung.cutlists as cutlists_management
-from otrverwaltung.constants import Section, Action, Cut_action
+from otrverwaltung.constants import Section, Action, Cut_action, DownloadStatus
 from otrverwaltung.planning import Planning
+from otrverwaltung.downloader import Download
+from otrverwaltung.conclusions import ConclusionsManager
 from otrverwaltung import path
 
 class App:
@@ -141,6 +146,13 @@ class App:
                 'pre_cut_show': 11,
                 'after_cut_show': 5
             },
+            'downloader': {
+                'resume_on_startup': True,
+                'preferred_downloader' : '',
+                'aria2c': ['aria2c', "--allow-overwrite=true", "--continue"],
+                'wget': ['wget'],
+                'aria2c_torrent': ["aria2c", "--check-integrity=true", "--continue" ]
+            },
             'plugins': {
                 'enabled': 'Play',
                 'config': {} # used as plugin config storage
@@ -164,7 +176,8 @@ class App:
         self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
        
         # load gui
-        self.__gui = gui.Gui(self)    
+        self.__gui = gui.Gui(self)  # for backwards compability
+        self.gui = self.__gui
 
         self.config.load()
     
@@ -174,19 +187,40 @@ class App:
                 self.__gui.main_window.maximize()            
             self.__gui.main_window.resize(int(width), int(height))
     
+        # load downloads
+        downloads = []
+        try:
+            file = open(path.get_storage_dir("data"), 'r')
+            print file
+            downloads = json.loads(file.read())['downloads']
+        except (IOError, ValueError), message:
+            print "Can't read downloads: %s" % message
+
+        for json_download in downloads:
+            download = Download(self, self.config)
+            download.from_json(json_download)
+            self.gui.main_window.treeview_download.add_objects(download)
+
+            if self.config.get('downloader', 'resume_on_startup') and download.information['status'] in [DownloadStatus.RUNNING, DownloadStatus.SEEDING]:
+                download.start(force=True)
+
+        # conclusions_manager
+        self.conclusions_manager = ConclusionsManager(self)
+
         # load plugins
         if local:
             plugin_paths = [path.getdatapath('plugins')]
         else:
             plugin_paths = path.get_plugin_paths()
     
-        self.plugin_system = PluginSystem(self, self.__gui, plugin_paths, self.config.get('plugins', 'enabled'), self.config.get('plugins', 'config'))
-    
-        # show undecoded otrkeys         
-        self.show_section(Section.OTRKEY)
+        self.plugin_system = PluginSystem(self, self.__gui, plugin_paths, self.config.get('plugins', 'enabled'), self.config.get('plugins', 'config'))    
+        
+        self.show_section(Section.DOWNLOAD)
         
         self.planned_broadcasts = Planning()
         self.planned_broadcasts.read_config(self.config.get('general', 'planned_items'))
+        for broadcast in self.planned_broadcasts:
+            self.__gui.main_window.append_row_planning(broadcast)
         
         self.__gui.main_window.broadcasts_badge()                           
        
@@ -250,33 +284,38 @@ class App:
         
         # set toolbar
         self.__gui.main_window.set_toolbar(section)
+        
+        self.section_info = {        
+            Section.PLANNING: ('scrolledwindow_planning', "Diese Aufnahmen wurden geplant." ),
+            Section.DOWNLOAD: ('scrolledwindow_download', "Diese Dateien werden gerade heruntergeladen."),
+            Section.OTRKEY: ('scrolledwindow_files', "Diese Dateien wurden noch nicht dekodiert." ),
+            Section.VIDEO_UNCUT: ('scrolledwindow_files', "Diese Dateien wurden noch nicht geschnitten."),
+            Section.VIDEO_CUT: ('scrolledwindow_files', "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."),
+            Section.ARCHIVE: ('scrolledwindow_files',  "Diese Dateien wurden ins Archiv verschoben."),
+            Section.TRASH: ('scrolledwindow_files', "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden.")
+        }
                 
         self.__gui.main_window.clear_files()
         files = []
-        text = ""
         
-        if section == Section.PLANNING:
-            text = self.__section_planning()
-      
-            self.__gui.main_window.show_planning(True)
-        else:
-            self.__gui.main_window.show_planning(False)
-        
+        treeview, text = self.section_info[section]
+        self.__gui.main_window.show_treeview(treeview)
+                
         if section == Section.OTRKEY:
-            text, files = self.__section_otrkey()
+            files = self.__section_otrkey()
         
         elif section == Section.VIDEO_UNCUT:
-            text, files = self.__section_video_uncut()   
+            files = self.__section_video_uncut()   
 
         elif section == Section.VIDEO_CUT:
-            text, files = self.__section_video_cut()   
+            files = self.__section_video_cut()   
 
         elif section == Section.TRASH:
-            text, files = self.__section_trash()   
+            files = self.__section_trash()   
 
         elif section == Section.ARCHIVE: 
             # returns NO files       
-            text = self.__section_archive()
+            self.__section_archive()
 
         if len(files) > 0: # this is not executed when the section is "Archive"
             if len(files) == 1:
@@ -294,39 +333,25 @@ class App:
         # set message text
         self.__gui.main_window.builder.get_object('labelMessage').set_markup(text)
 
-
-    # helper for different sections
-    def __section_planning(self):
-        text = "Diese Aufnahmen wurden geplant." 
-       
-        for count, broadcast in enumerate(self.planned_broadcasts):
-            if self.search(broadcast.title):
-                self.__gui.main_window.append_row_planning(self.planned_broadcasts[count])
-            
-        return text
-             
+    # helper for different sections   
     def __section_otrkey(self):
-        text = "Diese Dateien wurden noch nicht dekodiert." 
         path = self.config.get('general', 'folder_new_otrkeys')
         
         if path == "":
-            return text, []
+            return []
         
         files = [join(path, f) for f in os.listdir(path) if f.endswith(".otrkey") and self.search(f)]                           
             
-        return (text, files)
+        return files
          
     def __section_video_uncut(self):
-        text = "Diese Dateien wurden noch nicht geschnitten."
         path = self.config.get('general', 'folder_uncut_avis')
         
         files = [join(path, f) for f in os.listdir(path) if self.uncut_video.match(f) and self.search(f)]
             
-        return (text, files)
+        return files
         
-    def __section_video_cut(self):
-        text = "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."
-                
+    def __section_video_cut(self):    
         path = self.config.get('general', 'folder_cut_avis')
         
         files = []                
@@ -336,26 +361,21 @@ class App:
                     if self.search(f):
                         files += [join(path, f)]
         
-        return (text, files)
+        return files
         
     def __section_trash(self):
-        text = "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden."
         path_otrkeys = self.config.get('general', 'folder_trash_otrkeys')
         path_avis = self.config.get('general', 'folder_trash_avis')
                     
         files = [join(path_otrkeys, f) for f in os.listdir(path_otrkeys) if f.endswith('.otrkey') and self.search(f)]
         files += [join(path_avis, f) for f in os.listdir(path_avis) if self.cut_video.match(f) and self.search(f)]
                 
-        return (text, files)
+        return files
 
     def __section_archive(self):
-        text = "Diese Dateien wurden ins Archiv verschoben."
-
         path = self.config.get('general', 'folder_archive')
         
-        self.__tree(None, path)        
-        
-        return text            
+        self.__tree(None, path)
                  
     # recursive function for archive to add folders and files with a tree structure
     def __tree(self, parent=None, path=None):              
@@ -453,8 +473,7 @@ class App:
         """ #FIXME """
 
         self.__search_text = search.lower()
-
-        items = []        
+   
         # create dict of counts
         counts = {}
 
@@ -462,14 +481,10 @@ class App:
                                 (self.__section_video_uncut, Section.VIDEO_UNCUT),
                                 (self.__section_video_cut, Section.VIDEO_CUT),
                                 (self.__section_trash, Section.TRASH)]:
-            files = []
-            text, items = method()   
+            items = method()   
             count = len(items)
-            if count > 0:
-                counts[section] = "(%s)" % count
-            else:
-                counts[section] = ""
-         
+            counts[section] = "(%s)" % count
+
         # archive 
         files = []       
         for root, dirs, wfiles in os.walk(self.config.get('general', 'folder_archive')):
@@ -478,23 +493,8 @@ class App:
                     files += [join(root, f)]
 
         count = len(files)
-        if count > 0:
-            counts[Section.ARCHIVE] = "(%s)" % count
-        else:
-            counts[Section.ARCHIVE] = ""
+        counts[Section.ARCHIVE] = "(%s)" % count
 
-        # planning
-        items = []
-        for count, broadcast in enumerate(self.planned_broadcasts):
-            if self.search(broadcast.title):
-                items += [count]
-
-        count = len(items)
-        if count > 0:
-            counts[Section.PLANNING] = "(%s)" % count
-        else:
-            counts[Section.PLANNING] = ""
-        
         self.show_section(self.section)                   
         
         return counts
@@ -520,85 +520,71 @@ class App:
     ### Actions
     ###        
     
-    def perform_action(self, chosen_action, filenames=None, broadcasts=None, cut_action=None):
-        """ #FIXME """
-       
-        if broadcasts != None and chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE, Action.PLAN_ADD, Action.PLAN_RSS]:
-            if len(broadcasts) == 0 and not chosen_action in [Action.PLAN_ADD, Action.PLAN_RSS]:
-                if len(self.__gui.main_window.builder.get_object('treeview_planning').get_model()) > 0:
-                    if self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
-                        broadcasts = []                    
+    def perform_action(self, chosen_action, cut_action=None):
+        
+        action = actions.get_action(chosen_action, self, self.__gui)        
+        
+        if chosen_action in [Action.PLAN_EDIT, Action.PLAN_SEARCH, Action.PLAN_REMOVE]:
+            model, selected_rows = self.__gui.main_window.builder.get_object('treeview_planning').get_selection().get_selected_rows()
+            
+            if len(model) == 0: return            
+            
+            if len(selected_rows) == 0:            
+                if chosen_action != Action.PLAN_EDIT and self.__gui.question_box("Es ist keine Sendung markiert! Sollen alle Sendungen verarbeitet werden?"):
+                    selected_rows = [row.path for row in selected_rows]
+                    for row in model:
+                        selected_rows.append(row.path)
+                else:
+                    return
+           
+            selected_rows = [model.get_iter(path) for path in selected_rows]
+            self.locked = True
+            action.do(selected_rows)
+                     
+        elif chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT, Action.RENAME, Action.REAL_DELETE, Action.RESTORE, Action.DELETE, Action.ARCHIVE]:
+            filenames = self.__gui.main_window.get_selected_filenames()
 
-                        def foreach(model, path, iter, broadcasts):
-                            broadcasts += [iter]
-
-                        self.__gui.main_window.builder.get_object('treeview_planning').get_model().foreach(foreach, broadcasts)
-                    else:
-                        return
+            if len(filenames) == 0:
+                model = self.__gui.main_window.builder.get_object('treeview_files').get_model()
+    
+                if len(model) != 0 and self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
+                    filenames = [row[0] for row in model]
                 else:
                     return
 
-        elif filenames != None:
-            if len(filenames) == 0 and chosen_action != Action.NEW_FOLDER:
-                if len(self.__gui.main_window.builder.get_object('treeview_files').get_model()) > 0:
-                    if self.__gui.question_box("Es ist keine Datei markiert! Sollen alle Dateien verarbeitet werden?"):
-                        filenames = [row[0] for row in self.__gui.main_window.builder.get_object('treeview_files').get_model()]
-                    else:
-                        return
-                else:
-                    return          
+            self.locked = True
+            if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:
+                action.do(chosen_action, filenames, cut_action)
+            else:
+                action.do(filenames)
 
-        action = actions.get_action(chosen_action, self.__gui)
+        elif chosen_action in [Action.DOWNLOAD_START, Action.DOWNLOAD_STOP, Action.DOWNLOAD_REMOVE]:
+            model, selected_rows = self.__gui.main_window.treeview_download.get_selection().get_selected_rows()
+                      
+            if len(selected_rows) == 0:
+                return
+           
+            downloads = [model.get_value(model.get_iter(path), 0) for path in selected_rows]
+            action.do(downloads)
 
-        self.locked = True
-               
-        # different actions:
-        if chosen_action in [Action.DECODE, Action.CUT, Action.DECODEANDCUT]:             
-            action.do(chosen_action, filenames, self.config, self.rename_by_schema, cut_action)
-    
-        elif chosen_action == Action.RENAME: 
-            action.do(filenames)
-    
-        elif chosen_action == Action.REAL_DELETE: 
-            action.do(filenames)
-    
-        elif chosen_action == Action.RESTORE: 
-            action.do(filenames, self.config.get('general', 'folder_new_otrkeys'), self.config.get('general', 'folder_uncut_avis'), self.config.get('general', 'folder_cut_avis'), self.uncut_video)
-    
-        elif chosen_action == Action.DELETE:
-            action.do(filenames, self.config.get('general', 'folder_trash_otrkeys'), self.config.get('general', 'folder_trash_avis'))      
-
-        elif chosen_action == Action.PLAN_REMOVE: 
-            action.do(broadcasts, self.planned_broadcasts) 
-    
-        elif chosen_action == Action.PLAN_SEARCH: 
-            action.do(broadcasts, self.planned_broadcasts)            
-    
-        elif chosen_action == Action.PLAN_ADD: 
-            action.do(self.planned_broadcasts)
-    
-        elif chosen_action == Action.PLAN_EDIT: 
-            action.do(broadcasts[0], self.planned_broadcasts)       
-            
-        elif chosen_action == Action.PLAN_RSS:
-            action.do(self.planned_broadcasts, self.config.get('general', 'email'), self.config.get('general', 'password')) 
-    
-        elif chosen_action == Action.ARCHIVE: 
-            action.do(filenames, self.config.get('general', 'folder_archive'))
-     
         elif chosen_action == Action.NEW_FOLDER:
+            filenames = self.__gui.main_window.get_selected_filenames()
+            self.locked = True
             if len(filenames) == 0:
                 action.do(self.config.get('general', 'folder_archive'))
             else:
                 action.do(filenames[0])
-        
+
+        else:
+            self.locked = True
+            action.do()
+
         self.locked = False
         
         # update view?
         if action.update_list:            
             self.__gui.main_window.do_search(self.__search_text)
-            self.show_section(self.section)
-            
+            self.show_section(self.section)            
     
     def play_file(self, filename):
         """ #FIXME """        
@@ -728,7 +714,7 @@ class App:
         
         return "%02d:%02d:%02d,%03d" % (hrs, mins, secs, ms)
                       
-    def run(self):
+    def run(self, link=None):
         """ #FIXME """
         
         self.__gui.main_window.show()        
@@ -737,10 +723,29 @@ class App:
             self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
             self.__gui.preferences_window.show()
                
+        if link:
+            self.add_download_link(link)
+               
         self.__gui.run()
         
+        # save downloads
+        downloads = []
+        for row in self.gui.main_window.treeview_download.liststore:
+            downloads.append(row[0].to_json())
+
+        try:
+            file = open(path.get_storage_dir("data"), 'w')
+            file.write(json.dumps({'downloads': downloads}))
+            file.close()
+        except IOError, message:
+            print _("Can't write downloads: %s") % message
+
+        # kill downloads
+        for row in self.gui.main_window.treeview_download.liststore:
+            row[0].stop()
+
         # write to config
-        self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())               
+        self.config.set('general', 'planned_items', self.planned_broadcasts.get_config())            
         enabled, config = self.plugin_system.get_config()
         self.config.set('plugins', 'enabled', enabled)
         self.config.set('plugins', 'config', config)
@@ -751,9 +756,33 @@ class App:
         
         settings = ','.join([maximized, width, height])
         self.config.set('general', 'window_settings', settings)
+    
+    def add_download_link(self, link):
+        action = actions.get_action(Action.DOWNLOAD_ADD_LINK, self, self.__gui)
+        action.do(link)        
  
-if __name__ == '__main__':            
-    app = App()
-    app.run()
-    app.config.save()
+class OTRVerwaltungService(dbus.service.Object):
+    def __init__(self, app):
+        self.app = app
+        bus_name = dbus.service.BusName('elbersb.otrverwaltung', bus = dbus.SessionBus())
+        dbus.service.Object.__init__(self, bus_name, '/elbersb/otrverwaltung')
 
+    @dbus.service.method(dbus_interface='elbersb.otrverwaltung')
+    def show_window(self):
+        self.app.gui.main_window.present()
+        
+    @dbus.service.method(dbus_interface='elbersb.otrverwaltung')        
+    def add_link(self, link):        
+        self.app.add_download_link(link)        
+        
+if __name__ == "__main__":   
+    if dbus.SessionBus().request_name("elbersb.otrverwaltung") != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
+        print "OTR-Verwaltung läuft bereits. Zeige Fenster."
+        dbus.SessionBus().get_object("elbersb.otrverwaltung", "/elbersb/otrverwaltung").get_dbus_method("show_window")()
+        if link:            
+            dbus.SessionBus().get_object("elbersb.otrverwaltung", "/elbersb/otrverwaltung").get_dbus_method("add_link")(link)            
+    else:      
+        app = App()
+        service = OTRVerwaltungService(app)
+        app.run(link)
+        app.config.save()

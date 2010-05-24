@@ -21,6 +21,7 @@ from otrverwaltung.constants import Cut_action
 import otrverwaltung.cutlists as cutlists_management
 from otrverwaltung import fileoperations
 from otrverwaltung import path
+from otrverwaltung.gui.widgets.CutlistsTreeView import CutlistsTreeView
 
 class CutDialog(gtk.Dialog, gtk.Buildable):
     """ Dialog, um den Schnittmodus constants.Cut_action und ggf die Cutlist auszuwählen """ 
@@ -34,81 +35,15 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
         self.builder = builder
         self.builder.connect_signals(self)
        
-        self.cutlists = []        
         self.chosen_cutlist = None
  
-        # warning sign
-        self.pixbuf_warning = gtk.gdk.pixbuf_new_from_file(path.get_image_path('error.png'))      
-               
-        # setup the file treeview
-        treeview = self.builder.get_object('treeview_cutlists')
-        store = gtk.ListStore(
-            str, # 0 id
-            str, # 1 author
-            str, # 2 ratingbyauthor
-            str, # 3 rating
-            str, # 4 ratingcount
-            str, # 5 countcuts
-            str, # 6 actualcontent
-            str, # 7 usercomment
-            str, # 8 filename
-            str, # 9 withframes
-            str, # 10 withtime
-            str, # 11 duration
-            str, # 12 errors
-            str, # 13 othererrordescription
-            str, # 14 downloadcount
-            str, # 15 autoname
-            str, # 16 filename_original            
-            bool # 17 errors?
-            )             
-        
-        treeview.set_model(store)
-            
-        # create the TreeViewColumns to display the data
-        column_names = [
-            (0, "ID"),
-            (1, "Autor"),
-            (2, "Autorwertung"),
-            (3, "Benutzerwertung"),
-            (4, "Anzahl d. Wertungen"),
-            (7, "Kommentar"),
-            (12, "Fehler"),
-            (13, "Fehlerbeschr."),
-            (6, "Eigentlicher Inhalt"),
-            (5, "Anzahl d. Schnitte"),            
-            (8, "Dateiname"),
-            (11, "Dauer in s"),
-            (14, "Anzahl Heruntergeladen") ]
-        
-        renderer_left = gtk.CellRendererText()
-        renderer_left.set_property('xalign', 0.0) 
-              
-        cell_renderer_pixbuf = gtk.CellRendererPixbuf()
-        col = gtk.TreeViewColumn('', cell_renderer_pixbuf)
-        col.set_cell_data_func(cell_renderer_pixbuf, self.warning_pixbuf)
-        treeview.append_column(col)      
-              
-        # append the columns
-        for count, (index, text) in enumerate(column_names):                         
-            col = gtk.TreeViewColumn(text, renderer_left, markup=index)
-
-            col.set_resizable(True)        
-            treeview.append_column(col)
-            
-        selection = treeview.get_selection()
-        selection.connect('changed', self._on_selection_changed)
-    
+        self.treeview_cutlists = CutlistsTreeView()
+        self.treeview_cutlists.show()
+        self.treeview_cutlists.get_selection().connect('changed', self._on_selection_changed)
+        self.builder.get_object('scrolledwindow_cutlists').add(self.treeview_cutlists)
+     
         self.filename = ""
-    
-    def warning_pixbuf(self, column, cell, model, iter):
-        errors = model.get_value(iter, 17)
         
-        if errors:
-            cell.set_property('pixbuf', self.pixbuf_warning)
-        else:
-            cell.set_property('pixbuf', None)
-    
     ###
     ### Convenience methods
     ###
@@ -133,38 +68,11 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
             self.builder.get_object('radio_local_cutlist').set_sensitive(False)
 
         # start looking for cutlists                
-        self.builder.get_object('treeview_cutlists').get_model().clear()                
+        self.treeview_cutlists.get_model().clear()                
         self.builder.get_object('label_status').set_markup("<b>Cutlisten werden heruntergeladen...</b>")
             
     def add_cutlist(self, c):                                           
-        self.cutlists.append(c)      
-
-        errors = {
-           "100000" : "Fehlender Beginn", 
-           "010000" : "Fehlendes Ende",
-           "001000" : "Kein Video",
-           "000100" : "Kein Audio",
-           "000010" : "Anderer Fehler",
-           "000001" : "Falscher Inhalt/EPG-Error"
-        }
-      
-        if c.errors in errors.keys():
-            c.errors = errors[c.errors]
-        else:
-            c.errors = ''
-        
-        errors = False
-        if c.actualcontent or c.errors or c.othererrordescription:
-            errors = True
-        
-        c.actualcontent = "<span foreground='red'>%s</span>" % c.actualcontent
-        c.errors = "<span foreground='red'>%s</span>" % c.errors
-        c.othererrordescription = "<span foreground='red'>%s</span>" % c.othererrordescription
-        
-        data = [ c.id, c.author, "<b>%s</b>" % c.ratingbyauthor, "<b>%s</b>" % c.rating, c.ratingcount, c.countcuts, c.actualcontent, c.usercomment, c.filename, c.withframes, c.withtime, c.duration, c.errors, c.othererrordescription, c.downloadcount, c.autoname, c.filename_original ]
-        data.append(errors)
-        
-        self.builder.get_object('treeview_cutlists').get_model().append(data)  
+        self.treeview_cutlists.add_cutlist(c)
        
     ###
     ### Signal handlers
@@ -179,22 +87,15 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
     def _on_button_show_cuts_clicked(self, widget, data=None):
         cutlist = cutlists_management.Cutlist()
 
-        if self.builder.get_object('radio_local_cutlist').get_active():
-            
+        if self.builder.get_object('radio_local_cutlist').get_active():            
             cutlist.local_filename = self.builder.get_object('label_cutlist').get_text()
             
         else:
-            treeselection = self.builder.get_object('treeview_cutlists').get_selection()  
-
-            if treeselection.count_selected_rows() == 0:                            
+            cutlist = self.treeview_cutlists.get_selected()
+            
+            if not cutlist:
                 self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
                 return
-            
-            # retrieve id of chosen cutlist
-            (model, iter) = treeselection.get_selected()                   
-            cutlist_id = model.get_value(iter, 0)    
-                        
-            cutlist.id = cutlist_id
                                     
             error = cutlist.download(self.app.config.get('general', 'server'), self.filename)
 
@@ -217,21 +118,14 @@ class CutDialog(gtk.Dialog, gtk.Buildable):
             self.response(Cut_action.BEST_CUTLIST)
 
         elif self.builder.get_object('radio_choose_cutlist').get_active() == True:
-            treeselection = self.builder.get_object('treeview_cutlists').get_selection()  
+            cutlist = self.treeview_cutlists.get_selected()
                 
-            if treeselection.count_selected_rows() == 0:                            
+            if not cutlist:
                 self.gui.message_error_box("Es wurde keine Cutlist ausgewählt!")
                 return
-
-            # retrieve id of chosen cutlist
-            (model, iter) = treeselection.get_selected()                   
-            cutlist_id = model.get_value(iter, 0)
         
-            for cutlist in self.cutlists:
-                if cutlist.id == cutlist_id:
-                    self.chosen_cutlist = cutlist
-                    self.response(Cut_action.CHOOSE_CUTLIST)
-                    return
+            self.chosen_cutlist = cutlist
+            self.response(Cut_action.CHOOSE_CUTLIST)            
             
         elif self.builder.get_object('radio_local_cutlist').get_active() == True:
             self.response(Cut_action.LOCAL_CUTLIST)

@@ -22,11 +22,12 @@ from otrverwaltung import fileoperations
 from otrverwaltung.actions.baseaction import BaseAction
 
 class Delete(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = False
+        self.__app = app
         self.__gui = gui
 
-    def do(self, filenames, trash_otrkeys, trash_avis):
+    def do(self, filenames):
         if len(filenames) == 1:
             message = "Es ist eine Datei ausgewählt. Soll diese Datei "
         else:
@@ -36,12 +37,12 @@ class Delete(BaseAction):
             self.update_list = True
             for f in filenames:
                 if f.endswith("otrkey"):
-                    fileoperations.move_file(f, trash_otrkeys)
+                    fileoperations.move_file(f, self.__app.config.get('general', 'folder_trash_otrkeys'))
                 else:
-                    fileoperations.move_file(f, trash_avis)
+                    fileoperations.move_file(f, self.__app.config.get('general', 'folder_trash_avis'))
 
 class RealDelete(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = True
         self.__gui = gui            
 
@@ -56,21 +57,22 @@ class RealDelete(BaseAction):
                 fileoperations.remove_file(f)
 
 class Restore(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = True
+        self.__app = app
         self.__gui = gui
 
-    def do(self, filenames, new_otrkeys_folder, uncut_videos_folder, cut_videos_folder, uncut_video):
+    def do(self, filenames):
         for f in filenames:
             if f.endswith("otrkey"):
-                fileoperations.move_file(f, new_otrkeys_folder)
-            elif uncut_video.match(f):
-                fileoperations.move_file(f, uncut_videos_folder)
+                fileoperations.move_file(f, self.__app.config.get('general', 'folder_new_otrkeys'))
+            elif self.__app.uncut_video.match(f):
+                fileoperations.move_file(f, self.__app.config.get('general', 'folder_uncut_avis'))
             else:
-                fileoperations.move_file(f, cut_videos_folder)
+                fileoperations.move_file(f, self.__app.config.get('general', 'folder_cut_avis'))
     
 class Rename(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = True
         self.__gui = gui
         
@@ -92,7 +94,7 @@ class Rename(BaseAction):
             self.update_list = False
 
 class NewFolder(BaseAction):
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = False
         self.__gui = gui
         

@@ -22,12 +22,14 @@ from otrverwaltung.actions.baseaction import BaseAction
 
 class Archive(BaseAction):
    
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = False
+        self.__app = app
         self.__gui = gui
 
-    def do(self, filenames, archive_directory):
+    def do(self, filenames):
         # widgets
+        archive_directory = self.__app.config.get('general', 'folder_archive')
         dialog = self.__gui.dialog_archive
 
         result, renamed_filenames, archive_to = dialog.run(filenames, archive_directory)            

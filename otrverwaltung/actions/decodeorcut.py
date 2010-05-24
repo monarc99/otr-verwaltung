@@ -23,7 +23,7 @@ from os.path import basename, join, dirname, exists, splitext
 import time
 
 from otrverwaltung import fileoperations
-from otrverwaltung.filesconclusion import FileConclusion
+from otrverwaltung.conclusions import FileConclusion
 from otrverwaltung.constants import Action, Cut_action, Status, Format, Program
 from otrverwaltung.actions.baseaction import BaseAction
 from otrverwaltung import codec
@@ -33,13 +33,14 @@ from otrverwaltung.GeneratorTask import GeneratorTask
 
 class DecodeOrCut(BaseAction):
     
-    def __init__(self, gui):
+    def __init__(self, app, gui):
         self.update_list = True
+        self.__app = app
+        self.config = app.config
         self.__gui = gui
 
-    def do(self, action, filenames, config, rename_by_schema, cut_action=None):
-        self.config = config
-        self.rename_by_schema = rename_by_schema
+    def do(self, action, filenames, cut_action=None):
+        self.rename_by_schema = self.__app.rename_by_schema
         
         decode, cut = False, False            
             
@@ -78,123 +79,31 @@ class DecodeOrCut(BaseAction):
 
         # no more need for tasks view
         self.__gui.main_window.set_tasks_visible(False)
- 
+
+        show_conclusions = False
+        # Only cut - don't show conclusions if all were cancelled
+        if action == Action.CUT:
+            for conclusion in file_conclusions:
+                if conclusion.cut.status != Status.NOT_DONE:
+                    show_conclusions = True
+                    break
                     
-        # show conclusion
-        file_conclusions = self.__gui.dialog_conclusion._run(file_conclusions, action, self.rename_by_schema, self.config.get('general', 'folder_archive'))       
-                      
-        if cut:
-             
-            # create cutlists            
-            cutlists = []
-            
-            for file_conclusion in file_conclusions:
-
-                if file_conclusion.cut.create_cutlist:
-                    if "VirtualDub" in file_conclusion.cut.cutlist.intended_app:
-                        intended_app_name = "VirtualDub"
-                    else:
-                        intended_app_name = "Avidemux"
-
-                    file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
-                    file_conclusion.cut.cutlist.author = self.config.get('general', 'cutlist_username')
-                    file_conclusion.cut.cutlist.intended_version = open(path.getdatapath("VERSION"), 'r').read().strip()
-                    file_conclusion.cut.cutlist.smart = self.config.get('general', 'smart')                   
-
-                    file_conclusion.cut.cutlist.write_local_cutlist(file_conclusion.uncut_video, intended_app_name, file_conclusion.cut.my_rating)
+        # Only decode - don't show if everything is OK
+        elif action == Action.DECODE:
+            for conclusion in file_conclusions:
+                if conclusion.decode.status != Status.OK:
+                    show_conclusions = True
                     
-                    cutlists.append(file_conclusion.cut.cutlist)
-                        
-            # upload them:
-            def upload():
-                error_messages = []
-
-                for cutlist in cutlists:
-                    error_message = cutlist.upload(self.config.get('general', 'server'), self.config.get('general', 'cutlist_hash'))
-                    if error_message: 
-                        error_messages.append(error_message)
-                    else:
-                        if self.config.get('general', 'delete_cutlists'):
-                            fileoperations.remove_file(cutlist.local_filename)
-                 
-                count = len(cutlists)
-                
-                message = "Es wurden %s/%s Cutlisten hochgeladen!" % (str(count - len(error_messages)), str(count))
-                if len(error_messages) > 0:
-                    message += " (" + ", ".join(error_messages) + ")"
-
-                yield message
-
-            if len(cutlists) > 0:
-                if self.__gui.question_box("Soll(en) %s Cutlist(en) hochgeladen werden?" % len(cutlists)):
-                    
-                    def change_status(message):
-                        self.__gui.main_window.change_status(0, message)
-                    
-                    GeneratorTask(upload, change_status).start()
-            
-            # rename
-            for file_conclusion in file_conclusions:                         
-                if file_conclusion.cut.rename:
-                    extension = file_conclusion.get_extension()
-                    if not file_conclusion.cut.rename.endswith(extension):
-                        file_conclusion.cut.rename += extension
-                
-                    new_filename = join(self.config.get('general', 'folder_cut_avis'), file_conclusion.cut.rename.replace('/', '_'))
-                    new_filename = fileoperations.make_unique_filename(new_filename)
-                    
-                    if file_conclusion.cut_video != new_filename:
-                        file_conclusion.cut_video = fileoperations.rename_file(file_conclusion.cut_video, new_filename)
+            if not show_conclusions:
+                self.__app.gui.main_window.change_status(0, "%i Datei(en) erfolgreich dekodiert" % len(file_conclusions), permanent=True)
         
-            # move cut video to archive
-            for file_conclusion in file_conclusions:
-                if file_conclusion.cut.archive_to:
-                    fileoperations.move_file(file_conclusion.cut_video, file_conclusion.cut.archive_to)
-        
-            # move uncut video to trash if it's ok
-            for file_conclusion in file_conclusions:
-                if file_conclusion.cut.status == Status.OK and file_conclusion.cut.delete_uncut:
-                    # move to trash
-                    target = self.config.get('general', 'folder_trash_avis')
-                    fileoperations.move_file(file_conclusion.uncut_video, target)        
-        
-            # remove local cutlists      
-            if self.config.get('general', 'delete_cutlists'):
-                for file_conclusion in file_conclusions:
-                    if file_conclusion.cut.cutlist.local_filename and not file_conclusion.cut.create_cutlist: #and file_conclusion.cut.status == Status.OK:
-                        if exists(file_conclusion.cut.cutlist.local_filename):
-                            fileoperations.remove_file(file_conclusion.cut.cutlist.local_filename)
-        
-            # rate cutlists        
-            def rate():                    
-                yield 0 # fake generator
-                messages = []
-                count = 0
-                for file_conclusion in file_conclusions:                    
-                    if file_conclusion.cut.my_rating > -1:
-                        print "Rate with ", file_conclusion.cut.my_rating
-                        success, message = file_conclusion.cut.cutlist.rate(file_conclusion.cut.my_rating, self.config.get('general', 'server'))
-                        if success:
-                            count += 1
-                        else:
-                            messages += [message]
-                
-                if count > 0 or len(messages) > 0:
-                    if count == 0:
-                        text = "Es wurde keine Cutlist bewertet!"
-                    if count == 1:
-                        text = "Es wurde 1 Cutlist bewertet!"
-                    else:
-                        text = "Es wurden %s Cutlisten bewertet!" % count
-                        
-                    if len(messages) > 0:
-                        text += " (Fehler: %s)" % ", ".join(messages)
-                
-                    self.__gui.main_window.change_status(0, text)
-            
-            GeneratorTask(rate).start()
-             
-     
+        # Decode and cut - always show      
+        else: 
+            show_conclusions = True
+                                
+        if show_conclusions:                
+            self.__app.conclusions_manager.add_conclusions(*file_conclusions)
+
     def decode(self, file_conclusions):          
             
         # no decoder        
@@ -361,6 +270,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.create_cutlist = True            
                     file_conclusion.cut.cutlist.cuts_frames = cuts
                     file_conclusion.cut.cutlist.intended_app = basename(executable)                    
+                    file_conclusion.cut.cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten'
                     
                     fps, error = self.__get_fps(file_conclusion.uncut_video)
                     if not error:
@@ -426,7 +336,7 @@ class DecodeOrCut(BaseAction):
                 if self.config.get('general', 'rename_cut'):                        
                     file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
                 else:
-                    file_conclusion.cut.rename = basename(cut_video)               
+                    file_conclusion.cut.rename = basename(cut_video)           
         
         return True
 
