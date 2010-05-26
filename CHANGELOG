@@ -1,3 +1,8 @@
+0.9, 26. Mai 10:
+    * Downloadmöglichkeit
+    * Abhängigkeiten wie mplayer, wget usw. sind im deb-Paket vorhanden.
+    * Der Zusammenfassungsdialog wird nicht mehr automatisch angezeigt, sondern es wird ein Hinweis in der Leiste eingeblendet.
+
 0.8.4, 17. April 10:
     * Bugfix: http://www.otrforum.com/showthread.php/59666, Danke @Artemis1121
     * Es wird nun getestet, ob das "plugins"-Verzeichnis existiert

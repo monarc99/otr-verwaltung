@@ -1,4 +1,4 @@
 project = otrverwaltung
 template = simple-gnome
 version = 0.2.5
-dependencies = mplayer, avidemux, python-glade2
+dependencies = mplayer, avidemux, python-glade2, aria2, wget

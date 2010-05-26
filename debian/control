@@ -16,8 +16,15 @@ XB-Python-Version: ${python:Versions}
 Depends: ${misc:Depends},
  ${python:Depends},
  python-gobject,
+ python-dbus,
  python-xdg,
- python-gtk2
+ python-simplejson,
+ python-gtk2,
+ mplayer,
+ avidemux,
+ python-glade2,
+ aria2,
+ wget
 Description: Dateien von onlinetvrecorder.com verwalten
  Dateien von onlinetvrecorder.com verwalten: Schneiden, Schnitte
  betrachten, Cutlists bewerten...
