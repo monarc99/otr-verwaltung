@@ -628,6 +628,9 @@ class MainWindow(gtk.Window, gtk.Buildable):
                     selection.select_iter(row.iter)
         
     def do_search(self, search):
+        if not search:
+            return
+    
         counts_of_section = self.app.start_search(search)
         self.sidebar.set_search(counts_of_section)                    
         
