@@ -89,6 +89,7 @@ class Remove(BaseAction):
 class Search(BaseAction):
     def __init__(self, app, gui):
         self.update_list = False
+        self.__app = app
         self.__gui = gui
         
     def do(self, broadcast_iters):
@@ -101,4 +102,4 @@ class Search(BaseAction):
             string += time.strftime("%y.%m.%d_%H-%M", time.localtime(broadcast.datetime)) + "_"
             string += broadcast.station + "_"
             
-            webbrowser.open("http://www.otr-search.com/?q=%s" % string)
+            webbrowser.open(self.__app.config.get('general', 'otrkey_search') + string)
