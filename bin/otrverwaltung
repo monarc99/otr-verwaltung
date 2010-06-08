@@ -483,7 +483,7 @@ class App:
                                 (self.__section_trash, Section.TRASH)]:
             items = method()   
             count = len(items)
-            counts[section] = "(%s)" % count
+            counts[section] = count
 
         # archive 
         files = []       
@@ -493,7 +493,7 @@ class App:
                     files += [join(root, f)]
 
         count = len(files)
-        counts[Section.ARCHIVE] = "(%s)" % count
+        counts[Section.ARCHIVE] = count
 
         self.show_section(self.section)                   
         

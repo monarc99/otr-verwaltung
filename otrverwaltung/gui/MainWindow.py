@@ -27,6 +27,8 @@ import pango
 from otrverwaltung import path
 from otrverwaltung.constants import Action, Section, Cut_action, DownloadStatus
 from otrverwaltung.gui.widgets.DownloadsTreeView import DownloadsTreeView
+from otrverwaltung.gui.widgets.Sidebar import Sidebar
+from otrverwaltung.gui.widgets.EntrySearchToolItem import EntrySearchToolItem
 from otrverwaltung.gui import DownloadPropertiesDialog
 from otrverwaltung.GeneratorTask import GeneratorTask
 
@@ -121,6 +123,13 @@ class MainWindow(gtk.Window, gtk.Buildable):
                 toolbar_buttons.append(self.__toolbar_buttons[button_name])
                 
             self.__sets_of_toolbars[section] = toolbar_buttons
+   
+        # toolbar_search
+        self.search_tool_item = EntrySearchToolItem("Durchsuchen")
+        self.builder.get_object('toolbar_search').insert(self.search_tool_item, -1)
+        
+        self.search_tool_item.connect('search', self.on_search)
+        self.search_tool_item.connect('clear', self.on_search_clear)        
    
     def add_toolbutton(self, image, text, sections):
         """ Fügt einen neuen Toolbutton hinzu. 
@@ -236,31 +245,46 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.builder.get_object('menu_bottom').set_active(self.app.config.get('general', 'show_bottom'))
         
         self.builder.get_object('image_status').clear()
+            
+        ## sidebar ##
+        self.sidebar = Sidebar()
+    
+        planned = self.sidebar.add_element(Section.PLANNING, 'Geplante Sendungen', False)
+        self.sidebar.add_element(Section.DOWNLOAD, 'Downloads', False)
+        self.sidebar.add_section('OTRKEYS')
+        self.sidebar.add_element(Section.OTRKEY, 'Nicht dekodiert')    
+            
+        self.sidebar.add_section('VIDEOS')
+        self.sidebar.add_element(Section.VIDEO_UNCUT, 'Ungeschnitten')
+        self.sidebar.add_element(Section.VIDEO_CUT, 'Geschnitten')
+        self.sidebar.add_element(Section.ARCHIVE, 'Archiv')
+                   
+        self.sidebar.add_element(Section.TRASH, 'Mülleimer', False)
         
-        self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
+        self.builder.get_object('hbox_main').pack_start(self.sidebar, expand=False)
+        self.builder.get_object('hbox_main').reorder_child(self.sidebar, 0)
         
-        # delete-search button image
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_MENU)
-        self.builder.get_object('buttonClear').set_image(image)
-                      
-        # connect other signals
-        self.builder.get_object('radioPlanning').connect('clicked', self._on_sidebar_toggled, Section.PLANNING)
-        self.builder.get_object('radioDownload').connect('clicked', self._on_sidebar_toggled, Section.DOWNLOAD)
-        self.builder.get_object('radioUndecoded').connect('clicked', self._on_sidebar_toggled, Section.OTRKEY)
-        self.builder.get_object('radioUncut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_UNCUT)
-        self.builder.get_object('radioCut').connect('clicked', self._on_sidebar_toggled, Section.VIDEO_CUT)
-        self.builder.get_object('radioArchive').connect('clicked', self._on_sidebar_toggled, Section.ARCHIVE)  
-        self.builder.get_object('radioTrash').connect('clicked', self._on_sidebar_toggled, Section.TRASH)
+        self.sidebar.connect('element-clicked', self._on_sidebar_toggled)
+        self.sidebar.set_active(Section.DOWNLOAD)
         
-        # change background of sidebar
-        eventbox = self.builder.get_object('eventboxSidebar')
-        cmap = eventbox.get_colormap()
-        colour = cmap.alloc_color("lightgray")
-        style = eventbox.get_style().copy()
-        style.bg[gtk.STATE_NORMAL] = colour
-        eventbox.set_style(style)
+        # add planning badge
+        self.eventbox_planning = gtk.EventBox()
+        self.label_planning_current = gtk.Label()
+   
+        self.eventbox_planning.add(self.label_planning_current)
+        self.eventbox_planning.set_size_request(30, 15)
 
+                   
+        style = self.eventbox_planning.get_style().copy()
+        pixmap, mask = gtk.gdk.pixbuf_new_from_file(path.get_image_path('badge.png')).render_pixmap_and_mask()
+        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
+        self.eventbox_planning.shape_combine_mask(mask, 0, 0)        
+        self.eventbox_planning.set_style(style)
+        planned.add_widget(self.eventbox_planning)
+        
+        self.sidebar.show_all()
+        ## sidebar end ##
+        
         # change background of conclusin bar
         eventbox = self.builder.get_object('box_conclusion')
         cmap = eventbox.get_colormap()
@@ -268,25 +292,6 @@ class MainWindow(gtk.Window, gtk.Buildable):
         style = eventbox.get_style().copy()
         style.bg[gtk.STATE_NORMAL] = colour
         eventbox.set_style(style)        
-
-        style = self.builder.get_object('eventboxPlanningCurrentCount').get_style().copy()
-        pixmap, mask = gtk.gdk.pixbuf_new_from_file(path.get_image_path('badge.png')).render_pixmap_and_mask()
-        style.bg_pixmap[gtk.STATE_NORMAL] = pixmap        
-        self.builder.get_object('eventboxPlanningCurrentCount').shape_combine_mask(mask, 0, 0)        
-        self.builder.get_object('eventboxPlanningCurrentCount').set_style(style)
-
-        # change font of sidebar     
-        for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount', 'labelOtrkey', 'labelAvi', 'labelPlanningCurrentCount']:
-            self.builder.get_object(label).modify_font(pango.FontDescription("bold"))
-
-        # change background of tasks and searchbar
-        for eventbox in ['eventbox_search']:
-            eventbox = self.builder.get_object(eventbox)
-            cmap = eventbox.get_colormap()
-            colour = cmap.alloc_color("#FFF288")
-            style = eventbox.get_style().copy()
-            style.bg[gtk.STATE_NORMAL] = colour
-            eventbox.set_style(style)
 
 
     #
@@ -468,10 +473,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
                 count += 1
     
         if count == 0:
-            self.builder.get_object('eventboxPlanningCurrentCount').hide()
+            self.eventbox_planning.hide()
         else:
-            self.builder.get_object('eventboxPlanningCurrentCount').show()
-            self.builder.get_object('labelPlanningCurrentCount').set_text(str(count))
+            self.eventbox_planning.show()
+            self.label_planning_current.set_markup("<b>%i</b>" % count)
       
     def change_status(self, message_type, message, permanent=False):
         """ Zeigt ein Bild und einen Text in der Statusleiste an.
@@ -597,13 +602,8 @@ class MainWindow(gtk.Window, gtk.Buildable):
     def _on_menuFileQuit_activate(self, widget, data=None):        
         gtk.main_quit()
            
-    def _on_menuEditSearch_activate(self, widget, data=None):
-        entry_search = self.builder.get_object('entry_search')
-        
-        if entry_search.get_text() == "Durchsuchen":
-            entry_search.set_text('')
-        
-        entry_search.grab_focus()
+    def _on_menuEditSearch_activate(self, widget, data=None):               
+        self.search_tool_item.entry.grab_focus()
     
     def _on_menu_bottom_toggled(self, widget, data=None):
         self.app.config.set('general', 'show_bottom', widget.get_active())
@@ -615,61 +615,26 @@ class MainWindow(gtk.Window, gtk.Buildable):
                   
     # sidebar
     def _on_sidebar_toggled(self, widget, section):
-        if widget.get_active() == True:
-            self.app.show_section(section)            
-    
-    def _on_buttonClear_clicked(self, widget, data=None):
-        self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
-        self.builder.get_object('entry_search').set_text("Durchsuchen")
-   
-    def _on_entry_search_button_press_event(self, widget, data=None):
-        self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
-        if self.builder.get_object('entry_search').get_text() == "Durchsuchen":
-            self.builder.get_object('entry_search').set_text("")
-    
-    def _on_entry_search_focus_out_event(self, widget, data=None):
-        if self.builder.get_object('entry_search').get_text() == "":
-            self.builder.get_object('entry_search').modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse("gray"))
-            self.builder.get_object('entry_search').set_text("Durchsuchen")
-            
-    def _on_entry_search_changed(self, widget, data=None):
-        search = widget.get_text()
-
-        self.do_search(search)
-    
-    def do_search(self, search):
-        if search == "Durchsuchen" or search == "":
-            self.app.stop_search()
-            
-            self.builder.get_object('eventbox_search').hide()
-            
-            for label in ['labelOtrkeysCount', 'labelUncutCount', 'labelCutCount', 'labelArchiveCount', 'labelTrashCount']:
-                self.builder.get_object(label).set_text("")
-        else:
-            self.builder.get_object('eventbox_search').show()
-            self.builder.get_object('label_search').set_markup("<b>Suchergebnisse für '%s'</b>" % search)
+        self.app.show_section(section)            
         
-            counts_of_section = self.app.start_search(search)
-                  
-            self.builder.get_object('labelOtrkeysCount').set_text(counts_of_section[Section.OTRKEY])
-            self.builder.get_object('labelUncutCount').set_text(counts_of_section[Section.VIDEO_UNCUT])
-            self.builder.get_object('labelCutCount').set_text(counts_of_section[Section.VIDEO_CUT])     
-            self.builder.get_object('labelArchiveCount').set_text(counts_of_section[Section.ARCHIVE])    
-            self.builder.get_object('labelTrashCount').set_text(counts_of_section[Section.TRASH])
-               
-    def _on_eventboxPlanningCurrentCount_button_release_event(self, widget, data=None):
-        # show section
-        self.builder.get_object('radioPlanning').set_active(True)
-        
-        # select already broadcasted
-        selection = self.builder.get_object('treeview_planning').get_selection()
-        selection.unselect_all()
-        now = time.time()
+        if section == Section.PLANNING:
+            # select already broadcasted
+            selection = self.builder.get_object('treeview_planning').get_selection()
+            selection.unselect_all()
+            now = time.time()
                 
-        for row in self.builder.get_object('treeview_planning').get_model():
-            if row[0].datetime < now:
-                selection.select_iter(row.iter)
-                      
+            for row in self.builder.get_object('treeview_planning').get_model():
+                if row[0].datetime < now:
+                    selection.select_iter(row.iter)
+        
+    def on_search_clear(self, widget):
+        self.app.stop_search()
+        self.sidebar.set_search(None)
+        
+    def on_search(self, widget, search):
+        counts_of_section = self.app.start_search(search)
+        self.sidebar.set_search(counts_of_section)                  
+
     # bottom
     def on_notebook_bottom_page_added(self, notebook, child, page_num, data=None):
         self.builder.get_object('menu_bottom').set_sensitive(True)
