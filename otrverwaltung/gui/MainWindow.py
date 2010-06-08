@@ -128,7 +128,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.search_tool_item = EntrySearchToolItem("Durchsuchen")
         self.builder.get_object('toolbar_search').insert(self.search_tool_item, -1)
         
-        self.search_tool_item.connect('search', self.on_search)
+        self.search_tool_item.connect('search', lambda w, search: self.do_search(search))
         self.search_tool_item.connect('clear', self.on_search_clear)        
    
     def add_toolbutton(self, image, text, sections):
@@ -627,13 +627,13 @@ class MainWindow(gtk.Window, gtk.Buildable):
                 if row[0].datetime < now:
                     selection.select_iter(row.iter)
         
+    def do_search(self, search):
+        counts_of_section = self.app.start_search(search)
+        self.sidebar.set_search(counts_of_section)                    
+        
     def on_search_clear(self, widget):
         self.app.stop_search()
         self.sidebar.set_search(None)
-        
-    def on_search(self, widget, search):
-        counts_of_section = self.app.start_search(search)
-        self.sidebar.set_search(counts_of_section)                  
 
     # bottom
     def on_notebook_bottom_page_added(self, notebook, child, page_num, data=None):

@@ -286,19 +286,19 @@ class App:
         self.__gui.main_window.set_toolbar(section)
         
         self.section_info = {        
-            Section.PLANNING: ('scrolledwindow_planning', "Diese Aufnahmen wurden geplant." ),
-            Section.DOWNLOAD: ('scrolledwindow_download', "Diese Dateien werden gerade heruntergeladen."),
-            Section.OTRKEY: ('scrolledwindow_files', "Diese Dateien wurden noch nicht dekodiert." ),
-            Section.VIDEO_UNCUT: ('scrolledwindow_files', "Diese Dateien wurden noch nicht geschnitten."),
-            Section.VIDEO_CUT: ('scrolledwindow_files', "Diese Video-Dateien sind fertig geschnitten. Sie können ins Archiv verschoben werden."),
-            Section.ARCHIVE: ('scrolledwindow_files',  "Diese Dateien wurden ins Archiv verschoben."),
-            Section.TRASH: ('scrolledwindow_files', "Diese otrkey- und Video-Dateien wurden bereits dekodiert bzw. geschnitten. Sie können normalerweise gelöscht werden.")
+            Section.PLANNING: 'scrolledwindow_planning',
+            Section.DOWNLOAD: 'scrolledwindow_download',
+            Section.OTRKEY: 'scrolledwindow_files',
+            Section.VIDEO_UNCUT: 'scrolledwindow_files',
+            Section.VIDEO_CUT: 'scrolledwindow_files',
+            Section.ARCHIVE: 'scrolledwindow_files',
+            Section.TRASH: 'scrolledwindow_files'
         }
                 
         self.__gui.main_window.clear_files()
         files = []
         
-        treeview, text = self.section_info[section]
+        treeview = self.section_info[section]
         self.__gui.main_window.show_treeview(treeview)
                 
         if section == Section.OTRKEY:
@@ -318,20 +318,12 @@ class App:
             self.__section_archive()
 
         if len(files) > 0: # this is not executed when the section is "Archive"
-            if len(files) == 1:
-                text += " (1 Datei)"
-            else:
-                text += " (%s Dateien) " % len(files)
-            
             files.sort() 
             
             # put filenames into treestore
             for f in files:
                 # TODO: don't show files if in use
                 self.__append_row_treeview_files(None, f)
-
-        # set message text
-        self.__gui.main_window.builder.get_object('labelMessage').set_markup(text)
 
     # helper for different sections   
     def __section_otrkey(self):
