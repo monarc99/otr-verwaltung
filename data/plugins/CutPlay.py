@@ -21,7 +21,7 @@ import gtk
 from otrverwaltung.pluginsystem import Plugin
 
 import otrverwaltung.cutlists as cutlists_management
-import otrverwaltung.fileoperations
+from otrverwaltung import fileoperations
 from otrverwaltung.constants import Section
 
 class CutPlay(Plugin):

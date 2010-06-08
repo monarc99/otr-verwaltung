@@ -118,6 +118,7 @@ class App:
                 'folder_trash_otrkeys': '',
                 'folder_trash_avis': '',
                 'folder_archive': '',
+                'otrkey_search': 'http://otrkeyfinder.com/?search=',
                 'decoder': '',
                 'save_email_password': False,
                 'email': '',
