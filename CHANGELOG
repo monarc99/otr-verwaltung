@@ -1,3 +1,8 @@
+0.9.1, 10. Sept. 10:
+    * HQ-Dateinamen werden beim Download korrekt angezeigt.
+    * Überarbeitete Seitenleiste.
+    * Mirrorsuche jetzt konfigurierbar.
+
 0.9, 26. Mai 10:
     * Downloadmöglichkeit
     * Abhängigkeiten wie mplayer, wget usw. sind im deb-Paket vorhanden.
