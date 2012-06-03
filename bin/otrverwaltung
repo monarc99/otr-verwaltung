@@ -155,7 +155,7 @@ class App:
                 'aria2c_torrent': ["aria2c", "--check-integrity=true", "--continue" ]
             },
             'plugins': {
-                'enabled': 'Play:Mkv',
+                'enabled': 'Play:Mkv:Mediainfo',
                 'config': {} # used as plugin config storage
             }
                          
