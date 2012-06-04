@@ -20,7 +20,7 @@ import time
 import os.path
 import base64
 import hashlib
-import urllib
+import urllib2
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.cutlists import Cutlist
@@ -118,7 +118,70 @@ class Download:
             return time
         else:
             return 0
-       
+            
+    def _check_file_with_torrent(self):
+        """ checks file with torrent """
+        password = base64.b64decode(self._config.get('general', 'password'))
+        hash = hashlib.md5(password).hexdigest()
+        email = self._config.get('general', 'email')            
+        url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, email, hash)      
+        command = self._config.get('downloader', 'aria2c_torrent') + ["-d", self.information['output'], '--check-integrity=true', '--continue', '--bt-enable-lpd=false', '--bt-exclude-tracker="*"', '--enable-dht=false', '--enable-dht6=false', '--enable-peer-exchange=false', '--bt-hash-check-seed=false', '--bt-stop-timeout=1', '--seed-time=0', '--follow-torrent=mem', url]
+        self.information['message_short'] = 'Torrent Datei zur Überprüfung holen ...'
+        self.update_view()  
+                
+        # Checking
+        try:                
+            self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
+        except OSError, error:
+            self.information['status'] = DownloadStatus.ERROR
+            self.information['message_short'] = 'Aria2c ist nicht installiert oder Passwort falsch.'
+            return
+
+        while self.__process.poll() == None:                    
+            line = self.__process.stdout.readline().strip()
+            time.sleep(1)
+            if "Checksum" in line:
+                result = re.findall('Checksum:.*\((.*)%\)', line)
+                if result:
+                    self.information['message_short'] = 'Überprüfen...%s Prozent' % result[0]
+                    self.information['progress'] = int(result[0])
+                    self.update_view()         
+            elif '(OK):Herunterladen abgeschlossen.(INPR):wird heruntergeladen.' in line:
+                self.information['message_short'] = '(INPR):Download unvollständig.'
+                self.information['progress'] = 0
+                self.update_view()
+            elif '(OK):download completed.(INPR):download in-progress.' in line:
+                self.information['message_short'] = '(INPR):Download unvollständig.'
+                self.information['progress'] = 0
+                self.update_view()
+            elif '(ERR):ein Fehler ist unterlaufen.' in line:  # Torrent Download fehlgeschlagen 
+                self.information['message_short'] = 'Torrentdatei konnte nicht geladen werden. OTR-Daten nicht korrekt?'
+                self.information['progress'] = 0
+            elif '(ERR):error occurred.' in line:  # Torrent Download fehlgeschlagen 
+                self.information['message_short'] = 'Torrentdatei konnte nicht geladen werden. OTR-Daten nicht korrekt?'
+                self.information['progress'] = 0
+            elif '(OK):Herunterladen abgeschlossen.'  in line:
+                self.information['message_short'] = '(OK):Download vollständig.'
+                self._finished()
+                self.update_view()
+            elif '(OK):download completed.'  in line:
+                self.information['message_short'] = '(OK):Download vollständig.'
+                self._finished()
+                self.update_view()
+             
+        if self.__process.returncode == 0:
+	    self.information['message_short'] = '(OK):Download vollständig.'
+            self._finished()
+            self.update_view()
+        elif self.__process.returncode == 7:
+	    self.information['message_short'] = '(INPR):Download unvollständig.'
+            self.information['progress'] = 0
+            self.update_view()
+        else:
+            self.information['message_short'] = '(EER):Fehler aufgetreten. Aria2c installiert und OTR Daten korrekt?'
+            self.information['progress'] = 0
+            self.update_view()
+            
     #
     # Download
     #     
@@ -138,7 +201,7 @@ class Download:
                 email = self._config.get('general', 'email')            
                 url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, email, hash)
                 try:
-                    urllib.urlretrieve(url, torrent_filename)
+                    urllib2.urlretrieve(url, torrent_filename)
                     # read filename
                     f = open(torrent_filename, 'r')
                     line = f.readlines()[0]
@@ -302,59 +365,161 @@ class Download:
                 yield self.__process.stderr.read().strip()
             
             else:
-                command = self._config.get('downloader', 'aria2c') + ["-d", self.information['output'], self.link]
+                # Download with aria2c      
+                if 'otrkey' in self.filename and os.path.exists(self.information['output'] + '/' +  self.filename) and self._config.get('general', 'password'):
+                    self._check_file_with_torrent()    
+
+                retries = -1
+                command = self._config.get('downloader', 'aria2c') + ["-d", self.information['output'], self.link]            
                 yield "Ausgeführt wird:\n%s\n" % " ".join(command)
-                try:                
-                    self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
-                except OSError, error:
-                    self.information['status'] = DownloadStatus.ERROR
-                    self.information['message_short'] = 'Aria2c ist nicht installiert.'
-                    yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s" % error
-                    return
-                    
-                while self.__process.poll() == None:                    
-                    line = self.__process.stdout.readline().strip()                    
-                            
-                    if "%" in line:
-                        if "FileAlloc" in line:
-                            result = re.findall('FileAlloc:.*\(([0-9]{1,3}%)', line)
-                            self.information['message_short'] = 'Datei wird angelegt...%s' % result[0]
-                        else:
-                            self.information['message_short'] = ''
 
-                        if not self.information['size']:
-                            try:
-                                # aria2c gives size always in MiB (hopefully)
-                                size = re.findall('.*FileAlloc.*/(.*)\(', line)[0]
-                                size = size.strip('MiB')
-                                size = size.replace(',', '')
-                                size = int(round(float(size))) * 1024 * 1024
-                                self.information['size'] = size
-                                self.update_view()
-                                yield line
-                            except:
-                                pass
+                while retries != 0 and self.information['status'] == DownloadStatus.RUNNING:
+                    self.log = ''
+                    self.information['message_short'] = 'Download starten ...'
+                    self.update_view()
                     
-                        result = re.findall('\(([0-9]{1,3})%\).*SPD:(.*) ETA:(.*)]', line)
-
-                        if result:                            
-                            self.information['progress'] = int(result[0][0])
-                            self.information['speed'] = result[0][1]
-                            self.information['est'] = result[0][2]                       
-                            self.update_view()
-                    else:        
-                        yield line
-                
-                ### Process is terminated                
-                stdout = self.__process.stdout.read().strip()                
-                yield stdout
-                if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
-                    time.sleep(1) # wait for log being updated - very ugly
-                    if 'download completed' in self.log:
-                        self._finished()
-                    else:
+                    try:                
+                        self.__process = subprocess.Popen(command, stdout=subprocess.PIPE)
+                    except OSError, error:
                         self.information['status'] = DownloadStatus.ERROR
-            
+                        self.information['message_short'] = 'Aria2c ist nicht installiert.'
+                        yield "Ist aria2c installiert? Der Befehl konnte nicht ausgeführt werden:\n%s" % error
+                        return
+                    
+                    while self.__process.poll() == None:                    
+                        line = self.__process.stdout.readline().strip()                    
+	            
+                        if "Checksum" in line:
+                            result = re.findall('Checksum:.*\((.*)%\)', line)
+                            if result:
+                                self.information['message_short'] = 'Überprüfen...%s  Prozent' % result[0]
+                                self.information['progress'] = int(result[0])
+                                self.update_view()                  
+                        elif "%" in line:
+                            if "FileAlloc" in line:
+                                result = re.findall('FileAlloc:.*\(([0-9]{1,3}%)', line)
+                                self.information['message_short'] = 'Datei wird angelegt...%s' % result[0]
+                            else:
+                                self.information['message_short'] = ''
+  
+                            if not self.information['size']:
+                                try:
+                                    # aria2c gives size always in MiB (hopefully)
+                                    size = re.findall('.*SIZE.*/(.*)\(', line)[0]
+                                    size = size.strip('MiB')
+                                    size = size.replace(',', '')
+                                    size = int(round(float(size))) * 1024 * 1024
+                                    self.information['size'] = size
+                                    self.update_view()
+                                    yield line
+                                except:
+                                    pass
+                    
+                            result = re.findall('\(([0-9]{1,3})%\).*CN:([0-9]{1,5}).*SPD:(.*) ETA:(.*)]', line)
+ 
+                            if result:                            
+                                self.information['progress'] = int(result[0][0])
+                                self.information['message_short'] = 'Verbindungen: %s' % result[0][1]
+                                self.information['speed'] = result[0][2]
+                                self.information['est'] = result[0][3]                       
+                                self.update_view()
+                        else:        
+                            yield line
+                    
+                    ### Process is terminated                
+                    stdout = self.__process.stdout.read().strip()                
+                    yield stdout
+                    if not self.information['status'] in [DownloadStatus.STOPPED, DownloadStatus.ERROR]:
+                        time.sleep(1) # wait for log being updated - very ugly
+                        if '(INPR):wird heruntergeladen.' in self.log:
+                            self.information['status'] = DownloadStatus.ERROR
+                            self.information['message_short'] = '(INPR):Download unvollständig.'
+                            self.information['progress'] = 0
+                            self.update_view()
+                            break
+                        elif '(INPR):download in-progress.' in self.log:
+                            self.information['status'] = DownloadStatus.ERROR
+                            self.information['message_short'] = '(INPR):Download unvollständig.'
+                            self.information['progress'] = 0
+                            self.update_view()
+                            break
+                        elif '(OK):Herunterladen abgeschlossen.'  in self.log:
+                            self.information['message_short'] = '(OK):Download vollständig.'
+                            self._finished()
+                            self.update_view()
+                            break
+                        elif '(OK):download completed.'  in self.log:
+                            self.information['message_short'] = '(OK):Download vollständig.'
+                            self._finished()
+                            self.update_view()
+                            break
+                        else:                        
+                            # Warteschlange                             
+                            try:
+                                page = urllib2.urlopen(self.link)
+                            except IOError, e:
+                                self.information['status'] = DownloadStatus.ERROR
+                                page = e
+        
+                            headers = dict(page.info())
+                            if 'x-otr-queueposition' in headers:
+                                self.information['status'] = DownloadStatus.RUNNING
+                                if 'retry-after' in headers:
+                                    timer = int(headers['retry-after'])
+                                else:
+                                    timer = 30                               
+                                while timer != 0 and self.information['status'] == DownloadStatus.RUNNING:
+                                    self.information['message_short'] = 'Warteschlange Position: %s - nächster Versuch in %s Sekunden' % (headers['x-otr-queueposition'],timer)
+                                    timer -= 1
+                                    self.update_view()
+                                    time.sleep(1)
+                            elif 'x-otr-error-message' in headers:
+                                self.information['status'] = DownloadStatus.RUNNING
+                                if 'retry-after' in headers:
+                                    timer = int(headers['retry-after'])
+                                else:
+                                    timer = 30
+                                
+                                while timer != 0 and self.information['status'] == DownloadStatus.RUNNING:
+                                    self.information['message_short'] = 'Fehler: %s - nächster Versuch in %s Sekunden' % (headers['x-otr-error-message'],timer)
+                                    timer -= 1
+                                    self.update_view()
+                                    time.sleep(1)
+                            elif hasattr(page, 'reason'):
+                                self.information['status'] = DownloadStatus.RUNNING
+                                timer = 600
+                                
+                                while timer != 0 and self.information['status'] == DownloadStatus.RUNNING:
+                                    self.information['message_short'] = 'Fehler: %s - nächster Versuch in %s Sekunden' % (page.reason,timer)
+                                    timer -= 1
+                                    self.update_view()
+                                    time.sleep(1)
+                            elif hasattr(page, 'code'):
+                                self.information['status'] = DownloadStatus.RUNNING
+                                if page.code == 200:
+                                    timer = 5
+                                else:   
+                                    timer = 600
+                                    
+                                while timer != 0 and self.information['status'] == DownloadStatus.RUNNING:
+                                    self.information['message_short'] = 'Fehler: %s - nächster Versuch in %s Sekunden' % (page.code,timer)
+                                    timer -= 1
+                                    self.update_view()
+                                    time.sleep(1)                                    
+                            else:
+                                self.information['status'] = DownloadStatus.ERROR
+                                self.information['message_short'] = '(EER):Fehler aufgetreten.'
+                                self.information['progress'] = 0
+                                break
+
+                        retries -= 1
+                        self.update_view()
+
+                # Download Test
+                if 'otrkey' in self.filename and os.path.exists(self.information['output'] + '/' +  self.filename) and self._config.get('general', 'password'):
+                    self._check_file_with_torrent()  
+
+
         elif self.information['download_type'] in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:
             decoder = self._config.get('general', 'decoder')
             email = self._config.get('general', 'email')
