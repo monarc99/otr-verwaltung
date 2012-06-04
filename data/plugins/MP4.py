@@ -189,7 +189,6 @@ class MP4(Plugin):
 
                 while p.poll() == None:
                     line = p.stderr.read(60)
-                    print line
                     m = re.search(infos_match,line)
                     if m:
 		        next = float( float(m.group(1)) / float(max_frames) ) * 100
