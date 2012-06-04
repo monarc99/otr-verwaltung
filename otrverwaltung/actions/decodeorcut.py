@@ -21,6 +21,7 @@ import urllib
 import os
 from os.path import basename, join, dirname, exists, splitext
 import time
+import re
 
 from otrverwaltung import fileoperations
 from otrverwaltung.conclusions import FileConclusion
@@ -30,6 +31,7 @@ from otrverwaltung import codec
 from otrverwaltung import cutlists as cutlists_management
 from otrverwaltung import path
 from otrverwaltung.GeneratorTask import GeneratorTask
+from fractions import Fraction
 
 class DecodeOrCut(BaseAction):
     
@@ -337,7 +339,6 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
                 else:
                     file_conclusion.cut.rename = basename(cut_video)           
-        
         return True
 
     def __get_format(self, filename):        
@@ -449,7 +450,38 @@ class DecodeOrCut(BaseAction):
                     return None, "Aspekt konnte nicht bestimmt werden " + line
       
         return None, "Aspekt Ratio konnte nicht bestimmt werden."            
+
+    def __get_sample_aspect_ratio(self, filename):
+        """ Gets the aspect ratio of a movie using mplayer. 
+            Returns without error:              
+                       aspect_ratio, None
+                    with error:
+                       None, error_message """
+        mplayer = self.config.get('general', 'mplayer')
             
+        if not mplayer:
+            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Sample Aspekt Ratio benötigt."
+
+        try:
+            process = subprocess.Popen([mplayer, "-msglevel", "all=6", "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)       
+        except OSError:
+            return None, "MPlayer wurde nicht gefunden!"            
+        
+        stdout = process.communicate()[0]
+
+        infos_match = re.compile(r"VO Config \((\d{1,})x(\d{1,})->(\d{1,})x(\d{1,})")    
+
+        for line in stdout.split('\n'):
+            m = re.search(infos_match,line)
+            
+	    if m:
+                sar = Fraction(  int(m.group(3)),  int(m.group(1))  )
+                return str(sar.numerator) + ":" + str(sar.denominator), None
+            else:
+                pass
+   
+        return None, "Sample Aspekt Ratio konnte nicht bestimmt werden."            
+          
     def __create_cutlist_virtualdub(self, filename):
         """ returns: cuts, error_message """
         
@@ -654,26 +686,58 @@ class DecodeOrCut(BaseAction):
         format = self.__get_format(filename)         
 
         if format == Format.HQ:
-            aspect, error_message = self.__get_aspect_ratio(filename)
-            if not aspect:
-                return None, error_message                     
-                
-            if aspect == "16:9":
-                comp_data = codec.get_comp_data_h264_169()
+            if self.config.get('general', 'h264_codec') == 'ffdshow':    
+                aspect, error_message = self.__get_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                     
+                if aspect == "16:9":
+                    comp_data = codec.get_comp_data_h264_169()
+                else:
+                    comp_data = codec.get_comp_data_h264_43()
+                compression = 'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
+            elif self.config.get('general', 'h264_codec') == 'x264vfw':
+                aspect, error_message = self.__get_sample_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                   
+                comp_data = codec.get_comp_data_x264vfw_dynamic(aspect,self.config.get('general', 'x264vfw_hq_string'))
+                compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
+            elif self.config.get('general', 'h264_codec') == 'komisar':
+                aspect, error_message = self.__get_sample_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                    
+                comp_data = codec.get_comp_data_komisar_dynamic(aspect,self.config.get('general', 'komisar_hq_string'))
+                compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
             else:
-                comp_data = codec.get_comp_data_h264_43()
+                return None, "Codec nicht unterstützt. Nur ffdshow, x264vfw und komisar unterstützt."
         elif format == Format.HD:
             aspect, error_message = self.__get_aspect_ratio(filename)
             if not aspect:
                 return None, error_message                     
-                
-            if aspect == "16:9":
-                comp_data = codec.get_comp_data_hd_169()
+
+            if self.config.get('general', 'h264_codec') == 'ffdshow':    
+                if aspect == "16:9":
+                    comp_data = codec.get_comp_data_hd_169()
+                else:
+                    comp_data = codec.get_comp_data_hd_43()
+                compression = 'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
+            elif self.config.get('general', 'h264_codec') == 'x264vfw':
+                aspect, error_message = self.__get_sample_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                     
+                comp_data = codec.get_comp_data_x264vfw_dynamic(aspect,self.config.get('general', 'x264vfw_hd_string'))
+                compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
+            elif self.config.get('general', 'h264_codec') == 'komisar':
+                if aspect == "16:9":
+                    comp_data = codec.get_comp_data_hd_komisar_169()
+                else:
+                    comp_data = codec.get_comp_data_hd_komisar_43()
+                compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
             else:
-                comp_data = codec.get_comp_data_hd_43()
+                return None, "Codec nicht unterstützt. Nur ffdshow, x264vfw und komisar unterstützt."
         
         elif format == Format.AVI:      
             comp_data = codec.get_comp_data_dx50()
+            compression = 'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
         
         else:
             return None, "Format nicht unterstützt (Nur Avi DX50, HQ H264 und HD sind möglich)."
@@ -698,7 +762,7 @@ class DecodeOrCut(BaseAction):
             f.writelines([               
                 'VirtualDub.video.SetMode(1);\n',
                 'VirtualDub.video.SetSmartRendering(1);\n',
-                'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
+                compression,
                 'VirtualDub.video.SetCompData(%s);\n' % comp_data                
                 ])
         else:

@@ -60,6 +60,8 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), avidemux_man)
        
         self.gui.set_model_from_list(self.builder.get_object('comboboxServer'), ["http://cutlist.at/"])
+
+        self.gui.set_model_from_list(self.builder.get_object('h264_codec_cbox'), ["ffdshow", "x264vfw", "komisar"])
         
         # add bindings here.
                
@@ -100,6 +102,7 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         ComboBoxEntryBinding(self.builder.get_object('combobox_man_hq'), self.app.config, 'general', 'cut_hqs_man_by')
         ComboBoxEntryBinding(self.builder.get_object('combobox_man_mp4'), self.app.config, 'general', 'cut_mp4s_man_by')
         ComboBoxEntryBinding(self.builder.get_object('comboboxServer'), self.app.config, 'general', 'server')
+        ComboBoxEntryBinding(self.builder.get_object('h264_codec_cbox'), self.app.config, 'general', 'h264_codec')
 
         RadioButtonsBinding([self.builder.get_object(widget) for widget in ['radio_size', 'radio_filename']], self.app.config, 'general', 'choose_cutlists_by') 
         
