@@ -313,6 +313,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.message = "Keine lokale Cutlist gefunden."          
           
         # and finally cut the file
+        waitsound = subprocess.Popen([self.config.get('general', 'mplayer'), "-vo", "null", "-loop", "0", path.get_image_path('waitsound.mp3')])
         for count, file_conclusion in enumerate(file_conclusions):            
             
             if file_conclusion.cut.status in [Status.NOT_DONE, Status.ERROR]:
@@ -338,7 +339,8 @@ class DecodeOrCut(BaseAction):
                 if self.config.get('general', 'rename_cut'):                        
                     file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
                 else:
-                    file_conclusion.cut.rename = basename(cut_video)           
+                    file_conclusion.cut.rename = basename(cut_video)
+        waitsound.kill()
         return True
 
     def __get_format(self, filename):        
