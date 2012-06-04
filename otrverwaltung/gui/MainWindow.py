@@ -109,10 +109,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.__sets_of_toolbars = {
             Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],
             Section.DOWNLOAD:    [ 'download_add_link', 'download_start', 'download_stop', 'download_remove' ],
-            Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete' ],
-            Section.VIDEO_UNCUT: [ 'cut', 'delete', 'archive', ],
-            Section.VIDEO_CUT:   [ 'archive', 'delete', 'cut', 'rename' ],
-            Section.ARCHIVE:     [ 'delete', 'rename', 'new_folder' ],
+            Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete', 'real_delete' ],
+            Section.VIDEO_UNCUT: [ 'cut', 'delete', 'real_delete', 'archive'  ],
+            Section.VIDEO_CUT:   [ 'archive', 'delete', 'real_delete', 'cut', 'rename' ],
+            Section.ARCHIVE:     [ 'delete', 'real_delete', 'rename', 'new_folder' ],
             Section.TRASH:       [ 'real_delete', 'restore' ]
         }           
 
