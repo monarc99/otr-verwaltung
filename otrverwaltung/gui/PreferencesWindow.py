@@ -47,14 +47,14 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
                     
         # avi + hq + mp4
         avidemux = ["avidemux", "avidemux2_cli"]
-        virtualdub = [r"/pfad/zu/vdub.exe"]        
+        virtualdub = [r"intern-vdub", r"/pfad/zu/vdub.exe"]        
         self.gui.set_model_from_list(self.builder.get_object('combobox_avi'), avidemux + virtualdub)
         self.gui.set_model_from_list(self.builder.get_object('combobox_hq'), virtualdub)
-        self.gui.set_model_from_list(self.builder.get_object('combobox_mp4'), avidemux)
+        self.gui.set_model_from_list(self.builder.get_object('combobox_mp4'), virtualdub + avidemux)
         
         # manually
         avidemux_man = ["avidemux"]
-        virtualdub_man = [r"/pfad/zu/VirtualDub.exe"]
+        virtualdub_man = [r"intern-VirtualDub", r"/pfad/zu/VirtualDub.exe"]
         self.gui.set_model_from_list(self.builder.get_object('combobox_man_avi'), avidemux_man + virtualdub_man)
         self.gui.set_model_from_list(self.builder.get_object('combobox_man_hq'), virtualdub_man) 
         self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), avidemux_man)

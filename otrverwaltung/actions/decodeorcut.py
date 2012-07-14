@@ -379,16 +379,21 @@ class DecodeOrCut(BaseAction):
         
         if 'avidemux' in config_value:
             return Program.AVIDEMUX, config_value
+        elif 'intern-VirtualDub' in config_value:
+	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/VirtualDub.exe' 
+        elif 'intern-vdub' in config_value:
+	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/vdub.exe' 
         elif 'vdub' in config_value or 'VirtualDub' in config_value:
             return Program.VIRTUALDUB, config_value
         else:
             return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value
    
-    def __generate_filename(self, filename):
+    def __generate_filename(self, filename, forceavi=0):
         """ generate filename for a cut video file. """
         
         root, extension = splitext(basename(filename))
-                
+        if forceavi == 1:
+            extension = '.avi'
         new_name = root + "-cut" + extension
                 
         cut_video = join(self.config.get('general', 'folder_cut_avis'), new_name)        
@@ -711,12 +716,13 @@ class DecodeOrCut(BaseAction):
                 compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
             else:
                 return None, "Codec nicht unterstützt. Nur ffdshow, x264vfw und komisar unterstützt."
-        elif format == Format.HD:
-            aspect, error_message = self.__get_aspect_ratio(filename)
-            if not aspect:
-                return None, error_message                     
 
+        elif format == Format.HD:
             if self.config.get('general', 'h264_codec') == 'ffdshow':    
+                aspect, error_message = self.__get_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                     
+
                 if aspect == "16:9":
                     comp_data = codec.get_comp_data_hd_169()
                 else:
@@ -729,14 +735,25 @@ class DecodeOrCut(BaseAction):
                 comp_data = codec.get_comp_data_x264vfw_dynamic(aspect,self.config.get('general', 'x264vfw_hd_string'))
                 compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
             elif self.config.get('general', 'h264_codec') == 'komisar':
-                if aspect == "16:9":
-                    comp_data = codec.get_comp_data_hd_komisar_169()
-                else:
-                    comp_data = codec.get_comp_data_hd_komisar_43()
+                comp_data = codec.get_comp_data_komisar_dynamic(aspect,self.config.get('general', 'komisar_hd_string'))
                 compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
             else:
                 return None, "Codec nicht unterstützt. Nur ffdshow, x264vfw und komisar unterstützt."
-        
+
+        elif format == Format.MP4:
+            if self.config.get('general', 'h264_codec') == 'komisar':
+                aspect, error_message = self.__get_sample_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                     
+                comp_data = codec.get_comp_data_komsiar_dynamic(aspect,self.config.get('general', 'komisar_mp4_string'))
+                compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
+	    else: 
+                aspect, error_message = self.__get_sample_aspect_ratio(filename)
+                if not aspect:
+                    return None, error_message                     
+                comp_data = codec.get_comp_data_x264vfw_dynamic(aspect,self.config.get('general', 'x264vfw_mp4_string'))
+                compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
+
         elif format == Format.AVI:      
             comp_data = codec.get_comp_data_dx50()
             compression = 'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
@@ -776,7 +793,7 @@ class DecodeOrCut(BaseAction):
             for frame_start, frames_duration in cuts:
                 f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration))
 
-            cut_video = self.__generate_filename(filename)
+            cut_video = self.__generate_filename(filename,1)
                                 
             f.writelines([
                 'VirtualDub.SaveAVI("%s");\n' % cut_video,
@@ -795,8 +812,11 @@ class DecodeOrCut(BaseAction):
         else:
             command = "%s /s tmp.vcf /x" % config_value
 
-        command = "wineconsole " + command               
-        
+        if 'intern-VirtualDub' in config_value:
+            command = 'WINEPREFIX=' + dirname(config_value) + '/wine' + " wineconsole " + command               
+        else:
+            command = "wineconsole " + command               
+	  
         print command
         
         try:     

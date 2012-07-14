@@ -112,7 +112,7 @@ class ConclusionsManager:
             print "[Conclusion] Rename?"
             if conclusion.cut.rename:
                 print "[Conclusion] true"
-                extension = conclusion.get_extension()
+                extension = os.path.splitext(conclusion.cut_video)[1]
                 if not conclusion.cut.rename.endswith(extension):
                     conclusion.cut.rename += extension
                 
