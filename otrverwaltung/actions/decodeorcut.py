@@ -493,7 +493,10 @@ class DecodeOrCut(BaseAction):
             
 	    if m:
                 sar = Fraction(  int(m.group(3)),  int(m.group(1))  )
-                return str(sar.numerator) + ":" + str(sar.denominator), None
+                if sar.numerator == 427 and sar.denominator == 360:
+                    return "32:27", None
+                else:
+                    return str(sar.numerator) + ":" + str(sar.denominator), None
             else:
                 pass
    
