@@ -16,6 +16,7 @@
 
 from constants import Action
 import os.path
+from os.path import splitext
 
 from otrverwaltung.cutlists import Cutlist
 from otrverwaltung.constants import Action, Status
@@ -55,10 +56,14 @@ class FileConclusion:
         
         if action == Action.CUT or action == Action.DECODEANDCUT:        
             self.cut_video = ""
+            self.ac3_file = ""
             self.cut = Cut() 
 
     def get_extension(self):    
-        return os.path.splitext(self.uncut_video)[1]
+	if self.cut_video == "":		# prefer the extension of the cut video
+	    return os.path.splitext(self.uncut_video)[1]
+	else:
+	    return os.path.splitext(self.cut_video)[1]
         
 class ConclusionsManager:
     def __init__(self, app):
@@ -136,6 +141,9 @@ class ConclusionsManager:
                     # move to trash
                     target = self.app.config.get('general', 'folder_trash_avis')
                     fileoperations.move_file(conclusion.uncut_video, target)        
+                    if os.path.exists(conclusion.ac3_file):
+			target = self.app.config.get('general', 'folder_trash_avis')
+			fileoperations.move_file(conclusion.ac3_file, target)        
         
             # remove local cutlists      
             print "[Conclusion] Remove local cutlist?"

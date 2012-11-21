@@ -313,7 +313,7 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.message = "Keine lokale Cutlist gefunden."          
           
         # and finally cut the file
-        waitsound = subprocess.Popen([self.config.get('general', 'mplayer'), "-vo", "null", "-loop", "0", path.get_image_path('waitsound.mp3')])
+        # waitsound = subprocess.Popen([self.config.get('general', 'mplayer'), "-vo", "null", "-loop", "0", path.get_image_path('waitsound.mp3')])
         for count, file_conclusion in enumerate(file_conclusions):            
             
             if file_conclusion.cut.status in [Status.NOT_DONE, Status.ERROR]:
@@ -327,7 +327,7 @@ class DecodeOrCut(BaseAction):
             if file_conclusion.cut.cut_action in [Cut_action.BEST_CUTLIST, Cut_action.CHOOSE_CUTLIST]:
                 file_conclusion.cut.cutlist.download(self.config.get('general', 'server'), file_conclusion.uncut_video)   
 
-            cut_video, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)                
+            cut_video, ac3_file, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)                
 
             if cut_video == None:
                 file_conclusion.cut.status = Status.ERROR
@@ -335,28 +335,38 @@ class DecodeOrCut(BaseAction):
             else:
                 file_conclusion.cut.status = Status.OK
                 file_conclusion.cut_video = cut_video
+                file_conclusion.ac3_file = ac3_file
                 
                 if self.config.get('general', 'rename_cut'):                        
-                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
+                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.cut_video)) # rename after cut video, extension could have changed
                 else:
                     file_conclusion.cut.rename = basename(cut_video)
-        waitsound.kill()
+        # waitsound.kill()
         return True
 
     def __get_format(self, filename):        
         root, extension = splitext(filename)
-            
+        
         if extension == '.avi':
             if splitext(root)[1] == '.HQ':
-                return Format.HQ
+                format = Format.HQ
+                ac3name = splitext(root)[0] + ".HD.ac3"
             elif splitext(root)[1] == '.HD':
-                return Format.HD
+                format = Format.HD
+                ac3name = root + ".ac3"
             else:
-                return Format.AVI
+                format = Format.AVI
+                ac3name = root + ".HD.ac3"
         elif extension == '.mp4':
-            return Format.MP4
+            format = Format.MP4
+            ac3name = root + ".HD.ac3"
         else:
-            return -1
+            return -1, None
+            
+        if os.path.isfile(ac3name):
+	    return format, ac3name
+	else:
+	    return format, None
 
     def __get_program(self, filename, manually=False):   
         if manually:
@@ -370,7 +380,7 @@ class DecodeOrCut(BaseAction):
                          Format.HD  : self.config.get('general', 'cut_hqs_by'),                         
                          Format.MP4 : self.config.get('general', 'cut_mp4s_by') }
                      
-        format = self.__get_format(filename)                 
+        format, ac3 = self.__get_format(filename)                 
 
         if format < 0:
             return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt."
@@ -378,15 +388,15 @@ class DecodeOrCut(BaseAction):
         config_value = programs[format]
         
         if 'avidemux' in config_value:
-            return Program.AVIDEMUX, config_value
+            return Program.AVIDEMUX, config_value, ac3
         elif 'intern-VirtualDub' in config_value:
-	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/VirtualDub.exe' 
+	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/VirtualDub.exe', ac3 
         elif 'intern-vdub' in config_value:
-	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/vdub.exe' 
+	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/vdub.exe', ac3 
         elif 'vdub' in config_value or 'VirtualDub' in config_value:
-            return Program.VIRTUALDUB, config_value
+            return Program.VIRTUALDUB, config_value, ac3
         else:
-            return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value
+            return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value, False 
    
     def __generate_filename(self, filename, forceavi=0):
         """ generate filename for a cut video file. """
@@ -521,7 +531,7 @@ class DecodeOrCut(BaseAction):
             possibly created project files (VD) or from output (AD). 
             returns: error_message, cuts, executable """
         
-        program, config_value = self.__get_program(filename, manually=True)
+        program, config_value, ac3file = self.__get_program(filename, manually=True)
         
         if program < 0:
             return config_value, None, None
@@ -592,21 +602,21 @@ class DecodeOrCut(BaseAction):
     def cut_file_by_cutlist(self, filename, cutlist):
         """ Returns: cut_video, error """
 
-        program, program_config_value = self.__get_program(filename)
+        program, program_config_value, ac3file = self.__get_program(filename)
         if program < 0:
-            return None, program_config_value 
+            return None, None, program_config_value 
        
         # get list of cuts
         error = cutlist.read_cuts()        
         if error:
-            return None, error       
+            return None, None, error       
             
         if not cutlist.cuts_frames:                        
             fps, error = self.__get_fps(filename)
             if not error:
                 cutlist.fps = fps
             else:
-                return None, "Konnte FPS nicht bestimmen: " + error
+                return None, None, "Konnte FPS nicht bestimmen: " + error
             
             print "Calculate frame values from seconds."
             for start, duration in cutlist.cuts_seconds:
@@ -619,9 +629,56 @@ class DecodeOrCut(BaseAction):
             cut_video, error = self.__cut_file_virtualdub(filename, program_config_value, cutlist.cuts_frames)
             
         if error:
-            return None, error
-        else:
-            return cut_video, None
+            return None, None, error
+        elif ac3file != None:
+	    return self.__mux_ac3(filename, cut_video, ac3file, cutlist)
+	else:
+            return cut_video, None, None
+            
+    def __mux_ac3(self, filename, cut_video, ac3_file, cutlist):	# cuts the ac3 and muxes it with the avi into an mkv
+	root, extension = splitext(filename)
+	mkv_file = splitext(cut_video)[0] + ".mkv"
+	# creates the timecodes string for splitting the .ac3 with mkvmerge
+	timecodes = (','.join([self.__get_timecode(start) + ',' + self.__get_timecode(start+duration) for start, duration in cutlist.cuts_seconds]))
+	# splitting .ac3. Every second fragment will be used.
+	return_value = subprocess.call(["mkvmerge", "--split", "timecodes:" + timecodes, "-o", root + "-%03d.mka", ac3_file])
+	# return_value=0 is OK, return_value=1 means a warning. Most probably non-ac3-data that has been omitted.
+        # TODO: Is there some way to pass this warning to the conclusion dialog?
+        if return_value != 0 and return_value != 1:
+            return None, None, str(return_value)
+           
+        if len(cutlist.cuts_seconds) == 1:              # Only the second fragment is needed. Delete the rest.
+            fileoperations.rename_file(root + "-002.mka", root + ".mka")
+            fileoperations.remove_file(root + "-001.mka")
+            if os.path.isfile(root + "-003.mka"):
+		fileoperations.remove_file(root + "-003.mka")
+		
+        else:                                           # Concatenating every second fragment.
+            command = ["mkvmerge", "-o", root + ".mka", root + "-002.mka"]
+            command[len(command):] = ["+" + root + "-%03d.mka" % (2*n) for n in range(2,len(cutlist.cuts_seconds)+1)]
+            return_value = subprocess.call(command)
+            if return_value != 0:               # There should be no warnings here
+                return None, None, str(return_value)
+ 
+            for n in range(1,2*len(cutlist.cuts_seconds)+2):    # Delete all temporary audio fragments
+		if os.path.isfile(root + "-%03d.mka" % n):
+		    fileoperations.remove_file(root + "-%03d.mka" % n)
+ 
+        # Mux the cut .avi with the resulting audio-file into mkv_file
+        # TODO: Is there some way to pass possible warnings to the conclusion dialog?
+        return_value = subprocess.call(["mkvmerge", "-o", mkv_file, cut_video, root + ".mka"])
+        if return_value != 0 and return_value != 1:
+            return None, None, str(return_value)
+        
+        fileoperations.remove_file(root + ".mka")       # Delete remaining temporary files
+        fileoperations.remove_file(cut_video)
+        return mkv_file, ac3_file, None
+
+    def __get_timecode(self, time):           # converts the seconds into a timecode-format that mkvmerge understands
+        minute, second = divmod(int(time),60)		# discards milliseconds
+        hour, minute = divmod(minute, 60)
+        second = time - minute * 60 - hour * 3600	# for the milliseconds
+        return "%02i:%02i:%f" % (hour, minute, second)
 
     def __cut_file_avidemux(self, filename, config_value, cuts):
         # make file for avidemux scripting engine
@@ -690,7 +747,7 @@ class DecodeOrCut(BaseAction):
         return cut_video, None
         
     def __cut_file_virtualdub(self, filename, config_value, cuts=None, manually=False):
-        format = self.__get_format(filename)         
+        format, ac3_file = self.__get_format(filename)         
 
         if format == Format.HQ:
             if self.config.get('general', 'h264_codec') == 'ffdshow':    

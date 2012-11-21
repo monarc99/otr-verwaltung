@@ -17,7 +17,7 @@
 
 import sys
 import os
-from os.path import join, isdir, exists
+from os.path import join, isdir, exists, splitext
 import re
 import subprocess
 import time
@@ -181,7 +181,9 @@ class App:
             
         # regex
         self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|HD\.avi|mp4)$')
-        self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
+        # regex for the name schema should use cut videos just in case it has been muxed into an mkv because of an ac3-track
+        self.rename_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg(-cut\.avi|\.HQ-cut\.avi|\.HD-cut\.avi|-cut\.mp4|\.HD-cut\.mkv)$')
+        self.cut_video = re.compile('.*(avi|mp4|mkv|wmv|ac3)$')
        
         # load gui
         self.__gui = gui.Gui(self)  # for backwards compability
@@ -408,7 +410,8 @@ class App:
         if schema == "":
             schema = self.config.get('general', 'rename_schema')        
         
-        if self.uncut_video.match(filename):           
+        if self.rename_video.match(filename):           
+	    filename, extension = splitext(filename)	# preserve file extension (avi or mkv)
             
             parts = filename.split('_')
             parts.reverse()
@@ -454,7 +457,9 @@ class App:
             }
              
             for token, value in values.iteritems():
-                schema = schema.replace('{%s}' % token, value)                            
+                schema = schema.replace('{%s}' % token, value)                   
+                
+            schema += extension		# preserve file extension
                 
             return schema
         else:         
