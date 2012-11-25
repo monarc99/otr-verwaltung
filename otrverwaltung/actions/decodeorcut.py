@@ -636,7 +636,7 @@ class DecodeOrCut(BaseAction):
         elif ac3file != None:
 	    return self.__mux_ac3(filename, cut_video, ac3file, cutlist)
 	else:
-            return cut_video, None, None
+            return cut_video, "", None
             
     def __mux_ac3(self, filename, cut_video, ac3_file, cutlist):	# cuts the ac3 and muxes it with the avi into an mkv
 	root, extension = splitext(filename)
