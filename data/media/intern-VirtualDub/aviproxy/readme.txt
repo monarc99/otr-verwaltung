@@ -1,4 +1,4 @@
-The AVIFile handler included with VirtualDub 1.3b is capable
+The AVIFile handler included with VirtualDub is capable
 of running in Proxy mode -- that is, you can install it as the
 *default* handler for AVI files, and it will work with signposts
 that are renamed to the AVI extension.  This means that
@@ -21,3 +21,18 @@ these programs.  These applications were tested:
 Ligos LSX-MPEG Encoder 3.0:	works
 Panasonic MPEG Encoder 2.30:	works most of the time
 XingMPEG Encoder 2.20:		fails (must deinstall proxy)
+
+
+
+Issues with Windows Vista and newer versions of Windows
+=======================================================
+Starting with Windows Vista, the registry keys that associate
+the .AVI extension to the built-in handler in Windows are
+protected by Windows Resource Protection and are not normally
+replaceable. As such, the proxy mechanism is not recommended
+and not supported under Vista and newer versions of Windows.
+
+If you really need to try it, editing the access control list
+(ACL) for the registry entries in the Registry Editor to allow
+Administrators full control over the keys and not just
+TrustedInstaller has been reported to work.

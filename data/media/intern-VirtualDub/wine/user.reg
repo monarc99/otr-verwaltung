@@ -103,6 +103,53 @@ WINE REGISTRY Version 2
 [Keyboard Layout\\Preload] 1340917852
 "1"="00000407"
 
+[Software\\Freeware\\VirtualDub] 1358811345
+"Main prefs"=hex:00,00,00,01,00,00,00,00,20,03,00,00,40,00,00,00,02,00,00,00
+"SeenWelcome"=dword:00000001
+"VirtualDub"=dword:00000001
+
+[Software\\Freeware\\VirtualDub\\MRU List] 1358811383
+"a"="E:\\tmp\\VirtualDub-1.10.3\\Big_Buck_Bunny.avi"
+"MRUList"="a"
+
+[Software\\Freeware\\VirtualDub\\Persistence] 1358811349
+"Accelerate preview"=dword:00000000
+"Preview audio sync"=dword:00000001
+"Preview frame skipping"=dword:00000000
+"Show decompressed frame"=dword:00000000
+"Show status window"=dword:00000001
+"Swap panes"=dword:00000000
+"Update input pane"=dword:00000001
+"Update output pane"=dword:00000001
+"Vertical display"=dword:00000000
+
+[Software\\Freeware\\VirtualDub\\Preferences] 1358811345
+"Allow direct YCbCr decoding"=dword:00000001
+"AVI: Alignment threshold"=dword:00080000
+"AVI: Alignment threshold enable"=dword:00000000
+"AVI: Prefer internal decoders"=dword:00000000
+"AVI: Subindex entry limit"=dword:00002000
+"AVI: Superindex entry limit"=dword:00000100
+"Confirm render abort"=dword:00000001
+"Direct3D FX file"="display.fx"
+"Display: Allow DirectX overlays"=dword:00000001
+"Display: Enable debug info"=dword:00000000
+"File: Async mode"=dword:00000002
+"Render: Default throttle percent"=dword:00000064
+"Render: Output buffer size"=dword:00200000
+"Render: Video buffer count"=dword:00000020
+"Render: Wave buffer size"=dword:00010000
+"Timeline format"="Frame %f (%h:%02m:%02s.%03t) [%c]"
+
+[Software\\Freeware\\VirtualDub\\Saved filespecs] 1358811383
+"00000066"="E:\\tmp\\"
+"00000192"="E:\\tmp\\VirtualDub-1.10.3\\"
+"6769666f"=hex(1):
+"7761766f"=hex(1):
+
+[Software\\Freeware\\VirtualDub\\Window Placement] 1358811349
+"Main window"=hex:02,00,00,00,17,00,00,00,a2,05,00,00,23,03,00,00
+
 [Software\\GNU\\ffdshow] 1340918247
 "cscd"=dword:00000001
 "div3"=dword:00000001
@@ -215,15 +262,15 @@ WINE REGISTRY Version 2
 "isWhitelist"=dword:00000001
 "Whitelist"="bsplayer.exe;coreplayer.exe;ehshell.exe;gom.exe;graphedit.exe;graphedt.exe;graphstudio.exe;graphstudio64.exe;kmplayer.exe;mpc-hc.exe;mpc-hc64.exe;mplayerc.exe;wmplayer.exe;zplayer.exe;"
 
-[Software\\GNU\\ffdshow_enc] 1340926590
+[Software\\GNU\\ffdshow_enc] 1359068687
 #class="config"
 "bpsDlgFPS1000"=dword:000061a8
 "bpsDlgLen"=dword:000900b0
 "dlgEncCurrentPage"=dword:00000000
-"dlgPosX"=dword:00000268
-"dlgPosY"=dword:00000188
+"dlgPosX"=dword:0000026a
+"dlgPosY"=dword:0000018b
 "dlgRestorePos"=dword:00000000
-"lastPage"=dword:000000c8
+"lastPage"=dword:000000de
 "lvCodecsSelected"=dword:00000000
 "lvCodecsWidth0"=dword:00000064
 "lvCodecsWidth1"=dword:00000096
@@ -234,8 +281,38 @@ WINE REGISTRY Version 2
 "showHints"=dword:00000001
 "translateMode"=dword:00000000
 
-[Software\\GNU\\ffdshow_vfw] 1340918264
+[Software\\GNU\\ffdshow_vfw] 1358207894
 #class="config"
+"dlgCustColor0"=dword:00000000
+"dlgCustColor1"=dword:00101010
+"dlgCustColor10"=dword:00a0a0a0
+"dlgCustColor11"=dword:00b0b0b0
+"dlgCustColor12"=dword:00c0c0c0
+"dlgCustColor13"=dword:00d0d0d0
+"dlgCustColor14"=dword:00e0e0e0
+"dlgCustColor15"=dword:00ffffff
+"dlgCustColor2"=dword:00202020
+"dlgCustColor3"=dword:00303030
+"dlgCustColor4"=dword:00404040
+"dlgCustColor5"=dword:00505050
+"dlgCustColor6"=dword:00606060
+"dlgCustColor7"=dword:00707070
+"dlgCustColor8"=dword:00808080
+"dlgCustColor9"=dword:00909090
+"dlgDecCurrentPage"=dword:00000000
+"dlgPosX"=dword:0000026a
+"dlgPosY"=dword:0000018b
+"dlgRestorePos"=dword:00000000
+"lastPage"=dword:00000073
+"lvCodecsSelected"=dword:00000000
+"lvCodecsWidth0"=dword:0000005a
+"lvCodecsWidth1"=dword:0000004c
+"lvCodecsWidth2"=dword:000000ca
+"lvKeysWidth0"=dword:000000f0
+"lvKeysWidth1"=dword:0000005a
+"lvWidth0"=dword:0000012c
+"showHints"=dword:00000001
+"translateMode"=dword:00000000
 
 [Software\\GNU\\ffdshow_vfw\\default] 1340918264
 #class="config"
@@ -830,20 +907,20 @@ WINE REGISTRY Version 2
 "Ytemporal"=dword:00000003
 "Ythreshold"=dword:0000000a
 
-[Software\\GNU\\x264] 1341848719
+[Software\\GNU\\x264] 1358207679
 #class="config"
 "avc_level"=dword:00000000
 "createstats"=dword:00000000
 "disable_decoder"=dword:00000000
 "encoding_type"=dword:00000004
-"extra_cmdline"=""
+"extra_cmdline"="--sar 65:45 --tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --aq-mode 2 --weightp 0 "
 "fast1pass"=dword:00000000
 "fastdecode"=dword:00000000
 "fourcc_num"=dword:00000000
 "keep_input_csp"=dword:00000000
 "log_level"=dword:00000002
 "no_asm"=dword:00000000
-"output_file"=""
+"output_file"="E:\\Eigene Dateien\\VCF-Files\\"
 "output_mode"=dword:00000000
 "pass_number"=dword:00000001
 "passbitrate"=dword:00000320
@@ -852,8 +929,8 @@ WINE REGISTRY Version 2
 "psnr"=dword:00000001
 "quantizer"=dword:00000017
 "ratefactor"=dword:000000e6
-"sar_height"=dword:00000001
-"sar_width"=dword:00000001
+"sar_height"=dword:0000002d
+"sar_width"=dword:00000041
 "ssim"=dword:00000001
 "statsfile"=".\\x264.stats"
 "tuning"=""
@@ -903,7 +980,7 @@ WINE REGISTRY Version 2
 
 [Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced] 1340917902
 
-[Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedMRU] 1341848256
+[Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedMRU] 1358980557
 "a"=hex:56,00,69,00,72,00,74,00,75,00,61,00,6c,00,44,00,75,00,62,00,2e,00,65,\
   00,78,00,65,00,00,00,45,00,3a,00,5c,00,44,00,6f,00,77,00,6e,00,6c,00,6f,00,\
   61,00,64,00,73,00,00,00
@@ -1179,21 +1256,27 @@ WINE REGISTRY Version 2
 
 [Software\\Microsoft\\Windows\\CurrentVersion\\Run] 1340917855
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\Devices] 1340917853
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\Devices] 1357917076
+"Brother HL-5050"="wineps.drv,LPR:Brother-HL-5050"
 "Brother-HL-5050"="wineps.drv,CUPS:Brother-HL-5050"
+"Brother-HL-5050-2"="wineps.drv,CUPS:Brother-HL-5050-2"
 "Brother-HL-5050-BR-Script3"="wineps.drv,CUPS:Brother-HL-5050-BR-Script3"
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\PrinterPorts] 1340917853
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\PrinterPorts] 1357917076
+"Brother HL-5050"="wineps.drv,LPR:Brother-HL-5050,15,45"
 "Brother-HL-5050"="wineps.drv,CUPS:Brother-HL-5050,15,45"
+"Brother-HL-5050-2"="wineps.drv,CUPS:Brother-HL-5050-2,15,45"
 "Brother-HL-5050-BR-Script3"="wineps.drv,CUPS:Brother-HL-5050-BR-Script3,15,45"
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows] 1340917853
-"device"="Brother-HL-5050,wineps.drv,CUPS:Brother-HL-5050"
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows] 1357917076
+"device"="Brother-HL-5050-2,wineps.drv,CUPS:Brother-HL-5050-2"
 
 [Software\\VirtualDub.org\\VirtualDub] 1340918396
 "Main prefs"=hex:00,04,00,01,00,00,00,00,20,03,00,00,40,00,00,00,00,00,00,00
 "SeenWelcome"=dword:00000001
 "VirtualDub"=dword:00000001
+
+[Software\\VirtualDub.org\\VirtualDub\\Dialogs\\Filters] 1359331497
 
 [Software\\VirtualDub.org\\VirtualDub\\External Encoders\\Set 1] 1340921791
 "Audio Encoder"=hex(1):
@@ -1205,12 +1288,12 @@ WINE REGISTRY Version 2
 "Use Output As Temp Path"=dword:00000000
 "Video Encoder"=hex(1):
 
-[Software\\VirtualDub.org\\VirtualDub\\MRU List] 1342261642
-"a"="E:\\Downloads\\The_Big_Bang_Theory_12.07.13_15-05_pro7_30_TVOON_DE.mpg.HQ.avi"
-"b"="E:\\Downloads\\The_Big_Bang_Theory_12.07.13_14-40_pro7_25_TVOON_DE.mpg.HQ.avi"
-"c"="E:\\Downloads\\Heiter_bis_toedlich_Alles_Klara_12.07.12_18-50_ard_55_TVOON_DE.mpg.HD.avi"
-"d"="Z:\\home\\monarc\\Downloads\\Heiter_bis_toedlich_Alles_Klara_12.07.12_18-50_ard_55_TVOON_DE.mpg.HD.avi"
-"MRUList"="cabd"
+[Software\\VirtualDub.org\\VirtualDub\\MRU List] 1359560183
+"a"="Z:\\tmp\\Raumpatrouille_Orion_Ruecksturz_ins_Kino_13.01.29_02-10_ard_85_TVOON_DE.mpg.HD.avi"
+"b"="Z:\\tmp\\CSI__Vegas_13.01.29_20-15_rtl_60_TVOON_DE.mpg.HQ.avi"
+"c"="Z:\\tmp\\Navy_CIS_13.01.29_16-50_kabel1_60_TVOON_DE.mpg.HQ.avi"
+"d"="Z:\\tmp\\Die_Maske_13.01.29_20-15_tele5_125_TVOON_DE.mpg.HQ.avi"
+"MRUList"="dabc"
 
 [Software\\VirtualDub.org\\VirtualDub\\Persistence] 1341110262
 "Accelerate preview"=dword:00000000
@@ -1228,7 +1311,7 @@ WINE REGISTRY Version 2
 "Update output pane"=dword:00000000
 "Vertical display"=dword:00000000
 
-[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1341060852
+[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1358811013
 "Allow direct YCbCr decoding"=dword:00000001
 "AutoRecover: Enabled"=dword:00000000
 "AVI: Alignment threshold"=dword:00080000
@@ -1247,6 +1330,7 @@ WINE REGISTRY Version 2
 "Display: Allow DirectX overlays"=dword:00000000
 "Display: Enable background fallback"=dword:00000001
 "Display: Enable debug info"=dword:00000000
+"Display: Enable DirectX on secondary"=dword:00000000
 "Display: Enable high precision"=dword:00000000
 "Display: Secondary monitor mode"=dword:00000000
 "File: Async mode"=dword:00000002
@@ -1268,10 +1352,10 @@ WINE REGISTRY Version 2
 "Timeline format"="Frame %f (%h:%02m:%02s.%03t) [%c]"
 "Use profile-local path"=dword:00000000
 
-[Software\\VirtualDub.org\\VirtualDub\\Saved filespecs] 1342261642
-"00000065"="E:\\Videos\\kodierte_Aufnahmen\\"
-"00000066"="E:\\Videos\\"
-"00000192"="E:\\Videos\\kodierte_Aufnahmen\\"
+[Software\\VirtualDub.org\\VirtualDub\\Saved filespecs] 1359560183
+"00000065"="Z:\\mnt\\Datenpartition\\Eigene Dateien\\VCF-Files\\"
+"00000066"="E:\\tmp\\"
+"00000192"="E:\\tmp\\VirtualDub-1.10.3\\"
 "636f6e66"="E:\\Downloads\\"
 "656e6370"="E:\\bin\\VirtualDub-1.10.2\\mkvtoolnix\\"
 "6578746f"="E:\\Videos\\kodierte_Aufnahmen\\"
@@ -1279,8 +1363,8 @@ WINE REGISTRY Version 2
 "7277616f"=hex(1):
 "7761766f"=hex(1):
 
-[Software\\VirtualDub.org\\VirtualDub\\Window Placement] 1341848258
-"Main window"=hex:d4,00,00,00,71,00,00,00,74,06,00,00,9b,03,00,00,00,00,00,00
+[Software\\VirtualDub.org\\VirtualDub\\Window Placement] 1359478421
+"Main window"=hex:f2,00,00,00,e6,00,00,00,92,06,00,00,10,04,00,00,00,00,00,00
 
 [Software\\Wine\\Debug] 1340917855
 "RelayExclude"="ntdll.RtlEnterCriticalSection;ntdll.RtlLeaveCriticalSection;kernel32.48;kernel32.49;kernel32.94;kernel32.95;kernel32.96;kernel32.97;kernel32.98;kernel32.TlsGetValue;kernel32.TlsSetValue;kernel32.FlsGetValue;kernel32.FlsSetValue;kernel32.SetLastError"
@@ -1383,31 +1467,80 @@ WINE REGISTRY Version 2
 "OpenWithIcon"="7765_winebrowser.0"
 "ProgID"="xmlfile"
 
-[Software\\Wine\\Fonts] 1342261552
+[Software\\Wine\\Fonts] 1359560154
 "Codepages"="1252,850"
 
-[Software\\Wine\\Fonts\\External Fonts] 1342261552
-"@Luxi Mono (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximr.ttf"
-"@Luxi Mono Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximb.ttf"
-"@Luxi Mono Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximbi.ttf"
-"@Luxi Mono Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximri.ttf"
-"@Luxi Sans (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisr.ttf"
-"@Luxi Sans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisb.ttf"
-"@Luxi Sans Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisbi.ttf"
-"@Luxi Sans Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisri.ttf"
-"@Luxi Serif (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirr.ttf"
-"@Luxi Serif Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirb.ttf"
-"@Luxi Serif Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirbi.ttf"
-"@Luxi Serif Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirri.ttf"
+[Software\\Wine\\Fonts\\External Fonts] 1359560155
+"@Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"@BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"@Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"@DotumChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"@FangSong (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simfang.ttf"
+"@Gulim (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"@GulimChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"@Gungsuh (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"@GungsuhChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"@KaiTi (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simkai.ttf"
+"@Malgun Gothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\malgun.ttf"
+"@Malgun Gothic Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\malgunbd.ttf"
+"@Meiryo (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"@Meiryo Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"@Meiryo Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"@Meiryo Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"@Meiryo UI (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"@Meiryo UI Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"@Meiryo UI Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"@Meiryo UI Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"@Microsoft JhengHei (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msjh.ttf"
+"@Microsoft JhengHei Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msjhbd.ttf"
+"@Microsoft YaHei (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msyh.ttf"
+"@Microsoft YaHei Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msyhbd.ttf"
+"@Microsoft Yi Baiti (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msyi.ttf"
+"@MingLiU (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliu.ttc"
+"@MingLiU-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliub.ttc"
+"@MingLiU_HKSCS (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliu.ttc"
+"@MingLiU_HKSCS-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliub.ttc"
+"@MS Gothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msgothic.ttc"
+"@MS Mincho (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msmincho.ttc"
+"@MS PGothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msgothic.ttc"
+"@MS PMincho (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msmincho.ttc"
+"@MS UI Gothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msgothic.ttc"
+"@NSimSun (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\simsun.ttc"
+"@PMingLiU (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliu.ttc"
+"@PMingLiU-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliub.ttc"
+"@SimHei (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simhei.ttf"
+"@SimSun (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\simsun.ttc"
+"@SimSun-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simsunb.ttf"
 "A.D. MONO (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\a_d_mono.ttf"
+"ActionIs (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\actionis.ttf"
 "Adventure (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\Adventure.ttf"
-"Andale Mono (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\andalemo.ttf"
-"Arial (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\arial.ttf"
-"Arial Black (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\ariblk.ttf"
-"Arial Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\arialbd.ttf"
-"Arial Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\arialbi.ttf"
-"Arial Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\ariali.ttf"
+"Aharoni Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ahronbd.ttf"
+"Andalus (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\andlso.ttf"
+"Angsana New (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsa.ttf"
+"Angsana New Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsab.ttf"
+"Angsana New Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsaz.ttf"
+"Angsana New Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsai.ttf"
+"AngsanaUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsau.ttf"
+"AngsanaUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsaub.ttf"
+"AngsanaUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsauz.ttf"
+"AngsanaUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\angsaui.ttf"
+"Aparajita (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\aparaj.ttf"
+"Aparajita Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\aparajb.ttf"
+"Aparajita Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\aparajbi.ttf"
+"Aparajita Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\aparaji.ttf"
+"Arabic Typesetting (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\arabtype.ttf"
+"Arial (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\arial.ttf"
+"Arial Black (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ariblk.ttf"
+"Arial Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\arialbd.ttf"
+"Arial Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\arialbi.ttf"
+"Arial Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ariali.ttf"
 "Babelfish (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\babelfish.ttf"
+"Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"Bazaronite (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\bazaroni.ttf"
+"Beta Dance (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\betadance.ttf"
+"Betsy Flanagan (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\betsy.ttf"
+"Binary (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\binary.ttf"
 "Bitstream Vera Sans (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\Vera.ttf"
 "Bitstream Vera Sans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\VeraBd.ttf"
 "Bitstream Vera Sans Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\VeraBI.ttf"
@@ -1421,21 +1554,60 @@ WINE REGISTRY Version 2
 "Blue Highway   Bold (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\Bluehigb.ttf"
 "Blue Highway (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\Bluehigh.ttf"
 "Blue Highway Condensed Regular (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\Bluehigc.ttf"
-"Calibri (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\calibri.ttf"
-"Calibri Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\calibrib.ttf"
-"Calibri Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\calibriz.ttf"
-"Calibri Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\calibrii.ttf"
-"Cambria (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\cambria.ttc"
-"Cambria Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\cambriab.ttf"
-"Cambria Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\cambriaz.ttf"
-"Cambria Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\cambriai.ttf"
-"Cambria Math (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\cambria.ttc"
-"Comic Sans MS (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\comic.ttf"
-"Comic Sans MS Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\comicbd.ttf"
-"Courier New (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\cour.ttf"
-"Courier New Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\courbd.ttf"
-"Courier New Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\courbi.ttf"
-"Courier New Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\couri.ttf"
+"Brand New (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\brandnew.ttf"
+"Browallia New (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browa.ttf"
+"Browallia New Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browab.ttf"
+"Browallia New Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browaz.ttf"
+"Browallia New Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browai.ttf"
+"BrowalliaUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browau.ttf"
+"BrowalliaUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browaub.ttf"
+"BrowalliaUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browauz.ttf"
+"BrowalliaUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\browaui.ttf"
+"Calibri (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\calibri.ttf"
+"Calibri Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\calibrib.ttf"
+"Calibri Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\calibriz.ttf"
+"Calibri Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\calibrii.ttf"
+"Cambria (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\cambria.ttc"
+"Cambria Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cambriab.ttf"
+"Cambria Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cambriaz.ttf"
+"Cambria Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cambriai.ttf"
+"Cambria Math (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\cambria.ttc"
+"Candara (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Candara.ttf"
+"Candara Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Candarab.ttf"
+"Candara Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Candaraz.ttf"
+"Candara Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Candarai.ttf"
+"Captain Podd (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\CaptainPodd.ttf"
+"Comic Sans MS (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\comic.ttf"
+"Comic Sans MS Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\comicbd.ttf"
+"Consolas (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\consola.ttf"
+"Consolas Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\consolab.ttf"
+"Consolas Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\consolaz.ttf"
+"Consolas Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\consolai.ttf"
+"Constantia (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\constan.ttf"
+"Constantia Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\constanb.ttf"
+"Constantia Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\constanz.ttf"
+"Constantia Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\constani.ttf"
+"Corbel (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\corbel.ttf"
+"Corbel Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\corbelb.ttf"
+"Corbel Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\corbelz.ttf"
+"Corbel Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\corbeli.ttf"
+"Cordia New (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordia.ttf"
+"Cordia New Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiab.ttf"
+"Cordia New Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiaz.ttf"
+"Cordia New Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiai.ttf"
+"CordiaUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiau.ttf"
+"CordiaUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiaub.ttf"
+"CordiaUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiauz.ttf"
+"CordiaUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cordiaui.ttf"
+"Courier New (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\cour.ttf"
+"Courier New Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\courbd.ttf"
+"Courier New Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\courbi.ttf"
+"Courier New Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\couri.ttf"
+"Creature (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\creature.ttf"
+"DaunPenh (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\daunpenh.ttf"
+"David (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\david.ttf"
+"David Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\davidbd.ttf"
+"Davis (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\davis.ttf"
 "DejaVu Sans (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\dejavu\\DejaVuSans.ttf"
 "DejaVu Sans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\dejavu\\DejaVuSans-Bold.ttf"
 "DejaVu Sans Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\dejavu\\DejaVuSans-BoldOblique.ttf"
@@ -1457,22 +1629,112 @@ WINE REGISTRY Version 2
 "DejaVu Serif Condensed Condensed Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\dejavu\\DejaVuSerifCondensed-BoldItalic.ttf"
 "DejaVu Serif Condensed Condensed Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\dejavu\\DejaVuSerifCondensed-Italic.ttf"
 "DejaVu Serif Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\dejavu\\DejaVuSerif-Italic.ttf"
+"Densmore (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\densmore.ttf"
+"der D\xe4monschriftkegel (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\demon.ttf"
+"DFKai-SB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kaiu.ttf"
+"Die Nasty SuperBold (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\dienasty.ttf"
+"DilleniaUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcdl.ttf"
+"DilleniaUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcdb.ttf"
+"DilleniaUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcdbi.ttf"
+"DilleniaUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcdi.ttf"
 "DirtyBaker'sDozen (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\dirtydoz.ttf"
-"Droid Sans (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSans.ttf"
-"Droid Sans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSans-Bold.ttf"
-"Droid Sans Fallback (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSansFallback.ttf"
-"Droid Sans Mono (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSansMono.ttf"
-"Droid Serif (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSerif-Regular.ttf"
-"Droid Serif Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSerif-Bold.ttf"
-"Droid Serif Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSerif-BoldItalic.ttf"
-"Droid Serif Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\droid\\DroidSerif-Italic.ttf"
+"Distortia (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\distortia.ttf"
+"DokChampa (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\dokchamp.ttf"
+"Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"DotumChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"Ebrima (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ebrima.ttf"
+"Ebrima Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ebrimabd.ttf"
+"Edgewater (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\edgewater.ttf"
+"Electroharmonix (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\electroh.ttf"
+"Eli 5.0b (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\eli5.0-.ttf"
+"Embargo (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\embargo2.ttf"
+"Estrangelo Edessa (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\estre.ttf"
+"EucrosiaUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcel.ttf"
+"EucrosiaUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upceb.ttf"
+"EucrosiaUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcebi.ttf"
+"EucrosiaUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcei.ttf"
+"Euphemia (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\euphemia.ttf"
+"Fadgod (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\fadgod.ttf"
+"Failed Attempt (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\failed.ttf"
+"FakeReceipt (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\fakerece.ttf"
+"FangSong (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simfang.ttf"
+"Flubber (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\flubber.ttf"
+"Font in a Red Suit (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\fontrstc.ttf"
+"Franklin Gothic Medium (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\framd.ttf"
+"Franklin Gothic Medium Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\framdit.ttf"
+"FrankRuehl (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\frank.ttf"
+"FreeMono (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeMono.ttf"
+"FreeMono Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeMonoBold.ttf"
+"FreeMono BoldOblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeMonoBoldOblique.ttf"
+"FreeMono Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeMonoOblique.ttf"
+"FreeSans (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSans.ttf"
+"FreeSans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSansBold.ttf"
+"FreeSans BoldOblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSansBoldOblique.ttf"
+"FreeSans Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSansOblique.ttf"
+"FreeSerif (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSerif.ttf"
+"FreeSerif Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSerifBold.ttf"
+"FreeSerif BoldItalic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSerifBoldItalic.ttf"
+"FreeSerif Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\FreeSerifItalic.ttf"
+"FreesiaUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcfl.ttf"
+"FreesiaUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcfb.ttf"
+"FreesiaUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcfbi.ttf"
+"FreesiaUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcfi.ttf"
 "Fudd (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\fudd.ttf"
-"Georgia (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\georgia.ttf"
-"Georgia Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\georgiab.ttf"
-"Georgia Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\georgiaz.ttf"
-"Georgia Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\georgiai.ttf"
-"Impact (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\impact.ttf"
+"Gabriola (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Gabriola.ttf"
+"Gautami (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\gautami.ttf"
+"Gautami Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\gautamib.ttf"
+"Georgia (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\georgia.ttf"
+"Georgia Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\georgiab.ttf"
+"Georgia Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\georgiaz.ttf"
+"Georgia Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\georgiai.ttf"
+"Gisha (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\gisha.ttf"
+"Gisha Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\gishabd.ttf"
+"Golden Girdle (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\goldengi.ttf"
+"Gulim (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"GulimChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
+"Gungsuh (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"GungsuhChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
+"HydrogenWhiskey (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\hydrogen.ttf"
+"Ikarus (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\ikarrg.ttf"
+"Ikarus Turbulence (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\ikart.ttf"
+"Ikarus Vulture Regular (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\ikarv.ttf"
+"Impact (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\impact.ttf"
+"Independence (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\independ.ttf"
+"Indigo Joker (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\decoratives\\indigo.ttf"
+"IrisUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcil.ttf"
+"IrisUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcib.ttf"
+"IrisUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcibi.ttf"
+"IrisUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcii.ttf"
+"Iskoola Pota (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\iskpota.ttf"
+"Iskoola Pota Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\iskpotab.ttf"
+"JasmineUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcjl.ttf"
+"JasmineUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcjb.ttf"
+"JasmineUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcjbi.ttf"
+"JasmineUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcji.ttf"
+"KaiTi (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simkai.ttf"
+"Kalinga (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kalinga.ttf"
+"Kalinga Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kalingab.ttf"
+"Kartika (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kartika.ttf"
+"Kartika Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kartikab.ttf"
+"Khmer UI (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\KhmerUI.ttf"
+"Khmer UI Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\KhmerUIb.ttf"
+"KodchiangUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upckl.ttf"
+"KodchiangUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upckb.ttf"
+"KodchiangUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upckbi.ttf"
+"KodchiangUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcki.ttf"
+"Kokila (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kokila.ttf"
+"Kokila Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kokilab.ttf"
+"Kokila Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kokilabi.ttf"
+"Kokila Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\kokilai.ttf"
+"Lao UI (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\LaoUI.ttf"
+"Lao UI Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\LaoUIb.ttf"
 "Larabiefont (TrueType)"="Z:\\usr\\share\\fonts\\ttf\\western\\larabief.ttf"
+"Latha (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\latha.ttf"
+"Latha Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\lathab.ttf"
+"Leelawadee (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\leelawad.ttf"
+"Leelawadee Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\leelawdb.ttf"
+"Levenim MT (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\lvnm.ttf"
+"Levenim MT Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\lvnmbd.ttf"
 "Liberation Mono (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationMono-Regular.ttf"
 "Liberation Mono Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationMono-Bold.ttf"
 "Liberation Mono Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationMono-BoldItalic.ttf"
@@ -1481,7 +1743,7 @@ WINE REGISTRY Version 2
 "Liberation Sans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSans-Bold.ttf"
 "Liberation Sans Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSans-BoldItalic.ttf"
 "Liberation Sans Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSans-Italic.ttf"
-"Liberation Sans Narrow (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSansNarrow.ttf"
+"Liberation Sans Narrow (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSansNarrow-Regular.ttf"
 "Liberation Sans Narrow Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSansNarrow-Bold.ttf"
 "Liberation Sans Narrow Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSansNarrow-BoldItalic.ttf"
 "Liberation Sans Narrow Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSansNarrow-Italic.ttf"
@@ -1489,57 +1751,122 @@ WINE REGISTRY Version 2
 "Liberation Serif Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSerif-Bold.ttf"
 "Liberation Serif Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSerif-BoldItalic.ttf"
 "Liberation Serif Italic (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\liberation\\LiberationSerif-Italic.ttf"
-"Lucida Bright (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaBrightRegular.ttf"
-"Lucida Bright Demibold (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaBrightDemiBold.ttf"
-"Lucida Bright Demibold Italic (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaBrightDemiItalic.ttf"
-"Lucida Bright Italic (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaBrightItalic.ttf"
-"Lucida Console (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\lucon.ttf"
-"Lucida Sans (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaSansRegular.ttf"
-"Lucida Sans Demibold (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaSansDemiBold.ttf"
-"Lucida Sans Typewriter (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaTypewriterRegular.ttf"
-"Lucida Sans Typewriter Bold (TrueType)"="Z:\\usr\\share\\fonts\\java\\LucidaTypewriterBold.ttf"
-"Lucida Sans Unicode (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\l_10646.ttf"
-"Luxi Mono (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximr.ttf"
-"Luxi Mono Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximb.ttf"
-"Luxi Mono Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximbi.ttf"
-"Luxi Mono Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luximri.ttf"
-"Luxi Sans (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisr.ttf"
-"Luxi Sans Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisb.ttf"
-"Luxi Sans Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisbi.ttf"
-"Luxi Sans Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxisri.ttf"
-"Luxi Serif (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirr.ttf"
-"Luxi Serif Bold (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirb.ttf"
-"Luxi Serif Bold Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirbi.ttf"
-"Luxi Serif Oblique (TrueType)"="Z:\\usr\\share\\fonts\\TTF\\luxirri.ttf"
-"Marlett (TrueType)"="Z:\\usr\\bin\\..\\share\\wine\\fonts\\\\marlett.ttf"
-"Microsoft Sans Serif (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\micross.ttf"
-"Segoe UI (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\seguibk.ttf"
-"Segoe UI Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\segoeuib.ttf"
-"Segoe UI Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\segoeuiz.ttf"
-"Segoe UI Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\segoeuii.ttf"
-"Segoe UI Light (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\segoeuil.ttf"
-"Segoe UI Semibold SemiBold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\seguisb.ttf"
-"Symbol (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\symbol.ttf"
-"Tahoma (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\tahoma.ttf"
-"Tahoma Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\tahomabd.ttf"
-"Times New Roman (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\times.ttf"
-"Times New Roman Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\timesbd.ttf"
-"Times New Roman Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\timesbi.ttf"
-"Times New Roman Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\timesi.ttf"
-"Trebuchet MS (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\trebuc.ttf"
-"Trebuchet MS Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\trebucbd.ttf"
-"Trebuchet MS Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\trebucbi.ttf"
-"Trebuchet MS Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\trebucit.ttf"
-"Ubuntu (TrueType)"="Z:\\usr\\share\\fonts\\ubuntu\\Ubuntu-R.ttf"
-"Ubuntu Bold (TrueType)"="Z:\\usr\\share\\fonts\\ubuntu\\Ubuntu-B.ttf"
-"Ubuntu Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\ubuntu\\Ubuntu-BI.ttf"
-"Ubuntu Italic (TrueType)"="Z:\\usr\\share\\fonts\\ubuntu\\Ubuntu-I.ttf"
-"Verdana (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\verdana.ttf"
-"Verdana Bold (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\verdanab.ttf"
-"Verdana Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\verdanaz.ttf"
-"Verdana Italic (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\verdanai.ttf"
-"Webdings (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\webdings.ttf"
-"Wingdings (TrueType)"="Z:\\usr\\share\\fonts\\webcore\\wingding.ttf"
+"LilyUPC (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcll.ttf"
+"LilyUPC Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upclb.ttf"
+"LilyUPC Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upclbi.ttf"
+"LilyUPC Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\upcli.ttf"
+"Lucida Console (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\lucon.ttf"
+"Lucida Sans Unicode (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\l_10646.ttf"
+"Malgun Gothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\malgun.ttf"
+"Malgun Gothic Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\malgunbd.ttf"
+"Mangal (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\mangal.ttf"
+"Mangal Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\mangalb.ttf"
+"Marlett (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\marlett.ttf"
+"Meiryo (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"Meiryo Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"Meiryo Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"Meiryo Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"Meiryo UI (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"Meiryo UI Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"Meiryo UI Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryob.ttc"
+"Meiryo UI Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\meiryo.ttc"
+"Microsoft Himalaya (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\himalaya.ttf"
+"Microsoft JhengHei (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msjh.ttf"
+"Microsoft JhengHei Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msjhbd.ttf"
+"Microsoft New Tai Lue (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ntailu.ttf"
+"Microsoft New Tai Lue Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\ntailub.ttf"
+"Microsoft PhagsPa (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\phagspa.ttf"
+"Microsoft PhagsPa Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\phagspab.ttf"
+"Microsoft Sans Serif (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\micross.ttf"
+"Microsoft Tai Le (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\taile.ttf"
+"Microsoft Tai Le Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\taileb.ttf"
+"Microsoft Uighur (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msuighur.ttf"
+"Microsoft YaHei (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msyh.ttf"
+"Microsoft YaHei Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msyhbd.ttf"
+"Microsoft Yi Baiti (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\msyi.ttf"
+"MingLiU (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliu.ttc"
+"MingLiU-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliub.ttc"
+"MingLiU_HKSCS (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliu.ttc"
+"MingLiU_HKSCS-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliub.ttc"
+"Miriam (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\mriam.ttf"
+"Miriam Fixed (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\mriamc.ttf"
+"Mongolian Baiti (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\monbaiti.ttf"
+"MoolBoran (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\moolbor.ttf"
+"MS Gothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msgothic.ttc"
+"MS Mincho (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msmincho.ttc"
+"MS PGothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msgothic.ttc"
+"MS PMincho (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msmincho.ttc"
+"MS UI Gothic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\msgothic.ttc"
+"MV Boli (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\mvboli.ttf"
+"Narkisim (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\nrkis.ttf"
+"NSimSun (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\simsun.ttc"
+"Nyala (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\nyala.ttf"
+"OpenSymbol (TrueType)"="Z:\\usr\\share\\fonts\\opensymbol\\opens___.ttf"
+"Palatino Linotype (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\pala.ttf"
+"Palatino Linotype Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\palab.ttf"
+"Palatino Linotype Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\palabi.ttf"
+"Palatino Linotype Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\palai.ttf"
+"Plantagenet Cherokee (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\plantc.ttf"
+"PMingLiU (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliu.ttc"
+"PMingLiU-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\mingliub.ttc"
+"Raavi (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\raavi.ttf"
+"Raavi Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\raavib.ttf"
+"Rod (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\rod.ttf"
+"Sakkal Majalla (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\majalla.ttf"
+"Sakkal Majalla Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\majallab.ttf"
+"Segoe Print (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoepr.ttf"
+"Segoe Print Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoeprb.ttf"
+"Segoe Script (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoesc.ttf"
+"Segoe Script Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoescb.ttf"
+"Segoe UI (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoeui.ttf"
+"Segoe UI Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoeuib.ttf"
+"Segoe UI Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoeuiz.ttf"
+"Segoe UI Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoeuii.ttf"
+"Segoe UI Light (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\segoeuil.ttf"
+"Segoe UI Semibold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\seguisb.ttf"
+"Segoe UI Symbol (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\seguisym.ttf"
+"Shonar Bangla (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Shonar.ttf"
+"Shonar Bangla Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Shonarb.ttf"
+"Shruti (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\shruti.ttf"
+"Shruti Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\shrutib.ttf"
+"SimHei (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simhei.ttf"
+"Simplified Arabic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simpo.ttf"
+"Simplified Arabic Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simpbdo.ttf"
+"Simplified Arabic Fixed (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simpfxo.ttf"
+"SimSun (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\simsun.ttc"
+"SimSun-ExtB (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\simsunb.ttf"
+"Sylfaen (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\sylfaen.ttf"
+"Symbol (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\symbol.ttf"
+"Tahoma (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\tahoma.ttf"
+"Tahoma Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\tahomabd.ttf"
+"Times New Roman (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\times.ttf"
+"Times New Roman Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\timesbd.ttf"
+"Times New Roman Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\timesbi.ttf"
+"Times New Roman Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\timesi.ttf"
+"Traditional Arabic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\trado.ttf"
+"Traditional Arabic Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\tradbdo.ttf"
+"Trebuchet MS (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\trebuc.ttf"
+"Trebuchet MS Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\trebucbd.ttf"
+"Trebuchet MS Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\trebucbi.ttf"
+"Trebuchet MS Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\trebucit.ttf"
+"Tunga (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\tunga.ttf"
+"Tunga Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\tungab.ttf"
+"Utsaah (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\utsaah.ttf"
+"Utsaah Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\utsaahb.ttf"
+"Utsaah Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\utsaahbi.ttf"
+"Utsaah Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\utsaahi.ttf"
+"Vani (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Vani.ttf"
+"Vani Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\Vanib.ttf"
+"Verdana (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\verdana.ttf"
+"Verdana Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\verdanab.ttf"
+"Verdana Bold Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\verdanaz.ttf"
+"Verdana Italic (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\verdanai.ttf"
+"Vijaya (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\vijaya.ttf"
+"Vijaya Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\vijayab.ttf"
+"Vrinda (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\vrinda.ttf"
+"Vrinda Bold (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\vrindab.ttf"
+"Webdings (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\webdings.ttf"
+"Wingdings (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttf\\wingding.ttf"
 
 [Software\\Wine\\MenuFiles] 1341842607
 "/home/monarc/.config/menus/applications-merged/wine-Programs-x264vfw-Configure x264vfw.menu"="/home/monarc/.wine/dosdevices/c:/users/monarc/Start Menu/Programs/x264vfw/Configure x264vfw.lnk"
