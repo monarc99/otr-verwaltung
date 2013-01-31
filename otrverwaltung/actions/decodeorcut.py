@@ -22,6 +22,7 @@ import os
 from os.path import basename, join, dirname, exists, splitext
 import time
 import re
+import bisect
 
 from otrverwaltung import fileoperations
 from otrverwaltung.conclusions import FileConclusion
@@ -313,7 +314,6 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.message = "Keine lokale Cutlist gefunden."          
           
         # and finally cut the file
-        # waitsound = subprocess.Popen([self.config.get('general', 'mplayer'), "-vo", "null", "-loop", "0", path.get_image_path('waitsound.mp3')])
         for count, file_conclusion in enumerate(file_conclusions):            
             
             if file_conclusion.cut.status in [Status.NOT_DONE, Status.ERROR]:
@@ -341,7 +341,6 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.cut_video)) # rename after cut video, extension could have changed
                 else:
                     file_conclusion.cut.rename = basename(cut_video)
-        # waitsound.kill()
         return True
 
     def __get_format(self, filename):        
@@ -502,7 +501,7 @@ class DecodeOrCut(BaseAction):
    
         return None, "Sample Aspekt Ratio konnte nicht bestimmt werden."            
           
-    def __create_cutlist_virtualdub(self, filename):
+    def __create_cutlist_virtualdub(self, filename, format):
         """ returns: cuts, error_message """
         
         try:
@@ -520,6 +519,9 @@ class DecodeOrCut(BaseAction):
                 except (IndexError, ValueError), message:
                     return None, "Konnte Schnitte nicht lesen, um Cutlist zu erstellen. (%s)" % message
                 
+                if format == Format.HQ or format == Format.HD:
+                    cuts_frames.append((int(start)-2, int(duration)))
+                else:
                 cuts_frames.append((int(start), int(duration)))
                 
         if len(cuts_frames) == 0:
@@ -535,22 +537,36 @@ class DecodeOrCut(BaseAction):
             returns: error_message, cuts, executable """
         
         program, config_value, ac3file = self.__get_program(filename, manually=True)
+        format, ac3_file = self.__get_format(filename)
         
         if program < 0:
             return config_value, None, None
             
         if program == Program.AVIDEMUX:       
 
+            if ".avi" in filename and "avidemux3" in config_value and format == Format.HQ or format == Format.HD: 
+                try:
+                    mkvmerge = subprocess.call(['mkvmerge', '-o', filename+'.mkv', filename])
+                except OSError:
+                    return "Mkvmerge konnte nicht aufgerufen werden. Wird benötigt, damit Avidemux zuverlässige Timecode liefert. Bitte installieren.", None, None
+
             try:                   
-                avidemux = subprocess.Popen([config_value, filename], stdout=subprocess.PIPE)
+                if exists(filename+'.mkv'):
+                    avidemux = subprocess.Popen([config_value, filename+'.mkv'], bufsize=-1 ,stdout=subprocess.PIPE)
+                else:
+                    avidemux = subprocess.Popen([config_value, filename], bufsize=-1 ,stdout=subprocess.PIPE)
             except OSError:
+                if exists(filename+'.mkv'):
+                    fileoperations.remove_file(filename+'.mkv')
                 return "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
                 
-            while avidemux.poll() == None:
-                time.sleep(1)
-                pass
-                
             seg_lines = []
+            pts_correction = 0
+            fps, error = self.__get_fps(filename)
+            if error:
+                if exists(filename+'.mkv'):
+                    fileoperations.remove_file(filename+'.mkv')
+                return None, None, "Konnte FPS nicht bestimmen: " + error
             
             for line in avidemux.stdout.readlines():       
                 if line.startswith(' Seg'):
@@ -560,10 +576,35 @@ class DecodeOrCut(BaseAction):
                     parts = line.split(',')
         
                     seg_id = int(parts[0].split(':')[-1])
+                    if format == Format.HQ or format == Format.HD:
+                        start = int(parts[1].split(':')[-1])-2
+                    else:
                     start = int(parts[1].split(':')[-1])
                     size = int(parts[2].split(':')[-1])
                     seg_lines.append((seg_id, start, size))
  
+                # Avidemux3
+                elif 'Delaying video by' in line:
+                    pts_correction = float(line.split(' ')[7])
+                elif line.startswith(' We have '):
+                    seg_lines = []
+                elif line.startswith('Segment :'):
+                    line = line[line.find(':')+1:]
+                    seg_id = int(line.split('/')[0])
+                elif 'duration     :' in line:
+                    line = line[line.find(':')+1:]
+                    size = (float(line.split(' ')[0]))*fps/1000000
+                elif 'refStartPts  :' in line:
+                    line = line[line.find(':')+1:]
+                    start = (float(line.split(' ')[0])-pts_correction)*fps/1000000
+                    if start > 0:
+                        seg_lines.append((seg_id, start, size))
+                    else:
+                        # correct values for first keyframe
+                        seg_lines.append((seg_id, 0.0, size-fps*pts_correction/1000000))
+                else:
+                    pass
+
             # keep only necessary items            
             seg_lines.reverse()
             temp_cuts = []
@@ -583,6 +624,9 @@ class DecodeOrCut(BaseAction):
                 cuts_frames.append((start, duration))
                 count += 1                         
                 
+            if exists(filename+'.mkv'):
+                fileoperations.remove_file(filename+'.mkv')
+
             if len(cuts_frames) == 0:
                 cutlist_error = "Es wurde nicht geschnitten."
             else:
@@ -595,7 +639,7 @@ class DecodeOrCut(BaseAction):
             if error != None:
                 return error, None, None
                 
-            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"))
+            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"),format)
          
         if cutlist_error:            
             return cutlist_error, None, config_value
@@ -683,8 +727,50 @@ class DecodeOrCut(BaseAction):
         second = time - minute * 60 - hour * 3600	# for the milliseconds
         return "%02i:%02i:%f" % (hour, minute, second)
 
+    def __get_keyframes_from_file(self, filename):
+        """ returns keyframe list - in frame numbers"""
+        try:
+            command = ['wine',  path.get_image_path('tools')+'/ffmsindex.exe',  '-p', '-f', '-k',  filename ]
+            ffmsindex = subprocess.call(command)
+        except OSError:
+            return None, "ffmsindex konnte nicht aufgerufen werden."
+
+        try:
+            index = open(filename + '.ffindex_track00.kf.txt', 'r')
+        except IOError:
+            return None,  "Keyframe File von ffmsindex konnte nicht geöffnet werden."
+        index.readline()
+        index.readline()
+        try:
+            list =[float(i) for i in index.read().splitlines()]
+        except ValueError:
+            return None,  "Keyframes konnten nicht ermittelt werden."
+        index.close()
+        fileoperations.remove_file(filename +'.ffindex_track00.kf.txt')
+        fileoperations.remove_file(filename +'.ffindex')
+        
+        return list,  None
+
+    def __get_keyframe_in_front_of_frame(self, keyframes,  frame):
+        """Find keyframe less-than to frame."""
+
+        i = bisect.bisect_left(keyframes, frame)
+        if i:
+            return keyframes[i-1]
+        raise ValueError
+
+    def __get_keyframe_after_frame(self, keyframes, frame):
+        """Find keyframe greater-than to frame."""
+   
+        i = bisect.bisect_right(keyframes, frame)
+        if i != len(keyframes):
+            return keyframes[i]
+        raise ValueError 
+        
+
     def __cut_file_avidemux(self, filename, config_value, cuts):
-        # make file for avidemux scripting engine
+        format, ac3_file = self.__get_format(filename)
+        # make file for avidemux2.5 scripting engine
         f = open("tmp.js", "w")
                     
         f.writelines([
@@ -698,6 +784,10 @@ class DecodeOrCut(BaseAction):
             ])
             
         for frame_start, frames_duration in cuts:
+            if format == Format.HQ or format == Format.HD:
+                #2-Frame-Delay for HQ,HD Format
+                f.write("app.addSegment(0, %i, %i);\n" %(frame_start+2, frames_duration))
+            else:
             f.write("app.addSegment(0, %i, %i);\n" %(frame_start, frames_duration))
 
         cut_video = self.__generate_filename(filename)
@@ -813,7 +903,6 @@ class DecodeOrCut(BaseAction):
                     return None, error_message                     
                 comp_data = codec.get_comp_data_x264vfw_dynamic(aspect,self.config.get('general', 'x264vfw_mp4_string'))
                 compression = 'VirtualDub.video.SetCompression(0x34363278,0,10000,0);\n'
-
         elif format == Format.AVI:      
             comp_data = codec.get_comp_data_dx50()
             compression = 'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
@@ -850,7 +939,54 @@ class DecodeOrCut(BaseAction):
         f.write('VirtualDub.subset.Clear();\n')
 
         if not manually:
+            keyframes, error = self.__get_keyframes_from_file(filename)
+            
+            if keyframes == None:
+                return None,  "Keyframes konnten nicht ausgelesen werden."
+            
             for frame_start, frames_duration in cuts:
+                # interval does not begin with keyframe
+                if not frame_start in keyframes and format == Format.HQ or format == Format.HD:
+
+                    try: # get next keyframe
+                        frame_start_keyframe =self.__get_keyframe_after_frame(keyframes, frame_start)
+                    except ValueError:
+                        frame_start_keyframe = -1
+                        
+                    if frame_start+frames_duration > frame_start_keyframe:
+                        print 'Smart Rendering Part mit anschließenden kopierten Part'
+                        if frame_start_keyframe < 0:
+                            # copy end of file
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration-2))
+                        else:
+                            # smart rendering part  (duration -2 due to smart rendering bug)
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frame_start_keyframe-frame_start-2))
+                            #vd smart rendering bug
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start_keyframe-2, 2))                            
+                            # copy part
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start_keyframe, frames_duration-(frame_start_keyframe-frame_start)))
+                    else:
+                        print 'reiner Smart Rendering Part'
+                        try: # get next keyframe after the interval
+                            next_keyframe =self.__get_keyframe_after_frame(keyframes, frame_start+frames_duration-2)
+                        except ValueError:
+                            next_keyframe = -1   
+                        if next_keyframe - (frame_start+frames_duration) > 2:
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration))
+                        else:
+                            # workaround for smart rendering bug
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration-2))                            
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (next_keyframe-1, 1))                            
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (next_keyframe-1, 1))                            
+                else:
+                    if not (frame_start+frames_duration) in keyframes and format == Format.HQ or format == Format.HD:
+                        print 'Kopieren mit keinem Keyframe am Ende'
+                        f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration-2))
+                        # we all love workarounds
+                        f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+frames_duration-1, 1))
+                        f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+frames_duration-1, 1))
+                    else:
+                        print 'reines Kopieren'
                 f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration))
 
             cut_video = self.__generate_filename(filename,1)
@@ -877,8 +1013,6 @@ class DecodeOrCut(BaseAction):
         else:
             command = "wineconsole " + command               
 	  
-        print command
-        
         try:     
             vdub = subprocess.Popen(command, shell=True)
         except OSError:
