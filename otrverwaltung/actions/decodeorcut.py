@@ -954,7 +954,7 @@ class DecodeOrCut(BaseAction):
                         frame_start_keyframe = -1
                         
                     if frame_start+frames_duration > frame_start_keyframe:
-                        print 'Smart Rendering Part mit anschließenden kopierten Part'
+                        # 'Smart Rendering Part mit anschließenden kopierten Part'
                         if frame_start_keyframe < 0:
                             # copy end of file
                             f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration-2))
@@ -962,7 +962,9 @@ class DecodeOrCut(BaseAction):
                             # smart rendering part  (duration -2 due to smart rendering bug)
                             f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frame_start_keyframe-frame_start-2))
                             #vd smart rendering bug
-                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start_keyframe-2, 2))                            
+                            if ac3_file != None:
+                                f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start_keyframe-1, 1))                            
+                                f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start_keyframe-1, 1))                            
                             # copy part
                             f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start_keyframe, frames_duration-(frame_start_keyframe-frame_start)))
                     else:
@@ -975,16 +977,18 @@ class DecodeOrCut(BaseAction):
                             f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration))
                         else:
                             # workaround for smart rendering bug
-                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration-2))                            
-                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (next_keyframe-1, 1))                            
-                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (next_keyframe-1, 1))                            
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+2, frames_duration-2))
+                            if ac3_file != None:
+                                f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (next_keyframe-1, 1))                            
+                                f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (next_keyframe-1, 1))                            
                 else:
                     if not (frame_start+frames_duration) in keyframes and format == Format.HQ or format == Format.HD:
-                        print 'Kopieren mit keinem Keyframe am Ende'
+                        # 'Kopieren mit keinem Keyframe am Ende'
                         f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration-2))
                         # we all love workarounds
-                        f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+frames_duration-1, 1))
-                        f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+frames_duration-1, 1))
+                        if ac3_file != None:
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+frames_duration-1, 1))
+                            f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start+frames_duration-1, 1))
                     else:
                         print 'reines Kopieren'
                         f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration))
