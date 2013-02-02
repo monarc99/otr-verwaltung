@@ -1,2 +1,3 @@
 # ignore built files from makedeb.sh
 conf
+/otr-verwaltung.e4p

@@ -1,19 +1,20 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-requires PreferencesWindow 1.0 -->
   <!-- interface-naming-policy project-wide -->
   <object class="PreferencesWindow" id="preferences_window">
+    <property name="can_focus">False</property>
     <property name="border_width">9</property>
     <property name="title" translatable="yes">Optionen</property>
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
     <property name="skip_taskbar_hint">True</property>
-    <signal name="delete_event" handler="_on_preferences_window_delete_event"/>
+    <signal name="delete-event" handler="_on_preferences_window_delete_event" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox2">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
+        <property name="can_focus">False</property>
         <property name="spacing">4</property>
         <child>
           <object class="GtkNotebook" id="notebook">
@@ -23,19 +24,36 @@
             <child>
               <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkTable" id="table6">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="border_width">5</property>
                     <property name="n_rows">12</property>
                     <property name="n_columns">2</property>
                     <property name="row_spacing">10</property>
                     <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
                       <object class="GtkLabel" id="labelDescCutAvis">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">In diesen Ordner werden die Dateien nach dem Schneiden verschoben. Dieser Ordner kann derselbe sein wie der f&#xFC;r die neuen otrkey-Dateien.</property>
+                        <property name="label" translatable="yes">In diesen Ordner werden die Dateien nach dem Schneiden verschoben. Dieser Ordner kann derselbe sein wie der für die neuen otrkey-Dateien.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
@@ -48,6 +66,7 @@
                     <child>
                       <object class="GtkFileChooserButton" id="folderCutAvis">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="action">select-folder</property>
                       </object>
                       <packing>
@@ -61,6 +80,7 @@
                     <child>
                       <object class="GtkLabel" id="label42">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Geschnittene Dateien:</property>
                       </object>
@@ -72,8 +92,9 @@
                     <child>
                       <object class="GtkLabel" id="labelDescUncutAvis">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">In diesen Ordner werden die dekodierten Dateien verschoben. Dieser Ordner kann derselbe sein wie der f&#xFC;r die neuen otrkey-Dateien.</property>
+                        <property name="label" translatable="yes">In diesen Ordner werden die dekodierten Dateien verschoben. Dieser Ordner kann derselbe sein wie der für die neuen otrkey-Dateien.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
@@ -86,6 +107,7 @@
                     <child>
                       <object class="GtkLabel" id="label40">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Ungeschnittene Dateien:</property>
                       </object>
@@ -97,8 +119,9 @@
                     <child>
                       <object class="GtkFileChooserButton" id="folderUncutAvis">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="action">select-folder</property>
-                        <property name="title" translatable="yes">Ordner w&#xE4;hlen</property>
+                        <property name="title" translatable="yes">Ordner wählen</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -110,8 +133,9 @@
                     <child>
                       <object class="GtkFileChooserButton" id="folderTrashOtrkeys">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="action">select-folder</property>
-                        <property name="title" translatable="yes">Ordner w&#xE4;hlen</property>
+                        <property name="title" translatable="yes">Ordner wählen</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -123,8 +147,9 @@
                     <child>
                       <object class="GtkLabel" id="label26">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">M&#xFC;ll f&#xFC;r otrkeys:</property>
+                        <property name="label" translatable="yes">Müll für otrkeys:</property>
                       </object>
                       <packing>
                         <property name="top_attach">7</property>
@@ -134,8 +159,9 @@
                     <child>
                       <object class="GtkLabel" id="labelDescTrashOtrkeys">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Hierhin werden dekodierte Dateien verschoben. Dieser Ordner kann auch der M&#xFC;ll-Ordner des Systems sein.</property>
+                        <property name="label" translatable="yes">Hierhin werden dekodierte Dateien verschoben. Dieser Ordner kann auch der Müll-Ordner des Systems sein.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
@@ -148,6 +174,7 @@
                     <child>
                       <object class="GtkFileChooserButton" id="folderArchive">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="action">select-folder</property>
                       </object>
                       <packing>
@@ -161,6 +188,7 @@
                     <child>
                       <object class="GtkLabel" id="labelArchiveFolder">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Archiv:</property>
                       </object>
@@ -174,6 +202,7 @@
                       <object class="GtkLabel" id="label9">
                         <property name="width_request">100</property>
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Neue otrkey-Dateien:</property>
                         <property name="ellipsize">start</property>
@@ -187,6 +216,7 @@
                     <child>
                       <object class="GtkFileChooserButton" id="folderNewOtrkeys">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="action">select-folder</property>
                       </object>
                       <packing>
@@ -200,6 +230,7 @@
                     <child>
                       <object class="GtkLabel" id="labelDescNewOtrkeys">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Dies ist der Standard-Ordner von OTR-Verwaltung.</property>
                         <property name="wrap">True</property>
@@ -214,6 +245,7 @@
                     <child>
                       <object class="GtkLabel" id="label41">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Empfohlen: Alle Ordner sollten sich auf der selben Partition befinden&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -224,8 +256,9 @@
                     <child>
                       <object class="GtkLabel" id="labelDescTrashAvis">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Hierhin werden ungeschittene Dateien verschoben. Dieser Ordner kann auch der M&#xFC;ll-Ordner des Systems sein. Beide M&#xFC;ll-Ordner k&#xF6;nnen identisch sein.</property>
+                        <property name="label" translatable="yes">Hierhin werden ungeschittene Dateien verschoben. Dieser Ordner kann auch der Müll-Ordner des Systems sein. Beide Müll-Ordner können identisch sein.</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
@@ -238,8 +271,9 @@
                     <child>
                       <object class="GtkFileChooserButton" id="folderTrashAvis">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="action">select-folder</property>
-                        <property name="title" translatable="yes">Ordner w&#xE4;hlen</property>
+                        <property name="title" translatable="yes">Ordner wählen</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -251,32 +285,19 @@
                     <child>
                       <object class="GtkLabel" id="label11">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">M&#xFC;ll f&#xFC;r avis:</property>
+                        <property name="label" translatable="yes">Müll für avis:</property>
                       </object>
                       <packing>
                         <property name="top_attach">9</property>
                         <property name="bottom_attach">10</property>
                       </packing>
                     </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -285,6 +306,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Speicherorte</property>
               </object>
               <packing>
@@ -294,37 +316,53 @@
             <child>
               <object class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkTable" id="table3">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="border_width">8</property>
                     <property name="n_rows">5</property>
                     <property name="n_columns">2</property>
                     <property name="row_spacing">11</property>
                     <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
                       <object class="GtkHBox" id="hbox3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkEntry" id="entry_decoder">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="invisible_char">●</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkButton" id="button_set_file">
                             <property name="label" translatable="yes">...</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <signal name="clicked" handler="_on_button_set_file_clicked" object="entry_decoder"/>
+                            <signal name="clicked" handler="_on_button_set_file_clicked" object="entry_decoder" swapped="yes"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -337,6 +375,7 @@
                     <child>
                       <object class="GtkLabel" id="label6">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Passwort:</property>
                       </object>
@@ -349,6 +388,7 @@
                     <child>
                       <object class="GtkLabel" id="label5">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">E-Mail:</property>
                       </object>
@@ -361,6 +401,7 @@
                     <child>
                       <object class="GtkLabel" id="label4">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Pfad zum Dekoder:
 (otrdecoder)</property>
@@ -374,7 +415,11 @@
                       <object class="GtkEntry" id="entryEMail">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -387,7 +432,11 @@
                       <object class="GtkEntry" id="entryPassword">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -398,7 +447,8 @@
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="checkCorrect">
-                        <property name="label" translatable="yes">Dateien auf Korrektheit pr&#xFC;fen</property>
+                        <property name="label" translatable="yes">Dateien auf Korrektheit prüfen</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -413,8 +463,9 @@
                     <child>
                       <object class="GtkLabel" id="label3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">&lt;i&gt;Achtung: Die Verschl&#xFC;sselung des Passworts ist nicht vollkommmen sicher. Deshalb kann dieses Feld auch leer gelassen werden.&lt;/i&gt;</property>
+                        <property name="label" translatable="yes">&lt;i&gt;Achtung: Die Verschlüsselung des Passworts ist nicht vollkommmen sicher. Deshalb kann dieses Feld auch leer gelassen werden.&lt;/i&gt;</property>
                         <property name="use_markup">True</property>
                         <property name="wrap">True</property>
                       </object>
@@ -425,15 +476,10 @@
                         <property name="bottom_attach">4</property>
                       </packing>
                     </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -445,6 +491,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label2">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">OTR-Einstellungen</property>
               </object>
               <packing>
@@ -455,10 +502,11 @@
             <child>
               <object class="GtkVBox" id="vbox8">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkTable" id="table4">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="border_width">6</property>
                     <property name="n_columns">2</property>
                     <property name="column_spacing">5</property>
@@ -466,49 +514,74 @@
                     <child>
                       <object class="GtkVBox" id="vbox19">
                         <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
+                        <property name="can_focus">False</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkLabel" id="label55">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="xpad">1</property>
-                            <property name="label" translatable="yes">&lt;i&gt;Achtung: Die vorgeschlagenen Werte sind &#xFC;bliche Standardwerte. Sie wurden nicht auf diesem System ermittelt. Die Namen der Programme m&#xFC;ssen &#xFC;berpr&#xFC;ft werden!&lt;/i&gt;</property>
+                            <property name="label" translatable="yes">&lt;i&gt;Achtung: Die vorgeschlagenen Werte sind übliche Standardwerte. Sie wurden nicht auf diesem System ermittelt. Die Namen der Programme müssen überprüft werden!&lt;/i&gt;</property>
                             <property name="use_markup">True</property>
                             <property name="wrap">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkTable" id="table10">
                             <property name="visible">True</property>
-                            <property name="n_rows">4</property>
+                            <property name="can_focus">False</property>
+                            <property name="n_rows">6</property>
                             <property name="n_columns">3</property>
                             <property name="column_spacing">12</property>
                             <property name="row_spacing">3</property>
                             <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
                               <object class="GtkHBox" id="hbox21">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_man_mp4">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry2">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_set_file6">
                                     <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_mp4"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_mp4" swapped="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -523,24 +596,39 @@
                             <child>
                               <object class="GtkHBox" id="hbox20">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_man_hq">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry4">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_set_file5">
                                     <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_hq"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_hq" swapped="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -555,24 +643,39 @@
                             <child>
                               <object class="GtkHBox" id="hbox19">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_man_avi">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry6">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_set_file4">
                                     <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_avi" after="yes"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_man_avi" after="yes" swapped="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -587,24 +690,39 @@
                             <child>
                               <object class="GtkHBox" id="hbox18">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_mp4">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry8">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_set_file3">
                                     <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_mp4"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_mp4" swapped="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -619,11 +737,24 @@
                             <child>
                               <object class="GtkHBox" id="h264_codec_hbox">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="h264_codec_cbox">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry10">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
@@ -638,24 +769,39 @@
                             <child>
                               <object class="GtkHBox" id="hbox17">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_hq">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry12">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_set_file2">
                                     <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_hq"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_hq" swapped="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -670,24 +816,39 @@
                             <child>
                               <object class="GtkHBox" id="hbox16">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_avi">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry14">
+                                        <property name="can_focus">True</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_set_file1">
                                     <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_avi"/>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" object="combobox_avi" swapped="yes"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
@@ -702,6 +863,7 @@
                             <child>
                               <object class="GtkLabel" id="label39">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">&lt;b&gt;Manuell schneiden mit...&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
@@ -714,6 +876,7 @@
                             <child>
                               <object class="GtkLabel" id="label10">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">&lt;b&gt;Format...&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
@@ -725,6 +888,7 @@
                             <child>
                               <object class="GtkLabel" id="label30">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">&lt;b&gt;Per Cutlist schneiden mit...&lt;/b&gt;</property>
                                 <property name="use_markup">True</property>
@@ -737,6 +901,7 @@
                             <child>
                               <object class="GtkLabel" id="label35">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">avi</property>
                               </object>
@@ -749,6 +914,7 @@
                             <child>
                               <object class="GtkLabel" id="label37">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">HQ/HD</property>
                               </object>
@@ -761,6 +927,7 @@
                             <child>
                               <object class="GtkLabel" id="label38">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">mp4</property>
                               </object>
@@ -773,6 +940,7 @@
                             <child>
                               <object class="GtkLabel" id="h264_codec">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">H264 Codec</property>
                               </object>
@@ -782,9 +950,88 @@
                                 <property name="x_options">GTK_FILL</property>
                               </packing>
                             </child>
+                            <child>
+                              <object class="GtkLabel" id="label_ac3">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">ac3-Muxer</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">5</property>
+                                <property name="bottom_attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkHBox" id="hbox_ac3">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkComboBoxEntry" id="combobox_ac3">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry" id="comboboxentry-entry1">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="primary_icon_activatable">True</property>
+                                        <property name="secondary_icon_activatable">True</property>
+                                        <property name="primary_icon_sensitive">True</property>
+                                        <property name="secondary_icon_sensitive">True</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="button_set_file_ac3">
+                                    <property name="label" translatable="yes">...</property>
+                                    <property name="use_action_appearance">False</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <signal name="clicked" handler="_on_button_set_file_clicked" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">5</property>
+                                <property name="bottom_attach">6</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="check_merge_ac3">
+                            <property name="label" translatable="yes">ac3-Dateien schneiden und mit Video-Datei muxen</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -795,6 +1042,7 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -806,6 +1054,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label15">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Schneiden</property>
               </object>
               <packing>
@@ -816,20 +1065,28 @@
             <child>
               <object class="GtkVBox" id="vbox5">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="border_width">8</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkTable" id="table1">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="n_rows">5</property>
                     <property name="n_columns">3</property>
                     <property name="column_spacing">5</property>
                     <property name="row_spacing">4</property>
                     <child>
+                      <placeholder/>
+                    </child>
+                    <child>
                       <object class="GtkEntry" id="entry_username">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -841,8 +1098,9 @@
                     <child>
                       <object class="GtkLabel" id="label50">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Benutzername f&#xFC;r eigene Cutlists:</property>
+                        <property name="label" translatable="yes">Benutzername für eigene Cutlists:</property>
                       </object>
                       <packing>
                         <property name="top_attach">3</property>
@@ -852,6 +1110,7 @@
                     <child>
                       <object class="GtkLabel" id="label17">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Cutlist-Server:</property>
                       </object>
@@ -862,7 +1121,8 @@
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="check_delete_cutlists">
-                        <property name="label" translatable="yes">Cutlisten nach dem Schneiden l&#xF6;schen</property>
+                        <property name="label" translatable="yes">Cutlisten nach dem Schneiden löschen</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -878,8 +1138,9 @@
                     <child>
                       <object class="GtkLabel" id="label43">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Cutlists ausw&#xE4;hlen nach...</property>
+                        <property name="label" translatable="yes">Cutlists auswählen nach...</property>
                       </object>
                       <packing>
                         <property name="top_attach">1</property>
@@ -889,6 +1150,7 @@
                     <child>
                       <object class="GtkRadioButton" id="radio_filename">
                         <property name="label" translatable="yes">Dateiname</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -904,7 +1166,8 @@
                     </child>
                     <child>
                       <object class="GtkRadioButton" id="radio_size">
-                        <property name="label" translatable="yes">Gr&#xF6;&#xDF;e der Datei (empfohlen)</property>
+                        <property name="label" translatable="yes">Größe der Datei (empfohlen)</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -921,23 +1184,38 @@
                     <child>
                       <object class="GtkVBox" id="vbox3">
                         <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkComboBoxEntry" id="comboboxServer">
                             <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <child internal-child="entry">
+                              <object class="GtkEntry" id="comboboxentry-entry16">
+                                <property name="can_focus">True</property>
+                                <property name="primary_icon_activatable">True</property>
+                                <property name="secondary_icon_activatable">True</property>
+                                <property name="primary_icon_sensitive">True</property>
+                                <property name="secondary_icon_sensitive">True</property>
+                              </object>
+                            </child>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label7">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">&lt;span font-size='small'&gt;Achtung: Am Ende den Slash ('/') nicht vergessen!&lt;/span&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -950,6 +1228,7 @@
                     <child>
                       <object class="GtkLabel" id="label12">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">&lt;span font-size='small'&gt;Achtung: Der Benutzername muss bei cutlist.at einmalig sein!&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
@@ -961,12 +1240,10 @@
                         <property name="bottom_attach">5</property>
                       </packing>
                     </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="padding">3</property>
                     <property name="position">0</property>
                   </packing>
@@ -979,6 +1256,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label27">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Cutlist</property>
               </object>
               <packing>
@@ -989,28 +1267,32 @@
             <child>
               <object class="GtkVBox" id="vbox13">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="border_width">7</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkVBox" id="vbox16">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
+                    <property name="can_focus">False</property>
                     <property name="spacing">7</property>
                     <child>
                       <object class="GtkCheckButton" id="check_rename_cut">
                         <property name="label" translatable="yes">Nach dem Schneiden geschnittene avi-Datei umbenennen</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkTable" id="table7">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="n_rows">2</property>
                         <property name="n_columns">2</property>
                         <property name="column_spacing">8</property>
@@ -1018,6 +1300,7 @@
                         <child>
                           <object class="GtkLabel" id="label31">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Schema:</property>
                           </object>
@@ -1028,6 +1311,7 @@
                         <child>
                           <object class="GtkLabel" id="label33">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="yalign">0</property>
                             <property name="label" translatable="yes">Beispiel:</property>
@@ -1043,8 +1327,12 @@
                             <property name="width_request">450</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="invisible_char">●</property>
                             <property name="text" translatable="yes">schema</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -1054,6 +1342,7 @@
                         <child>
                           <object class="GtkLabel" id="label_schema">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">example</property>
                             <property name="use_markup">True</property>
@@ -1069,31 +1358,37 @@
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkHSeparator" id="hseparator6">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkLabel" id="label36">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <property name="ypad">16</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Die Ausdr&#xFC;cke in geschweiften Klammern werden mit den Information aus der Datei ersetzt:&lt;/b&gt;
+                    <property name="label" translatable="yes">&lt;b&gt;Die Ausdrücke in geschweiften Klammern werden mit den Information aus der Datei ersetzt:&lt;/b&gt;
 {titel}		z.B. 	James Bond 007 
 {titel_}				James_Bond_007	
 {titel.}				James.Bond.007
@@ -1111,6 +1406,8 @@
                     <property name="wrap">True</property>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -1122,6 +1419,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label8">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Umbenennen</property>
               </object>
               <packing>
@@ -1131,22 +1429,26 @@
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkHButtonBox" id="hbuttonbox1">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="border_width">5</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="buttonClose">
                 <property name="label">gtk-close</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="_on_preferences_buttonClose_clicked"/>
+                <signal name="clicked" handler="_on_preferences_buttonClose_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1157,6 +1459,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>

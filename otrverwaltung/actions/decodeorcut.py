@@ -31,6 +31,7 @@ from otrverwaltung import codec
 from otrverwaltung import cutlists as cutlists_management
 from otrverwaltung import path
 from otrverwaltung.GeneratorTask import GeneratorTask
+from otrverwaltung.gui import CutinterfaceDialog
 from fractions import Fraction
 
 class DecodeOrCut(BaseAction):
@@ -266,23 +267,12 @@ class DecodeOrCut(BaseAction):
                     file_conclusion.cut.cut_action = response
 
             if file_conclusion.cut.cut_action == Cut_action.MANUALLY: # MANUALLY                               
-                error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_video)
+                error_message, cutlist = self.cut_file_manually(file_conclusion.uncut_video)
                                        
                 if not error_message:
-                    file_conclusion.cut.create_cutlist = True            
-                    file_conclusion.cut.cutlist.cuts_frames = cuts
-                    file_conclusion.cut.cutlist.intended_app = basename(executable)                    
-                    file_conclusion.cut.cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten'
-                    
-                    fps, error = self.__get_fps(file_conclusion.uncut_video)
-                    if not error:
-                        file_conclusion.cut.cutlist.fps = fps
-                    else:
-                        file_conclusion.cut.cutlist.fps = 25.
-                        print "Achtung! Möglicherweise wurde eine falsche Fps-Anzahl eingetragen! (%s)" % error
-                    # calculate seconds
-                    for start_frame, duration_frames in cuts:
-                        file_conclusion.cut.cutlist.cuts_seconds.append((start_frame / fps, duration_frames / fps))
+                    file_conclusion.cut.create_cutlist = True
+                    file_conclusion.cut.upload_cutlist = True
+                    file_conclusion.cut.cutlist = cutlist
                 else:
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = error_message
@@ -381,9 +371,11 @@ class DecodeOrCut(BaseAction):
                          Format.MP4 : self.config.get('general', 'cut_mp4s_by') }
                      
         format, ac3 = self.__get_format(filename)                 
+        if not self.config.get('general', 'merge_ac3s'):
+        	ac3 = None
 
         if format < 0:
-            return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt."
+            return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt.", False
                              
         config_value = programs[format]
         
@@ -395,6 +387,8 @@ class DecodeOrCut(BaseAction):
 	    return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/vdub.exe', ac3 
         elif 'vdub' in config_value or 'VirtualDub' in config_value:
             return Program.VIRTUALDUB, config_value, ac3
+        elif 'CutInterface' in config_value and manually:
+            return Program.CUT_INTERFACE, config_value, ac3
         else:
             return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value, False 
    
@@ -530,21 +524,22 @@ class DecodeOrCut(BaseAction):
         return cuts_frames, None       
        
     def cut_file_manually(self, filename):
-        """ Cuts a file manually with Avidemux or VirtualDub and gets cuts from
+        """ Cuts a file manually with Avidemux or VirtualDub or the CutInterface and gets cuts from
             possibly created project files (VD) or from output (AD). 
-            returns: error_message, cuts, executable """
+            returns: error_message, cutlist """
         
         program, config_value, ac3file = self.__get_program(filename, manually=True)
         
         if program < 0:
-            return config_value, None, None
+            return config_value, None
             
+        cutlist = cutlists_management.Cutlist()
         if program == Program.AVIDEMUX:       
 
             try:                   
                 avidemux = subprocess.Popen([config_value, filename], stdout=subprocess.PIPE)
             except OSError:
-                return "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
+                return "Avidemux konnte nicht aufgerufen werden: " + config_value, None
                 
             while avidemux.poll() == None:
                 time.sleep(1)
@@ -588,22 +583,68 @@ class DecodeOrCut(BaseAction):
             else:
                 cutlist_error = None
                         
-        else: # VIRTUALDUB
+        elif program == Program.VIRTUALDUB: # VIRTUALDUB
             
             cut_video_is_none, error = self.__cut_file_virtualdub(filename, config_value, cuts=None, manually=True)
             
             if error != None:
-                return error, None, None
+                return error, None
                 
             cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"))
-         
-        if cutlist_error:            
-            return cutlist_error, None, config_value
+        
+        if program == Program.CUT_INTERFACE:
+            # looking for latest cutlist, if any
+            p, video_file = os.path.split(filename)
+            cutregex = re.compile("^" + video_file + "\.?(.*).cutlist$")
+            files = os.listdir(p)
+            number = -1
+            local_cutlist = None		# use fallback name in conclusions if there are no local cutlists
+            for f in files:
+                match = cutregex.match(f)
+                if match:
+                    # print "Found local cutlist %s" % match.group()
+                    if match.group(1) == '':
+                        res_num = 0
+                    else:
+                        res_num = int(match.group(1))
+                    
+                    if res_num > number:
+                        res_num = number
+                        local_cutlist = p + "/" + match.group()
+                    
+            ci = CutinterfaceDialog.NewCutinterfaceDialog()
+            cutlist = ci._run(filename , local_cutlist, self.__app)
+            ci.destroy()
+            
+            if cutlist.cuts_frames == None or len(cutlist.cuts_frames) == 0:
+                cutlist_error = "Keine Schnitte angegeben"
+            else:
+                cutlist_error = None
+            
         else:
-            return None, cuts_frames, config_value
+            # create cutlist data
+            if cutlist_error == None:
+                cutlist.cuts_frames = cuts_frames
+                cutlist.intended_app = basename(config_value)                    
+                cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten'
+                
+                fps, error = self.__get_fps(filename)
+                if not error:
+                    cutlist.fps = fps
+                else:
+                    cutlist.fps = 25.
+                    print "Achtung! Möglicherweise wurde eine falsche Fps-Anzahl eingetragen! (%s)" % error
+                # calculate seconds
+                for start_frame, duration_frames in cuts_frames:
+                    cutlist.cuts_seconds.append((start_frame / fps, duration_frames / fps))
+        
+        if cutlist_error:            
+            return cutlist_error, None
+        else:
+            return None, cutlist
              
     def cut_file_by_cutlist(self, filename, cutlist):
-        """ Returns: cut_video, error """
+        """ Returns: cut_video, ac3file, error """
 
         program, program_config_value, ac3file = self.__get_program(filename)
         if program < 0:
@@ -639,12 +680,13 @@ class DecodeOrCut(BaseAction):
             return cut_video, "", None
             
     def __mux_ac3(self, filename, cut_video, ac3_file, cutlist):	# cuts the ac3 and muxes it with the avi into an mkv
+        mkvmerge = self.config.get('general', 'merge_ac3s_by')
 	root, extension = splitext(filename)
 	mkv_file = splitext(cut_video)[0] + ".mkv"
 	# creates the timecodes string for splitting the .ac3 with mkvmerge
 	timecodes = (','.join([self.__get_timecode(start) + ',' + self.__get_timecode(start+duration) for start, duration in cutlist.cuts_seconds]))
 	# splitting .ac3. Every second fragment will be used.
-	return_value = subprocess.call(["mkvmerge", "--split", "timecodes:" + timecodes, "-o", root + "-%03d.mka", ac3_file])
+	return_value = subprocess.call([mkvmerge, "--split", "timecodes:" + timecodes, "-o", root + "-%03d.mka", ac3_file])
 	# return_value=0 is OK, return_value=1 means a warning. Most probably non-ac3-data that has been omitted.
         # TODO: Is there some way to pass this warning to the conclusion dialog?
         if return_value != 0 and return_value != 1:
@@ -657,7 +699,7 @@ class DecodeOrCut(BaseAction):
 		fileoperations.remove_file(root + "-003.mka")
 		
         else:                                           # Concatenating every second fragment.
-            command = ["mkvmerge", "-o", root + ".mka", root + "-002.mka"]
+            command = [mkvmerge, "-o", root + ".mka", root + "-002.mka"]
             command[len(command):] = ["+" + root + "-%03d.mka" % (2*n) for n in range(2,len(cutlist.cuts_seconds)+1)]
             return_value = subprocess.call(command)
             if return_value != 0:               # There should be no warnings here
@@ -669,7 +711,7 @@ class DecodeOrCut(BaseAction):
  
         # Mux the cut .avi with the resulting audio-file into mkv_file
         # TODO: Is there some way to pass possible warnings to the conclusion dialog?
-        return_value = subprocess.call(["mkvmerge", "-o", mkv_file, cut_video, root + ".mka"])
+        return_value = subprocess.call([mkvmerge, "-o", mkv_file, cut_video, root + ".mka"])
         if return_value != 0 and return_value != 1:
             return None, None, str(return_value)
         
