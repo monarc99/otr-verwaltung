@@ -127,9 +127,11 @@ class App:
                 'cut_avis_by': 'avidemux2_cli',
                 'cut_hqs_by': 'intern-vdub',
                 'cut_mp4s_by': 'intern-vdub',
-                'cut_avis_man_by': 'avidemux2_qt4',
-                'cut_hqs_man_by': 'intern-VirtualDub',
-                'cut_mp4s_man_by': 'avidemux2_qt4',
+                'cut_avis_man_by': 'CutInterface',
+                'cut_hqs_man_by': 'CutInterface',
+                'cut_mp4s_man_by': 'CutInterface',
+                'merge_ac3s' : True,
+                'merge_ac3s_by' : 'mkvmerge',
                 'server': 'http://cutlist.at/',
                 'cut_action': Cut_action.ASK,
                 'delete_cutlists': True,
@@ -458,8 +460,9 @@ class App:
              
             for token, value in values.iteritems():
                 schema = schema.replace('{%s}' % token, value)                   
-                
-            schema += extension		# preserve file extension
+            
+            if not schema[-len(extension):] == extension:
+                schema += extension		# preserve file extension
                 
             return schema
         else:         
@@ -780,7 +783,7 @@ class OTRVerwaltungService(dbus.service.Object):
     def add_link(self, link):        
         self.app.add_download_link(link)        
         
-if __name__ == "__main__":   
+if __name__ == "__main__":
     if dbus.SessionBus().request_name("elbersb.otrverwaltung") != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
         print "OTR-Verwaltung läuft bereits. Zeige Fenster."
         dbus.SessionBus().get_object("elbersb.otrverwaltung", "/elbersb/otrverwaltung").get_dbus_method("show_window")()

@@ -71,6 +71,7 @@ class Format:
 class Program:
     AVIDEMUX    = 0
     VIRTUALDUB  = 1
+    CUT_INTERFACE = 2
     
 class DownloadTypes:
     TORRENT     = 0

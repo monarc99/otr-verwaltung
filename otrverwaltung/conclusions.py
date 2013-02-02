@@ -42,6 +42,7 @@ class Cut:
         self.rename = ""                    # renamed filename
         self.archive_to = None              # directory, where the file should be archived
         self.create_cutlist = False         # create a cutlist?
+        self.upload_cutlist = False         # upload the cutlist?
         self.delete_uncut = True            # delete the uncut video after cut?
 
 class FileConclusion:
@@ -96,23 +97,6 @@ class ConclusionsManager:
 
             print "[Conclusion] for file ", conclusion.uncut_video
 
-            print "[Conclusion] Create cutlist?"
-            if conclusion.cut.create_cutlist:
-                print "[Conclusion] true"
-                if "VirtualDub" in conclusion.cut.cutlist.intended_app:
-                    intended_app_name = "VirtualDub"
-                else:
-                    intended_app_name = "Avidemux"
-
-                conclusion.cut.cutlist.local_filename = conclusion.uncut_video + ".cutlist"
-                conclusion.cut.cutlist.author = self.app.config.get('general', 'cutlist_username')
-                conclusion.cut.cutlist.intended_version = open(path.getdatapath("VERSION"), 'r').read().strip()
-                conclusion.cut.cutlist.smart = self.app.config.get('general', 'smart')                   
-
-                conclusion.cut.cutlist.write_local_cutlist(conclusion.uncut_video, intended_app_name, conclusion.cut.my_rating)
-                    
-                cutlists.append(conclusion.cut.cutlist)
-                                    
             # rename
             print "[Conclusion] Rename?"
             if conclusion.cut.rename:
@@ -140,19 +124,39 @@ class ConclusionsManager:
                 if os.path.exists(conclusion.uncut_video):
                     # move to trash
                     target = self.app.config.get('general', 'folder_trash_avis')
-                    fileoperations.move_file(conclusion.uncut_video, target)        
+                    conclusion.uncut_video = fileoperations.move_file(conclusion.uncut_video, target)        
                     if os.path.exists(conclusion.ac3_file):
 			target = self.app.config.get('general', 'folder_trash_avis')
 			fileoperations.move_file(conclusion.ac3_file, target)        
+                
+                # remove local cutlists      
+                print "[Conclusion] Remove local cutlist?"
+                if self.app.config.get('general', 'delete_cutlists'):                
+                    print "[Conclusion] true"
+                    if conclusion.cut.cutlist.local_filename:
+                        if os.path.exists(conclusion.cut.cutlist.local_filename):
+                            fileoperations.remove_file(conclusion.cut.cutlist.local_filename)
         
-            # remove local cutlists      
-            print "[Conclusion] Remove local cutlist?"
-            if self.app.config.get('general', 'delete_cutlists'):                
+            print "[Conclusion] Create cutlist?"
+            if conclusion.cut.create_cutlist:
                 print "[Conclusion] true"
-                if conclusion.cut.cutlist.local_filename and not conclusion.cut.create_cutlist:
-                    if os.path.exists(conclusion.cut.cutlist.local_filename):
-                        fileoperations.remove_file(conclusion.cut.cutlist.local_filename)
-        
+                if "VirtualDub" in conclusion.cut.cutlist.intended_app:
+                    intended_app_name = "VirtualDub"
+                else:
+                    intended_app_name = "Avidemux"
+
+                if not conclusion.cut.cutlist.local_filename:
+                    conclusion.cut.cutlist.local_filename = self.app.config.get('general', 'folder_uncut_avis') + '/' + os.path.basename(conclusion.uncut_video) + ".cutlist"
+                
+                conclusion.cut.cutlist.author = self.app.config.get('general', 'cutlist_username')
+                conclusion.cut.cutlist.intended_version = open(path.getdatapath("VERSION"), 'r').read().strip()
+                conclusion.cut.cutlist.smart = self.app.config.get('general', 'smart')                   
+
+                conclusion.cut.cutlist.write_local_cutlist(conclusion.uncut_video, intended_app_name, conclusion.cut.my_rating)
+                
+                if conclusion.cut.upload_cutlist:
+                    cutlists.append(conclusion.cut.cutlist)
+                                    
             
         # upload cutlists:
         def upload():

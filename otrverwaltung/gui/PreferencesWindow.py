@@ -35,6 +35,7 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
                                  
     def bind_config(self, config):
         self.example_filename = 'James_Bond_007_09.01.06_20-15_ard_120_TVOON_DE.mpg.HQ.avi'
+        self.example_cut_filename = 'James_Bond_007_09.01.06_20-15_ard_120_TVOON_DE.mpg.HQ-cut.avi'
         
         # preferences fonts (little explanations)
         labels = [  'labelDescNewOtrkeys',
@@ -55,13 +56,18 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         # manually
         avidemux_man = ["avidemux"]
         virtualdub_man = [r"intern-VirtualDub", r"/pfad/zu/VirtualDub.exe"]
-        self.gui.set_model_from_list(self.builder.get_object('combobox_man_avi'), avidemux_man + virtualdub_man)
-        self.gui.set_model_from_list(self.builder.get_object('combobox_man_hq'), virtualdub_man) 
-        self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), avidemux_man)
+        cut_interface = ["CutInterface"]
+        self.gui.set_model_from_list(self.builder.get_object('combobox_man_avi'), avidemux_man + virtualdub_man + cut_interface)
+        self.gui.set_model_from_list(self.builder.get_object('combobox_man_hq'), virtualdub_man + cut_interface) 
+        self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), avidemux_man + cut_interface)
        
         self.gui.set_model_from_list(self.builder.get_object('comboboxServer'), ["http://cutlist.at/"])
 
         self.gui.set_model_from_list(self.builder.get_object('h264_codec_cbox'), ["ffdshow", "x264vfw", "komisar"])
+        
+        # mkvmerge for ac3
+        mkvmerge = ["mkvmerge", "/pfad/zu/mkvmerge"]
+        self.gui.set_model_from_list(self.builder.get_object('combobox_ac3'), mkvmerge)
         
         # add bindings here.
                
@@ -72,7 +78,7 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         EntryBinding(self.builder.get_object('entry_schema'), self.app.config, 'general', 'rename_schema')                
         
         def rename_schema_changed(value):
-            new = self.app.rename_by_schema(self.example_filename, value)
+            new = self.app.rename_by_schema(self.example_cut_filename, value)
             self.builder.get_object('label_schema').set_label("<i>%s</i> wird zu <i>%s</i>" % (self.example_filename, new))       
         self.app.config.connect('general', 'rename_schema', rename_schema_changed)
         # "initial rename"
@@ -92,8 +98,12 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         CheckButtonBinding(self.builder.get_object('checkCorrect'), self.app.config, 'general', 'verify_decoded')
         CheckButtonBinding(self.builder.get_object('check_delete_cutlists'), self.app.config, 'general', 'delete_cutlists')
         CheckButtonBinding(self.builder.get_object('check_rename_cut'), self.app.config, 'general', 'rename_cut')
+        CheckButtonBinding(self.builder.get_object('check_merge_ac3'), self.app.config, 'general', 'merge_ac3s')
         
         self.app.config.connect('general', 'rename_cut', lambda value: self.builder.get_object('entry_schema').set_sensitive(value))
+        self.app.config.connect('general', 'merge_ac3s', lambda value: self.builder.get_object('combobox_ac3').set_sensitive(value))
+        self.app.config.connect('general', 'merge_ac3s', lambda value: self.builder.get_object('button_set_file_ac3').set_sensitive(value))
+        self.app.config.connect('general', 'merge_ac3s', lambda value: self.builder.get_object('label_ac3').set_sensitive(value))
         
         ComboBoxEntryBinding(self.builder.get_object('combobox_avi'), self.app.config, 'general', 'cut_avis_by')
         ComboBoxEntryBinding(self.builder.get_object('combobox_hq'), self.app.config, 'general', 'cut_hqs_by')
@@ -103,11 +113,13 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         ComboBoxEntryBinding(self.builder.get_object('combobox_man_mp4'), self.app.config, 'general', 'cut_mp4s_man_by')
         ComboBoxEntryBinding(self.builder.get_object('comboboxServer'), self.app.config, 'general', 'server')
         ComboBoxEntryBinding(self.builder.get_object('h264_codec_cbox'), self.app.config, 'general', 'h264_codec')
+        ComboBoxEntryBinding(self.builder.get_object('combobox_ac3'), self.app.config, 'general', 'merge_ac3s_by')
 
         RadioButtonsBinding([self.builder.get_object(widget) for widget in ['radio_size', 'radio_filename']], self.app.config, 'general', 'choose_cutlists_by') 
         
         self.builder.get_object('entryPassword').set_visibility(False)    
         self.builder.get_object('entry_schema').set_sensitive(self.app.config.get('general', 'rename_cut'))
+        self.builder.get_object('combobox_ac3').set_sensitive(self.app.config.get('general', 'merge_ac3s'))
              
     #  Signal handlers
 

@@ -164,8 +164,15 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
             
             self.builder.get_object('box_rename').props.visible = cut_ok           
             
-            if cut_ok:        
-                rename_list = [os.path.basename(self.file_conclusion.cut_video), self.rename_by_schema(os.path.basename(self.file_conclusion.uncut_video))]
+            if cut_ok:
+                if not self.file_conclusion.cut.rename == "":
+                    rename_list = [self.file_conclusion.cut.rename]
+                else:
+                    rename_list = []
+                
+                rename_list.append(self.rename_by_schema(os.path.basename(self.file_conclusion.cut_video)))
+                rename_list.append(os.path.basename(self.file_conclusion.cut_video))
+                print rename_list
                 
                 if self.file_conclusion.cut.cutlist.filename:
                     rename_list.append(self.file_conclusion.cut.cutlist.filename)
@@ -175,7 +182,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
                     self.builder.get_object('comboboxentry_rename').child.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("white"))
                 
                 self.gui.set_model_from_list(self.builder.get_object('comboboxentry_rename'), rename_list)     
-                self.builder.get_object('comboboxentry_rename').child.set_text(self.file_conclusion.cut.rename)
+                self.builder.get_object('comboboxentry_rename').set_active(0)
 
                 archive_to = self.file_conclusion.cut.archive_to
                 if not archive_to:
@@ -203,6 +210,7 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
 
                 if cut_ok:
                     self.builder.get_object('check_create_cutlist').set_active(self.file_conclusion.cut.create_cutlist)
+                    self.builder.get_object('check_upload_cutlist').set_active(self.file_conclusion.cut.upload_cutlist)
                     
                     c = self.file_conclusion.cut.cutlist                    
                     self.builder.get_object('combobox_own_rating').set_active(c.ratingbyauthor + 1)
@@ -260,7 +268,13 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
         print "[Conclusion] cut.create_cutlist = ", create_cutlist
         self.file_conclusion.cut.create_cutlist = create_cutlist
         self.builder.get_object('box_create_cutlist_options').set_sensitive(create_cutlist)
-        
+        self.builder.get_object('check_upload_cutlist').set_sensitive(create_cutlist)
+    
+    def _on_check_upload_cutlist_toggled(self, widget, data=None):
+        upload_cutlist = widget.get_active()
+        print "[Conclusion] cut.upload_cutlist = ", upload_cutlist
+        self.file_conclusion.cut.upload_cutlist = upload_cutlist
+    
     def _on_combobox_own_rating_changed(self, widget, data=None):
         ratingbyauthor = widget.get_active() - 1 
         print "[Conclusion] cut.cutlist.ratingbyauthor = ", ratingbyauthor
