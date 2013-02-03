@@ -54,12 +54,12 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         self.gui.set_model_from_list(self.builder.get_object('combobox_mp4'), virtualdub + avidemux)
         
         # manually
-        avidemux_man = ["avidemux"]
+        avidemux_man = [r"avidemux3_qt4",r"avidemux2_qt4",r"avidemux2_gtk"]
         virtualdub_man = [r"intern-VirtualDub", r"/pfad/zu/VirtualDub.exe"]
-        cut_interface = ["CutInterface"]
-        self.gui.set_model_from_list(self.builder.get_object('combobox_man_avi'), avidemux_man + virtualdub_man + cut_interface)
-        self.gui.set_model_from_list(self.builder.get_object('combobox_man_hq'), virtualdub_man + cut_interface) 
-        self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), avidemux_man + cut_interface)
+        cut_interface = [r"CutInterface"]
+        self.gui.set_model_from_list(self.builder.get_object('combobox_man_avi'), cut_interface + avidemux_man + virtualdub_man)
+        self.gui.set_model_from_list(self.builder.get_object('combobox_man_hq'), cut_interface + avidemux_man + virtualdub_man) 
+        self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), cut_interface + avidemux_man + virtualdub_man)
        
         self.gui.set_model_from_list(self.builder.get_object('comboboxServer'), ["http://cutlist.at/"])
 
