@@ -635,7 +635,7 @@ class DecodeOrCut(BaseAction):
             if error != None:
                 return error, None
                 
-            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"))
+            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"), format)
         
         if program == Program.CUT_INTERFACE:
             # looking for latest cutlist, if any
