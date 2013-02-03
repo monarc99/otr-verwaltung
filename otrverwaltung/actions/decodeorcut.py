@@ -556,10 +556,6 @@ class DecodeOrCut(BaseAction):
                     fileoperations.remove_file(filename+'.mkv')
                 return "Avidemux konnte nicht aufgerufen werden: " + config_value, None
                 
-            while avidemux.poll() == None:
-                time.sleep(1)
-                pass
-                
             seg_lines = []
             pts_correction = 0
             fps, error = self.__get_fps(filename)
