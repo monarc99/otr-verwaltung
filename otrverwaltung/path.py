@@ -16,7 +16,9 @@
 
 import sys
 import os.path
+import filecmp
 from xdg import BaseDirectory
+from shutil import copytree,  rmtree
 
 data_dir = '../data'
 
@@ -48,3 +50,24 @@ def get_gui_path(filename=''):
     
 def get_image_path(filename=""):
     return getdatapath("media", filename)
+
+def get_tools_path(filename=""):
+    return getdatapath("tools", filename)
+    
+def get_internal_virtualdub_path(filename=""):
+    if  os.path.expanduser("~") in os.path.abspath(sys.path[0]):
+        # started from home dir
+        return getdatapath("tools/intern-VirtualDub", filename)
+    else:
+        # started from the system
+        if os.path.exists(os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub", 'VERSION')):
+            if not filecmp.cmp(getdatapath("tools/intern-VirtualDub", 'VERSION'),  os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub", 'VERSION')):
+                # Version ist nicht aktuell
+                rmtree(os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub"), ignore_errors=True)
+                copytree(getdatapath('tools/intern-VirtualDub'), os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub"), symlinks=True)
+        else:
+            copytree(getdatapath('tools/intern-VirtualDub'), os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub"), symlinks=True)
+            
+        return os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub", filename)
+        
+

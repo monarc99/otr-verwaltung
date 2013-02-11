@@ -381,9 +381,9 @@ class DecodeOrCut(BaseAction):
         if 'avidemux' in config_value:
             return Program.AVIDEMUX, config_value, ac3
         elif 'intern-VirtualDub' in config_value:
-            return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/VirtualDub.exe', ac3
+            return Program.VIRTUALDUB, path.get_internal_virtualdub_path('VirtualDub.exe'), ac3
         elif 'intern-vdub' in config_value:
-            return Program.VIRTUALDUB, path.get_image_path('intern-VirtualDub') + '/vdub.exe', ac3
+            return Program.VIRTUALDUB, path.get_internal_virtualdub_path('vdub.exe'), ac3
         elif 'vdub' in config_value or 'VirtualDub' in config_value:
             return Program.VIRTUALDUB, config_value, ac3
         elif 'CutInterface' in config_value and manually:
@@ -773,7 +773,7 @@ class DecodeOrCut(BaseAction):
     def __get_keyframes_from_file(self, filename):
         """ returns keyframe list - in frame numbers"""
         try:
-            command = ['wine',  path.get_image_path('tools')+'/ffmsindex.exe',  '-p', '-f', '-k',  filename ]
+            command = [path.get_tools_path('ffmsindex-static'),  '-p', '-f', '-k',  filename ]
             ffmsindex = subprocess.call(command)
         except OSError:
             return None, "ffmsindex konnte nicht aufgerufen werden."
@@ -964,7 +964,7 @@ class DecodeOrCut(BaseAction):
 
         self.__gui.main_window.set_tasks_progress(50)
 
-        f = open("tmp.vcf", "w")
+        f = open("/tmp/tmp.vcf", "w")
 
         if not manually:
             f.write('VirtualDub.Open("%s");\n' % filename)
@@ -1051,9 +1051,9 @@ class DecodeOrCut(BaseAction):
 
         if manually:
             win_filename = "Z:" + filename.replace(r"/", r"\\")
-            command = 'VirtualDub.exe /s tmp.vcf "%s"' % win_filename
+            command = 'VirtualDub.exe /s Z:\\\\tmp\\\\tmp.vcf "%s"' % win_filename
         else:
-            command = "%s /s tmp.vcf /x" % config_value
+            command = "%s /s Z:\\\\tmp\\\\tmp.vcf /x" % config_value
 
         if 'intern-VirtualDub' in config_value:
             command = 'WINEPREFIX=' + dirname(config_value) + '/wine' + " wineconsole " + command
@@ -1071,7 +1071,7 @@ class DecodeOrCut(BaseAction):
             while events_pending():
                 main_iteration(False)
 
-        fileoperations.remove_file('tmp.vcf')
+        fileoperations.remove_file('/tmp/tmp.vcf')
 
         if manually:
             os.chdir(curr_dir)
