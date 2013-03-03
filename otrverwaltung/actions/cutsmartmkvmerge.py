@@ -107,7 +107,11 @@ class CutSmartMkvmerge(Cut):
 
         # video part 2 - simulate smart rendering process
         for frame_start, frames_duration in cutlist.cuts_frames:
-            videolist += self.__simulate_smart_mkvmerge(int(frame_start), int(frames_duration), keyframes)
+            result = self.__simulate_smart_mkvmerge(int(frame_start), int(frames_duration), keyframes)
+            if result != None:
+                videolist += result
+            else:
+                return None,  'Cutlist oder zu schneidende Datei passen nicht zusammen oder sind fehlerhaft.'
         
         # video part 3 - encode small parts - smart rendering part (1/2) 
         for encode, start,  duration,  video_part_filename in videolist:
@@ -292,7 +296,10 @@ class CutSmartMkvmerge(Cut):
                 return [(False, start+1, end+1, 'video_copy-00'+str(self.copy_nr) + '.mkv')]
             else:
                 # copy to keyframe before end
-                lt_kf_before_end = self.get_keyframe_in_front_of_frame(keyframes, end)
+                try:
+                    lt_kf_before_end = self.get_keyframe_in_front_of_frame(keyframes, end)
+                except:
+                    return None
                 if lt_kf_before_end <= start:
                     self.encode_nr += 1
                     encode = [(True, start, duration, 'video_encode-00'+str(self.encode_nr)+'.mkv')]
@@ -305,7 +312,10 @@ class CutSmartMkvmerge(Cut):
                     encode = [(True, lt_kf_before_end, end-lt_kf_before_end , 'video_encode-00'+str(self.encode_nr)+'.mkv')]
                     return copy + encode
         else:
-            nt_kf_from_start = self.get_keyframe_after_frame(keyframes, start)
+            try:
+                nt_kf_from_start = self.get_keyframe_after_frame(keyframes, start)
+            except:
+                return None
             duration_nt_kf = nt_kf_from_start-start
             if end <= nt_kf_from_start:
                 self.encode_nr += 1
@@ -315,7 +325,11 @@ class CutSmartMkvmerge(Cut):
                 self.encode_nr += 1
                 encode = [(True, start, duration_nt_kf, 'video_encode-00'+str(self.encode_nr)+'.mkv')]
                 if  duration-duration_nt_kf > 0:
-                    return encode + self.__simulate_smart_mkvmerge(nt_kf_from_start, duration-duration_nt_kf,  keyframes)
+                    result = self.__simulate_smart_mkvmerge(nt_kf_from_start, duration-duration_nt_kf,  keyframes)
+                    if result != None:
+                        return encode + result
+                    else: 
+                        return None
                 else:
                     return encode
 

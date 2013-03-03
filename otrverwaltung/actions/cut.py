@@ -326,7 +326,7 @@ class Cut(BaseAction):
                 self.gui.main_window.set_tasks_text('Kodiere Audio')
                 self.gui.main_window.set_tasks_progress(0)
             else:
-                print line
+                #print line
                 continue
 
             while events_pending():
