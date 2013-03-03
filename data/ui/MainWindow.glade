@@ -5,7 +5,7 @@
   <!-- interface-naming-policy project-wide -->
   <object class="MainWindow" id="main_window">
     <property name="width_request">700</property>
-    <property name="title" translatable="yes">OTR-Verwaltung</property>
+    <property name="title" translatable="yes">OTR-Verwaltung++</property>
     <property name="window_position">center</property>
     <signal name="destroy" handler="_on_main_window_destroy"/>
     <signal name="configure_event" handler="_on_main_window_configure_event"/>

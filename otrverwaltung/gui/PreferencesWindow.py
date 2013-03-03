@@ -48,10 +48,11 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
                     
         # avi + hq + mp4
         avidemux = ["avidemux", "avidemux2_cli"]
-        virtualdub = [r"intern-vdub", r"/pfad/zu/vdub.exe"]        
+        virtualdub = [r"intern-vdub", r"/pfad/zu/vdub.exe"]
+        smartmkvmerge = [r"SmartMKVmerge"]
         self.gui.set_model_from_list(self.builder.get_object('combobox_avi'), avidemux + virtualdub)
-        self.gui.set_model_from_list(self.builder.get_object('combobox_hq'), virtualdub)
-        self.gui.set_model_from_list(self.builder.get_object('combobox_mp4'), virtualdub + avidemux)
+        self.gui.set_model_from_list(self.builder.get_object('combobox_hq'), virtualdub + smartmkvmerge)
+        self.gui.set_model_from_list(self.builder.get_object('combobox_mp4'), virtualdub)
         
         # manually
         avidemux_man = [r"avidemux3_qt4",r"avidemux2_qt4",r"avidemux2_gtk"]
@@ -62,6 +63,7 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         self.gui.set_model_from_list(self.builder.get_object('combobox_man_mp4'), cut_interface + avidemux_man + virtualdub_man)
        
         self.gui.set_model_from_list(self.builder.get_object('comboboxServer'), ["http://cutlist.at/"])
+        self.gui.set_model_from_list(self.builder.get_object('entry_decoder'), ['intern-otrdecoder','intern-easydecoder'])
 
         self.gui.set_model_from_list(self.builder.get_object('h264_codec_cbox'), ["ffdshow", "x264vfw", "komisar"])
         
@@ -69,13 +71,25 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         mkvmerge = ["mkvmerge", "/pfad/zu/mkvmerge"]
         self.gui.set_model_from_list(self.builder.get_object('combobox_ac3'), mkvmerge)
         
+        # smartmkvmerge
+        smkv_first_audio = [ 'MP3 Spur kopieren', 
+                                        'MP3 nach AAC konvertieren',  
+                                        'nach 2-Kanal AAC konvertieren - von AC3 wenn vorhanden',  
+                                        'nach Mehr-Kanal AAC konvertieren - von AC3 wenn vorhanden']
+        self.gui.set_model_from_list(self.builder.get_object('smkv_first_audio'), smkv_first_audio)
+        smkv_second_audio = [   'AC3 Spur kopieren', 
+                                                'AC3 Spur nach AAC konvertieren',  
+                                                'AC3 Spur entfernen']
+        self.gui.set_model_from_list(self.builder.get_object('smkv_second_audio'), smkv_second_audio)
+        
+        
         # add bindings here.
                
         EntryBinding(self.builder.get_object('entry_username'), self.app.config, 'general', 'cutlist_username')
-        EntryBinding(self.builder.get_object('entry_decoder'), self.app.config, 'general', 'decoder')
         EntryBinding(self.builder.get_object('entryEMail'), self.app.config, 'general', 'email')
         EntryBinding(self.builder.get_object('entryPassword'), self.app.config, 'general', 'password', encode=True)       
         EntryBinding(self.builder.get_object('entry_schema'), self.app.config, 'general', 'rename_schema')                
+        EntryBinding(self.builder.get_object('smkv_workingdir'), self.app.config, 'smartmkvmerge', 'workingdir')                
         
         def rename_schema_changed(value):
             new = self.app.rename_by_schema(self.example_cut_filename, value)
@@ -99,6 +113,10 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         CheckButtonBinding(self.builder.get_object('check_delete_cutlists'), self.app.config, 'general', 'delete_cutlists')
         CheckButtonBinding(self.builder.get_object('check_rename_cut'), self.app.config, 'general', 'rename_cut')
         CheckButtonBinding(self.builder.get_object('check_merge_ac3'), self.app.config, 'general', 'merge_ac3s')
+        CheckButtonBinding(self.builder.get_object('check_mplayer_fullscreen'), self.app.config, 'general', 'mplayer_fullscreen')
+        CheckButtonBinding(self.builder.get_object('smkv_normalize'), self.app.config, 'smartmkvmerge', 'normalize_audio')
+        CheckButtonBinding(self.builder.get_object('smkv_mp4'), self.app.config, 'smartmkvmerge', 'remux_to_mp4')
+        
         
         self.app.config.connect('general', 'rename_cut', lambda value: self.builder.get_object('entry_schema').set_sensitive(value))
         self.app.config.connect('general', 'merge_ac3s', lambda value: self.builder.get_object('combobox_ac3').set_sensitive(value))
@@ -114,6 +132,9 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         ComboBoxEntryBinding(self.builder.get_object('comboboxServer'), self.app.config, 'general', 'server')
         ComboBoxEntryBinding(self.builder.get_object('h264_codec_cbox'), self.app.config, 'general', 'h264_codec')
         ComboBoxEntryBinding(self.builder.get_object('combobox_ac3'), self.app.config, 'general', 'merge_ac3s_by')
+        ComboBoxEntryBinding(self.builder.get_object('entry_decoder'), self.app.config, 'programs', 'decoder')
+        ComboBoxEntryBinding(self.builder.get_object('smkv_first_audio'), self.app.config, 'smartmkvmerge', 'first_audio_stream')
+        ComboBoxEntryBinding(self.builder.get_object('smkv_second_audio'), self.app.config, 'smartmkvmerge', 'second_audio_stream')
 
         RadioButtonsBinding([self.builder.get_object(widget) for widget in ['radio_size', 'radio_filename']], self.app.config, 'general', 'choose_cutlists_by') 
         

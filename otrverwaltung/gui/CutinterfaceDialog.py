@@ -125,7 +125,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
             cutlist.read_from_file()
             cutlist.read_cuts()
             if cutlist.author != self.app.config.get('general', 'cutlist_username'):
-                cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten; Vorlage von ' + cutlist.author + '; ' + cutlist.usercomment
+                cutlist.usercomment = 'Mit OTR-Verwaltung++ geschnitten; Vorlage von ' + cutlist.author + '; ' + cutlist.usercomment
             if cutlist.cuts_frames:
                 self.initial_cutlist = cutlist.cuts_frames
                 self.initial_cutlist_in_frames = True
@@ -134,7 +134,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
                 self.initial_cutlist_in_frames = False
             
         else:
-            cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten'
+            cutlist.usercomment = 'Mit OTR-Verwaltung++ geschnitten'
             self.initial_cutlist = []
             self.initial_cutlist_in_frames = True
         
@@ -149,7 +149,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
         cutlist.fps = float(self.framerate_num) / float(self.framerate_denom)
         cutlist.cuts_frames = cuts
         cutlist.cuts_seconds = []
-        cutlist.app = 'OTR-Verwaltung;Cutinterface'
+        cutlist.app = 'OTR-Verwaltung++;Cutinterface'
         for start, duration in cuts:
             s = start * self.framerate_denom / float(self.framerate_num)
             d = duration * self.framerate_denom / float(self.framerate_num)

@@ -464,6 +464,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
     
     def on_button_show_conclusion_clicked(self, widget, data=None):
         self.app.conclusions_manager.show_conclusions()
+        self.app.show_section(self.app.section)
      
     def broadcasts_badge(self):
         count = 0
@@ -555,7 +556,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog = gtk.AboutDialog()        
         about_dialog.set_transient_for(self.gui.main_window)
         about_dialog.set_destroy_with_parent(True)
-        about_dialog.set_name("OTR-Verwaltung")
+        about_dialog.set_name(self.app.app_name)
         about_dialog.set_logo(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))
         
         version = open(path.getdatapath("VERSION"), 'r').read().strip()

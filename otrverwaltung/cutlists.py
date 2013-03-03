@@ -57,7 +57,7 @@ class Cutlist:
         self.fps = 0
 
         # own additions
-        self.app = 'OTR-Verwaltung'
+        self.app = 'OTR-Verwaltung++'
         self.errors = False
         self.cuts_seconds = [] # (start, duration) list
         self.cuts_frames = [] # (start, duration) list

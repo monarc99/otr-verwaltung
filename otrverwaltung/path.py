@@ -69,5 +69,3 @@ def get_internal_virtualdub_path(filename=""):
             copytree(getdatapath('tools/intern-VirtualDub'), os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub"), symlinks=True)
             
         return os.path.join(BaseDirectory.xdg_data_home, "otrverwaltung/intern-VirtualDub", filename)
-        
-
