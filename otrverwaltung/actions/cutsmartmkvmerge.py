@@ -94,7 +94,7 @@ class CutSmartMkvmerge(Cut):
         audio_timecodes = audio_timecodes.lstrip(',+')
         
         try:
-            blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'), '-D',  '--split',  'parts:'+audio_timecodes,  '-o',  self.workingdir + '/audio_copy.mkv'] + audio_import_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+            blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'), '--ui-language',  'en_US',  '-D',  '--split',  'parts:'+audio_timecodes,  '-o',  self.workingdir + '/audio_copy.mkv'] + audio_import_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         except OSError as e:
             return None, "Fehler: %s Filename: %s Error: %s" % str(e.errno),  str(e.filename),  str(e.strerror)
         
@@ -130,7 +130,7 @@ class CutSmartMkvmerge(Cut):
         
         # video part 4 - cut the big parts out the file (keyframe accurate) - smart rendering part (2/2)
         try:
-            non_blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'), '-A',  '--split',  'parts-frames:'+video_splitframes,  '-o',  self.workingdir + '/video_copy.mkv', filename ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+            non_blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US','-A',  '--split',  'parts-frames:'+video_splitframes,  '-o',  self.workingdir + '/video_copy.mkv', filename ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         except OSError as e:
             return None, "Fehler: %s Filename: %s Error: %s" % str(e.errno),  str(e.filename),  str(e.strerror)
         mkvmerge_list.append(non_blocking_process)
@@ -212,7 +212,7 @@ class CutSmartMkvmerge(Cut):
         else:
             cut_video = os.path.splitext(self.generate_filename(filename,1))[0] + ".mkv"
         try:
-            blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'), '-o',  cut_video] + self.video_files + self.audio_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+            blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US',  '-o',  cut_video] + self.video_files + self.audio_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
         except OSError:
             return None, "MKVMerge konnte nicht aufgerufen werden."
         self.show_progress(blocking_process)

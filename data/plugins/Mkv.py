@@ -204,12 +204,12 @@ class Mkv(Plugin):
                 mkvpass_file = fileoperations.make_unique_filename(os.path.splitext(filename)[0] + ".mkv")
 
                 if self.Config['EncodeAudioToAAC']:
-                    args = [self.app.config.get_program('mkvmerge'), "-o", mkvpass_file, '-A',  filename, '-D',   ffmpegpass_file]
+                    args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US',"-o", mkvpass_file, '-A',  filename, '-D',   ffmpegpass_file]
                 else:
                     if self.Config['RemoveOtherAudioStreamsThanAC3']:
-                        args = [self.app.config.get_program('mkvmerge'), "-o", mkvpass_file, '-a',  ac3_stream[2],  filename]
+                        args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US', "-o", mkvpass_file, '-a',  ac3_stream[2],  filename]
                     else:
-                        args = [self.app.config.get_program('mkvmerge'), "-o", mkvpass_file, filename]
+                        args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US', "-o", mkvpass_file, filename]
 
                 p = subprocess.Popen(args, stdout=subprocess.PIPE)
                 p.stdout.readline()

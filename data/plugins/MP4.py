@@ -131,7 +131,7 @@ class MP4(Plugin):
                 
                     mkvpass_file = fileoperations.make_unique_filename(os.path.splitext(filename)[0] + "_remux.mkv")
                     try:  
-                        p = subprocess.Popen([self.app.config.get_program('mkvmerge'), "-o", mkvpass_file, filename], stdout=subprocess.PIPE)
+                        p = subprocess.Popen([self.app.config.get_program('mkvmerge'), '--ui-language',  'en_US',  "-o", mkvpass_file, filename], stdout=subprocess.PIPE)
                     except OSError:
                         self.errors[filename] = "MKVmerge wurde nicht gefunden!"            
                         continue

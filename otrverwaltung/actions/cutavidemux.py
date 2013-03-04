@@ -53,7 +53,7 @@ class CutAvidemux(Cut):
             
         if ".avi" in filename and "avidemux3" in program_config_value and format == Format.HQ or format == Format.HD: 
             try:
-                mkvmerge = subprocess.Popen([self.config.get_program('mkvmerge'), '-o', filename+'.mkv', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+                mkvmerge = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US', '-o', filename+'.mkv', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
                 self.show_progress(mkvmerge)
                 returncode = mkvmerge.wait()
                 if returncode != 0 and returncode != 1:
