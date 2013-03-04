@@ -193,11 +193,11 @@ class CutSmartMkvmerge(Cut):
         for blocking_process in mkvmerge_list:
             returncode = blocking_process.wait()
             if returncode != 0 and returncode != 1:
-                return None,  'Fehler beim Schneiden der Originaldatei...'
+                return None,  'beim Schneiden der Originaldatei...'
         for blocking_process in process_list:
             returncode = blocking_process.wait()
             if returncode != 0:
-                return None,  'Fehler beim Kodieren ...'
+                return None,  'beim Kodieren ...'
 
         # clean up
         if os.path.isfile (self.workingdir + '/video_copy.mkv'):

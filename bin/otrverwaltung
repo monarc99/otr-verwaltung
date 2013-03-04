@@ -158,7 +158,7 @@ class App:
             'downloader': {
                 'resume_on_startup': True,
                 'preferred_downloader' : '',
-                'aria2c_opts': ['--allow-overwrite=true', '--continue', '--max-concurrent-downloads=5', '--max-connection-per-server=5', '--max-tries=0', '--split=5', '--auto-file-renaming=false', '--allow-overwrite=true', '--allow-piece-length-change=true', '--always-resume=false', '--max-resume-failure-tries=0'],
+                'aria2c_opts': ['--allow-overwrite=true', '--continue', '--max-concurrent-downloads=5', '--max-connection-per-server=1', '--max-tries=0', '--split=5', '--auto-file-renaming=false', '--allow-overwrite=true', '--allow-piece-length-change=true', '--always-resume=false', '--max-resume-failure-tries=0'],
                 'wget_opts': ['-v'],
                 'aria2c_opts_torrent': ["--check-integrity=true", "--continue" ]
             },
