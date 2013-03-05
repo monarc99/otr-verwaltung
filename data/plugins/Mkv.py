@@ -110,7 +110,7 @@ class Mkv(Plugin):
         def mkvmerge():
             # env
             my_env = os.environ.copy()
-            my_env["LOCAL"] = "C"
+            my_env["LANG"] = "C"
             
             for count, filename in enumerate(filenames):
                 yield 0, count

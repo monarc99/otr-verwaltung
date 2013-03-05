@@ -88,7 +88,7 @@ class CutSmartMkvmerge(Cut):
             
         # env
         my_env = os.environ.copy()
-        my_env["LOCAL"] = "C"
+        my_env["LANG"] = "C"
 
         # audio part 1 - cut audio 
         if ac3_file:

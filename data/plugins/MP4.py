@@ -117,7 +117,7 @@ class MP4(Plugin):
         def mp4():
             # env
             my_env = os.environ.copy()
-            my_env["LOCAL"] = "C"
+            my_env["LANG"] = "C"
             
             for count, filename in enumerate(filenames):
                 #analyse file

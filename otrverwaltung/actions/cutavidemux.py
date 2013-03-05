@@ -53,9 +53,9 @@ class CutAvidemux(Cut):
             
         # env
         my_env = os.environ.copy()
-        my_env["LOCAL"] = "C"
+        my_env["LANG"] = "C"
         
-        if ".avi" in filename and "avidemux3" in program_config_value and format == Format.HQ or format == Format.HD: 
+        if ".avi" in filename and "avidemux3" in program_config_value and format == Format.HQ or ".avi" in filename and "avidemux3" in program_config_value and format == Format.HD: 
             try:
                 mkvmerge = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US', '-o', filename+'.mkv', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
                 self.show_progress(mkvmerge)
