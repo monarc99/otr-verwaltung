@@ -205,15 +205,16 @@ class Mkv(Plugin):
                 # mkvmerge pass
                 yield 2, count
                 self.progress = 0
+
                 mkvpass_file = fileoperations.make_unique_filename(os.path.splitext(filename)[0] + ".mkv")
 
                 if self.Config['EncodeAudioToAAC']:
-                    args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US',"-o", mkvpass_file, '-A',  filename, '-D',   ffmpegpass_file]
+                    args = [self.app.config.get_program('mkvmerge'), '--engage', 'no_cue_duration', '--engage',  'no_cue_relative_position', '--ui-language',  'en_US',"-o", mkvpass_file, '-A',  filename, '-D',   ffmpegpass_file]
                 else:
-                    if self.Config['RemoveOtherAudioStreamsThanAC3']:
-                        args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US', "-o", mkvpass_file, '-a',  ac3_stream[2],  filename]
+                    if self.Config['RemoveOtherAudioStreamsThanAC3'] and ac3_stream:
+                        args = [self.app.config.get_program('mkvmerge'), '--engage', 'no_cue_duration', '--engage',  'no_cue_relative_position', '--ui-language',  'en_US', "-o", mkvpass_file, '-a',  ac3_stream[2],  filename]
                     else:
-                        args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US', "-o", mkvpass_file, filename]
+                        args = [self.app.config.get_program('mkvmerge'),  '--engage', 'no_cue_duration', '--engage',  'no_cue_relative_position', '--ui-language',  'en_US', "-o", mkvpass_file, filename]
 
                 p = subprocess.Popen(args, stdout=subprocess.PIPE,  env=my_env)
                 p.stdout.readline()

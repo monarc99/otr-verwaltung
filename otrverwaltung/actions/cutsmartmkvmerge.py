@@ -216,14 +216,14 @@ class CutSmartMkvmerge(Cut):
         else:
             cut_video = os.path.splitext(self.generate_filename(filename,1))[0] + ".mkv"
         try:
-            blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US',  '-o',  cut_video] + self.video_files + self.audio_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=my_env)
+            blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'),  '--engage', 'no_cue_duration', '--engage',  'no_cue_relative_position',  '--ui-language',  'en_US',  '-o',  cut_video] + self.video_files + self.audio_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=my_env)
         except OSError:
-            return None, "MKVMerge konnte nicht aufgerufen werden."
+            return None, "MKVMerge konnte nicht aufgerufen werden oder zu alt (6.1.0 benötigt)"
         self.show_progress(blocking_process)
         
         returncode = blocking_process.wait()
         if returncode != 0 and returncode != 1:
-            return None,  'Allgemeine Schutzverletzung beim Erstellen des MKV...'
+            return None,  'beim Schreiben des geschnittenen MKVs...'
 
         # remove all temporary files
         for n in self.video_files + self.audio_files:
