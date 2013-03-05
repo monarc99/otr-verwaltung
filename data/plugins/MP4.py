@@ -115,6 +115,10 @@ class MP4(Plugin):
         self.errors ={}
                 
         def mp4():
+            # env
+            my_env = os.environ.copy()
+            my_env["LOCAL"] = "C"
+            
             for count, filename in enumerate(filenames):
                 #analyse file
                 cutter = Cut(self.app, self.gui)
@@ -131,7 +135,7 @@ class MP4(Plugin):
                 
                     mkvpass_file = fileoperations.make_unique_filename(os.path.splitext(filename)[0] + "_remux.mkv")
                     try:  
-                        p = subprocess.Popen([self.app.config.get_program('mkvmerge'), '--ui-language',  'en_US',  "-o", mkvpass_file, filename], stdout=subprocess.PIPE)
+                        p = subprocess.Popen([self.app.config.get_program('mkvmerge'), '--ui-language',  'en_US',  "-o", mkvpass_file, filename], stdout=subprocess.PIPE, env=my_env)
                     except OSError:
                         self.errors[filename] = "MKVmerge wurde nicht gefunden!"            
                         continue

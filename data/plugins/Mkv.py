@@ -17,8 +17,8 @@
 import gtk
 import subprocess
 import time
-import os.path
 import re
+import os
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung.pluginsystem import Plugin
@@ -108,6 +108,10 @@ class Mkv(Plugin):
         self.errors ={}
                 
         def mkvmerge():
+            # env
+            my_env = os.environ.copy()
+            my_env["LOCAL"] = "C"
+            
             for count, filename in enumerate(filenames):
                 yield 0, count
                 yield 3, 0
@@ -211,7 +215,7 @@ class Mkv(Plugin):
                     else:
                         args = [self.app.config.get_program('mkvmerge'),  '--ui-language',  'en_US', "-o", mkvpass_file, filename]
 
-                p = subprocess.Popen(args, stdout=subprocess.PIPE)
+                p = subprocess.Popen(args, stdout=subprocess.PIPE,  env=my_env)
                 p.stdout.readline()
 
                 line = ""                            
