@@ -1270,8 +1270,8 @@ WINE REGISTRY Version 2
 [Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows] 1357917076
 "device"="Brother-HL-5050-2,wineps.drv,CUPS:Brother-HL-5050-2"
 
-[Software\\VirtualDub.org\\VirtualDub] 1340918396
-"Main prefs"=hex:00,04,00,01,00,00,00,00,20,03,00,00,40,00,00,00,00,00,00,00
+[Software\\VirtualDub.org\\VirtualDub] 1362743443
+"Main prefs"=hex:00,04,00,01,00,00,00,00,20,03,00,00,40,00,00,00,02,00,00,00
 "SeenWelcome"=dword:00000001
 "VirtualDub"=dword:00000001
 
@@ -1287,12 +1287,12 @@ WINE REGISTRY Version 2
 "Use Output As Temp Path"=dword:00000000
 "Video Encoder"=hex(1):
 
-[Software\\VirtualDub.org\\VirtualDub\\MRU List] 1360536818
-"a"="Z:\\tmp\\Der_13te_Krieger_13.02.09_20-15_rtl2_115_TVOON_DE.mpg.HQ.avi"
-"b"="Z:\\tmp\\Das_fuenfte_Element_13.02.10_00-15_ard_120_TVOON_DE.mpg.HD.avi"
-"c"="Z:\\tmp\\Numb3rs_Die_Logik_des_Verbrechens_13.02.09_23-10_kabel1_65_TVOON_DE.mpg.HQ.avi"
-"d"="Z:\\tmp\\The_Big_Bang_Theory__The_Spoiler_Alert_Segmentation_13.02.07_20-00_uswcbs_31_TVOON_DE.mpg.HD.avi"
-"MRUList"="dabc"
+[Software\\VirtualDub.org\\VirtualDub\\MRU List] 1362743473
+"a"="Z:\\home\\monarc\\Downloads\\Big_Buck_Bunny_12.09.30_02-25_osf_10_TVOON_DE.mpg.HQ.avi"
+"b"="Z:\\tmp\\The_Big_Bang_Theory__The_Spoiler_Alert_Segmentation_13.02.07_20-00_uswcbs_31_TVOON_DE.mpg.HD.avi"
+"c"="Z:\\tmp\\Der_13te_Krieger_13.02.09_20-15_rtl2_115_TVOON_DE.mpg.HQ.avi"
+"d"="Z:\\tmp\\Das_fuenfte_Element_13.02.10_00-15_ard_120_TVOON_DE.mpg.HD.avi"
+"MRUList"="abcd"
 
 [Software\\VirtualDub.org\\VirtualDub\\Persistence] 1341110262
 "Accelerate preview"=dword:00000000
@@ -1310,7 +1310,7 @@ WINE REGISTRY Version 2
 "Update output pane"=dword:00000000
 "Vertical display"=dword:00000000
 
-[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1358811013
+[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1362743443
 "Allow direct YCbCr decoding"=dword:00000001
 "AutoRecover: Enabled"=dword:00000000
 "AVI: Alignment threshold"=dword:00080000
@@ -1323,6 +1323,7 @@ WINE REGISTRY Version 2
 "AVI: Use video stream fccHandler in codec search"=dword:00000000
 "AVI: VBR warning enabled"=dword:00000000
 "Batch: Show status window"=dword:00000000
+"Confirm exit"=dword:00000000
 "Confirm render abort"=dword:00000001
 "CPU: Enabled extensions"=dword:00000000
 "Direct3D FX file"="display.fx"
@@ -1331,12 +1332,14 @@ WINE REGISTRY Version 2
 "Display: Enable debug info"=dword:00000000
 "Display: Enable DirectX on secondary"=dword:00000000
 "Display: Enable high precision"=dword:00000000
+"Display: Enable unified 3D driver"=dword:00000000
 "Display: Secondary monitor mode"=dword:00000000
 "File: Async mode"=dword:00000002
 "Filters: Enable 3D hardware acceleration"=dword:00000000
 "Filters: Process-ahead frame count"=dword:00000000
 "Images: Frame rate denominator"=dword:00000001
 "Images: Frame rate numerator"=dword:0000000a
+"MRU size"=dword:00000004
 "Playback: Default audio device"=hex(1):
 "Render: Audio buffer seconds"=dword:00000002
 "Render: Default throttle percent"=dword:00000064
@@ -1351,7 +1354,7 @@ WINE REGISTRY Version 2
 "Timeline format"="Frame %f (%h:%02m:%02s.%03t) [%c]"
 "Use profile-local path"=dword:00000000
 
-[Software\\VirtualDub.org\\VirtualDub\\Saved filespecs] 1360536818
+[Software\\VirtualDub.org\\VirtualDub\\Saved filespecs] 1362743473
 "00000065"="Z:\\mnt\\Datenpartition\\Eigene Dateien\\VCF-Files\\"
 "00000066"="E:\\tmp\\"
 "00000192"="E:\\tmp\\VirtualDub-1.10.3\\"
@@ -1362,8 +1365,8 @@ WINE REGISTRY Version 2
 "7277616f"=hex(1):
 "7761766f"=hex(1):
 
-[Software\\VirtualDub.org\\VirtualDub\\Window Placement] 1359905751
-"Main window"=hex:f8,00,00,00,e6,00,00,00,98,06,00,00,10,04,00,00,00,00,00,00
+[Software\\VirtualDub.org\\VirtualDub\\Window Placement] 1362743455
+"Main window"=hex:fa,00,00,00,e6,00,00,00,9a,06,00,00,10,04,00,00,00,00,00,00
 
 [Software\\Wine\\Debug] 1340917855
 "RelayExclude"="ntdll.RtlEnterCriticalSection;ntdll.RtlLeaveCriticalSection;kernel32.48;kernel32.49;kernel32.94;kernel32.95;kernel32.96;kernel32.97;kernel32.98;kernel32.TlsGetValue;kernel32.TlsSetValue;kernel32.FlsGetValue;kernel32.FlsSetValue;kernel32.SetLastError"
@@ -1466,10 +1469,10 @@ WINE REGISTRY Version 2
 "OpenWithIcon"="7765_winebrowser.0"
 "ProgID"="xmlfile"
 
-[Software\\Wine\\Fonts] 1360536761
+[Software\\Wine\\Fonts] 1362743464
 "Codepages"="1252,850"
 
-[Software\\Wine\\Fonts\\External Fonts] 1360536761
+[Software\\Wine\\Fonts\\External Fonts] 1362743464
 "@Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"

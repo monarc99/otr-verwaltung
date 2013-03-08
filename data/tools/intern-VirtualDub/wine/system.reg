@@ -17376,7 +17376,7 @@ WINE REGISTRY Version 2
 "CommonPictures"=str(2):"%ALLUSERSPROFILE%\\Pictures"
 "CommonVideo"=str(2):"%ALLUSERSPROFILE%\\Videos"
 
-[Software\\Microsoft\\Windows\\CurrentVersion\\Fonts] 1360536761
+[Software\\Microsoft\\Windows\\CurrentVersion\\Fonts] 1362743464
 "@Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
@@ -20053,7 +20053,7 @@ WINE REGISTRY Version 2
 
 [Software\\Microsoft\\Windows NT\\CurrentVersion\\FontMapper] 1340917855
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts] 1360536761
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts] 1362743464
 "@Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
