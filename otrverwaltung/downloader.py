@@ -412,7 +412,7 @@ class Download:
                             self._finished()
 
                 # Download Test
-                self.information['message_short'] = 'Endgültige Überprüfung der heruntergeladen Datei ...'
+                self.information['message_short'] = 'Abschliessende Überprüfung der heruntergeladen Datei ...'
                 self.update_view()
                 if 'otrkey' in self.filename and self._config.get('general', 'password'):
                     torrent_check_return=self._check_file_with_torrent()
@@ -426,7 +426,7 @@ class Download:
                        self.information['progress'] = 0
                     else:
                        self.information['status'] = DownloadStatus.ERROR
-                       self.information['message_short'] = '(EER):Fehler aufgetreten.'
+                       self.information['message_short'] = '(EER):Fehler bei der abschliessenden Überprüfung aufgetreten. Eventuell OTR nicht erreichbar.'
                        self.information['progress'] = 0
 
         elif self.information['download_type'] in [DownloadTypes.OTR_DECODE, DownloadTypes.OTR_CUT]:

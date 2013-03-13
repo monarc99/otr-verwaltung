@@ -78,6 +78,14 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
         self.audiosink = gst.element_factory_make('autoaudiosink')
         self.videosink = gst.element_factory_make('autovideosink')
  
+        # pipeline elements
+        self.audioqueue = gst.element_factory_make('queue')
+        self.videoqueue = gst.element_factory_make('queue')
+        self.audioconvert = gst.element_factory_make('audioconvert')
+        self.audioresample = gst.element_factory_make('audioresample')
+        self.videoscale = gst.element_factory_make('videoscale')
+        self.ffmpegcolorspace = gst.element_factory_make('ffmpegcolorspace')
+ 
         # Connect handler for 'pad-added' signal 
         def on_pad_added(element, pad, sink_pad):
             caps = pad.get_caps()
@@ -96,9 +104,11 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
         self.video_composition.connect('pad-added', on_pad_added, self.key_seek.get_pad('secondary-sink'))
  
         # Add elements to pipeline
-        self.player.add(self.audio_composition, self.audiosink, self.video_composition, self.key_seek, self.videosink)
-        self.key_seek.get_pad('secondary-src').link(self.videosink.get_pad('sink'))
-        self.key_seek.get_pad('keyseek-src').link(self.audiosink.get_pad('sink'))
+        self.player.add(self.audio_composition, self.audioqueue,  self.audioconvert,  self.audioresample,  self.audiosink, self.video_composition, self.key_seek, self.videoqueue,  self.ffmpegcolorspace,  self.videoscale, self.videosink)
+        self.key_seek.get_pad('secondary-src').link(self.videoqueue.get_pad('sink'))
+        gst.element_link_many(self.videoqueue, self.ffmpegcolorspace, self.videoscale,  self.videosink )
+        self.key_seek.get_pad('keyseek-src').link(self.audioqueue.get_pad('sink'))
+        gst.element_link_many(self.audioqueue, self.audioconvert, self.audioresample,  self.audiosink )
     
     def on_unrealize(self,widget,data=None):
         # to prevent racing conditions when closing the window while playing

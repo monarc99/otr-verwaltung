@@ -270,6 +270,14 @@ class Cut(BaseAction):
                     except IndexError as e:
                         continue
                     x264_opts.extend(level)
+                elif 'Frame rate' in line:
+                    try:
+                        fps = ['--fps', str(float(line.strip().split(' ')[3]))]
+                    except ValueError as e:
+                        continue
+                    except IndexError as e:
+                        continue
+                    x264_opts.extend(fps)
             else:
                 break
         return x264_opts
