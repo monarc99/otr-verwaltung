@@ -15,11 +15,12 @@ from otrverwaltung.elements import DecoderWrapper
 from otrverwaltung import path
 from otrverwaltung import cutlists
 from otrverwaltung.gui import LoadCutDialog
+from otrverwaltung.actions.cut import Cut
 
 #TODO: uncomment
 #from otrverwaltung import path
 
-class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
+class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
     __gtype_name__ = "CutinterfaceDialog"
 
     def __init__(self):
@@ -30,6 +31,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
         self.hide_cuts = False
         self.frames = 0
         self.slider = None
+        self.keyframes = None
         
     def do_parser_finished(self, builder):
         self.builder = builder
@@ -100,14 +102,14 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
                     pad.link(sink_pad)
         
         self.key_seek = KeySeekElement.KeySeekElement()
-        self.audio_composition.connect('pad-added', on_pad_added, self.key_seek.get_pad('keyseek-sink'))
-        self.video_composition.connect('pad-added', on_pad_added, self.key_seek.get_pad('secondary-sink'))
+        self.audio_composition.connect('pad-added', on_pad_added, self.audioqueue.get_pad('sink'))
+        self.video_composition.connect('pad-added', on_pad_added, self.videoqueue.get_pad('sink'))
  
         # Add elements to pipeline
         self.player.add(self.audio_composition, self.audioqueue,  self.audioconvert,  self.audioresample,  self.audiosink, self.video_composition, self.key_seek, self.videoqueue,  self.ffmpegcolorspace,  self.videoscale, self.videosink)
-        self.key_seek.get_pad('secondary-src').link(self.videoqueue.get_pad('sink'))
+#        self.key_seek.get_pad('secondary-src').link(self.videoqueue.get_pad('sink'))
         gst.element_link_many(self.videoqueue, self.ffmpegcolorspace, self.videoscale,  self.videosink )
-        self.key_seek.get_pad('keyseek-src').link(self.audioqueue.get_pad('sink'))
+#        self.key_seek.get_pad('keyseek-src').link(self.audioqueue.get_pad('sink'))
         gst.element_link_many(self.audioqueue, self.audioconvert, self.audioresample,  self.audiosink )
     
     def on_unrealize(self,widget,data=None):
@@ -167,8 +169,13 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
 
     def _run(self, filename, cutlist, app):
         self.app = app
+        self.config = app.config
         self.filename = filename
         self.cutlist = self.load_cutlist(cutlist)
+        
+        self.keyframes, error = self.get_keyframes_from_file(filename)
+        if self.keyframes == None:
+            print "Error: Keyframes konnten nicht ausgelesen werden."
  
         def discovered(d, is_media):
             if is_media:
@@ -430,7 +437,10 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
         
         self.current_frame_position = current_position * self.framerate_num / self.framerate_denom / gst.SECOND
                  
-        self.builder.get_object('label_time').set_text('Frame: %i/%i, Zeit %s/%s' % (self.current_frame_position, self.get_frames() - 1, self.convert_sec(current_position), self.convert_sec(duration)))
+        if self.current_frame_position in self.keyframes:
+            self.builder.get_object('label_time').set_text('Frame(K): %i/%i, Zeit %s/%s' % (self.current_frame_position, self.get_frames() - 1, self.convert_sec(current_position), self.convert_sec(duration)))
+        else:
+            self.builder.get_object('label_time').set_text('Frame: %i/%i, Zeit %s/%s' % (self.current_frame_position, self.get_frames() - 1, self.convert_sec(current_position), self.convert_sec(duration)))
     
     def update_slider(self):
         try:
@@ -606,8 +616,29 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable):
         self.jump_to(nanoseconds=nano_seconds, flags=flags)
     
     def jump_key(self, direction):
-    	event = gst.event_new_custom(gst.EVENT_CUSTOM_UPSTREAM, gst.Structure(direction))
-        self.audiosink.send_event(event)
+#    	event = gst.event_new_custom(gst.EVENT_CUSTOM_UPSTREAM, gst.Structure(direction))
+#      self.audiosink.send_event(event)
+        try:
+            current_position = self.player.query_position(gst.FORMAT_TIME, None)[0]
+        except Exception, e:
+            time.sleep(0.04)
+            current_position = self.player.query_position(gst.FORMAT_TIME, None)[0]
+        self.current_frame_position = current_position * self.framerate_num / self.framerate_denom / gst.SECOND
+        
+        if direction == 'backward':
+            try:
+                new_position= self.get_keyframe_in_front_of_frame(self.keyframes, self.current_frame_position)
+            except ValueError:
+                new_position = 0
+        elif direction == 'forward':
+            try:
+                new_position= self.get_keyframe_after_frame(self.keyframes, self.current_frame_position)
+            except ValueError:
+                new_position = self.get_frames() - 1
+        
+        nano_seconds = new_position * gst.SECOND * self.framerate_denom / self.framerate_num
+        
+        self.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE, int(nano_seconds))
         
     def on_button_keyfast_back_clicked(self, widget, data=None):
         self.jump_key('backward')

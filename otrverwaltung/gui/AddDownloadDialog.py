@@ -148,7 +148,7 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             sessid = sessid[sessid.index("=") + 1:sessid.index(";")]
 
             if not "Dekodierungen" in website.read(): 
-                yield 'torrent_error', 'OTR-Daten nicht korrekt!'
+                yield 'torrent', 0, 0
             else:
                 params = urllib.urlencode({'aktion': 'tracker', 'search': without_otrkey})
                 request = urllib2.Request("http://www.onlinetvrecorder.com/index.php?%s" % params, headers={ 'Cookie': "PHPSESSID=" + sessid})
