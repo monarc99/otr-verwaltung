@@ -81,8 +81,6 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         self.videosink = gst.element_factory_make('autovideosink')
  
         # pipeline elements
-        self.audioqueue = gst.element_factory_make('queue')
-        self.videoqueue = gst.element_factory_make('queue')
         self.audioconvert = gst.element_factory_make('audioconvert')
         self.audioresample = gst.element_factory_make('audioresample')
         self.videoscale = gst.element_factory_make('videoscale')
@@ -102,15 +100,15 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
                     pad.link(sink_pad)
         
         self.key_seek = KeySeekElement.KeySeekElement()
-        self.audio_composition.connect('pad-added', on_pad_added, self.audioqueue.get_pad('sink'))
-        self.video_composition.connect('pad-added', on_pad_added, self.videoqueue.get_pad('sink'))
+        self.audio_composition.connect('pad-added', on_pad_added, self.key_seek.get_pad('keyseek-sink'))
+        self.video_composition.connect('pad-added', on_pad_added, self.key_seek.get_pad('secondary-sink'))
  
         # Add elements to pipeline
-        self.player.add(self.audio_composition, self.audioqueue,  self.audioconvert,  self.audioresample,  self.audiosink, self.video_composition, self.key_seek, self.videoqueue,  self.ffmpegcolorspace,  self.videoscale, self.videosink)
-#        self.key_seek.get_pad('secondary-src').link(self.videoqueue.get_pad('sink'))
-        gst.element_link_many(self.videoqueue, self.ffmpegcolorspace, self.videoscale,  self.videosink )
-#        self.key_seek.get_pad('keyseek-src').link(self.audioqueue.get_pad('sink'))
-        gst.element_link_many(self.audioqueue, self.audioconvert, self.audioresample,  self.audiosink )
+        self.player.add(self.audio_composition, self.audioconvert,  self.audioresample,  self.audiosink, self.video_composition, self.key_seek, self.ffmpegcolorspace,  self.videoscale, self.videosink)
+        self.key_seek.get_pad('secondary-src').link(self.ffmpegcolorspace.get_pad('sink'))
+        gst.element_link_many(self.ffmpegcolorspace, self.videoscale,  self.videosink )
+        self.key_seek.get_pad('keyseek-src').link(self.audioconvert.get_pad('sink'))
+        gst.element_link_many(self.audioconvert, self.audioresample,  self.audiosink )
     
     def on_unrealize(self,widget,data=None):
         # to prevent racing conditions when closing the window while playing
@@ -616,29 +614,8 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         self.jump_to(nanoseconds=nano_seconds, flags=flags)
     
     def jump_key(self, direction):
-#    	event = gst.event_new_custom(gst.EVENT_CUSTOM_UPSTREAM, gst.Structure(direction))
-#      self.audiosink.send_event(event)
-        try:
-            current_position = self.player.query_position(gst.FORMAT_TIME, None)[0]
-        except Exception, e:
-            time.sleep(0.04)
-            current_position = self.player.query_position(gst.FORMAT_TIME, None)[0]
-        self.current_frame_position = current_position * self.framerate_num / self.framerate_denom / gst.SECOND
-        
-        if direction == 'backward':
-            try:
-                new_position= self.get_keyframe_in_front_of_frame(self.keyframes, self.current_frame_position)
-            except ValueError:
-                new_position = 0
-        elif direction == 'forward':
-            try:
-                new_position= self.get_keyframe_after_frame(self.keyframes, self.current_frame_position)
-            except ValueError:
-                new_position = self.get_frames() - 1
-        
-        nano_seconds = new_position * gst.SECOND * self.framerate_denom / self.framerate_num
-        
-        self.player.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE, int(nano_seconds))
+        event = gst.event_new_custom(gst.EVENT_CUSTOM_UPSTREAM, gst.Structure(direction))
+        self.audiosink.send_event(event)
         
     def on_button_keyfast_back_clicked(self, widget, data=None):
         self.jump_key('backward')

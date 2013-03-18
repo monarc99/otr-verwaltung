@@ -240,7 +240,9 @@ class KeySeekElement(gst.Element):
 					self._seek_step(self.step-1)
 				else:
 					self.position = self.stored_buf.timestamp
+					# print "Pushing buffer with pts %i" % self.stored_buf.timestamp
 					self.buf_result = self.keyseeksrcpad.push(self.stored_buf)
+					# print "Result: %r" % self.buf_result
 					self.item_waiting = False
 					self.stored_buf = None
 					self.cond_add.notify()
@@ -250,10 +252,12 @@ class KeySeekElement(gst.Element):
 					self.update, self.rate, self.format, self.start, self.stop, self.seg_position = self.stored_event.parse_new_segment()
 					# print "Received Segment with update=%r, rate=%r, format=%i, start=%i, stop=%i, position=%i" % (self.update,self.rate,self.format,self.start,self.stop,self.seg_position)
 					if (not self.forward_seek) and (not self.backward_seek):
+						# print "Forwarding segment"
 						self.event_result = self.keyseeksrcpad.push_event(self.stored_event)
 					else:
 						self.event_result = True
-				if self.stored_event.type == gst.EVENT_EOS:
+				elif self.stored_event.type == gst.EVENT_EOS:
+					# print "Forwarding EOS"
 					self.event_result = self.keyseeksrcpad.push_event(self.stored_event)
 					self.running = False
 					self.cond_add.notify_all()
@@ -261,6 +265,7 @@ class KeySeekElement(gst.Element):
 					self.keyseeksrcpad.pause_task()
 
 				else:
+					# print "Forwarding event %r" % self.stored_event.type
 					self.event_result = self.keyseeksrcpad.push_event(self.stored_event)
 				self.stored_event = None
 				self.item_waiting = False
@@ -275,6 +280,7 @@ class KeySeekElement(gst.Element):
 		self.keyseeksrcpad.push_event(new_segment_event)
 	
 	def _chain(self, pad, buf):
+		# print "Received buffer with pts %i" % buf.timestamp
 		return self._store_buf(buf)
 	
 	def _is_running(self):
@@ -301,6 +307,7 @@ class KeySeekElement(gst.Element):
 		self.buf_result = gst.FLOW_OK
 	
 	def _handle_sink_event(self, pad, event):
+		# print "Received sink event %r" % event.type
 		if event.type == gst.EVENT_FLUSH_START:
 			res = self.keyseeksrcpad.push_event(event)
 			self.qlock.acquire()
@@ -324,6 +331,7 @@ class KeySeekElement(gst.Element):
 			return self._store_event(event)
 	
 	def _handle_src_event(self, pad, event):
+		# print "Received src event %r" % event.type
 		self.gui_wait.acquire()
 		if event.type == gst.EVENT_CUSTOM_UPSTREAM:
 			# print event.get_structure().get_name()
