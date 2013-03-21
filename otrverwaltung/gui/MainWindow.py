@@ -564,7 +564,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog.set_website("http://elbersb.de/otrverwaltung")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2010 Benjamin Elbers")
-        about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>"])
+        about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>", "JanS",  "monarc99"])
         about_dialog.run()
         about_dialog.destroy()
     

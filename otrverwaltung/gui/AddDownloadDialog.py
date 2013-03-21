@@ -8,10 +8,13 @@ import urllib, urllib2
 import re
 import subprocess
 import base64
+import os
+import libtorrent as lt
 
 from otrverwaltung.GeneratorTask import GeneratorTask
 from otrverwaltung import cutlists
 from otrverwaltung import path
+from otrverwaltung.scraper import scrape
 from otrverwaltung.gui.widgets.CutlistsTreeView import CutlistsTreeView
 
 class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
@@ -139,30 +142,28 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
         without_otrkey = self.filename[:-7]
         
         # search for torrents
-        try:
-            email = self.config.get('general', 'email')
-            password = base64.b64decode(self.config.get('general', 'password')) 
-            params = urllib.urlencode({'email': email, 'pass': password, 'btn_login': 'Login'})
-            website = urllib.urlopen("http://www.onlinetvrecorder.com/index.php", params)
-            sessid = website.info().getheader('Set-Cookie')
-            sessid = sessid[sessid.index("=") + 1:sessid.index(";")]
-
-            if not "Dekodierungen" in website.read(): 
-                yield 'torrent', 0, 0
-            else:
-                params = urllib.urlencode({'aktion': 'tracker', 'search': without_otrkey})
-                request = urllib2.Request("http://www.onlinetvrecorder.com/index.php?%s" % params, headers={ 'Cookie': "PHPSESSID=" + sessid})
-                response = urllib2.urlopen(request).read()
-
-                result = re.findall(r"<td valign=top bgcolor='' nowrap>([0-9]*)</td>", response)                
-                            
-                if result:                           
-                    yield 'torrent', int(result[0]), int(result[1])
-                else:
-                    yield 'torrent', 0, 0
-        except IOError:
-            yield 'torrent_error', 'Verbindungsprobleme'
+        torrent_filename = os.path.join(self.config.get('general', 'folder_new_otrkeys'), self.filename + '.torrent')
+        if not os.path.exists(torrent_filename):
+            url = 'http://81.95.11.2/torrents/' + self.filename + '.torrent'
+            try:
+                urllib.urlretrieve(url, torrent_filename)
+            except IOError:
+                yield 'torrent_error',  "Torrentdatei konnte nicht heruntergeladen werden (%s)!"
+        # read filename
+        torrent = open(torrent_filename,'rb').read()
+        info = lt.torrent_info(torrent, len(torrent))
+        info_hash = str(info.info_hash())
                 
+        try:
+            result = scrape('http://81.95.11.2:8080/announce', [info_hash])				
+            for hash, stats in result.iteritems():				
+                yield 'torrent', stats["seeds"], stats["peers"]
+        except:
+            yield 'torrent_error',  "Tracker konnte nicht erreicht werden"
+        
+        if os.path.isfile(torrent_filename):
+            os.remove(torrent_filename)
+            
         # search for cutlists
         error, cutlists_found = cutlists.download_cutlists(without_otrkey, self.config.get('general', 'server'), 1, False)
         if error:

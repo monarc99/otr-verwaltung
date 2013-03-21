@@ -152,8 +152,8 @@ class App:
                 'x264vfw_hd_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --weightp 0',
                 'x264vfw_hq_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --aq-mode 2 --weightp 0',
                 'x264vfw_mp4_string': '--force-cfr --profile baseline --preset medium --trellis 0',
-                'pre_cut_show': 14,
-                'after_cut_show': 14
+                'pre_cut_show': 10,
+                'after_cut_show': 10
             },
             'downloader': {
                 'resume_on_startup': True,

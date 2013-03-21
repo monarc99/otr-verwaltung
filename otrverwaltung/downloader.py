@@ -122,10 +122,7 @@ class Download:
 
     def _check_file_with_torrent(self):
         """ checks file with torrent """
-        torrent_password = base64.b64decode(self._config.get('general', 'password'))
-        torrent_hash = hashlib.md5(torrent_password).hexdigest()
-        torrent_email = self._config.get('general', 'email')
-        torrent_url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, torrent_email, torrent_hash)
+        torrent_url = 'http://81.95.11.2/torrents/' + self.filename + '.torrent'
         torrent_command = [self._config.get_program('aria2c')] + self._config.get('downloader', 'aria2c_opts_torrent') + ["-d", self.information['output'], '--check-integrity=true', '--continue', '--bt-enable-lpd=false', '--bt-exclude-tracker="*"', '--enable-dht=false', '--enable-dht6=false', '--enable-peer-exchange=false', '--bt-hash-check-seed=false', '--bt-stop-timeout=1', '--seed-time=0', '--follow-torrent=mem', torrent_url]
 
         # Checking
@@ -150,10 +147,7 @@ class Download:
             # download torrent if necessary
             torrent_filename = os.path.join(self._config.get('general', 'folder_new_otrkeys'), self.filename + '.torrent')
             if not os.path.exists(torrent_filename):
-                password = base64.b64decode(self._config.get('general', 'password'))
-                hash = hashlib.md5(password).hexdigest()
-                email = self._config.get('general', 'email')
-                url = 'http://81.95.11.2/xbt/xbt_torrent_create.php?filename=%s&email=%s&mode=free&hash=%s' % (self.filename, email, hash)
+                url = 'http://81.95.11.2/torrents/' + self.filename + '.torrent'
                 try:
                     urllib2.urlretrieve(url, torrent_filename)
                     # read filename
@@ -322,7 +316,7 @@ class Download:
                 # Download with aria2c
                 self.information['message_short'] = 'Überprüfung der bereits heruntergeladen Datei ...'
                 self.update_view()
-                if 'otrkey' in self.filename and os.path.exists(self.information['output'] + '/' +  self.filename) and self._config.get('general', 'password'):
+                if 'otrkey' in self.filename and os.path.exists(self.information['output'] + '/' +  self.filename):
                     torrent_check_return=self._check_file_with_torrent()
 
                     if torrent_check_return == 0:
@@ -414,7 +408,7 @@ class Download:
                 # Download Test
                 self.information['message_short'] = 'Abschliessende Überprüfung der heruntergeladen Datei ...'
                 self.update_view()
-                if 'otrkey' in self.filename and self._config.get('general', 'password'):
+                if 'otrkey' in self.filename:
                     torrent_check_return=self._check_file_with_torrent()
 
                     if torrent_check_return == 0:
