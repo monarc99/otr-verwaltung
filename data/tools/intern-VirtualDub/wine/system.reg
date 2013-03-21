@@ -38,6 +38,7 @@ WINE REGISTRY Version 2
 @="exefile"
 "Content Type"="application/x-msdownload"
 
+
 [Software\\Classes\\.gif] 1340917854
 @="giffile"
 "Content Type"="image/gif"
@@ -17376,7 +17377,7 @@ WINE REGISTRY Version 2
 "CommonPictures"=str(2):"%ALLUSERSPROFILE%\\Pictures"
 "CommonVideo"=str(2):"%ALLUSERSPROFILE%\\Videos"
 
-[Software\\Microsoft\\Windows\\CurrentVersion\\Fonts] 1362743464
+[Software\\Microsoft\\Windows\\CurrentVersion\\Fonts] 1363824082
 "@Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
@@ -20053,7 +20054,7 @@ WINE REGISTRY Version 2
 
 [Software\\Microsoft\\Windows NT\\CurrentVersion\\FontMapper] 1340917855
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts] 1362743464
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts] 1363824082
 "@Batang (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@BatangChe (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\batang.ttc"
 "@Dotum (TrueType)"="Z:\\usr\\share\\fonts\\drakfont\\ttc\\gulim.ttc"
@@ -21527,196 +21528,6 @@ WINE REGISTRY Version 2
 "00021404"="9"
 "00030404"="9"
 
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows 4.0\\Drivers\\Version-0\\Brother HL-5050] 1353910160
-"Configuration File"="wineps16.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps16.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows 4.0\\Drivers\\Version-0\\Brother-HL-5050] 1340917853
-"Configuration File"="wineps16.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps16.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows 4.0\\Drivers\\Version-0\\Brother-HL-5050-2] 1357917076
-"Configuration File"="wineps16.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps16.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows 4.0\\Drivers\\Version-0\\Brother-HL-5050-BR-Script3] 1340917853
-"Configuration File"="wineps16.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps16.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows NT x86\\Drivers\\Version-3\\Brother HL-5050] 1353910160
-"Configuration File"="wineps.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000003
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows NT x86\\Drivers\\Version-3\\Brother-HL-5050] 1340917853
-"Configuration File"="wineps.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000003
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows NT x86\\Drivers\\Version-3\\Brother-HL-5050-2] 1357917076
-"Configuration File"="wineps.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000003
-
-[System\\CurrentControlSet\\Control\\Print\\Environments\\Windows NT x86\\Drivers\\Version-3\\Brother-HL-5050-BR-Script3] 1340917853
-"Configuration File"="wineps.drv"
-"Data File"="generic.ppd"
-"Datatype"="RAW"
-"Dependent Files"=str(7):""
-"Driver"="wineps.drv"
-"Help File"=""
-"Monitor"=""
-"Previous Names"=str(7):""
-"Version"=dword:00000003
-
-[System\\CurrentControlSet\\Control\\Print\\Monitors\\Local Port] 1340917855
-"Driver"="localspl.dll"
-
-[System\\CurrentControlSet\\Control\\Print\\Printers] 1340917855
-"DefaultSpoolDirectory"="C:\\windows\\system32\\spool\\printers"
-
-[System\\CurrentControlSet\\Control\\Print\\Printers\\Brother HL-5050] 1353910160
-"Attributes"=dword:00000000
-"Datatype"="RAW"
-"Default DevMode"=hex:42,72,6f,74,68,65,72,20,48,4c,2d,35,30,35,30,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,0a,03,01,00,9c,00,08,00,13,7b,00,00,\
-  01,00,09,00,9a,0b,33,08,64,00,01,00,07,00,00,00,02,00,01,00,00,00,03,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-"Description"="WINEPS Printer using LPR"
-"Location"="Brother HL-5050"
-"Name"="Brother HL-5050"
-"Parameters"="<parameters?>"
-"Port"="LPR:Brother-HL-5050"
-"Print Processor"="WinPrint"
-"Printer Driver"="Brother HL-5050"
-"Priority"=dword:00000000
-"Separator File"="<sep file?>"
-"Share Name"="<share name?>"
-"StartTime"=dword:00000000
-"Status"=dword:00000000
-"UntilTime"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Printers\\Brother-HL-5050] 1340917853
-"Attributes"=dword:00000000
-"Datatype"="RAW"
-"Default DevMode"=hex:42,72,6f,74,68,65,72,2d,48,4c,2d,35,30,35,30,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,0a,03,01,00,9c,00,08,00,13,7b,00,00,\
-  01,00,09,00,9a,0b,33,08,64,00,01,00,07,00,00,00,02,00,01,00,00,00,03,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-"Description"="WINEPS Printer using CUPS"
-"Location"=""
-"Name"="Brother-HL-5050"
-"Parameters"=""
-"Port"="CUPS:Brother-HL-5050"
-"Print Processor"="WinPrint"
-"Printer Driver"="Brother-HL-5050"
-"Priority"=dword:00000000
-"Separator File"=""
-"Share Name"=""
-"StartTime"=dword:00000000
-"Status"=dword:00000000
-"UntilTime"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Printers\\Brother-HL-5050-2] 1357917076
-"Attributes"=dword:00000000
-"Datatype"="RAW"
-"Default DevMode"=hex:42,72,6f,74,68,65,72,2d,48,4c,2d,35,30,35,30,2d,32,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,0a,03,01,00,9c,00,08,00,13,6b,00,00,\
-  01,00,09,00,9a,0b,33,08,64,00,01,00,07,00,00,00,02,00,01,00,00,00,03,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-"Description"="WINEPS Printer using CUPS"
-"Location"=""
-"Name"="Brother-HL-5050-2"
-"Parameters"=""
-"Port"="CUPS:Brother-HL-5050-2"
-"Print Processor"="WinPrint"
-"Printer Driver"="Brother-HL-5050-2"
-"Priority"=dword:00000000
-"Separator File"=""
-"Share Name"=""
-"StartTime"=dword:00000000
-"Status"=dword:00000000
-"UntilTime"=dword:00000000
-
-[System\\CurrentControlSet\\Control\\Print\\Printers\\Brother-HL-5050-BR-Script3] 1340917853
-"Attributes"=dword:00000000
-"Datatype"="RAW"
-"Default DevMode"=hex:42,72,6f,74,68,65,72,2d,48,4c,2d,35,30,35,30,2d,42,52,2d,\
-  53,63,72,69,70,74,33,00,00,00,00,00,00,0a,03,01,00,9c,00,08,00,13,6b,00,00,\
-  01,00,09,00,9a,0b,33,08,64,00,01,00,07,00,00,00,02,00,01,00,00,00,03,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-"Description"="WINEPS Printer using CUPS"
-"Location"=""
-"Name"="Brother-HL-5050-BR-Script3"
-"Parameters"=""
-"Port"="CUPS:Brother-HL-5050-BR-Script3"
-"Print Processor"="WinPrint"
-"Printer Driver"="Brother-HL-5050-BR-Script3"
-"Priority"=dword:00000000
-"Separator File"=""
-"Share Name"=""
-"StartTime"=dword:00000000
-"Status"=dword:00000000
-"UntilTime"=dword:00000000
-
 [System\\CurrentControlSet\\Control\\ProductOptions] 1340917855
 "ProductType"="WinNT"
 
@@ -21813,17 +21624,6 @@ WINE REGISTRY Version 2
 "PreshutdownTimeout"=dword:0002bf20
 "Start"=dword:00000002
 "Type"=dword:00000020
-
-[System\\CurrentControlSet\\Services\\Spooler] 1340917855
-"Description"="Loads files to memory for later printing"
-"DisplayName"="Print Spooler"
-"ErrorControl"=dword:00000001
-"Group"="SpoolerGroup"
-"ImagePath"="C:\\windows\\system32\\spoolsv.exe"
-"ObjectName"="LocalSystem"
-"PreshutdownTimeout"=dword:0002bf20
-"Start"=dword:00000003
-"Type"=dword:00000110
 
 [System\\CurrentControlSet\\Services\\StiSvc] 1340917855
 "Description"="WIA Service"
