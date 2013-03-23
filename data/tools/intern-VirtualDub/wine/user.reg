@@ -86,20 +86,22 @@ WINE REGISTRY Version 2
 [Software\\VirtualDub.org\\VirtualDub\\MRU List] 1363981516
 "MRUList"=hex(1):
 
-[Software\\VirtualDub.org\\VirtualDub\\Persistence] 1363981516
+[Software\\VirtualDub.org\\VirtualDub\\Persistence] 1364070492
 "Accelerate preview"=dword:00000000
 "Auto-size panes"=dword:00000000
-"Pane layout mode"=dword:00000000
+"Pane layout mode"=dword:00000001
 "Preview audio sync"=dword:00000001
 "Preview frame skipping"=dword:00000000
+"Save edit list"=dword:00000001
+"Save text info"=dword:00000000
 "Show decompressed frame"=dword:00000000
 "Show status window"=dword:00000001
 "Swap panes"=dword:00000000
 "Update input pane"=dword:00000001
-"Update output pane"=dword:00000001
+"Update output pane"=dword:00000000
 "Vertical display"=dword:00000000
 
-[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1363981501
+[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1364070488
 "Allow direct YCbCr decoding"=dword:00000001
 "AutoRecover: Enabled"=dword:00000000
 "AVI: Alignment threshold"=dword:00080000
@@ -110,7 +112,7 @@ WINE REGISTRY Version 2
 "AVI: Subindex entry limit"=dword:00002000
 "AVI: Superindex entry limit"=dword:00000100
 "AVI: Use video stream fccHandler in codec search"=dword:00000000
-"AVI: VBR warning enabled"=dword:00000001
+"AVI: VBR warning enabled"=dword:00000000
 "Batch: Show status window"=dword:00000000
 "Confirm exit"=dword:00000000
 "Confirm render abort"=dword:00000001

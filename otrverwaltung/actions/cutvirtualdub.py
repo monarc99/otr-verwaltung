@@ -44,10 +44,10 @@ class CutVirtualdub(Cut):
 
     def create_cutlist(self,  filename, program_config_value):
         cut_video_is_none, error = self.__cut_file_virtualdub(filename, program_config_value, cuts=None, manually=True)
-
+ 
         if error != None:
             return None,  error
-            
+        format, ac3_file = self.get_format(filename)
         cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(os.path.join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"), format)
 
         return cuts_frames,  cutlist_error

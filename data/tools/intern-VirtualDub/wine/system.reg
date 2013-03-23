@@ -598,12 +598,6 @@ WINE REGISTRY Version 2
 "QuietUninstallString"="\"C:\\Program Files\\ffdshow\\unins000.exe\" /SILENT"
 "UninstallString"="\"C:\\Program Files\\ffdshow\\unins000.exe\""
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\drivers.desc] 1363981258
-"ff_vfw.dll"="ffdshow video encoder"
-
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\Drivers32] 1363981258
-"VIDC.FFDS"="ff_vfw.dll"
-
 [System\\CurrentControlSet\\Control\\MediaResources\\icm\\VIDC.FFDS] 1363981258
 "Description"="ffdshow video encoder"
 "Driver"="ff_vfw.dll"
@@ -615,8 +609,14 @@ WINE REGISTRY Version 2
 "NoRepair"=dword:00000001
 "UninstallString"="C:\\Program Files\\x264vfw\\x264vfw-uninstall.exe"
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\drivers.desc] 1363980684
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\drivers.desc] 1341842091
+"AACACM.acm"="AAC ACM Codec"
+"AC3ACM.acm"="AC-3 ACM Codec"
 "C:\\PROG~FBU\\x264vfw\\x264vfw.dll"="x264vfw - H.264/MPEG-4 AVC codec"
+"ff_vfw.dll"="ffdshow video encoder"
 
-[Software\\Microsoft\\Windows NT\\CurrentVersion\\drivers32] 1363980684
+[Software\\Microsoft\\Windows NT\\CurrentVersion\\drivers32] 1341842091
+"msacm.aacacm"="AACACM.acm"
+"msacm.ac3acm"="AC3ACM.acm"
+"VIDC.FFDS"="ff_vfw.dll"
 "vidc.x264"="C:\\PROG~FBU\\x264vfw\\x264vfw.dll"
