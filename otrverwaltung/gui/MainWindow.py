@@ -535,7 +535,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
             
         try:
-           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/data/VERSION').read().strip()
+           svn_version = urllib.urlopen('http://github.com/monarc99/otr-verwaltung/raw/master/data/VERSION').read().strip()
         except IOError:
             self.gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
             return
