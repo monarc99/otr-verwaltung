@@ -335,6 +335,10 @@ class DecodeOrCut(Cut):
                     file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.cut_video)) # rename after cut video, extension could have changed
                 else:
                     file_conclusion.cut.rename = basename(cut_video)
+                    
+                if os.path.isfile(file_conclusion.uncut_video + '.ffindex_track00.kf.txt'):
+                    os.remove(file_conclusion.uncut_video + '.ffindex_track00.kf.txt')
+                
         return True
 
     def cut_file_manually(self, filename):

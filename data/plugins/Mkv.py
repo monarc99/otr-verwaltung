@@ -166,9 +166,9 @@ class Mkv(Plugin):
                         else:
                             map = ['-map' ,'0']
 
-                    args = [ffmpeg, "-loglevel", "info", "-y", "-i", filename, "-vn", '-af', 'volume=volume=' + str(vol), "-vsync", "1", '-async',  '1000',  "-dts_delta_threshold", "100", "-drc_scale", "1.0", "-vf", "fps="+ str(fps), '-threads',  '0',   ffmpegpass_file]
+                    args = [ffmpeg, "-loglevel", "info", "-y", "-drc_scale", "1.0", "-i", filename, "-vn", '-af', 'volume=volume=' + str(vol), "-vsync", "1", '-async',  '1000',  "-dts_delta_threshold", "100", "-vf", "fps="+ str(fps), '-threads',  '0',   ffmpegpass_file]
                     map.extend(audiocodec)
-                    args[6:6] = map
+                    args[8:8] = map
                 
                     try:
                         p = subprocess.Popen(args, stderr=subprocess.PIPE, universal_newlines=True)

@@ -20,6 +20,7 @@ import os
 import re
 import subprocess
 import bisect
+import logging
 
 from otrverwaltung.actions.baseaction import BaseAction
 from otrverwaltung.constants import Action, Cut_action, Status, Format, Program
@@ -206,11 +207,12 @@ class Cut(BaseAction):
     
     def get_keyframes_from_file(self, filename):
         """ returns keyframe list - in frame numbers"""
-        try:
-            command = [self.config.get_program('ffmsindex'),  '-p', '-f', '-k',  filename ]
-            ffmsindex = subprocess.call(command)
-        except OSError:
-            return None, "ffmsindex konnte nicht aufgerufen werden."
+        if not os.path.isfile(filename + '.ffindex_track00.kf.txt'):
+            try:
+                command = [self.config.get_program('ffmsindex'),  '-p', '-f', '-k',  filename ]
+                ffmsindex = subprocess.call(command)
+            except OSError:
+                return None, "ffmsindex konnte nicht aufgerufen werden."
     
         try:
             index = open(filename + '.ffindex_track00.kf.txt', 'r')
@@ -223,8 +225,8 @@ class Cut(BaseAction):
         except ValueError:
             return None,  "Keyframes konnten nicht ermittelt werden."
         index.close()
-        fileoperations.remove_file(filename +'.ffindex_track00.kf.txt')
-        fileoperations.remove_file(filename +'.ffindex')
+        if os.path.isfile(filename + '.ffindex'):
+            fileoperations.remove_file(filename +'.ffindex')
             
         return list,  None
     
@@ -334,7 +336,7 @@ class Cut(BaseAction):
                 self.gui.main_window.set_tasks_text('Kodiere Audio')
                 self.gui.main_window.set_tasks_progress(0)
             else:
-                #print line
+                logging.debug(line) 
                 continue
 
             while events_pending():

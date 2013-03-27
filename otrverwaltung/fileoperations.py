@@ -89,7 +89,9 @@ def move_file(filename, target, error_cb=__error):
         except Exception:
             handle_error(error_cb, "Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
             return filename
-    
+            
+    if os.path.isfile(filename +'.cutlist'):
+        os.remove(filename +'.cutlist')
     return new_filename
 
 def make_unique_filename(filename):

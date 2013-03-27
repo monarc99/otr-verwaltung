@@ -100,7 +100,7 @@ class CutSmartMkvmerge(Cut):
         try:
             blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'), '--ui-language',  'en_US',  '-D',  '--split',  'parts:'+audio_timecodes,  '-o',  self.workingdir + '/audio_copy.mkv'] + audio_import_files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
         except OSError as e:
-            return None, "Fehler: %s Filename: %s Error: %s" % str(e.errno),  str(e.filename),  str(e.strerror)
+            return None,  e.strerror + ": " + self.config.get_program('mkvmerge')
         
         mkvmerge_list.append(blocking_process)
 
@@ -124,7 +124,7 @@ class CutSmartMkvmerge(Cut):
                 try:
                     non_blocking_process = subprocess.Popen([self.config.get_program('x264')] + x264_opts + ['--seek',  str(start),'--frames',  str(duration),  '--output',  self.workingdir + '/' + video_part_filename,  filename ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
                 except OSError as e:
-                    return None, "Fehler: %s Filename: %s Error: %s" % str(e.errno),  str(e.filename),  str(e.strerror)
+                    return None, e.strerror + ": " + self.config.get_program('x264')
                 process_list.append(non_blocking_process)
             else:
                 video_splitframes += ','+str(start)+'-'+str(duration)
@@ -136,7 +136,7 @@ class CutSmartMkvmerge(Cut):
         try:
             non_blocking_process = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US','-A',  '--split',  'parts-frames:'+video_splitframes,  '-o',  self.workingdir + '/video_copy.mkv', filename ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=my_env)
         except OSError as e:
-            return None, "Fehler: %s Filename: %s Error: %s" % str(e.errno),  str(e.filename),  str(e.strerror)
+            return None, e.strerror + ": " + self.config.get_program('mkvmerge')
         mkvmerge_list.append(non_blocking_process)
 
         # audio part 2 - encode audio to AAC
@@ -179,13 +179,13 @@ class CutSmartMkvmerge(Cut):
                     if not 'AC3 Spur entfernen' in self.config.get('smartmkvmerge', 'second_audio_stream') :
                         map.extend(['-map',  '0:a:1'])
                     
-                args = [ffmpeg, "-loglevel", "info", "-y", "-i", ffmpeginput_file, "-vn", "-vsync", "1", '-async',  '1000',  "-dts_delta_threshold", "100", "-drc_scale", "1.0", '-threads',  '0',   ffmpegoutput_file]
+                args = [ffmpeg, "-loglevel", "info", "-y", "-drc_scale", "1.0", "-i", ffmpeginput_file, "-vn", "-vsync", "1", '-async',  '1000',  "-dts_delta_threshold", "100", '-threads',  '0',   ffmpegoutput_file]
                 map.extend(audiocodec)
-                args[6:6] = map
+                args[8:8] = map
                 try:
                     non_blocking_process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
                 except OSError as e:
-                    return None, "Fehler: %s Filename: %s Error: %s" % str(e.errno),  str(e.filename),  str(e.strerror)
+                    return None, e.strerror + ": " + ffmpeg
                 process_list.append(non_blocking_process)
                 self.audio_files.append(self.workingdir + '/audio_encode.mkv')
 
