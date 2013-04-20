@@ -1,4 +1,4 @@
 project = otrverwaltung
 template = simple-gnome
 version = 0.2.5
-dependencies = mplayer, python-glade2, python-libtorrent, avidemux, avidemux-cli, avidemux-qt, wine, mediainfo-gui, gstreamer0.10-gnonlin, gstreamer0.10-ffmpeg, gstreamer0.10-plugins-ugly
+dependencies = mplayer, python-glade2, python-libtorrent, avidemux, avidemux-cli, avidemux-qt, wine, mediainfo-gui, gstreamer0.10-gnonlin, gstreamer0.10-ffmpeg, gstreamer0.10-plugins-ugly gstreamer0.10-python python-xdg

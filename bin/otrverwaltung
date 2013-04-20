@@ -25,7 +25,8 @@ import hashlib
 import optparse
 import logging
 import dbus, dbus.service, dbus.glib
-import simplejson as json
+try: import simplejson as json
+except ImportError: import json
 
 try:
     from gtk import events_pending, main_iteration
