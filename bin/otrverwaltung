@@ -133,6 +133,7 @@ class App:
                 'mplayer_fullscreen': True, 
                 'merge_ac3s' : True,
                 'merge_ac3s_by' : 'mkvmerge',
+                'move_otrkey_to_trash_after_decode': True, 
                 'server': 'http://cutlist.at/',
                 'cut_action': Cut_action.ASK,
                 'delete_cutlists': True,

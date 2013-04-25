@@ -201,8 +201,9 @@ class DecodeOrCut(Cut):
                 file_conclusion.uncut_video = join(self.config.get('general', 'folder_uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
 
                 # move otrkey to trash
-                target = self.config.get('general', 'folder_trash_otrkeys')
-                fileoperations.move_file(file_conclusion.otrkey, target)
+                if self.config.get('general', 'move_otrkey_to_trash_after_decode'):
+                    target = self.config.get('general', 'folder_trash_otrkeys')
+                    fileoperations.move_file(file_conclusion.otrkey, target)
             else:
                 file_conclusion.decode.status = Status.ERROR
 
