@@ -297,14 +297,23 @@ class DecodeOrCut(Cut):
                 file_conclusion.cut.cutlist = cutlists_management.get_best_cutlist(cutlists)
 
             elif file_conclusion.cut.cut_action == Cut_action.CHOOSE_CUTLIST:
-                file_conclusion.cut.cutlist = self.gui.dialog_cut.chosen_cutlist
-
+                if self.gui.dialog_cut.chosen_cutlist != None:
+                    file_conclusion.cut.cutlist = self.gui.dialog_cut.chosen_cutlist
+                else:
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = "Keine Cutlist gefunden."
+                    
             elif file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST:
                 file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
 
                 if not exists(file_conclusion.cut.cutlist.local_filename):
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
+
+            elif file_conclusion.cut.cut_action == Cut_action.ASK:
+                file_conclusion.cut.status = Status.NOT_DONE
+                file_conclusion.cut.message = "Keine Cutlist gefunden."
+
 
         # and finally cut the file
         for count, file_conclusion in enumerate(file_conclusions):

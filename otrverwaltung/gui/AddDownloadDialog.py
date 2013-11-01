@@ -150,8 +150,8 @@ class AddDownloadDialog(gtk.Dialog, gtk.Buildable):
             except IOError:
                 yield 'torrent_error',  "Torrentdatei konnte nicht heruntergeladen werden (%s)!"
         # read filename
-        torrent = open(torrent_filename,'rb').read()
-        info = lt.torrent_info(torrent, len(torrent))
+        torrent = lt.bdecode(open(torrent_filename, 'rb').read())
+        info = lt.torrent_info(torrent)
         info_hash = str(info.info_hash())
                 
         try:

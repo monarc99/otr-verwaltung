@@ -111,7 +111,22 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
     def _on_button_forward_clicked(self, widget, data=None):
         self.show_conclusion(self.conclusion_iter + 1)
         self.forward_clicks += 1
-        
+
+    def _on_button_abort_clicked(self, widget, data=None):
+        widgets_hidden = ['button_play_cut', 'box_rating', 'check_delete_uncut', 'box_rename', 'box_archive',  'button_play',  'box_create_cutlist']
+        for widget in widgets_hidden:
+            self.builder.get_object(widget).hide()
+            
+        self.file_conclusion.cut.status = Status.NOT_DONE
+        self.builder.get_object('check_upload_cutlist').set_active(False)
+        self.file_conclusion.cut.rename = False    
+        status, message = self.file_conclusion.cut.status, self.file_conclusion.cut.message
+        self.builder.get_object('label_cut_status').set_markup(self.__status_to_s(status, message))
+         
+        if os.path.isfile(self.file_conclusion.cut_video):
+            os.remove(self.file_conclusion.cut_video)
+
+
     def show_conclusion(self, new_iter):
         self.conclusion_iter = new_iter
         self.file_conclusion = self.__file_conclusions[self.conclusion_iter]
@@ -132,8 +147,9 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
 
         # enable back- and forward button?
         self.builder.get_object('button_back').set_sensitive(not self.conclusion_iter == 0)
-        self.builder.get_object('button_forward').set_sensitive(not (self.conclusion_iter + 1 == len(self.__file_conclusions)))               
-                
+        self.builder.get_object('button_forward').set_sensitive(not (self.conclusion_iter + 1 == len(self.__file_conclusions)))
+        self.builder.get_object('button_abort').set_sensitive(action == Action.CUT or action == Action.DECODEANDCUT and  self.file_conclusion.cut.status == Status.OK)
+            
         # status message
         if action != Action.DECODE:
             status, message = self.file_conclusion.cut.status, self.file_conclusion.cut.message

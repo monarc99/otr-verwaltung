@@ -173,6 +173,7 @@ class App:
                 'decoder': 'intern-otrdecoder',
                 'ffmpeg': 'intern-ffmpeg',
                 'ffmsindex': 'intern-ffmsindex',
+                'ffprobe': 'intern-ffprobe',
                 'mkvmerge': 'intern-mkvmerge',
                 'mediainfo': 'intern-mediainfo', 
                 'mp4box': 'intern-mp4box',
@@ -207,7 +208,7 @@ class App:
         self.locked = False
             
         # regex
-        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|HD\.avi|mp4)$')
+        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|HD\.avi|mp4|HQ\.mkv|HD\.mkv)$')
         # regex for the name schema should use cut videos just in case it has been muxed into an mkv because of an ac3-track
         self.rename_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg(-cut\.avi|\.HQ-cut\.avi|\.HD-cut\.avi|-cut\.mp4|\.HQ-cut\.mp4|\.HD-cut\.mp4|\.HD-cut\.mkv|\.HQ-cut\.mkv|-cut\.mkv)$')
         self.cut_video = re.compile('.*(avi|mp4|mkv|wmv|ac3)$')

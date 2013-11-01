@@ -26,6 +26,7 @@ except ImportError:
 
 assert DistUtilsExtra.auto.__version__ >= '2.10', 'needs DistUtilsExtra.auto >= 2.10'
 import os
+import tarfile
 
 
 def update_data_path(prefix, oldvalue=None):
@@ -73,15 +74,30 @@ def update_desktop_file(datadir):
         print ("ERROR: Can't find otrverwaltung.desktop.in")
         sys.exit(1)
 
+def pack_tools_dir():
 
+    if os.path.isfile('data/tools.tar.bz2'):
+        os.remove('data/tools.tar.bz2')
+        
+    def reset(tarinfo):
+        tarinfo.uid = tarinfo.gid = 0
+        tarinfo.uname = tarinfo.gname = "root"
+        return tarinfo
+        
+        tar = tarfile.open("data/tools.tar.bz2", "w:bz2")
+        tar.add("data/tools", filter=reset)
+        tar.close()
+    
 class InstallAndUpdateDataDirectory(DistUtilsExtra.auto.install_auto):
     def run(self):
+        self.prefix='/usr'
         if self.root or self.home:
             print "WARNING: You don't use a standard --prefix installation, take care that you eventually " \
             "need to update quickly/quicklyconfig.py file to adjust __quickly_data_directory__. You can " \
             "ignore this warning if you are packaging and uses --prefix."
         previous_value = update_data_path(self.prefix + '/share/otrverwaltung/')
         update_desktop_file(self.prefix + '/share/otrverwaltung/')
+        pack_tools_dir()
         DistUtilsExtra.auto.install_auto.run(self)
         update_data_path(self.prefix, previous_value)
 

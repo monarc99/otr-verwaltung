@@ -55,7 +55,7 @@ class CutAvidemux(Cut):
         my_env = os.environ.copy()
         my_env["LANG"] = "C"
         
-        if ".avi" in filename and "avidemux3" in program_config_value: 
+        if '.avi' in filename and "avidemux3" in program_config_value: 
             try:
                 mkvmerge = subprocess.Popen([self.config.get_program('mkvmerge'),  '--ui-language',  'en_US', '-o', filename+'.mkv', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
                 self.show_progress(mkvmerge)
@@ -94,8 +94,9 @@ class CutAvidemux(Cut):
                 seg_lines.append((seg_id, start, size))
 
             # Avidemux3
-            elif 'Delaying video by' in line:
-                pts_correction = float(line.split(' ')[7])
+            # The first frame has a PTS >0, adjusting to 40 ms
+            elif '[addReferenceVideo]  The first frame has a PTS >0' in line:
+                pts_correction = float(line.split(' ')[13])*1000
             elif line.startswith(' We have '):
                 seg_lines = []
             elif line.startswith('Segment :'):

@@ -19,6 +19,8 @@ from gtk import events_pending, main_iteration, RESPONSE_OK
 import re
 import os
 import subprocess
+import logging
+import sys
 
 from otrverwaltung.actions.cut import Cut
 from otrverwaltung.constants import Action, Cut_action, Status, Format, Program
@@ -43,6 +45,8 @@ class CutSmartMkvmerge(Cut):
         try:
             if os.path.isfile (self.workingdir + '/audio_copy.mkv'):
                 os.remove(self.workingdir + '/audio_copy.mkv')
+            if os.path.isfile (self.workingdir + '/x264.index'):
+                os.remove(self.workingdir + '/x264.index')
             if os.path.isfile (self.workingdir + '/video_copy.mkv'):
                 os.rename(self.workingdir + '/video_copy.mkv', self.workingdir + '/video_copy-001.mkv')
             for n in self.video_files + self.audio_files:
@@ -122,7 +126,7 @@ class CutSmartMkvmerge(Cut):
             self.video_files.append('+'+ self.workingdir +'/' + video_part_filename)
             if encode:
                 try:
-                    non_blocking_process = subprocess.Popen([self.config.get_program('x264')] + x264_opts + ['--seek',  str(start),'--frames',  str(duration),  '--output',  self.workingdir + '/' + video_part_filename,  filename ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+                    non_blocking_process = subprocess.Popen([self.config.get_program('x264')] + x264_opts + ['--index', self.workingdir + '/x264.index','--seek',  str(start),'--frames',  str(duration),  '--output',  self.workingdir + '/' + video_part_filename,  filename ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
                 except OSError as e:
                     return None, e.strerror + ": " + self.config.get_program('x264')
                 process_list.append(non_blocking_process)
@@ -144,16 +148,28 @@ class CutSmartMkvmerge(Cut):
             self.audio_files.append(self.workingdir + '/audio_copy.mkv')
         else:
                 blocking_process.wait()
+                self.show_progress(blocking_process)
                 ffmpeginput_file = self.workingdir + '/audio_copy.mkv'
                 ffmpegoutput_file = self.workingdir + '/audio_encode.mkv'
                 
+                audiofilter = ['-af',  'anull']
                 # convert first audio stream to aac
                 if 'AAC' in self.config.get('smartmkvmerge', 'first_audio_stream') and 'AAC' in self.config.get('smartmkvmerge', 'second_audio_stream'):
                     aacaudiostreams = '-c:a'
+                    if self.config.get('smartmkvmerge', 'normalize_audio'):
+                        vol0,  error = self.get_norm_volume(ffmpeginput_file, '0')
+                        vol1,  error = self.get_norm_volume(ffmpeginput_file, '1')
+                        audiofilter = ['-af:0', 'volume=volume=' + vol0,  '-af:1', 'volume=volume=' + vol1]
                 elif 'AAC' in self.config.get('smartmkvmerge', 'second_audio_stream') and 'MP3' in self.config.get('smartmkvmerge', 'first_audio_stream'):
                     aacaudiostreams = '-c:a:1'
+                    if self.config.get('smartmkvmerge', 'normalize_audio'):
+                        vol,  error = self.get_norm_volume(ffmpeginput_file, '1')
+                        audiofilter = ['-af:1', 'volume=volume=' + vol]
                 elif 'AAC' in self.config.get('smartmkvmerge', 'first_audio_stream'):
                     aacaudiostreams = '-c:a:0'
+                    if self.config.get('smartmkvmerge', 'normalize_audio'):
+                        vol,  error = self.get_norm_volume(ffmpeginput_file, '0')
+                        audiofilter = ['-af:0', 'volume=volume=' + vol]
                 else:
                     aacaudiostreams = '-c:a:2'
                     
@@ -179,9 +195,11 @@ class CutSmartMkvmerge(Cut):
                     if not 'AC3 Spur entfernen' in self.config.get('smartmkvmerge', 'second_audio_stream') :
                         map.extend(['-map',  '0:a:1'])
                     
-                args = [ffmpeg, "-loglevel", "info", "-y", "-drc_scale", "1.0", "-i", ffmpeginput_file, "-vn", "-vsync", "1", '-async',  '1000',  "-dts_delta_threshold", "100", '-threads',  '0',   ffmpegoutput_file]
+                args = [ffmpeg, "-loglevel", "info", "-y", "-drc_scale", "1.0", "-i", ffmpeginput_file, "-vn", "-vsync", "1", '-async',  '200000',  "-dts_delta_threshold", "100", '-threads',  '0',    ffmpegoutput_file]
                 map.extend(audiocodec)
+                map.extend(audiofilter)
                 args[8:8] = map
+                logging.debug(args)
                 try:
                     non_blocking_process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
                 except OSError as e:
@@ -234,6 +252,7 @@ class CutSmartMkvmerge(Cut):
         if self.config.get('smartmkvmerge', 'remux_to_mp4'):
             # split files with eac3to
             with ChangeDir(self.workingdir):
+                stdout_encoding = sys.stdout.encoding or sys.getfilesystemencoding()
                 try:
                     blocking_process = subprocess.Popen(['wine', path.get_tools_path('intern-eac3to/eac3to.exe'), os.path.basename(cut_video),  '-demux',  '-silence',  '-keepDialnorm'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
                 except OSError:
@@ -250,7 +269,7 @@ class CutSmartMkvmerge(Cut):
                     if 'Creating file' in line:
                         m = re.search(file_match,line)
                         if m:
-                            self.rawstreams[m.group(2)] = m.group(1)
+                            self.rawstreams[m.group(2)] = m.group(1).decode("iso-8859-1").encode("utf-8")
                         else:
                             pass
                             
