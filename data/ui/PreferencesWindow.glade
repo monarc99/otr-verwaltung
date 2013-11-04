@@ -956,7 +956,7 @@
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_ac3">
-                                <property name="visible">True</property>
+                                <property name="visible">False</property>
                                 <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">ac3-Muxer</property>
@@ -968,7 +968,7 @@
                             </child>
                             <child>
                               <object class="GtkHBox" id="hbox_ac3">
-                                <property name="visible">True</property>
+                                <property name="visible">False</property>
                                 <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBoxEntry" id="combobox_ac3">

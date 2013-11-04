@@ -123,13 +123,22 @@ class Cut(BaseAction):
         return cut_video
 
     def mux_ac3(self, filename, cut_video, ac3_file, cutlist):	# cuts the ac3 and muxes it with the avi into an mkv
-        mkvmerge = self.config.get('general', 'merge_ac3s_by')
+        mkvmerge = self.config.get_program('mkvmerge')
         root, extension = os.path.splitext(filename)
         mkv_file = os.path.splitext(cut_video)[0] + ".mkv"
+        # env
+        my_env = os.environ.copy()
+        my_env["LANG"] = "C"
+
         # creates the timecodes string for splitting the .ac3 with mkvmerge
         timecodes = (','.join([self.get_timecode(start) + ',' + self.get_timecode(start+duration) for start, duration in cutlist.cuts_seconds]))
         # splitting .ac3. Every second fragment will be used.
-        return_value = subprocess.call([mkvmerge, "--split", "timecodes:" + timecodes, "-o", root + "-%03d.mka", ac3_file])
+#        return_value = subprocess.call([mkvmerge, "--split", "timecodes:" + timecodes, "-o", root + "-%03d.mka", ac3_file])
+        try:
+            blocking_process = subprocess.Popen([mkvmerge, '--ui-language',  'en_US',  "--split", "timecodes:" + timecodes, "-o", root + "-%03d.mka", ac3_file ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
+        except OSError as e:
+            return None,  e.strerror + ": " + mkvmerge
+        return_value = blocking_process.wait()
         # return_value=0 is OK, return_value=1 means a warning. Most probably non-ac3-data that has been omitted.
         # TODO: Is there some way to pass this warning to the conclusion dialog?
         if return_value != 0 and return_value != 1:
@@ -144,7 +153,12 @@ class Cut(BaseAction):
         else:                                           # Concatenating every second fragment.
             command = [mkvmerge, "-o", root + ".mka", root + "-002.mka"]
             command[len(command):] = ["+" + root + "-%03d.mka" % (2*n) for n in range(2,len(cutlist.cuts_seconds)+1)]
-            return_value = subprocess.call(command)
+#            return_value = subprocess.call(command)
+            try:
+                blocking_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
+            except OSError as e:
+                return None,  e.strerror + ": " + mkvmerge
+            return_value = blocking_process.wait()
             if return_value != 0:               # There should be no warnings here
                 return None, None, str(return_value)
 
@@ -154,7 +168,12 @@ class Cut(BaseAction):
 
         # Mux the cut .avi with the resulting audio-file into mkv_file
         # TODO: Is there some way to pass possible warnings to the conclusion dialog?
-        return_value = subprocess.call([mkvmerge, "-o", mkv_file, cut_video, root + ".mka"])
+#        return_value = subprocess.call([mkvmerge, "-o", mkv_file, cut_video, root + ".mka"])
+        try:
+            blocking_process = subprocess.Popen([mkvmerge, "-o", mkv_file, cut_video, root + ".mka"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
+        except OSError as e:
+            return None,  e.strerror + ": " + mkvmerge
+        return_value = blocking_process.wait()
         if return_value != 0 and return_value != 1:
             return None, None, str(return_value)
 
@@ -408,6 +427,7 @@ class Cut(BaseAction):
                 
         while True:
             line = blocking_process.stdout.readline()
+            logging.debug(line)
             if line == '':
                 break
             elif 'x264 [info]: started' in line:
@@ -450,8 +470,7 @@ class Cut(BaseAction):
             elif 'ffmpeg version' in line:
                 self.gui.main_window.set_tasks_text('Kodiere Audio')
                 self.gui.main_window.set_tasks_progress(0)
-            else:
-                logging.debug(line) 
+            else: 
                 continue
 
             while events_pending():
@@ -464,6 +483,8 @@ class Cut(BaseAction):
                     with error:
                         1.0, error_message """
             
+        self.gui.main_window.set_tasks_text('Berechne den Normalisierungswert')
+        self.gui.main_window.set_tasks_progress(0)
         try:
             process1 = subprocess.Popen([path.get_tools_path('intern-ffprobe'), '-v',  'error','-of','compact=p=0:nk=1','-drc_scale','1.0','-show_entries','frame_tags=lavfi.r128.I','-f','lavfi','amovie='+filename+':si='+stream+',ebur128=metadata=1'], stdout=subprocess.PIPE)       
         except OSError:
@@ -478,7 +499,7 @@ class Cut(BaseAction):
             if sline:
                 loudness = sline
                 adjust = ref - float(loudness)
-
+        self.gui.main_window.set_tasks_progress(100)
         if adjust:
             return str(adjust)+'dB',  None
         else:

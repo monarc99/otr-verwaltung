@@ -66,6 +66,8 @@ class Restore(BaseAction):
         for f in filenames:
             if f.endswith("otrkey"):
                 fileoperations.move_file(f, self.__app.config.get('general', 'folder_new_otrkeys'))
+            elif f.endswith("ac3"):
+                fileoperations.move_file(f, self.__app.config.get('general', 'folder_uncut_avis'))
             elif self.__app.uncut_video.match(f):
                 fileoperations.move_file(f, self.__app.config.get('general', 'folder_uncut_avis'))
             else:

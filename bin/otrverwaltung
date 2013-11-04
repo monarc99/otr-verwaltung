@@ -125,7 +125,7 @@ class App:
                 'password': '',
                 'verify_decoded': True,
                 'cut_avis_by': 'avidemux2_cli',
-                'cut_hqs_by': 'intern-vdub',
+                'cut_hqs_by': 'SmartMKVmerge',
                 'cut_mp4s_by': 'intern-vdub',
                 'cut_avis_man_by': 'CutInterface',
                 'cut_hqs_man_by': 'CutInterface',
