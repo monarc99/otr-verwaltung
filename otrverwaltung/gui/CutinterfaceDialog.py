@@ -39,7 +39,6 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         self.slider = self.builder.get_object('slider')
                 
         self.movie_window = self.builder.get_object('movie_window')
-        self.movie_window.set_size_request(600, 450)
         self.movie_window.connect('realize', self.on_realize)
         self.movie_window.connect('unrealize', self.on_unrealize)
         
@@ -174,6 +173,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         self.keyframes, error = self.get_keyframes_from_file(filename)
         if self.keyframes == None:
             print "Error: Keyframes konnten nicht ausgelesen werden."
+        self.movie_window.set_size_request(self.config.get('general', 'cutinterface_resolution_x'), self.config.get('general', 'cutinterface_resolution_y'))
  
         def discovered(d, is_media):
             if is_media:

@@ -130,6 +130,8 @@ class App:
                 'cut_avis_man_by': 'CutInterface',
                 'cut_hqs_man_by': 'CutInterface',
                 'cut_mp4s_man_by': 'CutInterface',
+                'cutinterface_resolution_x': 640, 
+                'cutinterface_resolution_y': 450, 
                 'mplayer_fullscreen': True, 
                 'merge_ac3s' : True,
                 'merge_ac3s_by' : 'mkvmerge',
