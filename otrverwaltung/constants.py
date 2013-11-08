@@ -71,6 +71,8 @@ class Format:
 class Program:
     AVIDEMUX    = 0
     VIRTUALDUB  = 1
+    CUT_INTERFACE = 2
+    SMART_MKVMERGE = 3
     
 class DownloadTypes:
     TORRENT     = 0

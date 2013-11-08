@@ -1,0 +1,103 @@
+; AC-3 ACM Codec install file
+; Usage: right-click on this file and choose "Install"
+
+[Version]
+Signature="$CHICAGO$"
+Class=Media
+ClassGUID={4d36e96c-e325-11ce-bfc1-08002be10318}
+Provider=%mfgname%
+
+[Strings]
+DisplayName="AC-3 ACM Codec"
+DisplayVersion="2.1"
+mfgname="fccHandler"
+MediaClassName="Media Devices"
+ACM_ID="msacm.ac3acm"
+AudioTagDecimal="8192" ; 0x2000 (hex) => 8192 (dec)
+InternalName="AC-3 ACM Codec"
+RegKeyUsed="Software\fccHandler\AC3ACM"
+UninstallPath="Software\Microsoft\Windows\CurrentVersion\Uninstall\AC3ACM"
+UpdateURL="http://fcchandler.home.comcast.net/~fcchandler/AC3ACM/"
+
+[SourceDisksNames]
+1=%DisplayName%,"",1
+
+[SourceDisksFiles]
+AC3ACM.inf=1
+AC3ACM.acm=1
+
+[DefaultInstall]
+CopyFiles  = ACM.Copy, ACM.Copy.Inf
+AddReg     = ACM.AddReg, ACM.AddReg.9x
+UpdateInis = ACM.UpdateIni
+
+[DefaultInstall.ntx86]
+CopyFiles  = ACM.Copy, ACM.Copy.Inf
+AddReg     = ACM.AddReg, ACM.AddReg.NT
+
+[DefaultInstall.ntamd64]
+
+[DefaultUninstall]
+DelFiles   = ACM.Copy, ACM.Copy.Inf
+DelReg     = ACM.DelReg
+UpdateInis = ACM.UpdateIni.Del
+
+[DefaultUninstall.ntx86]
+DelFiles   = ACM.Copy, ACM.Copy.Inf, ACM.Del.Pnf
+DelReg     = ACM.DelReg
+
+[DefaultUninstall.ntamd64]
+
+[ACM.Copy]
+AC3ACM.acm
+
+[ACM.Copy.Inf]
+AC3ACM.inf
+
+[ACM.Del.Pnf]
+AC3ACM.PNF
+
+[ACM.UpdateIni]
+system.ini, drivers32,"%ACM_ID%=*","%ACM_ID%=AC3ACM.acm"
+
+[ACM.UpdateIni.Del]
+system.ini, drivers32,"%ACM_ID%=AC3ACM.acm"
+
+[ACM.AddReg]
+HKLM,%UninstallPath%,DisplayName,,"%DisplayName% %DisplayVersion%"
+HKLM,%UninstallPath%,DisplayVersion,,"%DisplayVersion%"
+HKLM,%UninstallPath%,Publisher,,"%mfgname%"
+HKLM,%UninstallPath%,URLUpdateInfo,,"%UpdateURL%"
+HKLM,%UninstallPath%,NoModify,0x00010001,1
+HKLM,%UninstallPath%,NoRepair,0x00010001,1
+HKCR,"Windows Media\WMSDK\AudioDecode\%AudioTagDecimal%","DllName",,"AC3ACM.acm"
+; Allow using the ACM codec for encoding in Microsoft applications (like Windows Media Encoder)
+HKCR,"Windows Media\WMSDK\AudioEncode","%AudioTagDecimal%",,""
+
+[ACM.AddReg.9x]
+HKLM,"SYSTEM\CurrentControlSet\Control\MediaResources\acm\%ACM_ID%",Description,,"%DisplayName%"
+HKLM,"SYSTEM\CurrentControlSet\Control\MediaResources\acm\%ACM_ID%",Driver,,"AC3ACM.acm"
+HKLM,"SYSTEM\CurrentControlSet\Control\MediaResources\acm\%ACM_ID%",FriendlyName,,"%DisplayName%"
+HKLM,%UninstallPath%,UninstallString,,"%10%\rundll.exe setupx.dll,InstallHinfSection DefaultUninstall 132 %17%\AC3ACM.inf"
+
+[ACM.Addreg.NT]
+HKLM,"Software\Microsoft\Windows NT\CurrentVersion\Drivers32","%ACM_ID%",,"AC3ACM.acm"
+HKLM,"Software\Microsoft\Windows NT\CurrentVersion\drivers.desc","AC3ACM.acm",,"%DisplayName%"
+HKLM,%UninstallPath%,UninstallString,,"%11%\rundll32.exe setupapi.dll,InstallHinfSection DefaultUninstall 132 %17%\AC3ACM.inf"
+
+[ACM.DelReg]
+HKCU,"%RegKeyUsed%"
+HKLM,"Software\Microsoft\Windows NT\CurrentVersion\Drivers32","%ACM_ID%",,""
+HKLM,"Software\Microsoft\Windows NT\CurrentVersion\drivers.desc","AC3ACM.acm",,""
+HKLM,"SYSTEM\CurrentControlSet\Control\MediaResources\acm\%ACM_ID%"
+HKLM,"Software\Microsoft\AudioCompressionManager\DriverCache\%ACM_ID%"
+HKCR,"Windows Media\WMSDK\AudioDecode\%AudioTagDecimal%"
+HKCR,"Windows Media\WMSDK\AudioEncode","%AudioTagDecimal%",,""
+HKCU,"Software\Microsoft\ActiveMovie\devenum\{33D9A761-90C8-11D0-BD43-00A0C911CE86}\%AudioTagDecimal%%InternalName%"
+HKLM,"%UninstallPath%"
+
+[DestinationDirs]
+DefaultDestDir = 11 ; System directory. %SystemRoot%\system32 for Windows 2000 and later
+ACM.Copy       = 11
+ACM.Copy.Inf   = 17 ; INF file directory
+ACM.Del.Pnf    = 17

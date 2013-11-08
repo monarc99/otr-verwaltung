@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 ### BEGIN LICENSE
 # Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>
-#This program is free software: you can redistribute it and/or modify it 
-#under the terms of the GNU General Public License version 3, as published 
+#This program is free software: you can redistribute it and/or modify it
+#under the terms of the GNU General Public License version 3, as published
 #by the Free Software Foundation.
 #
-#This program is distributed in the hope that it will be useful, but 
-#WITHOUT ANY WARRANTY; without even the implied warranties of 
-#MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+#This program is distributed in the hope that it will be useful, but
+#WITHOUT ANY WARRANTY; without even the implied warranties of
+#MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
 #PURPOSE.  See the GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License along 
+#You should have received a copy of the GNU General Public License along
 #with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
 from gtk import events_pending, main_iteration, RESPONSE_OK
+from os.path import basename, join, dirname, exists, splitext
 import base64
 import subprocess
-import urllib
 import os
-from os.path import basename, join, dirname, exists, splitext
 import time
+import re
 
 from otrverwaltung import fileoperations
 from otrverwaltung.conclusions import FileConclusion
@@ -30,55 +30,60 @@ from otrverwaltung import codec
 from otrverwaltung import cutlists as cutlists_management
 from otrverwaltung import path
 from otrverwaltung.GeneratorTask import GeneratorTask
+from otrverwaltung.gui import CutinterfaceDialog
+from otrverwaltung.actions.cut import Cut
+from otrverwaltung.actions.cutsmartmkvmerge import CutSmartMkvmerge
+from otrverwaltung.actions.cutvirtualdub import CutVirtualdub
+from otrverwaltung.actions.cutavidemux import CutAvidemux
 
-class DecodeOrCut(BaseAction):
-    
+class DecodeOrCut(Cut):
+
     def __init__(self, app, gui):
         self.update_list = True
-        self.__app = app
+        self.app = app
         self.config = app.config
-        self.__gui = gui
+        self.gui = gui
 
     def do(self, action, filenames, cut_action=None):
-        self.rename_by_schema = self.__app.rename_by_schema
-        
-        decode, cut = False, False            
-            
+        self.rename_by_schema = self.app.rename_by_schema
+
+        decode, cut = False, False
+
         # prepare tasks
         if action == Action.DECODE:
-            self.__gui.main_window.set_tasks_text('Dekodieren')
+            self.gui.main_window.set_tasks_text('Dekodieren')
             decode = True
         elif action == Action.CUT:
-            self.__gui.main_window.set_tasks_text('Schneiden')
+            self.gui.main_window.set_tasks_text('Schneiden')
             cut = True
         else: # decode and cut
-            self.__gui.main_window.set_tasks_text('Dekodieren/Schneiden')        
+            self.gui.main_window.set_tasks_text('Dekodieren/Schneiden')
             decode, cut = True, True
-                                       
+
         file_conclusions = []
-            
+
         if decode:
             for otrkey in filenames:
                 file_conclusions.append(FileConclusion(action, otrkey=otrkey))
-            
+
         if cut and not decode: # dont add twice
             for uncut_video in filenames:
                 file_conclusions.append(FileConclusion(action, uncut_video=uncut_video))
-                        
-        # decode files                    
+
+        # decode files
         if decode:
-            if self.decode(file_conclusions) == False: 
+            if self.decode(file_conclusions) == False:
                 return
-            
+
         # cut files
         if cut:
-            if self.cut(file_conclusions, action, cut_action) == False: 
+            if self.cut(file_conclusions, action, cut_action) == False:
                 return
 
-        self.__gui.main_window.block_gui(False)
+        self.gui.main_window.block_gui(False)
 
         # no more need for tasks view
-        self.__gui.main_window.set_tasks_visible(False)
+        self.gui.main_window.set_tasks_visible(False)
 
         show_conclusions = False
         # Only cut - don't show conclusions if all were cancelled
@@ -87,71 +92,71 @@ class DecodeOrCut(BaseAction):
                 if conclusion.cut.status != Status.NOT_DONE:
                     show_conclusions = True
                     break
-                    
+
         # Only decode - don't show if everything is OK
         elif action == Action.DECODE:
             for conclusion in file_conclusions:
                 if conclusion.decode.status != Status.OK:
                     show_conclusions = True
-                    
-            if not show_conclusions:
-                self.__app.gui.main_window.change_status(0, "%i Datei(en) erfolgreich dekodiert" % len(file_conclusions), permanent=True)
-        
-        # Decode and cut - always show      
-        else: 
-            show_conclusions = True
-                                
-        if show_conclusions:                
-            self.__app.conclusions_manager.add_conclusions(*file_conclusions)
 
-    def decode(self, file_conclusions):          
-            
-        # no decoder        
-        if not "decode" in self.config.get('general', 'decoder'): # no decoder specified
+            if not show_conclusions:
+                self.app.gui.main_window.change_status(0, "%i Datei(en) erfolgreich dekodiert" % len(file_conclusions), permanent=True)
+
+        # Decode and cut - always show
+        else:
+            show_conclusions = True
+
+        if show_conclusions:
+            self.app.conclusions_manager.add_conclusions(*file_conclusions)
+
+    def decode(self, file_conclusions):
+
+        # no decoder
+        if not "decode" in self.config.get('programs', 'decoder'): # no decoder specified
             # dialog box: no decoder
-            self.__gui.message_error_box("Es ist kein korrekter Dekoder angegeben!")
+            self.gui.message_error_box("Es ist kein korrekter Dekoder angegeben!")
             return False
-        
+
         # retrieve email and password
         email = self.config.get('general', 'email')
-        password = base64.b64decode(self.config.get('general', 'password')) 
+        password = base64.b64decode(self.config.get('general', 'password'))
 
         if not email or not password:
-            self.__gui.dialog_email_password.set_email_password(email, password)       
-        
+            self.gui.dialog_email_password.set_email_password(email, password)
+
             # let the user type in his data through a dialog
-            response = self.__gui.dialog_email_password.run()
-            self.__gui.dialog_email_password.hide()
-            
+            response = self.gui.dialog_email_password.run()
+            self.gui.dialog_email_password.hide()
+
             if response == RESPONSE_OK:
-                email, password = self.__gui.dialog_email_password.get_email_password()                  
+                email, password = self.gui.dialog_email_password.get_email_password()
             else: # user pressed cancel
-                return False                        
-        
+                return False
+
         # now this method may not return "False"
-        self.__gui.main_window.set_tasks_visible(True)
-        self.__gui.main_window.block_gui(True)
-                   
+        self.gui.main_window.set_tasks_visible(True)
+        self.gui.main_window.block_gui(True)
+
         # decode each file
         for count, file_conclusion in enumerate(file_conclusions):
             # update progress
-            self.__gui.main_window.set_tasks_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
-                   
-            verify = True                   
+            self.gui.main_window.set_tasks_text("Datei %s/%s dekodieren" % (count + 1, len(file_conclusions)))
 
-            command = [self.config.get('general', 'decoder'), "-i", file_conclusion.otrkey, "-e", email, "-p", password, "-o", self.config.get('general', 'folder_uncut_avis')]
-                      
+            verify = True
+
+            command = [self.config.get_program('decoder'), "-i", file_conclusion.otrkey, "-e", email, "-p", password, "-o", self.config.get('general', 'folder_uncut_avis')]
+
             if not self.config.get('general', 'verify_decoded'):
                 verify = False
-                command += ["-q"]              
+                command += ["-q"]
 
-            try:       
-                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)       
+            try:
+                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except OSError:
                 file_conclusion.decode.status = Status.ERROR
                 file_conclusion.decode.message = "Dekoder wurde nicht gefunden."
-                continue               
- 
+                continue
+
             while True:
                 l = ""
                 while True:
@@ -159,45 +164,47 @@ class DecodeOrCut(BaseAction):
                     if c == "\r" or c == "\n":
                         break
                     l += c
-        
+
                 if not l:
                     break
-        
-                try:                             
-                    if verify:   
+
+                try:
+                    if verify:
                         file_count = count + 1, len(file_conclusions)
-                                                        
+
                         if "input" in l:
-                            self.__gui.main_window.set_tasks_text("Eingabedatei %s/%s kontrollieren" % file_count)
+                            self.gui.main_window.set_tasks_text("Eingabedatei %s/%s kontrollieren" % file_count)
                         elif "output" in l:
-                            self.__gui.main_window.set_tasks_text("Ausgabedatei %s/%s kontrollieren" % file_count)
+                            self.gui.main_window.set_tasks_text("Ausgabedatei %s/%s kontrollieren" % file_count)
                         elif "Decoding" in l:
-                            self.__gui.main_window.set_tasks_text("Datei %s/%s dekodieren" % file_count)
-                                                        
-                    progress = int(l[10:13])                    
+                            self.gui.main_window.set_tasks_text("Datei %s/%s dekodieren" % file_count)
+
+                    progress = int(l[10:13])
                     # update progress
-                    self.__gui.main_window.set_tasks_progress(progress)
-                    
+                    self.gui.main_window.set_tasks_progress(progress)
+
                     while events_pending():
                         main_iteration(False)
-                except ValueError:                
+                except ValueError:
                     pass
-           
-            # errors?            
+
+            # errors?
             errors = process.stderr.readlines()
             error_message = ""
             for error in errors:
-                error_message += error.strip()
-                                                  
-            if len(errors) == 0: # dekodieren erfolgreich                
+                if not 'libmediaclient' in error:
+                    error_message += error.strip()
+
+            if error_message == "": # dekodieren erfolgreich
                 file_conclusion.decode.status = Status.OK
-                
+
                 file_conclusion.uncut_video = join(self.config.get('general', 'folder_uncut_avis'), basename(file_conclusion.otrkey[0:len(file_conclusion.otrkey)-7]))
-                             
+
                 # move otrkey to trash
-                target = self.config.get('general', 'folder_trash_otrkeys')
-                fileoperations.move_file(file_conclusion.otrkey, target)
-            else:            
+                if self.config.get('general', 'move_otrkey_to_trash_after_decode'):
+                    target = self.config.get('general', 'folder_trash_otrkeys')
+                    fileoperations.move_file(file_conclusion.otrkey, target)
+            else:
                 file_conclusion.decode.status = Status.ERROR
 
                 try:
@@ -206,548 +213,266 @@ class DecodeOrCut(BaseAction):
                     error_message = unicode(error_message, 'iso-8859-1')
 
                 file_conclusion.decode.message = error_message
-                
+
         return True
-            
-    def cut(self, file_conclusions, action, default_cut_action=None):                      
+
+    def cut(self, file_conclusions, action, default_cut_action=None):
         # now this method may not return "False"
-        self.__gui.main_window.set_tasks_visible(True)
-        self.__gui.main_window.block_gui(True)          
-             
+        self.gui.main_window.set_tasks_visible(True)
+        self.gui.main_window.block_gui(True)
+
         if not default_cut_action:
-            default_cut_action = self.config.get('general', 'cut_action')                                         
-               
+            default_cut_action = self.config.get('general', 'cut_action')
+
         for count, file_conclusion in enumerate(file_conclusions):
-            self.__gui.main_window.set_tasks_text("Cutlist %s/%s wählen" % (count + 1, len(file_conclusions)))
-            self.__gui.main_window.set_tasks_progress((count + 1) / float(len(file_conclusions)) * 100)
-    
-            # file correctly decoded?            
+            self.gui.main_window.set_tasks_text("Cutlist %s/%s wählen" % (count + 1, len(file_conclusions)))
+            self.gui.main_window.set_tasks_progress((count + 1) / float(len(file_conclusions)) * 100)
+
+            # file correctly decoded?
             if action == Action.DECODEANDCUT:
                 if file_conclusion.decode.status != Status.OK:
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = "Datei wurde nicht dekodiert."
                     continue
-           
+
             file_conclusion.cut.cut_action = default_cut_action
-                                         
+
             if default_cut_action in [Cut_action.ASK, Cut_action.CHOOSE_CUTLIST]:
-                # show dialog                
-                self.__gui.dialog_cut.setup(
+                # show dialog
+                self.gui.dialog_cut.setup(
                     file_conclusion.uncut_video,
                     self.config.get('general', 'folder_cut_avis'),
-                    default_cut_action == Cut_action.ASK)                    
-                    
-                cutlists = []                              
+                    default_cut_action == Cut_action.ASK)
+
+                cutlists = []
                 self.cutlists_error = False
-                
-                def error_cb(error):            
-                    self.__gui.dialog_cut.builder.get_object('label_status').set_markup("<b>%s</b>" % error)
+
+                def error_cb(error):
+                    self.gui.dialog_cut.builder.get_object('label_status').set_markup("<b>%s</b>" % error)
                     self.cutlists_error = True
-                     
+
                 def cutlist_found_cb(cutlist):
-                    self.__gui.dialog_cut.add_cutlist(cutlist)
+                    self.gui.dialog_cut.add_cutlist(cutlist)
                     cutlists.append(cutlist)
-               
+
                 def completed():
                     if not self.cutlists_error:
-                        self.__gui.dialog_cut.builder.get_object('label_status').set_markup("")
-               
+                        self.gui.dialog_cut.builder.get_object('label_status').set_markup("")
+                
                 GeneratorTask(cutlists_management.download_cutlists, None, completed).start(file_conclusion.uncut_video, self.config.get('general', 'server'), self.config.get('general', 'choose_cutlists_by'), self.config.get('general', 'cutlist_mp4_as_hq'), error_cb, cutlist_found_cb)
                 
-                response = self.__gui.dialog_cut.run()                
-                self.__gui.dialog_cut.hide()
-
+                response = self.gui.dialog_cut.run()
+                self.gui.dialog_cut.hide()
+                
                 if response < 0:
                     file_conclusion.cut.status = Status.NOT_DONE
-                    file_conclusion.cut.message = "Abgebrochen."                    
+                    file_conclusion.cut.message = "Abgebrochen."
                 else:  # change cut_action accordingly
                     file_conclusion.cut.cut_action = response
 
             if file_conclusion.cut.cut_action == Cut_action.MANUALLY: # MANUALLY                               
-                error_message, cuts, executable = self.cut_file_manually(file_conclusion.uncut_video)
+                error_message, cutlist = self.cut_file_manually(file_conclusion.uncut_video)
                                        
                 if not error_message:
-                    file_conclusion.cut.create_cutlist = True            
-                    file_conclusion.cut.cutlist.cuts_frames = cuts
-                    file_conclusion.cut.cutlist.intended_app = basename(executable)                    
-                    file_conclusion.cut.cutlist.usercomment = 'Mit OTR-Verwaltung geschnitten'
-                    
-                    fps, error = self.__get_fps(file_conclusion.uncut_video)
-                    if not error:
-                        file_conclusion.cut.cutlist.fps = fps
-                    else:
-                        file_conclusion.cut.cutlist.fps = 25.
-                        print "Achtung! Möglicherweise wurde eine falsche Fps-Anzahl eingetragen! (%s)" % error
-                    # calculate seconds
-                    for start_frame, duration_frames in cuts:
-                        file_conclusion.cut.cutlist.cuts_seconds.append((start_frame / fps, duration_frames / fps))
+                    file_conclusion.cut.create_cutlist = True
+                    file_conclusion.cut.upload_cutlist = True
+                    file_conclusion.cut.cutlist = cutlist
                 else:
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = error_message
-                    
+
             elif file_conclusion.cut.cut_action == Cut_action.BEST_CUTLIST:
                 error, cutlists = cutlists_management.download_cutlists(file_conclusion.uncut_video, self.config.get('general', 'server'), self.config.get('general', 'choose_cutlists_by'), self.config.get('general', 'cutlist_mp4_as_hq'))
-                
+
                 if error:
                     file_conclusion.cut.status = Status.ERROR
                     file_conclusion.cut.message = error
                     continue
-                
+
                 if len(cutlists) == 0:
                     file_conclusion.cut.status = Status.NOT_DONE
                     file_conclusion.cut.message = "Keine Cutlist gefunden."
                     continue
-                                               
+
                 file_conclusion.cut.cutlist = cutlists_management.get_best_cutlist(cutlists)
-             
-            elif file_conclusion.cut.cut_action == Cut_action.CHOOSE_CUTLIST:                
-                file_conclusion.cut.cutlist = self.__gui.dialog_cut.chosen_cutlist
-                
-            elif file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST:     
+
+            elif file_conclusion.cut.cut_action == Cut_action.CHOOSE_CUTLIST:
+                if self.gui.dialog_cut.chosen_cutlist != None:
+                    file_conclusion.cut.cutlist = self.gui.dialog_cut.chosen_cutlist
+                else:
+                    file_conclusion.cut.status = Status.NOT_DONE
+                    file_conclusion.cut.message = "Keine Cutlist gefunden."
+                    
+            elif file_conclusion.cut.cut_action == Cut_action.LOCAL_CUTLIST:
                 file_conclusion.cut.cutlist.local_filename = file_conclusion.uncut_video + ".cutlist"
-                
+
                 if not exists(file_conclusion.cut.cutlist.local_filename):
                     file_conclusion.cut.status = Status.ERROR
-                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."          
-          
+                    file_conclusion.cut.message = "Keine lokale Cutlist gefunden."
+
+            elif file_conclusion.cut.cut_action == Cut_action.ASK:
+                file_conclusion.cut.status = Status.NOT_DONE
+                file_conclusion.cut.message = "Keine Cutlist gefunden."
+
+
         # and finally cut the file
-        for count, file_conclusion in enumerate(file_conclusions):            
-            
+        for count, file_conclusion in enumerate(file_conclusions):
+
             if file_conclusion.cut.status in [Status.NOT_DONE, Status.ERROR]:
-                continue    
-        
+                continue
+
             print "[Decodeandcut] Datei %s wird geschnitten" % file_conclusion.uncut_video
-            self.__gui.main_window.set_tasks_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
-            self.__gui.main_window.set_tasks_progress(0.5)
-            
+            self.gui.main_window.set_tasks_text("Datei %s/%s schneiden" % (count + 1, len(file_conclusions)))
+            self.gui.main_window.set_tasks_progress(0)
+            while events_pending():
+                main_iteration(False)
+
             # download cutlist
             if file_conclusion.cut.cut_action in [Cut_action.BEST_CUTLIST, Cut_action.CHOOSE_CUTLIST]:
-                file_conclusion.cut.cutlist.download(self.config.get('general', 'server'), file_conclusion.uncut_video)   
+                file_conclusion.cut.cutlist.download(self.config.get('general', 'server'), file_conclusion.uncut_video)
 
-            cut_video, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)                
+            cut_video, ac3_file, error = self.cut_file_by_cutlist(file_conclusion.uncut_video, file_conclusion.cut.cutlist)
 
             if cut_video == None:
                 file_conclusion.cut.status = Status.ERROR
-                file_conclusion.cut.message = error    
+                file_conclusion.cut.message = error
             else:
                 file_conclusion.cut.status = Status.OK
                 file_conclusion.cut_video = cut_video
-                
-                if self.config.get('general', 'rename_cut'):                        
-                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.uncut_video))
+                file_conclusion.ac3_file = ac3_file
+
+                if self.config.get('general', 'rename_cut'):
+                    file_conclusion.cut.rename = self.rename_by_schema(basename(file_conclusion.cut_video)) # rename after cut video, extension could have changed
                 else:
-                    file_conclusion.cut.rename = basename(cut_video)           
-        
+                    file_conclusion.cut.rename = basename(cut_video)
+                    
+                if os.path.isfile(file_conclusion.uncut_video + '.ffindex_track00.kf.txt'):
+                    os.remove(file_conclusion.uncut_video + '.ffindex_track00.kf.txt')
+                
         return True
 
-    def __get_format(self, filename):        
-        root, extension = splitext(filename)
-            
-        if extension == '.avi':
-            if splitext(root)[1] == '.HQ':
-                return Format.HQ
-            elif splitext(root)[1] == '.HD':
-                return Format.HD
-            else:
-                return Format.AVI
-        elif extension == '.mp4':
-            return Format.MP4
-        else:
-            return -1
-
-    def __get_program(self, filename, manually=False):   
-        if manually:
-            programs = { Format.AVI : self.config.get('general', 'cut_avis_man_by'),
-                         Format.HQ  : self.config.get('general', 'cut_hqs_man_by'),
-                         Format.HD  : self.config.get('general', 'cut_hqs_man_by'),
-                         Format.MP4 : self.config.get('general', 'cut_mp4s_man_by') }
-        else:
-            programs = { Format.AVI : self.config.get('general', 'cut_avis_by'),
-                         Format.HQ  : self.config.get('general', 'cut_hqs_by'),
-                         Format.HD  : self.config.get('general', 'cut_hqs_by'),                         
-                         Format.MP4 : self.config.get('general', 'cut_mp4s_by') }
-                     
-        format = self.__get_format(filename)                 
-
-        if format < 0:
-            return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt."
-                             
-        config_value = programs[format]
-        
-        if 'avidemux' in config_value:
-            return Program.AVIDEMUX, config_value
-        elif 'vdub' in config_value or 'VirtualDub' in config_value:
-            return Program.VIRTUALDUB, config_value
-        else:
-            return -2, "Programm '%s' konnte nicht bestimmt werden. Es werden VirtualDub und Avidemux unterstützt." % config_value
-   
-    def __generate_filename(self, filename):
-        """ generate filename for a cut video file. """
-        
-        root, extension = splitext(basename(filename))
-                
-        new_name = root + "-cut" + extension
-                
-        cut_video = join(self.config.get('general', 'folder_cut_avis'), new_name)        
-            
-        return cut_video
-   
-    def __get_fps(self, filename):
-        """ Gets the fps of a movie using mplayer. 
-            Returns without error:              
-                       fps, None
-                    with error:
-                       None, error_message """
-        
-        mplayer = self.config.get('general', 'mplayer')
-            
-        if not mplayer:
-            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der FPS benötigt."
-
-        try:
-            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)       
-        except OSError:
-            return None, "MPlayer wurde nicht gefunden!"            
-        
-        stdout = process.communicate()[0]
-    
-        for line in stdout.split('\n'):
-            if "VIDEO" in line:
-                try:
-                    return float(line[line.index("bpp")+3 : line.index("fps")]), None
-                except:
-                    return None, "FPS konnte nicht bestimmt werden " + line
-      
-        return None, "FPS konnte nicht bestimmt werden."
-        
-    
-    def __get_aspect_ratio(self, filename):
-        """ Gets the aspect ratio of a movie using mplayer. 
-            Returns without error:              
-                       aspect_ratio, None
-                    with error:
-                       None, error_message """
-        mplayer = self.config.get('general', 'mplayer')
-            
-        if not mplayer:
-            return None, "Der Mplayer ist nicht angegeben. Dieser wird zur Bestimmung der Aspekt Ratio benötigt."
-
-        try:
-            process = subprocess.Popen([mplayer, "-vo", "null", "-frames", "1", "-nosound", filename], stdout=subprocess.PIPE)       
-        except OSError:
-            return None, "MPlayer wurde nicht gefunden!"            
-        
-        stdout = process.communicate()[0]
-    
-        for line in stdout.split('\n'):
-            if "Aspe" in line:
-                if "1.78:1" in line or "0.56:1" in line:
-                    return "16:9", None
-                elif "1.33:1" in line or "0.75:1" in line:
-                    return "4:3", None
-                else:
-                    return None, "Aspekt konnte nicht bestimmt werden " + line
-      
-        return None, "Aspekt Ratio konnte nicht bestimmt werden."            
-            
-    def __create_cutlist_virtualdub(self, filename):
-        """ returns: cuts, error_message """
-        
-        try:
-            f = open(filename, 'r')
-        except IOError:
-            return None, "Die VirtualDub-Projektdatei konnte nicht gelesen werden.\nWurde das Projekt in VirtualDub nicht gespeichert?\n(Datei: %s)." % filename
-
-        cuts_frames = [] # (start, duration)
-        count = 0
-
-        for line in f.readlines():
-            if "VirtualDub.subset.AddRange" in line:
-                try:
-                    start, duration = line[line.index('(') + 1 : line.index(')')].split(',')
-                except (IndexError, ValueError), message:
-                    return None, "Konnte Schnitte nicht lesen, um Cutlist zu erstellen. (%s)" % message
-                
-                cuts_frames.append((int(start), int(duration)))
-                
-        if len(cuts_frames) == 0:
-            return None, "Konnte keine Schnitte finden!"
-
-        fileoperations.remove_file(filename)
-
-        return cuts_frames, None       
-       
     def cut_file_manually(self, filename):
-        """ Cuts a file manually with Avidemux or VirtualDub and gets cuts from
+        """ Cuts a file manually with Avidemux or VirtualDub or the CutInterface and gets cuts from
             possibly created project files (VD) or from output (AD). 
-            returns: error_message, cuts, executable """
+            returns: error_message, cutlist """
         
-        program, config_value = self.__get_program(filename, manually=True)
-        
-        if program < 0:
-            return config_value, None, None
-            
-        if program == Program.AVIDEMUX:       
+        program, config_value, ac3file = self.get_program(filename, manually=True)
+        format, ac3_file = self.get_format(filename)
+        fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
 
-            try:                   
-                avidemux = subprocess.Popen([config_value, filename], stdout=subprocess.PIPE)
-            except OSError:
-                return "Avidemux konnte nicht aufgerufen werden: " + config_value, None, None
-                
-            while avidemux.poll() == None:
-                time.sleep(1)
-                pass
-                
-            seg_lines = []
+        if error:
+            if exists(filename+'.mkv'):
+                fileoperations.remove_file(filename+'.mkv')
+            return None, None, "Konnte FPS nicht bestimmen: " + error
+
+
+        if program < 0:
+            return config_value, None
             
-            for line in avidemux.stdout.readlines():       
-                if line.startswith(' Seg'):
-                    # delete not interesting parts
-                    line = line[:line.find("audio")]
-                
-                    parts = line.split(',')
-        
-                    seg_id = int(parts[0].split(':')[-1])
-                    start = int(parts[1].split(':')[-1])
-                    size = int(parts[2].split(':')[-1])
-                    seg_lines.append((seg_id, start, size))
- 
-            # keep only necessary items            
-            seg_lines.reverse()
-            temp_cuts = []
+        cutlist = cutlists_management.Cutlist()
+
+        if program == Program.AVIDEMUX:
+
+            cutter = CutAvidemux(self.app, self.gui)
+            cuts_frames,  cutlist_error = cutter.create_cutlist(filename, config_value)
+                        
+        elif program == Program.VIRTUALDUB: # VIRTUALDUB
             
-            for seg_id, start, duration in seg_lines:
-                if seg_id == 0:
-                    temp_cuts.append((start, duration))
-                    break
-                else:
-                    temp_cuts.append((start, duration))
+            cutter = CutVirtualdub(self.app, self.gui)
+            cuts_frames,  cutlist_error = cutter.create_cutlist(filename, config_value)
                 
-            temp_cuts.reverse()
+        if program == Program.CUT_INTERFACE:
+            # looking for latest cutlist, if any
+            p, video_file = os.path.split(filename)
+            cutregex = re.compile("^" + video_file + "\.?(.*).cutlist$")
+            files = os.listdir(p)
+            number = -1
+            local_cutlist = None		# use fallback name in conclusions if there are no local cutlists
+            for f in files:
+                match = cutregex.match(f)
+                if match:
+                    # print "Found local cutlist %s" % match.group()
+                    if match.group(1) == '':
+                        res_num = 0
+                    else:
+                        res_num = int(match.group(1))
+                    
+                    if res_num > number:
+                        res_num = number
+                        local_cutlist = p + "/" + match.group()
+                    
+            ci = CutinterfaceDialog.NewCutinterfaceDialog()
+            cutlist = ci._run(filename , local_cutlist, self.app)
+            ci.destroy()
             
-            cuts_frames = []
-            count = 0
-            for start, duration in temp_cuts:
-                cuts_frames.append((start, duration))
-                count += 1                         
-                
-            if len(cuts_frames) == 0:
-                cutlist_error = "Es wurde nicht geschnitten."
+            if cutlist.cuts_frames == None or len(cutlist.cuts_frames) == 0:
+                cutlist_error = "Keine Schnitte angegeben"
             else:
                 cutlist_error = None
-                        
-        else: # VIRTUALDUB
             
-            cut_video_is_none, error = self.__cut_file_virtualdub(filename, config_value, cuts=None, manually=True)
-            
-            if error != None:
-                return error, None, None
+        else: # complete cutlist for Avidemux & VirtualDub
+        
+            # create cutlist data
+            if cutlist_error == None:
+                cutlist.cuts_frames = cuts_frames
+                cutlist.intended_app = basename(config_value)                    
+                cutlist.usercomment = 'Mit %s geschnitten' %self.app.app_name
+                cutlist.fps = fps
                 
-            cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"))
-         
+                # calculate seconds
+                for start_frame, duration_frames in cuts_frames:
+                    cutlist.cuts_seconds.append((start_frame / fps, duration_frames / fps))
+        
         if cutlist_error:            
-            return cutlist_error, None, config_value
+            return cutlist_error, None
         else:
-            return None, cuts_frames, config_value
+            return None, cutlist
              
     def cut_file_by_cutlist(self, filename, cutlist):
-        """ Returns: cut_video, error """
+        """ Returns: cut_video, ac3file, error """
 
-        program, program_config_value = self.__get_program(filename)
+        program, program_config_value, ac3file = self.get_program(filename)
         if program < 0:
-            return None, program_config_value 
-       
+            return None, None, program_config_value
+
         # get list of cuts
-        error = cutlist.read_cuts()        
+        error = cutlist.read_cuts()
         if error:
-            return None, error       
-            
-        if not cutlist.cuts_frames:                        
-            fps, error = self.__get_fps(filename)
+            return None, None, error
+
+        if not cutlist.cuts_frames:
+            fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
             if not error:
                 cutlist.fps = fps
             else:
-                return None, "Konnte FPS nicht bestimmen: " + error
-            
+                return None, None, "Konnte FPS nicht bestimmen: " + error
+
             print "Calculate frame values from seconds."
             for start, duration in cutlist.cuts_seconds:
                 cutlist.cuts_frames.append((start * cutlist.fps, duration * cutlist.fps))
-               
+
         if program == Program.AVIDEMUX:
-            cut_video, error = self.__cut_file_avidemux(filename, program_config_value, cutlist.cuts_frames)
-            
-        else: # VIRTUALDUB                              
-            cut_video, error = self.__cut_file_virtualdub(filename, program_config_value, cutlist.cuts_frames)
-            
+            cutter = CutAvidemux(self.app, self.gui)
+            cut_video, error = cutter.cut_file_by_cutlist(filename, cutlist,  program_config_value)
+            if not error and ac3file != None and self.config.get('general', 'merge_ac3s'):
+                return self.mux_ac3(filename, cut_video, ac3file, cutlist)
+
+        elif program == Program.SMART_MKVMERGE:
+            cutter = CutSmartMkvmerge(self.app, self.gui)
+            cut_video, error = cutter.cut_file_by_cutlist(filename, cutlist)
+            if not error and ac3file != None:
+                return cut_video,  ac3file,  None
+        
+        elif program == Program.VIRTUALDUB: # VIRTUALDUB
+            cutter = CutVirtualdub(self.app, self.gui)
+            cut_video, error = cutter.cut_file_by_cutlist(filename, cutlist,  program_config_value)
+            if not error and ac3file != None and self.config.get('general', 'merge_ac3s'):
+                return self.mux_ac3(filename, cut_video, ac3file, cutlist)
+        
+        else:
+            return None,  None,  "Schnittprogramm wird nicht unterstützt"
+                
         if error:
-            return None, error
+            return None, None, error
         else:
-            return cut_video, None
-
-    def __cut_file_avidemux(self, filename, config_value, cuts):
-        # make file for avidemux scripting engine
-        f = open("tmp.js", "w")
-                    
-        f.writelines([
-            '//AD\n',
-            'var app = new Avidemux();\n',
-            '\n'
-            '//** Video **\n',            
-            'app.load("%s");\n' % filename,            
-            '\n',            
-            'app.clearSegments();\n'
-            ])
-            
-        for frame_start, frames_duration in cuts:
-            f.write("app.addSegment(0, %i, %i);\n" %(frame_start, frames_duration))
-
-        cut_video = self.__generate_filename(filename)
-                                
-        f.writelines([
-            '//** Postproc **\n',
-            'app.video.setPostProc(3,3,0);\n'
-            ])
-            
-        if self.config.get('general', 'smart'):
-            f.write('app.video.codec("Copy","CQ=4","0");\n')
-            
-        f.writelines([
-            '//** Audio **\n',
-            'app.audio.reset();\n',
-            'app.audio.codec("copy",128,0,"");\n',
-            'app.audio.normalizeMode=0;\n',
-            'app.audio.normalizeValue=0;\n',
-            'app.audio.delay=0;\n',
-            'app.audio.mixer="NONE";\n',
-            'app.audio.scanVBR="";\n',
-            'app.setContainer="AVI";\n',
-            'setSuccess(app.save("%s"));\n' % cut_video
-            ])
-
-        f.close()
-        
-        # start avidemux: 
-        try:
-            avidemux = subprocess.Popen([config_value, "--nogui", "--force-smart", "--run", "tmp.js", "--quit"], stderr=subprocess.PIPE)
-        except OSError:
-            return None, "Avidemux konnte nicht aufgerufen werden: " + config_value
-        
-        self.__gui.main_window.set_tasks_progress(50)
-        
-        while avidemux.poll() == None:
-            time.sleep(1)
-#            TODO: make it happen
-#            line = avidemux.stderr.readline()
-#
-#            if "Done:" in line:
-#                progress = line[line.find(":") + 1 : line.find("%")]
-#                self.__gui.main_window.set_tasks_progress(int(progress))
-#            
-            while events_pending():
-                main_iteration(False)
-        
-        fileoperations.remove_file('tmp.js')
-        
-        return cut_video, None
-        
-    def __cut_file_virtualdub(self, filename, config_value, cuts=None, manually=False):
-        format = self.__get_format(filename)         
-
-        if format == Format.HQ:
-            aspect, error_message = self.__get_aspect_ratio(filename)
-            if not aspect:
-                return None, error_message                     
-                
-            if aspect == "16:9":
-                comp_data = codec.get_comp_data_h264_169()
-            else:
-                comp_data = codec.get_comp_data_h264_43()
-        elif format == Format.HD:
-            aspect, error_message = self.__get_aspect_ratio(filename)
-            if not aspect:
-                return None, error_message                     
-                
-            if aspect == "16:9":
-                comp_data = codec.get_comp_data_hd_169()
-            else:
-                comp_data = codec.get_comp_data_hd_43()
-        
-        elif format == Format.AVI:      
-            comp_data = codec.get_comp_data_dx50()
-        
-        else:
-            return None, "Format nicht unterstützt (Nur Avi DX50, HQ H264 und HD sind möglich)."
-        
-        # make file for virtualdub scripting engine
-        if manually:
-            # TODO: kind of a hack
-            curr_dir = os.getcwd()
-            try:
-                os.chdir(dirname(config_value))
-            except OSError:        
-                return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
-    
-        self.__gui.main_window.set_tasks_progress(50)
-    
-        f = open("tmp.vcf", "w")
-        
-        if not manually:
-            f.write('VirtualDub.Open("%s");\n' % filename)
-            
-        if self.config.get('general', 'smart'):
-            f.writelines([               
-                'VirtualDub.video.SetMode(1);\n',
-                'VirtualDub.video.SetSmartRendering(1);\n',
-                'VirtualDub.video.SetCompression(0x53444646,0,10000,0);\n'
-                'VirtualDub.video.SetCompData(%s);\n' % comp_data                
-                ])
-        else:
-            f.write('VirtualDub.video.SetMode(0);\n')
-
-        f.write('VirtualDub.subset.Clear();\n')
-
-        if not manually:
-            for frame_start, frames_duration in cuts:
-                f.write("VirtualDub.subset.AddRange(%i, %i);\n" % (frame_start, frames_duration))
-
-            cut_video = self.__generate_filename(filename)
-                                
-            f.writelines([
-                'VirtualDub.SaveAVI("%s");\n' % cut_video,
-                'VirtualDub.Close();'
-                ])
-
-        f.close()
-        
-        # start vdub
-        if not exists(config_value):
-            return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
-        
-        if manually: 
-            win_filename = "Z:" + filename.replace(r"/", r"\\")
-            command = 'VirtualDub.exe /s tmp.vcf "%s"' % win_filename
-        else:
-            command = "%s /s tmp.vcf /x" % config_value
-
-        command = "wineconsole " + command               
-        
-        print command
-        
-        try:     
-            vdub = subprocess.Popen(command, shell=True)
-        except OSError:
-            return None, "VirtualDub konnte nicht aufgerufen werden: " + config_value
-            
-        while vdub.poll() == None:          
-            time.sleep(1)
-                      
-            while events_pending():
-                main_iteration(False)
-        
-        fileoperations.remove_file('tmp.vcf')
-        
-        if manually:
-            os.chdir(curr_dir)            
-            return None, None        
-
-        return cut_video, None
+            return cut_video, "", None

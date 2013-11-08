@@ -14,8 +14,11 @@
 #with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
-import simplejson as json
+try: import simplejson as json
+except ImportError: import json
 import os.path
+
+from otrverwaltung import path
 
 class Config:
     """ Loads and saves configuration fields from/to file. """
@@ -92,3 +95,17 @@ class Config:
                     self.set(category, option, json_config[category][option])
                 except KeyError:                
                     self.set(category, option, value)                     
+
+    def get_program(self,  program):
+        """ Returns the full calling string of a program 
+            either the pure config value or the internal version, if the config value contains 'intern' """
+        
+        value = self.__fields['programs'][program]
+        intern_program = path.get_tools_path(value)
+
+        if 'intern-' in value:
+            if os.path.isfile(intern_program):
+                return intern_program
+            
+        return value
+                

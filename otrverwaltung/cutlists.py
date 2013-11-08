@@ -57,6 +57,7 @@ class Cutlist:
         self.fps = 0
 
         # own additions
+        self.app = 'OTR-Verwaltung++'
         self.errors = False
         self.cuts_seconds = [] # (start, duration) list
         self.cuts_frames = [] # (start, duration) list
@@ -122,18 +123,36 @@ class Cutlist:
         except IOError, error:
             return "Cutlist konnte nicht heruntergeladen werden (%s)." % error
     
+    def _check_string(self, string):
+        try:
+            res = string.decode('latin1').encode('utf-8')
+        except:
+            print "No latin1 string, trying utf-8"
+            try:
+                res = string.decode('utf-8').encode('utf-8')
+            except:
+                print "Malformed string"
+                res = ""
+        
+        return res
+    
     def read_from_file(self):
         config_parser = ConfigParser.SafeConfigParser()
         
         try:
             config_parser.read(self.local_filename)
             
-            self.filename = config_parser.get('Info', 'SuggestedMovieName')
-            self.author = config_parser.get('Info', 'Author')
-            self.rating = config_parser.get('Info', 'RatingByAuthor')
-            self.usercomment = config_parser.get('Info', 'UserComment')
+            self.filename = self._check_string(config_parser.get('Info', 'SuggestedMovieName'))
+            self.author = self._check_string(config_parser.get('Info', 'Author'))
+            self.ratingbyauthor = int(config_parser.get('Info', 'RatingByAuthor'))
+            self.rating = 0
+            self.ratingcount = 0
+            self.usercomment = self._check_string(config_parser.get('Info', 'UserComment'))
+            self.countcuts = int(config_parser.get('General', 'NoOfCuts'))
+            self.actualcontent = self._check_string(config_parser.get('Info', 'ActualContent'))
+            self.filename_original = self._check_string(config_parser.get('General', 'ApplyToFile'))
         except:
-            print "Malformed cutlist: ", message        
+            print "Malformed cutlist: ", self.local_filename
       
     def read_cuts(self):
         """ Reads cuts from local_filename.
@@ -199,7 +218,7 @@ class Cutlist:
                                         
             cutlist.writelines([
                 "[General]\n",
-                "Application=OTR-Verwaltung\n",
+                "Application=%s\n" % self.app,
                 "Version=%s\n" % self.intended_version,
                 "comment1=The following parts of the movie will be kept, the rest will be cut out.\n",
                 "ApplyToFile=%s\n" % os.path.basename(uncut_video),

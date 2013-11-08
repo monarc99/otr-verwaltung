@@ -72,12 +72,13 @@ def rename_file(old_filename, new_filename, error_cb=__error):
 
 def move_file(filename, target, error_cb=__error):
     """ Verschiebt eine Datei in den angegebenen Ordner."""
+    """ return: new filename """
     
     new_filename = join(target, basename(filename))
     
     if exists(new_filename):
         handle_error(error_cb, "Umbenennen: Die Datei existiert bereits! (%s)" % new_filename)
-        return
+        return filename
     
     print "[Fileoperations] Move %s to %s" % (filename, target)
     try:
@@ -87,6 +88,11 @@ def move_file(filename, target, error_cb=__error):
             shutil.move(filename, target)
         except Exception:
             handle_error(error_cb, "Fehler beim Verschieben von %s nach %s (%s). " % (filename, target, e))
+            return filename
+            
+    if os.path.isfile(filename +'.cutlist'):
+        os.remove(filename +'.cutlist')
+    return new_filename
 
 def make_unique_filename(filename):
     """ Gleicht den gegebenen Dateinamen an, sodass  """

@@ -109,10 +109,10 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.__sets_of_toolbars = {
             Section.PLANNING :   [ 'plan_add', 'plan_edit', 'plan_remove', 'plan_search'],
             Section.DOWNLOAD:    [ 'download_add_link', 'download_start', 'download_stop', 'download_remove' ],
-            Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete' ],
-            Section.VIDEO_UNCUT: [ 'cut', 'delete', 'archive', ],
-            Section.VIDEO_CUT:   [ 'archive', 'delete', 'cut', 'rename' ],
-            Section.ARCHIVE:     [ 'delete', 'rename', 'new_folder' ],
+            Section.OTRKEY :     [ 'decodeandcut', 'decode', 'delete', 'real_delete' ],
+            Section.VIDEO_UNCUT: [ 'cut', 'delete', 'real_delete', 'archive'  ],
+            Section.VIDEO_CUT:   [ 'archive', 'delete', 'real_delete', 'cut', 'rename' ],
+            Section.ARCHIVE:     [ 'delete', 'real_delete', 'rename', 'new_folder' ],
             Section.TRASH:       [ 'real_delete', 'restore' ]
         }           
 
@@ -464,6 +464,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
     
     def on_button_show_conclusion_clicked(self, widget, data=None):
         self.app.conclusions_manager.show_conclusions()
+        self.app.show_section(self.app.section)
      
     def broadcasts_badge(self):
         count = 0
@@ -534,7 +535,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
             
         try:
-           svn_version = urllib.urlopen('http://github.com/elbersb/otr-verwaltung/raw/master/data/VERSION').read().strip()
+           svn_version = urllib.urlopen('http://github.com/monarc99/otr-verwaltung/raw/master/data/VERSION').read().strip()
         except IOError:
             self.gui.message_error_box("Konnte keine Verbindung mit dem Internet herstellen!")
             return
@@ -555,7 +556,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog = gtk.AboutDialog()        
         about_dialog.set_transient_for(self.gui.main_window)
         about_dialog.set_destroy_with_parent(True)
-        about_dialog.set_name("OTR-Verwaltung")
+        about_dialog.set_name(self.app.app_name)
         about_dialog.set_logo(gtk.gdk.pixbuf_new_from_file(path.get_image_path('icon3.png')))
         
         version = open(path.getdatapath("VERSION"), 'r').read().strip()
@@ -563,7 +564,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         about_dialog.set_website("http://elbersb.de/otrverwaltung")
         about_dialog.set_comments("Zum Verwalten von Dateien von onlinetvrecorder.com.")
         about_dialog.set_copyright("Copyright \xc2\xa9 2010 Benjamin Elbers")
-        about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>"])
+        about_dialog.set_authors(["Benjamin Elbers <elbersb@gmail.com>", "JanS",  "monarc99"])
         about_dialog.run()
         about_dialog.destroy()
     

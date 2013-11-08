@@ -71,7 +71,7 @@ class CutPlay(Plugin):
                 f.write("%s %s 0\n" % (end, (cutlist.cuts_seconds[count+1][0] - 1)))
         f.close()
         
-        p = subprocess.Popen([self.app.config.get('general', 'mplayer'), "-edl", edl_filename, filename])                
+        p = subprocess.Popen([self.app.config.get_program('mplayer'), "-edl", edl_filename, filename])                
         
         while p.poll() == None:
             time.sleep(1)

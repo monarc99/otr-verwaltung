@@ -1,0 +1,13 @@
+eac3to v3.27
+command line: D:\bin\otr-verwaltung\data\tools\intern-eac3to\eac3to.exe The_Mentalist_13.02.24_21-15_sat1_60_TVOON_DE.mpg.HQ-cut.mkv -demux -silence -keepDialnorm
+------------------------------------------------------------------------------
+MKV, 1 video track, 1 audio track, 0:40:46, 25p
+1: h264/AVC, English, 576p25 (16:9)
+2: AAC, 2.0 channels, 48kHz
+[v01] Extracting video track number 1...
+[a02] Extracting audio track number 2...
+[v01] Creating file "The_Mentalist_13.02.24_21-15_sat1_60_TVOON_DE.mpg.HQ-cut - 1 - h264, English, 576p25.h264"...
+[a02] Creating file "The_Mentalist_13.02.24_21-15_sat1_60_TVOON_DE.mpg.HQ-cut - 2 - AAC, 2.0 channels, 48kHz.aac"...
+Video track 1 contains 61147 frames.
+eac3to processing took 1 second.
+Done.

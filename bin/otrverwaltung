@@ -17,7 +17,7 @@
 
 import sys
 import os
-from os.path import join, isdir, exists
+from os.path import join, isdir, exists, splitext
 import re
 import subprocess
 import time
@@ -25,7 +25,8 @@ import hashlib
 import optparse
 import logging
 import dbus, dbus.service, dbus.glib
-import simplejson as json
+try: import simplejson as json
+except ImportError: import json
 
 try:
     from gtk import events_pending, main_iteration
@@ -119,24 +120,28 @@ class App:
                 'folder_trash_avis': '',
                 'folder_archive': '',
                 'otrkey_search': 'http://otrkeyfinder.com/?search=',
-                'decoder': '',
                 'save_email_password': False,
                 'email': '',
                 'password': '',
-                'verify_decoded': False,
-                'cut_avis_by': 'avidemux',
-                'cut_hqs_by':           '',
-                'cut_mp4s_by': 'avidemux',
-                'cut_avis_man_by': 'avidemux',
-                'cut_hqs_man_by': '',
-                'cut_mp4s_man_by': 'avidemux',
+                'verify_decoded': True,
+                'cut_avis_by': 'avidemux2_cli',
+                'cut_hqs_by': 'SmartMKVmerge',
+                'cut_mp4s_by': 'intern-vdub',
+                'cut_avis_man_by': 'CutInterface',
+                'cut_hqs_man_by': 'CutInterface',
+                'cut_mp4s_man_by': 'CutInterface',
+                'cutinterface_resolution_x': 640, 
+                'cutinterface_resolution_y': 450, 
+                'mplayer_fullscreen': True, 
+                'merge_ac3s' : True,
+                'merge_ac3s_by' : 'mkvmerge',
+                'move_otrkey_to_trash_after_decode': True, 
                 'server': 'http://cutlist.at/',
                 'cut_action': Cut_action.ASK,
                 'delete_cutlists': True,
                 'smart': True,
                 'choose_cutlists_by': 0, # 0 = size, 1=name
                 'cutlist_username': '',
-                'mplayer': 'mplayer',
                 'planned_items': '',
                 'rename_cut': True,
                 'rename_schema': '{titel} vom {tag}. {MONAT} {jahr}, {stunde}-{minute} ({sender})',
@@ -144,22 +149,54 @@ class App:
                 'show_bottom': False,                
                 'cutlist_hash': hashlib.md5(str(time.time())).hexdigest(),
                 'window_settings': '',
-                'pre_cut_show': 11,
-                'after_cut_show': 5
+                'h264_codec': 'x264vfw',
+                'komisar_hd_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --weightp 0',
+                'komisar_hq_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --aq-mode 2 --weightp 0',
+                'komisar_mp4_string': '--force-cfr --profile baseline --preset medium --trellis 0',
+                'x264vfw_hd_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --weightp 0',
+                'x264vfw_hq_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --aq-mode 2 --weightp 0',
+                'x264vfw_mp4_string': '--force-cfr --profile baseline --preset medium --trellis 0',
+                'pre_cut_show': 10,
+                'after_cut_show': 10
             },
             'downloader': {
                 'resume_on_startup': True,
                 'preferred_downloader' : '',
-                'aria2c': ['aria2c', "--allow-overwrite=true", "--continue"],
-                'wget': ['wget'],
-                'aria2c_torrent': ["aria2c", "--check-integrity=true", "--continue" ]
+                'aria2c_opts': ['--allow-overwrite=true', '--continue', '--max-connection-per-server=1', '--max-tries=0', '--split=5', '--auto-file-renaming=false', '--allow-overwrite=true', '--allow-piece-length-change=true', '--always-resume=false', '--max-resume-failure-tries=0'],
+                'wget_opts': ['-v'],
+                'aria2c_opts_torrent': ["--check-integrity=true", "--continue" ]
             },
             'plugins': {
-                'enabled': 'Play',
+                'enabled': 'Play:Mkv:MP4:Mediainfo',
                 'config': {} # used as plugin config storage
+            }, 
+            'programs': {
+                'aria2c': 'intern-aria2c',
+                'decoder': 'intern-otrdecoder',
+                'ffmpeg': 'intern-ffmpeg',
+                'ffmsindex': 'intern-ffmsindex',
+                'ffprobe': 'intern-ffprobe',
+                'mkvmerge': 'intern-mkvmerge',
+                'mediainfo': 'intern-mediainfo', 
+                'mp4box': 'intern-mp4box',
+                'mplayer': 'mplayer', 
+                'sox': 'intern-sox',
+                'wget': 'wget', 
+                'x264': 'intern-x264'
+            },
+            'smartmkvmerge': {
+                'x264_hd_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --weightp 0',
+                'x264_hq_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --aq-mode 2 --weightp 0',
+                'x264_mp4_string': '--force-cfr --profile baseline --preset medium --trellis 0',
+                'workingdir': '/tmp', 
+                'first_audio_stream': 'originale MP3 Spur kopieren', 
+                'second_audio_stream': 'originale AC3 Spur kopieren', 
+                'normalize_audio': False, 
+                'remux_to_mp4': False, 
             }
-                         
         }
+        
+        self.app_name = 'OTR-Verwaltung++'
         
         if local:
             self.config = Config(os.path.join(launch_dir, "..", "conf"), configuration)    
@@ -173,8 +210,10 @@ class App:
         self.locked = False
             
         # regex
-        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|HD\.avi|mp4)$')
-        self.cut_video = re.compile('.*(avi|mp4|mkv|wmv)$')
+        self.uncut_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg\.(avi|HQ\.avi|HD\.avi|mp4|HQ\.mkv|HD\.mkv)$')
+        # regex for the name schema should use cut videos just in case it has been muxed into an mkv because of an ac3-track
+        self.rename_video = re.compile('.*_([0-9]{2}\.){2}([0-9]){2}_([0-9]){2}-([0-9]){2}_.*_([0-9])*_TVOON_DE.mpg(-cut\.avi|\.HQ-cut\.avi|\.HD-cut\.avi|-cut\.mp4|\.HQ-cut\.mp4|\.HD-cut\.mp4|\.HD-cut\.mkv|\.HQ-cut\.mkv|-cut\.mkv)$')
+        self.cut_video = re.compile('.*(avi|mp4|mkv|wmv|ac3)$')
        
         # load gui
         self.__gui = gui.Gui(self)  # for backwards compability
@@ -401,7 +440,8 @@ class App:
         if schema == "":
             schema = self.config.get('general', 'rename_schema')        
         
-        if self.uncut_video.match(filename):           
+        if self.rename_video.match(filename):           
+	    filename, extension = splitext(filename)	# preserve file extension (avi or mkv)
             
             parts = filename.split('_')
             parts.reverse()
@@ -447,7 +487,10 @@ class App:
             }
              
             for token, value in values.iteritems():
-                schema = schema.replace('{%s}' % token, value)                            
+                schema = schema.replace('{%s}' % token, value)                   
+            
+            if not schema[-len(extension):] == extension:
+                schema += extension		# preserve file extension
                 
             return schema
         else:         
@@ -597,8 +640,11 @@ class App:
         
         f_edl = join(self.config.get('general', 'folder_new_otrkeys'), ".tmp.edl")
         f_sub = join(self.config.get('general', 'folder_new_otrkeys'), ".tmp.sub")
-            
-        p = subprocess.Popen([self.config.get('general', 'mplayer'), "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
+        
+        if self.config.get('general', 'mplayer_fullscreen'):
+            p = subprocess.Popen([self.config.get_program('mplayer'), "-fs", "-geometry",  "50%:50%", "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
+        else:
+            p = subprocess.Popen([self.config.get_program('mplayer'), "-geometry",  "50%:50%", "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
        
         # wait
         while p.poll() == None:
@@ -768,7 +814,7 @@ class OTRVerwaltungService(dbus.service.Object):
     def add_link(self, link):        
         self.app.add_download_link(link)        
         
-if __name__ == "__main__":   
+if __name__ == "__main__":
     if dbus.SessionBus().request_name("elbersb.otrverwaltung") != dbus.bus.REQUEST_NAME_REPLY_PRIMARY_OWNER:
         print "OTR-Verwaltung läuft bereits. Zeige Fenster."
         dbus.SessionBus().get_object("elbersb.otrverwaltung", "/elbersb/otrverwaltung").get_dbus_method("show_window")()

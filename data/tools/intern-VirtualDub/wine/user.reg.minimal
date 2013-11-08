@@ -1,0 +1,145 @@
+WINE REGISTRY Version 2
+;; All keys relative to \\User\\S-1-5-21-0-0-0-1000
+
+#arch=win32
+
+[Software\\GNU\\ffdshow] 1363981258
+"cscd"=dword:00000001
+"div3"=dword:00000001
+"duck"=dword:00000001
+"dx50"=dword:00000001
+"fastH264"=dword:00000000
+"ffv1"=dword:00000001
+"flv1"=dword:00000001
+"fvfw"=dword:00000001
+"h261"=dword:00000001
+"h263"=dword:00000001
+"h264"=dword:00000001
+"hfyu"=dword:00000001
+"isBlacklist"=dword:00000001
+"isWhitelist"=dword:00000000
+"iv32"=dword:00000001
+"mjpg"=dword:00000001
+"mp41"=dword:00000001
+"mp42"=dword:00000001
+"mp43"=dword:00000001
+"mp4v"=dword:00000001
+"mszh"=dword:00000001
+"png1"=dword:00000001
+"qtrle"=dword:00000001
+"qtrpza"=dword:00000001
+"raw_rawv"=dword:00000001
+"rt21"=dword:00000001
+"subTextpin"=dword:00000001
+"subTextpinSSA"=dword:00000001
+"svq1"=dword:00000001
+"svq3"=dword:00000001
+"theo"=dword:00000001
+"vp3"=dword:00000001
+"vp5"=dword:00000001
+"vp6"=dword:00000001
+"vp6f"=dword:00000001
+"xvid"=dword:00000001
+"zlib"=dword:00000001
+
+[Software\\GNU\\ffdshow\\default] 1363981262
+"isSubtitles"=dword:00000000
+"postprocH264mode"=dword:00000000
+"resizeMethod"=dword:00000009
+"subIsExpand"=dword:00000000
+"threadsnum"=dword:00000004
+
+[Software\\GNU\\ffdshow_audio] 1363981258
+"aac"=dword:00000008
+"ac3"=dword:0000000f
+"amr"=dword:00000001
+"dts"=dword:00000011
+"eac3"=dword:00000001
+"flac"=dword:00000001
+"isBlacklist"=dword:00000001
+"isWhitelist"=dword:00000000
+"lpcm"=dword:00000004
+"mace"=dword:00000001
+"mlp"=dword:00000001
+"mp2"=dword:00000007
+"mp3"=dword:00000007
+"qdm2"=dword:00000001
+"truehd"=dword:00000001
+"tta"=dword:00000001
+"vorbis"=dword:00000012
+
+[Software\\GNU\\ffdshow_audio\\default] 1363981258
+"decoderDRC"=dword:00000000
+"ismixer"=dword:00000001
+"mixerNormalizeMatrix"=dword:00000000
+"mixerOut"=dword:00000001
+"passthroughAC3"=dword:00000000
+"passthroughDTS"=dword:00000000
+"volNormalize"=dword:00000000
+[Software\\VirtualDub.org\\VirtualDub] 1363981501
+"Main prefs"=hex:00,04,00,01,00,00,00,00,20,03,00,00,40,00,00,00,02,00,00,00
+"SeenWelcome"=dword:00000001
+"VirtualDub"=dword:00000001
+
+[Software\\VirtualDub.org\\VirtualDub\\External Encoders] 1363981426
+
+[Software\\VirtualDub.org\\VirtualDub\\MRU List] 1363981516
+"MRUList"=hex(1):
+
+[Software\\VirtualDub.org\\VirtualDub\\Persistence] 1364070492
+"Accelerate preview"=dword:00000000
+"Auto-size panes"=dword:00000000
+"Pane layout mode"=dword:00000001
+"Preview audio sync"=dword:00000001
+"Preview frame skipping"=dword:00000000
+"Save edit list"=dword:00000001
+"Save text info"=dword:00000000
+"Show decompressed frame"=dword:00000000
+"Show status window"=dword:00000001
+"Swap panes"=dword:00000000
+"Update input pane"=dword:00000001
+"Update output pane"=dword:00000000
+"Vertical display"=dword:00000000
+
+[Software\\VirtualDub.org\\VirtualDub\\Preferences] 1364070488
+"Allow direct YCbCr decoding"=dword:00000001
+"AutoRecover: Enabled"=dword:00000000
+"AVI: Alignment threshold"=dword:00080000
+"AVI: Alignment threshold enable"=dword:00000000
+"AVI: Non-zero start warning enabled"=dword:00000001
+"AVI: Prefer internal audio decoders"=dword:00000000
+"AVI: Prefer internal decoders"=dword:00000000
+"AVI: Subindex entry limit"=dword:00002000
+"AVI: Superindex entry limit"=dword:00000100
+"AVI: Use video stream fccHandler in codec search"=dword:00000000
+"AVI: VBR warning enabled"=dword:00000000
+"Batch: Show status window"=dword:00000000
+"Confirm exit"=dword:00000000
+"Confirm render abort"=dword:00000001
+"CPU: Enabled extensions"=dword:00000000
+"Direct3D FX file"="display.fx"
+"Display: Allow DirectX overlays"=dword:00000000
+"Display: Enable background fallback"=dword:00000000
+"Display: Enable debug info"=dword:00000000
+"Display: Enable high precision"=dword:00000000
+"Display: Enable unified 3D driver"=dword:00000000
+"Display: Secondary monitor mode"=dword:00000000
+"File: Async mode"=dword:00000002
+"Filters: Enable 3D hardware acceleration"=dword:00000000
+"Filters: Process-ahead frame count"=dword:00000000
+"Images: Frame rate denominator"=dword:00000001
+"Images: Frame rate numerator"=dword:0000000a
+"MRU size"=dword:00000004
+"Playback: Default audio device"=hex(1):
+"Render: Audio buffer seconds"=dword:00000002
+"Render: Default throttle percent"=dword:00000064
+"Render: Inhibit system sleep"=dword:00000001
+"Render: Output buffer size"=dword:00200000
+"Render: Use background priority"=dword:00000000
+"Render: Video buffer count"=dword:00000020
+"Render: Warn if no audio"=dword:00000000
+"Render: Wave buffer size"=dword:00010000
+"Threading: Video compression threads"=dword:00000001
+"Threading: Video filter threads"=dword:ffffffff
+"Timeline format"="Frame %f (%h:%02m:%02s.%03t) [%c]"
+"Use profile-local path"=dword:00000000
