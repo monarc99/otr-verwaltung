@@ -77,6 +77,7 @@ class CutSmartMkvmerge(Cut):
         # env
         my_env = os.environ.copy()
         my_env["LANG"] = "C"
+        my_env["LC_COLLATE"] = "C"
 
         # x264 option string
         format, ac3_file = self.get_format(filename)

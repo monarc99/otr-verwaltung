@@ -54,6 +54,7 @@ class CutAvidemux(Cut):
         # env
         my_env = os.environ.copy()
         my_env["LANG"] = "C"
+        my_env["LC_COLLATE"] = "C"
         
         if '.avi' in filename and "avidemux3" in program_config_value: 
             try:
