@@ -130,7 +130,7 @@ class CutSmartMkvmerge(Cut):
         # video part 3 - encode small parts - smart rendering part (1/2) 
         for encode, start,  duration,  video_part_filename in videolist:
             self.video_files.append('+'+ self.workingdir +'/' + video_part_filename)
-            command = [x264] + x264_opts + ['--index', self.workingdir + '/x264.index','--seek',  str(start),'--frames',  str(duration),  '--output',  self.workingdir + '/' + video_part_filename,  filename ]
+            command = [x264] + x264_opts + ['--demuxer','ffms','--index', self.workingdir + '/x264.index','--seek',  str(start),'--frames',  str(duration),  '--output',  self.workingdir + '/' + video_part_filename,  filename ]
             logging.debug(command)
             if encode:
                 try:
