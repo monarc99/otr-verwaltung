@@ -2,3 +2,5 @@ project = otrverwaltung
 template = simple-gnome
 version = 0.2.5
 dependencies = mplayer, python-glade2, python-libtorrent, avidemux, avidemux-cli, avidemux-qt, wine, mediainfo-gui, gstreamer0.10-gnonlin, gstreamer0.10-ffmpeg, gstreamer0.10-plugins-ugly, python-xdg, python-gst0.10
+
+# OpenSusE Namen python-gstreamer-0_10 gstreamer-0_10-plugins-ffmpeg python-libtorrent-rasterbar python-xdg

@@ -82,14 +82,17 @@ class CutSmartMkvmerge(Cut):
         # x264 option string
         format, ac3_file = self.get_format(filename)
         if format == Format.HQ:
-            x264_opts = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hq_string').split(' '),  filename)
+            x264_opts,  x264_core = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hq_string').split(' '),  filename)
         elif format == Format.HD:
-            x264_opts = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hd_string').split(' '),  filename)
+            x264_opts,  x264_core = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hd_string').split(' '),  filename)
         elif format == Format.MP4:
-            x264_opts = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_mp4_string').split(' '),  filename)
+            x264_opts,  x264_core = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_mp4_string').split(' '),  filename)
         else:
             return None, "Format nicht unterstützt (Nur MP4 H264, HQ H264 und HD H264 sind möglich)."
         logging.debug(x264_opts)
+        
+        if x264_core < 122:
+            return None,  "Alte HQ Kodierung entdeckt. Diese Datei bitte mit intern-Virtualdub und Codec ffdshow schneiden."
         
         # test workingdir
         if os.access(self.config.get('smartmkvmerge', 'workingdir').rstrip('/'),  os.W_OK):

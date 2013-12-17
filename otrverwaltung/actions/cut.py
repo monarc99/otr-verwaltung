@@ -287,8 +287,18 @@ class Cut(BaseAction):
         
         while True:
             line = blocking_process.stdout.readline()
+
             if line != '':
-                if 'Color primaries' in line and 'BT.709-5' in line:
+                if 'x264 core' in line:
+                    print line
+                    try:
+                        x264_core = int(line.strip().split(' ')[30])
+                        print x264_core
+                    except ValueError as e:
+                        continue
+                    except IndexError as e:
+                        continue
+                elif 'Color primaries' in line and 'BT.709-5' in line:
                     x264_opts.extend(bt709)
                 elif 'Color primaries' in line and 'BT.470-6' in line:
                     x264_opts.extend(bt470bg)
@@ -330,10 +340,10 @@ class Cut(BaseAction):
                         elif option == 'psy':
                             if value == '0':
                                 x264_opts.extend(['--no-psy'])
-                        elif option == 'psy-rd':
+                        elif option == 'psy_rd':
                             rd,  trellis = value.split(':', 1)
                             x264_opts.extend(['--psy-rd',  rd+':'+trellis])
-                        elif option == 'mixed-ref':
+                        elif option == 'mixed_ref':
                             if value == '0':
                                 x264_opts.extend(['--no-mixed-refs'])
                         elif option == 'me_range':
@@ -377,13 +387,13 @@ class Cut(BaseAction):
                                 x264_opts.extend(['--direct',  'temporal'])                            
                             elif value == '3':
                                 x264_opts.extend(['--direct',  'auto'])                            
-                        elif option == 'weightb':
+                        elif option == 'weightb' or option == 'wpredb':
                             if value == '0':
                                 x264_opts.extend(['--no-weightb'])
                         elif option == 'open_gop':
                             if value == '1':
                                 x264_opts.extend(['--open-gop'])
-                        elif option == 'weightp':
+                        elif option == 'weightp' or option == 'wpredp':
                             x264_opts.extend(['--weightp',  value])                            
                         elif option == 'keyint':
                             x264_opts.extend(['--keyint',  value])                            
@@ -401,6 +411,8 @@ class Cut(BaseAction):
                                 x264_opts.extend(['--no-mbtree'])
                         elif option == 'crf':
                             x264_opts.extend(['--crf',  value])                            
+                        elif option == 'qp':
+                            x264_opts.extend(['--qp',  value])                            
                         elif option == 'qcomp':
                             x264_opts.extend(['--qcomp',  value])                            
                         elif option == 'qpmin':
@@ -411,12 +423,24 @@ class Cut(BaseAction):
                             x264_opts.extend(['--qpstep',  value])                            
                         elif option == 'ip_ratio':
                             x264_opts.extend(['--ipratio',  value])                            
+                        elif option == 'pb_ratio':
+                            x264_opts.extend(['--pbratio',  value])                            
                         elif option == 'aq':
-                            mode,  strength = value.split(':', 1)
-                            x264_opts.extend(['--aq-mode',  mode,  '--aq-strength',  strength])
+                            if value == '0':
+                                x264_opts.extend(['--aq-mode',  value ])
+                            else:
+                                mode,  strength = value.split(':', 1)
+                                x264_opts.extend(['--aq-mode',  mode,  '--aq-strength',  strength])
+                        elif option == 'lookahead_threads':
+                            x264_opts.extend(['--sync-lookahead',  value])                            
+                        elif option == 'sliced_threads':
+                            if value != '0':
+                                x264_opts.extend(['--sliced-threads'])            
+                        elif option == 'constrained_intra':
+                            x264_opts.extend(['--constrained-intra',  value])            
             else:
                 break
-        return x264_opts
+        return x264_opts,  x264_core
 
     def show_progress(self, blocking_process):
         progress_match = re.compile(r".*(?<=\[|\ )(\d{1,}).*%.*")
