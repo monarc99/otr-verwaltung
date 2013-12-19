@@ -235,6 +235,7 @@ class Cut(BaseAction):
     
     def get_keyframes_from_file(self, filename):
         """ returns keyframe list - in frame numbers"""
+        
         if not os.path.isfile(filename + '.ffindex_track00.kf.txt'):
             try:
                 command = [self.config.get_program('ffmsindex'),  '-p', '-f', '-k',  filename ]
@@ -242,8 +243,17 @@ class Cut(BaseAction):
             except OSError:
                 return None, "ffmsindex konnte nicht aufgerufen werden."
     
+        if os.path.isfile(filename + '.ffindex_track00.kf.txt'):
+            filename_keyframes = filename + '.ffindex_track00.kf.txt'
+        elif os.path.isfile(filename + '.ffindex_track01.kf.txt'):
+            filename_keyframes = filename + '.ffindex_track01.kf.txt'
+        elif os.path.isfile(filename + '.ffindex_track02.kf.txt'):
+            filename_keyframes = filename + '.ffindex_track02.kf.txt'
+        else:
+            filename_keyframes = None
+
         try:
-            index = open(filename + '.ffindex_track00.kf.txt', 'r')
+            index = open(filename_keyframes, 'r')
         except IOError:
             return None,  "Keyframe File von ffmsindex konnte nicht geöffnet werden."
         index.readline()

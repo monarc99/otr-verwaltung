@@ -435,7 +435,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         
         self.current_frame_position = current_position * self.framerate_num / self.framerate_denom / gst.SECOND
                  
-        if self.current_frame_position in self.keyframes:
+        if self.keyframes != None and self.current_frame_position in self.keyframes :
             self.builder.get_object('label_time').set_text('Frame(K): %i/%i, Zeit %s/%s' % (self.current_frame_position, self.get_frames() - 1, self.convert_sec(current_position), self.convert_sec(duration)))
         else:
             self.builder.get_object('label_time').set_text('Frame: %i/%i, Zeit %s/%s' % (self.current_frame_position, self.get_frames() - 1, self.convert_sec(current_position), self.convert_sec(duration)))
