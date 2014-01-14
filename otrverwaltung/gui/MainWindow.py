@@ -20,6 +20,7 @@ import time
 import urllib
 import webbrowser
 import subprocess
+import logging
 
 import gtk
 import pango
@@ -649,6 +650,9 @@ class MainWindow(gtk.Window, gtk.Buildable):
         
 def NewMainWindow(app, gui):
     glade_filename = path.getdatapath('ui', 'MainWindow.glade')
+    version = open(path.getdatapath("VERSION"), 'r').read().strip()
+    logging.info("Version: " + version)
+
 
     builder = gtk.Builder()   
     builder.add_from_file(glade_filename)
