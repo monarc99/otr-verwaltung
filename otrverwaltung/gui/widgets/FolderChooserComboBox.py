@@ -16,6 +16,7 @@
 
 import gtk, pango
 import os
+import sys
 
 class FolderChooserComboBox(gtk.ComboBox):
 
@@ -57,6 +58,7 @@ class FolderChooserComboBox(gtk.ComboBox):
             return ""
         
     def fill(self, path):
+        ENCODING = sys.stdout.encoding or sys.getfilesystemencoding()
         image = gtk.icon_theme_get_default().load_icon('folder', 16, gtk.ICON_LOOKUP_USE_BUILTIN)
 
         self.liststore.clear()
@@ -67,10 +69,10 @@ class FolderChooserComboBox(gtk.ComboBox):
             self.set_row_separator_func(self.__separator)
         
         # root folder
-        self.liststore.append([path.split('/')[-1], image, "", path])
+        self.liststore.append([path.split('/')[-1], image, "", path.encode(ENCODING)])
         
         fill_up = "—"
-        for root, dirs, files in os.walk(path):
+        for root, dirs, files in os.walk(path.encode(ENCODING)):
             directory = root[len(path)+1:].split('/')
 
             if not directory[0]: continue
