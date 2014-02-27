@@ -57,6 +57,7 @@ if opts.debug:
     logging.root.setLevel(logging.DEBUG)
 elif opts.verbose:
     logging.root.setLevel(logging.INFO)
+logging.basicConfig(stream=sys.stdout)
 link = opts.link
 
 # Setup path

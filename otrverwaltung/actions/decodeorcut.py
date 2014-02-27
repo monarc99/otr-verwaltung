@@ -269,7 +269,7 @@ class DecodeOrCut(Cut):
                     file_conclusion.cut.message = "Abgebrochen."
                 else:  # change cut_action accordingly
                     file_conclusion.cut.cut_action = response
-
+            
             if file_conclusion.cut.cut_action == Cut_action.MANUALLY: # MANUALLY                               
                 error_message, cutlist = self.cut_file_manually(file_conclusion.uncut_video)
                                        
@@ -363,7 +363,7 @@ class DecodeOrCut(Cut):
         if error:
             if exists(filename+'.mkv'):
                 fileoperations.remove_file(filename+'.mkv')
-            return None, None, "Konnte FPS nicht bestimmen: " + error
+            return "Konnte FPS nicht bestimmen: " + error,  None
 
 
         if program < 0:
