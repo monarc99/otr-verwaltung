@@ -114,8 +114,9 @@ class CutSmartMkvmerge(Cut):
             blocking_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,  env=my_env)
         except OSError as e:
             return None,  e.strerror + ": " + mkvmerge
-        
         mkvmerge_list.append(blocking_process)
+        if self.config.get('smartmkvmerge', 'single_threaded'):
+            self.show_progress(blocking_process)
 
         # video part 1 - read keyframes
         keyframes, error = self.get_keyframes_from_file(filename)
@@ -143,6 +144,8 @@ class CutSmartMkvmerge(Cut):
                 except OSError as e:
                     return None, e.strerror + ": " + x264
                 process_list.append(non_blocking_process)
+                if self.config.get('smartmkvmerge', 'single_threaded'):
+                    self.show_progress(non_blocking_process)
             else:
                 video_splitframes += ','+str(start)+'-'+str(duration)
 
@@ -157,13 +160,15 @@ class CutSmartMkvmerge(Cut):
         except OSError as e:
             return None, e.strerror + ": " + mkvmerge
         mkvmerge_list.append(non_blocking_process)
+        if self.config.get('smartmkvmerge', 'single_threaded'):
+            self.show_progress(non_blocking_process)
 
         # audio part 2 - encode audio to AAC
         if 'MP3 Spur kopieren' in self.config.get('smartmkvmerge', 'first_audio_stream') and 'AC3 Spur kopieren' in self.config.get('smartmkvmerge', 'second_audio_stream'):
             self.audio_files.append(self.workingdir + '/audio_copy.mkv')
         else:
-                blocking_process.wait()
                 self.show_progress(blocking_process)
+                blocking_process.wait()
                 ffmpeginput_file = self.workingdir + '/audio_copy.mkv'
                 ffmpegoutput_file = self.workingdir + '/audio_encode.mkv'
                 
@@ -221,6 +226,8 @@ class CutSmartMkvmerge(Cut):
                     return None, e.strerror + ": " + ffmpeg
                 process_list.append(non_blocking_process)
                 self.audio_files.append(self.workingdir + '/audio_encode.mkv')
+                if self.config.get('smartmkvmerge', 'single_threaded'):
+                    self.show_progress(non_blocking_process)
 
         # wait until all threads are terminated
         for blocking_process in mkvmerge_list + process_list:
