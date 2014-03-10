@@ -100,6 +100,21 @@ class CutSmartMkvmerge(Cut):
             self.workingdir = os.path.abspath(self.config.get('smartmkvmerge', 'workingdir')).rstrip('/')
         else:
             return None, "Ungültiges Temp Verzeichnis. Schreiben nicht möglich."
+          
+        # threads  
+        flag_singlethread = self.config.get('smartmkvmerge', 'single_threaded')
+        
+        if self.config.get('smartmkvmerge', 'single_threaded_automatic'):
+            try:
+                memory = self.meminfo()
+                if self.available_cpu_count() > 1 and memory['MemFree'] > (os.stat(filename).st_size/1024):
+                    flag_singlethread = True
+                else:
+                    flag_singlethread = False
+            except Exception  as e:
+                flag_singlethread = self.config.get('smartmkvmerge', 'single_threaded')
+            
+        logging.debug(flag_singlethread)
             
         # audio part 1 - cut audio 
         if ac3_file:
@@ -115,7 +130,7 @@ class CutSmartMkvmerge(Cut):
         except OSError as e:
             return None,  e.strerror + ": " + mkvmerge
         mkvmerge_list.append(blocking_process)
-        if self.config.get('smartmkvmerge', 'single_threaded'):
+        if flag_singlethread:
             self.show_progress(blocking_process)
 
         # video part 1 - read keyframes
@@ -144,7 +159,7 @@ class CutSmartMkvmerge(Cut):
                 except OSError as e:
                     return None, e.strerror + ": " + x264
                 process_list.append(non_blocking_process)
-                if self.config.get('smartmkvmerge', 'single_threaded'):
+                if flag_singlethread:
                     self.show_progress(non_blocking_process)
             else:
                 video_splitframes += ','+str(start)+'-'+str(duration)
@@ -160,7 +175,7 @@ class CutSmartMkvmerge(Cut):
         except OSError as e:
             return None, e.strerror + ": " + mkvmerge
         mkvmerge_list.append(non_blocking_process)
-        if self.config.get('smartmkvmerge', 'single_threaded'):
+        if flag_singlethread:
             self.show_progress(non_blocking_process)
 
         # audio part 2 - encode audio to AAC
@@ -172,7 +187,7 @@ class CutSmartMkvmerge(Cut):
                 ffmpeginput_file = self.workingdir + '/audio_copy.mkv'
                 ffmpegoutput_file = self.workingdir + '/audio_encode.mkv'
                 
-                audiofilter = ['-af',  'anull']
+                audiofilter = []
                 # convert first audio stream to aac
                 if 'AAC' in self.config.get('smartmkvmerge', 'first_audio_stream') and 'AAC' in self.config.get('smartmkvmerge', 'second_audio_stream'):
                     aacaudiostreams = '-c:a'
@@ -226,7 +241,7 @@ class CutSmartMkvmerge(Cut):
                     return None, e.strerror + ": " + ffmpeg
                 process_list.append(non_blocking_process)
                 self.audio_files.append(self.workingdir + '/audio_encode.mkv')
-                if self.config.get('smartmkvmerge', 'single_threaded'):
+                if flag_singlethread:
                     self.show_progress(non_blocking_process)
 
         # wait until all threads are terminated

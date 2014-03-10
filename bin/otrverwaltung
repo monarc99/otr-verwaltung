@@ -194,7 +194,8 @@ class App:
                 'second_audio_stream': 'originale AC3 Spur kopieren', 
                 'normalize_audio': False, 
                 'remux_to_mp4': False, 
-                'single_threaded': False
+                'single_threaded': False, 
+                'single_threaded_automatic': True
             }
         }
         
