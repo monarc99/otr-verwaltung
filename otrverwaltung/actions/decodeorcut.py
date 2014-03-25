@@ -336,6 +336,7 @@ class DecodeOrCut(Cut):
             if cut_video == None:
                 file_conclusion.cut.status = Status.ERROR
                 file_conclusion.cut.message = error
+                file_conclusion.cut.upload_cutlist = False
             else:
                 file_conclusion.cut.status = Status.OK
                 file_conclusion.cut_video = cut_video

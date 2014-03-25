@@ -92,8 +92,8 @@ class CutSmartMkvmerge(Cut):
             return None, "Format nicht unterstützt (Nur MP4 H264, HQ H264 und HD H264 sind möglich)."
         logging.debug(x264_opts)
         
-        if x264_core < 122:
-            return None,  "Alte HQ Kodierung entdeckt. Diese Datei bitte mit intern-Virtualdub und Codec ffdshow schneiden."
+        if x264_core != 122:
+            return None,  "Alte oder unbekannte Kodierung entdeckt. Diese Datei bitte mit intern-Virtualdub und Codec ffdshow schneiden."
         
         # test workingdir
         if os.access(self.config.get('smartmkvmerge', 'workingdir').rstrip('/'),  os.W_OK):
