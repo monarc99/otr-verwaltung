@@ -34,6 +34,7 @@ class Mkv(Plugin):
     Configurable = True
     Config = { 
             'DumpAVIs': True,
+            'DumpAVIs_delete': False,
             'EncodeAudioToAAC': False, 
             'EncodeOnlyFirstAudioToAAC': True,  
             'NormalizeAudio': False, 
@@ -59,6 +60,11 @@ class Mkv(Plugin):
         checkbutton_dump_avis = gtk.CheckButton("Originaldatei automatisch in Mülleimer verschieben?")
         dialog.vbox.pack_start(checkbutton_dump_avis, expand=False)
         checkbutton_dump_avis.connect('toggled', on_checkbutton_toggled,'DumpAVIs')
+
+        # checkbutton for eraseing media file
+        checkbutton_dump_avis_delete = gtk.CheckButton("Originaldatei im Mülleimer gleich für immer löschen?")
+        dialog.vbox.pack_start(checkbutton_dump_avis_delete, expand=False)
+        checkbutton_dump_avis_delete.connect('toggled', on_checkbutton_toggled,'DumpAVIs_delete')
 
         # checkbutton encode audio aac
         checkbutton_encode_audio = gtk.CheckButton("Audiospuren zu AAC umwandeln?")
@@ -87,6 +93,7 @@ class Mkv(Plugin):
 
         # current config
         checkbutton_dump_avis.set_active(self.Config['DumpAVIs'])
+        checkbutton_dump_avis_delete.set_active(self.Config['DumpAVIs_delete'])
         checkbutton_encode_audio.set_active(self.Config['EncodeAudioToAAC'])
         checkbutton_encode_only_first_audio.set_active(self.Config['EncodeOnlyFirstAudioToAAC'])
         checkbutton_normalize_audio.set_active(self.Config['NormalizeAudio'])
@@ -246,10 +253,13 @@ class Mkv(Plugin):
                     if self.Config['EncodeAudioToAAC']:
                         fileoperations.remove_file(ffmpegpass_file)
                     if self.Config['DumpAVIs']:
-                        new_filename = os.path.join(self.app.config.get('general', 'folder_trash_avis'), os.path.basename(filename))
-                        if os.path.exists(new_filename):
-                            fileoperations.remove_file(new_filename)
-                        fileoperations.move_file(filename, self.app.config.get('general', 'folder_trash_avis'))
+                        if self.Config['DumpAVIs_delete']:
+                            fileoperations.remove_file(filename)
+                        else:
+                            new_filename = os.path.join(self.app.config.get('general', 'folder_trash_avis'), os.path.basename(filename))
+                            if os.path.exists(new_filename):
+                                fileoperations.remove_file(new_filename)
+                            fileoperations.move_file(filename, self.app.config.get('general', 'folder_trash_avis'))
                 else:
                     error = p.stdout.readline()
                     try:
