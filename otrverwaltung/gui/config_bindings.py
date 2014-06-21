@@ -70,6 +70,7 @@ class FileChooserFolderBinding(ConfigBinding):
 
         # add signal
         self.widget.connect('current-folder-changed', self.on_folder_changed)
+        self.widget.connect('selection-changed', self.on_folder_changed)
     
     def change_value(self, value):
         if self.widget.get_filename() != value:

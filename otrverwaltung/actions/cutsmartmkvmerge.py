@@ -72,6 +72,7 @@ class CutSmartMkvmerge(Cut):
         video_splitframes = ''                               # mkvmerge split string for cutting the video at keyframes 
         audio_timecodes = ''                                # mkvmerge split timecodes for cutting the audio
         ac3_file = None                                         # AC3 source file
+        warning_msg = None
         mkvmerge =  self.config.get_program('mkvmerge')
         x264 = self.config.get_program('x264')
         # env
@@ -93,7 +94,7 @@ class CutSmartMkvmerge(Cut):
         logging.debug(x264_opts)
         
         if x264_core != 125:
-            return None,  "Alte oder unbekannte Kodierung entdeckt. Diese Datei bitte mit intern-Virtualdub und Codec ffdshow schneiden."
+            warning_msg ="Unbekannte Kodierung entdeckt. Diese Datei genau prüfen und notfalls mit intern-Virtualdub und Codec ffdshow schneiden."
         
         # test workingdir
         if os.access(self.config.get('smartmkvmerge', 'workingdir').rstrip('/'),  os.W_OK):
@@ -348,7 +349,7 @@ class CutSmartMkvmerge(Cut):
                 if returncode != 0:
                     return None,  'Fehler beim Erstellen der MP4'
                     
-        return cut_video, None
+        return cut_video, warning_msg
 
     def __simulate_smart_mkvmerge(self, start,  duration,  keyframes):
         end = start + duration

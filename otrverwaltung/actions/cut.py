@@ -308,9 +308,9 @@ class Cut(BaseAction):
                         continue
                     except IndexError as e:
                         continue
-                elif 'Color primaries' in line and 'BT.709-5' in line:
+                elif 'Color primaries' in line and '709' in line:
                     x264_opts.extend(bt709)
-                elif 'Color primaries' in line and 'BT.470-6' in line:
+                elif 'Color primaries' in line and '470' in line:
                     x264_opts.extend(bt470bg)
                 elif 'Format profile' in line and '@L' in line:
                     try:
