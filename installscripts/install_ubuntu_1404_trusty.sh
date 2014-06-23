@@ -26,11 +26,14 @@ set -e
 INSTALLDIR="Software"
 
 echo "Installscript OTRV++ für Ubuntu 14.04 Trusty"
+echo ""
 echo "Dieses Script ist nur für Ubuntu 14.04 und nicht für vorherige oder zukünftige Ubuntu Versionen oder Derivaten gedacht."
 echo "Benutzung auf eigene Gefahr."
-
+echo ""
 echo "Das Script wird die zahlreichen Abhängigkeiten von OTR installieren und benötigt root Rechte zum Installieren."
 echo "Auch wird das eine oder andere Paket eine Bestätigung der EULA benötigen."
+echo "Dafür muss man den OK Button per Enter Taste bestätigen. Also keine Maus"
+echo "Sollte beim Bestätigen nichts passieren, ist der OK Button nicht ausgewählt. Kommt manchmal vor. Dann per TAB Taste zuerst auswählen."  
 
 # Paketliste updaten und Abhängigkeiten installieren
 sudo apt-get -y update
