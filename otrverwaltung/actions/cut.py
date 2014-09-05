@@ -68,6 +68,9 @@ class Cut(BaseAction):
             else:
                 format = Format.AVI
                 ac3name = root + ".HD.ac3"
+        elif extension == '.ac3':
+                format = Format.AC3
+                ac3name = root
         else:
             return -1, None
     
@@ -92,7 +95,10 @@ class Cut(BaseAction):
 
         if format < 0:
             return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt.", False
-                             
+
+        if format == Format.AC3:
+            return -1, "AC3 wird automatisch mit der HD.avi verarbeitet und nicht einzeln geschnitten.", False
+
         config_value = programs[format]
 
         if 'avidemux' in config_value:
@@ -330,124 +336,124 @@ class Cut(BaseAction):
                     except IndexError as e:
                         continue
                     x264_opts.extend(fps)
-                elif 'Encoding settings' in line:
-                    for pair in line.strip().split(' : ')[1].split(' / '):
-                        option,  value = pair.split('=', 1)
-                        if option == 'cabac':
-                            if value == '0':
-                                x264_opts.extend(['--no-cabac'])
-                        elif option == 'ref':
-                            x264_opts.extend(['--ref',  value])
-                        elif option == 'deblock':
-                            enabled,  alpha,  beta = value.split(':', 2)
-                            if enabled == '0':
-                                x264_opts.extend(['-no-deblock'])
-                            x264_opts.extend(['--deblock',  alpha+':'+beta])
-                        elif option == 'me':
-                            x264_opts.extend(['--me',  value])
-                        elif option == 'subme':
-                            x264_opts.extend(['--subme',  value])
-                        elif option == 'psy':
-                            if value == '0':
-                                x264_opts.extend(['--no-psy'])
-                        elif option == 'psy_rd':
-                            rd,  trellis = value.split(':', 1)
-                            x264_opts.extend(['--psy-rd',  rd+':'+trellis])
-                        elif option == 'mixed_ref':
-                            if value == '0':
-                                x264_opts.extend(['--no-mixed-refs'])
-                        elif option == 'me_range':
-                            x264_opts.extend(['--merange',  value])
-                        elif option == 'chroma_me':
-                            if value == '0':
-                                x264_opts.extend(['--no-chroma-me'])
-                        elif option == 'trellis':
-                            x264_opts.extend(['--trellis',  value])
-                        elif option == '8x8dct':
-                            if value == '0':
-                                x264_opts.extend(['--no-8x8dct'])
-                        elif option == 'deadzone':
-                            inter,  intra = value.split(',', 1)
-                            x264_opts.extend(['--deadzone-inter',  inter, '--deadzone-intra',  intra ])
-                        elif option == 'fast_pskip':
-                            if value == '0':
-                                x264_opts.extend(['--no-fast-pskip'])
-                        elif option == 'chroma_qp_offset':
-                            x264_opts.extend(['--chroma-qp-offset',  value])
-                        elif option == 'decimate':
-                            if value == '0':
-                                x264_opts.extend(['--no-dct-decimate'])
-                        elif option == 'constrained_intra':
-                            if value == '1':
-                                x264_opts.extend(['--constrained-intra'])
-                        elif option == 'bframes':
-                            x264_opts.extend(['--bframes',  value])
-                        elif option == 'b_pyramid':
-                            x264_opts.extend(['--b-pyramid',  value])                            
-                        elif option == 'b_adapt':
-                            x264_opts.extend(['--b-adapt',  value])                            
-                        elif option == 'b_bias':
-                            x264_opts.extend(['--b-bias',  value])                            
-                        elif option == 'direct':
-                            if value == '0':
-                                x264_opts.extend(['--direct',  'none'])                            
-                            elif value == '1':
-                                x264_opts.extend(['--direct',  'spatial'])                            
-                            elif value == '2':
-                                x264_opts.extend(['--direct',  'temporal'])                            
-                            elif value == '3':
-                                x264_opts.extend(['--direct',  'auto'])                            
-                        elif option == 'weightb' or option == 'wpredb':
-                            if value == '0':
-                                x264_opts.extend(['--no-weightb'])
-                        elif option == 'open_gop':
-                            if value == '1':
-                                x264_opts.extend(['--open-gop'])
-                        elif option == 'weightp' or option == 'wpredp':
-                            x264_opts.extend(['--weightp',  value])                            
-                        elif option == 'keyint':
-                            x264_opts.extend(['--keyint',  value])                            
-                        elif option == 'keyint_min':
-                            x264_opts.extend(['--min-keyint',  value])                            
-                        elif option == 'scenecut':
-                            x264_opts.extend(['--scenecut',  value])                            
-                        elif option == 'intra_refresh':
-                            if value == '1':
-                                x264_opts.extend(['--intra-refresh'])
-                        elif option == 'rc_lookahead':
-                            x264_opts.extend(['--rc-lookahead',  value])                            
-                        elif option == 'mbtree':
-                            if value == '0':
-                                x264_opts.extend(['--no-mbtree'])
-                        elif option == 'crf':
-                            x264_opts.extend(['--crf',  value])                            
-                        elif option == 'qp':
-                            x264_opts.extend(['--qp',  value])                            
-                        elif option == 'qcomp':
-                            x264_opts.extend(['--qcomp',  value])                            
-                        elif option == 'qpmin':
-                            x264_opts.extend(['--qpmin',  value])                            
-                        elif option == 'qpmax':
-                            x264_opts.extend(['--qpmax',  value])                            
-                        elif option == 'qpstep':
-                            x264_opts.extend(['--qpstep',  value])                            
-                        elif option == 'ip_ratio':
-                            x264_opts.extend(['--ipratio',  value])                            
-                        elif option == 'pb_ratio':
-                            x264_opts.extend(['--pbratio',  value])                            
-                        elif option == 'aq':
-                            if value == '0':
-                                x264_opts.extend(['--aq-mode',  value ])
-                            else:
-                                mode,  strength = value.split(':', 1)
-                                x264_opts.extend(['--aq-mode',  mode,  '--aq-strength',  strength])
-                        elif option == 'lookahead_threads':
-                            x264_opts.extend(['--sync-lookahead',  value])                            
-                        elif option == 'sliced_threads':
-                            if value != '0':
-                                x264_opts.extend(['--sliced-threads'])            
-                        elif option == 'constrained_intra':
-                            x264_opts.extend(['--constrained-intra',  value])            
+#                elif 'Encoding settings' in line:
+#                    for pair in line.strip().split(' : ')[1].split(' / '):
+#                        option,  value = pair.split('=', 1)
+#                        if option == 'cabac':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-cabac'])
+#                        elif option == 'ref':
+#                            x264_opts.extend(['--ref',  value])
+#                        elif option == 'deblock':
+#                            enabled,  alpha,  beta = value.split(':', 2)
+#                            if enabled == '0':
+#                                x264_opts.extend(['-no-deblock'])
+#                            x264_opts.extend(['--deblock',  alpha+':'+beta])
+#                        elif option == 'me':
+#                            x264_opts.extend(['--me',  value])
+#                        elif option == 'subme':
+#                            x264_opts.extend(['--subme',  value])
+#                        elif option == 'psy':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-psy'])
+#                        elif option == 'psy_rd':
+#                            rd,  trellis = value.split(':', 1)
+#                            x264_opts.extend(['--psy-rd',  rd+':'+trellis])
+#                        elif option == 'mixed_ref':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-mixed-refs'])
+#                        elif option == 'me_range':
+#                            x264_opts.extend(['--merange',  value])
+#                        elif option == 'chroma_me':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-chroma-me'])
+#                        elif option == 'trellis':
+#                            x264_opts.extend(['--trellis',  value])
+#                        elif option == '8x8dct':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-8x8dct'])
+#                        elif option == 'deadzone':
+#                            inter,  intra = value.split(',', 1)
+#                            x264_opts.extend(['--deadzone-inter',  inter, '--deadzone-intra',  intra ])
+#                        elif option == 'fast_pskip':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-fast-pskip'])
+#                        elif option == 'chroma_qp_offset':
+#                            x264_opts.extend(['--chroma-qp-offset',  value])
+#                        elif option == 'decimate':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-dct-decimate'])
+#                        elif option == 'constrained_intra':
+#                            if value == '1':
+#                                x264_opts.extend(['--constrained-intra'])
+#                        elif option == 'bframes':
+#                            x264_opts.extend(['--bframes',  value])
+#                        elif option == 'b_pyramid':
+#                            x264_opts.extend(['--b-pyramid',  value])                            
+#                        elif option == 'b_adapt':
+#                            x264_opts.extend(['--b-adapt',  value])                            
+#                        elif option == 'b_bias':
+#                            x264_opts.extend(['--b-bias',  value])                            
+#                        elif option == 'direct':
+#                            if value == '0':
+#                                x264_opts.extend(['--direct',  'none'])                            
+#                            elif value == '1':
+#                                x264_opts.extend(['--direct',  'spatial'])                            
+#                            elif value == '2':
+#                                x264_opts.extend(['--direct',  'temporal'])                            
+#                            elif value == '3':
+#                                x264_opts.extend(['--direct',  'auto'])                            
+#                        elif option == 'weightb' or option == 'wpredb':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-weightb'])
+#                        elif option == 'open_gop':
+#                            if value == '1':
+#                                x264_opts.extend(['--open-gop'])
+#                        elif option == 'weightp' or option == 'wpredp':
+#                            x264_opts.extend(['--weightp',  value])                            
+#                        elif option == 'keyint':
+#                            x264_opts.extend(['--keyint',  value])                            
+#                        elif option == 'keyint_min':
+#                            x264_opts.extend(['--min-keyint',  value])                            
+#                        elif option == 'scenecut':
+#                            x264_opts.extend(['--scenecut',  value])                            
+#                        elif option == 'intra_refresh':
+#                            if value == '1':
+#                                x264_opts.extend(['--intra-refresh'])
+#                        elif option == 'rc_lookahead':
+#                            x264_opts.extend(['--rc-lookahead',  value])                            
+#                        elif option == 'mbtree':
+#                            if value == '0':
+#                                x264_opts.extend(['--no-mbtree'])
+#                        elif option == 'crf':
+#                            x264_opts.extend(['--crf',  value])                            
+#                        elif option == 'qp':
+#                            x264_opts.extend(['--qp',  value])                            
+#                        elif option == 'qcomp':
+#                            x264_opts.extend(['--qcomp',  value])                            
+#                        elif option == 'qpmin':
+#                            x264_opts.extend(['--qpmin',  value])                            
+#                        elif option == 'qpmax':
+#                            x264_opts.extend(['--qpmax',  value])                            
+#                        elif option == 'qpstep':
+#                            x264_opts.extend(['--qpstep',  value])                            
+#                        elif option == 'ip_ratio':
+#                            x264_opts.extend(['--ipratio',  value])                            
+#                        elif option == 'pb_ratio':
+#                            x264_opts.extend(['--pbratio',  value])                            
+#                        elif option == 'aq':
+#                            if value == '0':
+#                                x264_opts.extend(['--aq-mode',  value ])
+#                            else:
+#                                mode,  strength = value.split(':', 1)
+#                                x264_opts.extend(['--aq-mode',  mode,  '--aq-strength',  strength])
+#                        elif option == 'lookahead_threads':
+#                            x264_opts.extend(['--sync-lookahead',  value])                            
+#                        elif option == 'sliced_threads':
+#                            if value != '0':
+#                                x264_opts.extend(['--sliced-threads'])            
+#                        elif option == 'constrained_intra':
+#                            x264_opts.extend(['--constrained-intra',  value])            
             else:
                 break
         return x264_opts,  x264_core

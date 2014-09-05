@@ -108,7 +108,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         gst.element_link_many(self.ffmpegcolorspace, self.videoscale,  self.videosink )
         self.key_seek.get_pad('keyseek-src').link(self.audioconvert.get_pad('sink'))
         gst.element_link_many(self.audioconvert, self.audioresample,  self.audiosink )
-    
+            
     def on_unrealize(self,widget,data=None):
         # to prevent racing conditions when closing the window while playing
 	self.player.set_state(gst.STATE_NULL)
@@ -174,6 +174,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         if self.keyframes == None:
             print "Error: Keyframes konnten nicht ausgelesen werden."
         self.movie_window.set_size_request(self.config.get('general', 'cutinterface_resolution_x'), self.config.get('general', 'cutinterface_resolution_y'))
+        self.hide_cuts = self.config.get('general', 'cutinterface_hide_cuts')
  
         def discovered(d, is_media):
             if is_media:
@@ -212,10 +213,11 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         
         self.timer = gobject.timeout_add(200, self.tick)
 
+
     def tick(self):
         self.update_frames_and_time()
         self.update_slider()
-
+        self.builder.get_object('checkbutton_hide_cuts').set_active(self.hide_cuts)
         return True
 
     def jump_to(self, frames=None, seconds=None, nanoseconds=0, flags = gst.SEEK_FLAG_ACCURATE):       
@@ -697,6 +699,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         # print "Absolute position: ", pos
         
         self.hide_cuts = widget.get_active()
+        self.config.set('general', 'cutinterface_hide_cuts',self.hide_cuts)
         self.update_timeline()
         if self.hide_cuts:
             self.set_marker(self.get_relative_position(marker_a),self.get_relative_position(marker_b))

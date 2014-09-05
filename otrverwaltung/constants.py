@@ -67,6 +67,7 @@ class Format:
     HQ  = 1
     MP4 = 2
     HD  = 3
+    AC3 = 4
     
 class Program:
     AVIDEMUX    = 0

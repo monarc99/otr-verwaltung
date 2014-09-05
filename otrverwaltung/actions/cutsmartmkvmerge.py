@@ -327,7 +327,7 @@ class CutSmartMkvmerge(Cut):
                 if os.path.isfile(os.path.splitext(cut_video)[0]+ ' - Log.txt'):
                     os.remove(os.path.splitext(cut_video)[0]+ ' - Log.txt')
 
-                args = [self.config.get_program('mp4box'), '-new',  '-keep-all']
+                args = [self.config.get_program('mp4box'), '-new',  '-keep-all',  '-isma',  '-inter',  '500']
                 
                 for index in sorted(self.rawstreams.keys()):
                     args.append('-add')
