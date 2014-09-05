@@ -95,7 +95,8 @@ class CutSmartMkvmerge(Cut):
         
         if x264_core != 125:
             warning_msg ="Unbekannte Kodierung entdeckt. Diese Datei genau prüfen und notfalls mit intern-Virtualdub und Codec ffdshow schneiden."
-        
+            return None,  warning_msg
+            
         # test workingdir
         if os.access(self.config.get('smartmkvmerge', 'workingdir').rstrip('/'),  os.W_OK):
             self.workingdir = os.path.abspath(self.config.get('smartmkvmerge', 'workingdir')).rstrip('/')
