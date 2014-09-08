@@ -14,16 +14,12 @@
 #with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
-from os.path import join, isdir, basename, splitext
-import sys
+from os.path import basename
 import time
 import urllib
 import webbrowser
-import subprocess
 import logging
-
 import gtk
-import pango
 
 from otrverwaltung import path
 from otrverwaltung.constants import Action, Section, Cut_action, DownloadStatus
@@ -50,6 +46,16 @@ class MainWindow(gtk.Window, gtk.Buildable):
         self.__setup_treeview_download()
         self.__setup_treeview_files()
         self.__setup_widgets()
+        # set title
+        current_version = open(path.getdatapath("VERSION"), 'r').read().strip()
+            
+        try:
+           svn_version = urllib.urlopen('http://github.com/monarc99/otr-verwaltung/raw/master/data/VERSION').read().strip()
+        except IOError:
+            self.set_title('OTR-Verwaltung++' + ' ' + current_version)
+        else:
+            self.set_title('OTR-Verwaltung++' + ' ' + current_version + '  -  aktuelle Version: ' + svn_version)
+
     
     def __get_cut_menu(self, action):
         # menu for cut/decodeandcut

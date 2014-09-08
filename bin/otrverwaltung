@@ -132,7 +132,7 @@ class App:
                 'cut_hqs_man_by': 'CutInterface',
                 'cut_mp4s_man_by': 'CutInterface',
                 'cutinterface_resolution_x': 640, 
-                'cutinterface_resolution_y': 450, 
+                'cutinterface_resolution_y': 450,
                 'cutinterface_hide_cuts': False,  
                 'mplayer_fullscreen': True, 
                 'merge_ac3s' : True,
@@ -190,6 +190,10 @@ class App:
                 'x264_hd_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --weightp 0',
                 'x264_hq_string': '--tune film --direct auto --force-cfr --rc-lookahead 60 --b-adapt 2 --aq-mode 2 --weightp 0',
                 'x264_mp4_string': '--force-cfr --profile baseline --preset medium --trellis 0',
+                'ffmpeg_hd_x264_options': 'crf=23:deblock=-1/-1:psy-rd=1/0.15:direct=auto:force-cfr=1:b-adapt=2:rc-lookahead=60:weightp=0:aq-mode=2',
+                'ffmpeg_hq_x264_options': 'crf=23:deblock=-1/-1:psy-rd=1/0.15:direct=auto:force-cfr=1:b-adapt=2:rc-lookahead=60:weightp=0',
+                'ffmpeg_mp4_x264_options': 'crf=23:force-cfr=1:trellis=0',
+                'encoder_engine': 'x264',   # 'x264' or 'ffmpeg' possible
                 'workingdir': '/tmp', 
                 'first_audio_stream': 'originale MP3 Spur kopieren', 
                 'second_audio_stream': 'originale AC3 Spur kopieren', 
@@ -761,14 +765,14 @@ class App:
         """ #FIXME """
         
         self.__gui.main_window.show()        
-
+                        
         if self.config.get('general', 'folder_new_otrkeys') == "":      
             self.__gui.message_info_box("Dies ist offenbar das erste Mal, dass OTR-Verwaltung gestartet wird.\n\nEs müssen zunächst einige wichtige Einstellungen vorgenommen werden. Klicken Sie dazu auf OK.")
             self.__gui.preferences_window.show()
                
         if link:
             self.add_download_link(link)
-               
+                       
         self.__gui.run()
         
         # save downloads
@@ -781,7 +785,7 @@ class App:
             file.write(json.dumps({'downloads': downloads}))
             file.close()
         except IOError, message:
-            print _("Can't write downloads: %s") % message
+            print ("Can't write downloads: %s") % message
 
         # kill downloads
         for row in self.gui.main_window.treeview_download.liststore:

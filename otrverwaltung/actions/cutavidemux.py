@@ -63,18 +63,18 @@ class CutAvidemux(Cut):
                 returncode = mkvmerge.wait()
                 if returncode != 0 and returncode != 1:
                     return None,  'Fehler beim Muxen zu MKV'
-            except OSError:
-                return "mkvmerge konnte nicht aufgerufen werden.", None, None
+            except:
+                return None, "mkvmerge konnte nicht aufgerufen werden."
             
         try:
             if os.path.isfile(filename+'.mkv'):
                 avidemux = subprocess.Popen([program_config_value, filename+'.mkv'], bufsize=-1 ,stdout=subprocess.PIPE)
             else:
                 avidemux = subprocess.Popen([program_config_value, filename], bufsize=-1 ,stdout=subprocess.PIPE)
-        except OSError:
+        except:
             if os.path.isfile(filename+'.mkv'):
                 fileoperations.remove_file(filename+'.mkv')
-            return "Avidemux konnte nicht aufgerufen werden: " + program_config_value, None
+            return None, "Avidemux konnte nicht aufgerufen werden: " + program_config_value
             
         seg_lines = []
         pts_correction = 0
