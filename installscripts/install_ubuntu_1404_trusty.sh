@@ -37,13 +37,19 @@ echo "Sollte beim Bestätigen nichts passieren, ist der OK Button nicht ausgewä
 
 # Paketliste updaten und Abhängigkeiten installieren
 sudo apt-get -y update
-sudo apt-get -y install mplayer python-glade2 python-libtorrent avidemux avidemux-cli avidemux-qt wine mediainfo-gui gstreamer0.10-gnonlin gstreamer0.10-plugins-ugly python-xdg python-gst0.10
+sudo apt-get -y install python-glade2 python-libtorrent avidemux avidemux-cli avidemux-qt wine mediainfo-gui gstreamer0.10-gnonlin gstreamer0.10-plugins-ugly python-xdg python-gst0.10
 
 # gstreamer0.10-ffmpeg aus PPA installieren und PPA wieder entfernen
-sudo apt-add-repository -y ppa:mc3man/trusty-media
+sudo apt-add-repository -y ppa:mc3man/gstffmpeg-keep
 sudo apt-get -y update
 sudo apt-get -y install gstreamer0.10-ffmpeg
-sudo apt-add-repository -y -r ppa:mc3man/trusty-media
+sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
+
+# mplayer aus PPA installieren und PPA wieder entfernen
+sudo apt-add-repository -y ppa:mc3man/mplayer-test
+sudo apt-get -y update
+sudo apt-get -y install mplayer
+sudo apt-add-repository -y -r ppa:mc3man/mplayer-test
 
 # otrv++ laden
 wget -P ~/Downloads https://github.com/monarc99/otr-verwaltung/archive/master.zip
