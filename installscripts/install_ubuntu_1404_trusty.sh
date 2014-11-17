@@ -60,6 +60,7 @@ unzip -uod ~/"$INSTALLDIR" ~/Downloads/master.zip
 rm ~/Downloads/master.zip
 
 # Menü Eintrag erstellen
+mkdir -p ~/.local/share/applications/
 sed -e "/Icon=/d" ~/"$INSTALLDIR"/otr-verwaltung-master/otrverwaltung.desktop.in > ~/.local/share/applications/otrverwaltung.desktop
 echo Icon=$(eval echo ~)/"$INSTALLDIR"/otr-verwaltung-master/data/media/icon.png >> ~/.local/share/applications/otrverwaltung.desktop
 
