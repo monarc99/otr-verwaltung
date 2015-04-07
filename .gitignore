@@ -3,3 +3,5 @@ conf
 /conf~
 /otr-verwaltung.e4p
 /*.gitignore
+/update.txt
+*.pyc
