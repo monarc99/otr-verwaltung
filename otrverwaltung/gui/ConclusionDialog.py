@@ -194,8 +194,10 @@ class ConclusionDialog(gtk.Dialog, gtk.Buildable):
                     rename_list.append(self.file_conclusion.cut.cutlist.filename)
                     
                     self.builder.get_object('comboboxentry_rename').child.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("#FFFF84"))
+                    self.builder.get_object('comboboxentry_rename').child.modify_text(gtk.STATE_NORMAL, gtk.gdk.Color("black"))
                 else:
                     self.builder.get_object('comboboxentry_rename').child.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("white"))
+                    self.builder.get_object('comboboxentry_rename').child.modify_text(gtk.STATE_NORMAL, gtk.gdk.Color("black"))
                 
                 self.gui.set_model_from_list(self.builder.get_object('comboboxentry_rename'), rename_list)     
                 self.builder.get_object('comboboxentry_rename').set_active(0)
