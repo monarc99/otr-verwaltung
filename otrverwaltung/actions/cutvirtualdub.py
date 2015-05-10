@@ -58,6 +58,16 @@ class CutVirtualdub(Cut):
         if sar == None or dar == None:
             return None, error
             
+        # find wine
+        cmd_exists = lambda x: any(os.access(os.path.join(pathx, x), os.X_OK) for pathx in os.environ["PATH"].split(os.pathsep))
+        if cmd_exists('wineconsole'):
+            winecommand = 'wineconsole'
+        elif cmd_exists('wine'):
+            winecommand = 'wine'
+        else:
+            return None, "Wine konnte nicht aufgerufen werden."
+        
+            
         if format == Format.HQ:
             if self.config.get('general', 'h264_codec') == 'ffdshow':
                 if dar == "16:9":
@@ -207,10 +217,10 @@ class CutVirtualdub(Cut):
             command = "%s /s Z:\\\\tmp\\\\tmp.vcf /x" % config_value
 
         if 'intern-VirtualDub' in config_value:
-            command = 'WINEPREFIX=' + os.path.dirname(config_value) + '/wine' + " wineconsole " + command
+            command = 'WINEPREFIX=' + os.path.dirname(config_value) + '/wine' + " " + winecommand + " " + command
         else:
-            command = "wineconsole " + command
-
+            command = winecommand + " " + command
+        
         try:
             vdub = subprocess.Popen(command, shell=True)
         except OSError:
