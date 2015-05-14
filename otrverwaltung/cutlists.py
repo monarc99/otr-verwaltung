@@ -178,13 +178,15 @@ class Cutlist:
                 if config_parser.has_option(cut, "StartFrame") and config_parser.has_option(cut, "DurationFrames"):
                     start_frame = int(config_parser.get(cut, "StartFrame"))
                     duration_frames = int(config_parser.get(cut, "DurationFrames"))
-                    self.cuts_frames.append((start_frame, duration_frames))                    
-                    print "Append frames: %i, %i" % (start_frame, duration_frames)
+                    if duration_frames > 0:
+                        self.cuts_frames.append((start_frame, duration_frames))                    
+                        print "Append frames: %i, %i" % (start_frame, duration_frames)
                                     
                 start_second = float(config_parser.get(cut, "Start"))
                 duration_seconds = float(config_parser.get(cut, "Duration"))
-                self.cuts_seconds.append((start_second, duration_seconds))     
-                print "Append seconds: %f, %f" % (start_second, duration_seconds)                                             
+                if duration_seconds > 0:
+                    self.cuts_seconds.append((start_second, duration_seconds))     
+                    print "Append seconds: %f, %f" % (start_second, duration_seconds)                                             
 
         except ConfigParser.NoSectionError, message:
             return "Fehler in Cutlist: " + str(message)
