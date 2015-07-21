@@ -11,6 +11,9 @@ cleanup() {
     *)
       echo "Unbekannter Fehler. Sie müssen OTRV++ manuell installieren, falls sie das Script nicht gerade selbst abgebrochen haben."
       rm ~/Downloads/master.zip
+      sudo apt-add-repository -y -r ppa:djcj/hybrid
+      sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
+      sudo apt-add-repository -y -r ppa:mc3man/mplayer-test
       ;;
   esac
   echo bitte ENTER drücken, um das Script zu beenden; read;
@@ -24,6 +27,7 @@ done
 # bei Fehler abbrechen
 set -e
 INSTALLDIR="Software"
+source /etc/lsb-release
 
 echo "Installscript OTRV++ für Ubuntu 14.04 Trusty"
 echo ""
@@ -46,10 +50,30 @@ sudo apt-get -y install gstreamer0.10-ffmpeg
 sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
 
 # mplayer aus PPA installieren und PPA wieder entfernen
-sudo apt-add-repository -y ppa:mc3man/mplayer-test
-sudo apt-get -y update
-sudo apt-get -y install mplayer
-sudo apt-add-repository -y -r ppa:mc3man/mplayer-test
+if [ "$DISTRIB_RELEASE" == "14.04" ]
+  then
+    sudo apt-add-repository -y ppa:mc3man/mplayer-test
+    sudo apt-get -y update
+    sudo apt-get -y install mplayer
+    sudo apt-add-repository -y -r ppa:mc3man/mplayer-test
+  elif [ "$DISTRIB_RELEASE" == "14.10" ]
+    then
+    sudo apt-add-repository -y ppa:mc3man/mplayer-test
+    sudo apt-get -y update
+    sudo apt-get -y install mplayer
+    sudo apt-add-repository -y -r ppa:mc3man/mplayer-test
+  elif [ "$DISTRIB_RELEASE" == "15.04" ]
+    then
+    sudo apt-add-repository -y ppa:djcj/hybrid
+    sudo apt-get -y update
+    sudo apt-get -y install mplayer
+    sudo apt-add-repository -y -r ppa:djcj/hybrid
+  else
+    echo "Für diese Ubuntu Version konnte keine geeignete mplayer Version gefunden werden."
+    echo "OTRV++ bitte manuell installieren."
+    exit -1
+fi
+
 
 # otrv++ laden
 wget -P ~/Downloads https://github.com/monarc99/otr-verwaltung/archive/master.zip
