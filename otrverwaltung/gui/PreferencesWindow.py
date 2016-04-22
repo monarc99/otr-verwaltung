@@ -50,7 +50,7 @@ class PreferencesWindow(gtk.Window, gtk.Buildable):
         avidemux = ["avidemux", "avidemux2_cli"]
         virtualdub = [r"intern-vdub", r"/pfad/zu/vdub.exe"]
         smartmkvmerge = [r"SmartMKVmerge"]
-        self.gui.set_model_from_list(self.builder.get_object('combobox_avi'), avidemux + virtualdub)
+        self.gui.set_model_from_list(self.builder.get_object('combobox_avi'), avidemux + virtualdub + smartmkvmerge)
         self.gui.set_model_from_list(self.builder.get_object('combobox_hq'), virtualdub + smartmkvmerge)
         self.gui.set_model_from_list(self.builder.get_object('combobox_mp4'), virtualdub)
         

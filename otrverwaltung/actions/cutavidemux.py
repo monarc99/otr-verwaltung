@@ -20,6 +20,7 @@ from gtk import events_pending, main_iteration, RESPONSE_OK
 import os
 import subprocess
 import time
+import re
 
 from otrverwaltung.actions.cut import Cut
 from otrverwaltung.constants import Action, Cut_action, Status, Format, Program
@@ -46,7 +47,7 @@ class CutAvidemux(Cut):
         """ read cuts from avidemux 2 and 3
             returns cut_frames und cutlist_error """
             
-        format, ac3_file = self.get_format(filename)
+        format, ac3_file, bframe_delay = self.get_format(filename)
         fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
         if fps == None:
             return None, error
@@ -78,44 +79,56 @@ class CutAvidemux(Cut):
             
         seg_lines = []
         pts_correction = 0
-    
-        for line in avidemux.stdout.readlines():
-            if line.startswith(' Seg'):
-                # delete not interesting parts
-                line = line[:line.find("audio")]
 
-                parts = line.split(',')
+        # Avidemux3
+        if "avidemux3" in program_config_value:
+            for line in avidemux.stdout.readlines():
+                # [addReferenceVideo]  The first frame has a PTS >0, adjusting to 120 ms
+                m_pts = re.search('\\[addReferenceVideo\\]  The first frame has a PTS >0.*?(\\d+)', line)
+                if m_pts:
+                    pts_correction = float(m_pts.group(1))*1000
+                    continue
+                #Segment :0/1
+                m_seg = re.search('Segment :(\\d+)', line)
+                if m_seg:
+                    seg_id = int(m_seg.group(1))
+                    if seg_id == 0:
+                        seg_lines = []
+                    continue
+                #        duration     :10671440000 02:57:51,440
+                m_dur = re.search(' *?duration *?:(\\d+)', line)
+                if m_dur:
+                    size = float(m_dur.group(1))*fps/1000000
+                    continue
+                #        refStartPts  :15740000 00:00:15,740
+                m_start = re.search(' *?refStartPts *?:(\\d+)', line)
+                if m_start:
+                    start = (float(m_start.group(1))-pts_correction)*fps/1000000
+                    if start > 0:
+                        seg_lines.append((seg_id, start, size))
+                    else:
+                        # correct values for first keyframe
+                        seg_lines.append((seg_id, 0.0, size-fps*pts_correction/1000000))
+                    continue
+        else:
+            #avidemux2
+            for line in avidemux.stdout.readlines():
+                if line.startswith(' Seg'):
+                    # delete not interesting parts
+                    line = line[:line.find("audio")]
 
-                seg_id = int(parts[0].split(':')[-1])
-                if format == Format.HQ or format == Format.HD:
-                    start = int(parts[1].split(':')[-1])-2
-                else:
-                    start = int(parts[1].split(':')[-1])
-                size = int(parts[2].split(':')[-1])
-                seg_lines.append((seg_id, start, size))
+                    parts = line.split(',')
 
-            # Avidemux3
-            # The first frame has a PTS >0, adjusting to 40 ms
-            elif '[addReferenceVideo]  The first frame has a PTS >0' in line:
-                pts_correction = float(line.split(' ')[13])*1000
-            elif line.startswith(' We have '):
-                seg_lines = []
-            elif line.startswith('Segment :'):
-                line = line[line.find(':')+1:]
-                seg_id = int(line.split('/')[0])
-            elif 'duration     :' in line:
-                line = line[line.find(':')+1:]
-                size = (float(line.split(' ')[0]))*fps/1000000
-            elif 'refStartPts  :' in line:
-                line = line[line.find(':')+1:]
-                start = (float(line.split(' ')[0])-pts_correction)*fps/1000000
-                if start > 0:
+                    seg_id = int(parts[0].split(':')[-1])
+                    if format == Format.HQ or format == Format.HD:
+                        start = int(parts[1].split(':')[-1])-2
+                    else:
+                        start = int(parts[1].split(':')[-1])
+                    size = int(parts[2].split(':')[-1])
                     seg_lines.append((seg_id, start, size))
                 else:
-                    # correct values for first keyframe
-                    seg_lines.append((seg_id, 0.0, size-fps*pts_correction/1000000))
-            else:
-                pass
+                    pass
+
 
         # keep only necessary items
         seg_lines.reverse()
@@ -147,7 +160,7 @@ class CutAvidemux(Cut):
         return cuts_frames,  cutlist_error
     
     def __cut_file_avidemux(self, filename, program_config_value, cuts):
-        format, ac3_file = self.get_format(filename)
+        format, ac3_file, bframe_delay = self.get_format(filename)
         # make file for avidemux2.5 scripting engine
         f = open("tmp.js", "w")
 

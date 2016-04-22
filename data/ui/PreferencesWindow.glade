@@ -1571,19 +1571,22 @@
                     <property name="yalign">0</property>
                     <property name="ypad">16</property>
                     <property name="label" translatable="yes">&lt;b&gt;Die Ausdrücke in geschweiften Klammern werden mit den Information aus der Datei ersetzt:&lt;/b&gt;
-{titel}		z.B. 	James Bond 007 
-{titel_}				James_Bond_007	
+{titel}         	z.B. 		James Bond 007
+{titel_}				James_Bond_007
 {titel.}				James.Bond.007
-{sender}			ard
+{lctitel}				james bond 007
+{lctitel_}				james_bond_007
+{lctitel.}				james.bond.007
+{sender}				ard
 {SENDER}			Ard
 {tag}				06
-{monat}			01
-{MONAT}			Januar
+{monat}				01
+{MONAT}				Januar
 {jahr}				09
-{stunde}			20
-{minute}			15
-{dauer}			120
-{format}			HQ</property>
+{stunde}				20
+{minute}				15
+{dauer}				120
+{format}				HQ</property>
                     <property name="use_markup">True</property>
                     <property name="wrap">True</property>
                   </object>

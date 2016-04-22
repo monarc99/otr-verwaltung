@@ -46,6 +46,7 @@ class Cut(BaseAction):
         root, extension = os.path.splitext(filename)
     
         if extension == '.avi':
+            bframe_delay = 2
             if os.path.splitext(root)[1] == '.HQ':
                 format = Format.HQ
                 ac3name = os.path.splitext(root)[0] + ".HD.ac3"
@@ -56,9 +57,18 @@ class Cut(BaseAction):
                 format = Format.AVI
                 ac3name = root + ".HD.ac3"
         elif extension == '.mp4':
-            format = Format.MP4
-            ac3name = root + ".HD.ac3"
+            bframe_delay = 0
+            if os.path.splitext(root)[1] == '.HQ':
+                format = Format.HQ
+                ac3name = os.path.splitext(root)[0] + ".HD.ac3"
+            elif os.path.splitext(root)[1] == '.HD':
+                format = Format.HD
+                ac3name = root + ".ac3"
+            else:
+                format = Format.MP4
+                ac3name = root + ".HD.ac3"
         elif extension == '.mkv':
+            bframe_delay = 2
             if os.path.splitext(root)[1] == '.HQ':
                 format = Format.HQ
                 ac3name = os.path.splitext(root)[0] + ".HD.ac3"
@@ -75,9 +85,9 @@ class Cut(BaseAction):
             return -1, None
     
         if os.path.isfile(ac3name):
-            return format, ac3name
+            return format, ac3name, bframe_delay
         else:
-            return format, None
+            return format, None, bframe_delay
 
     def get_program(self, filename, manually=False):
         if manually:
@@ -91,7 +101,7 @@ class Cut(BaseAction):
                          Format.HD  : self.config.get('general', 'cut_hqs_by'),
                          Format.MP4 : self.config.get('general', 'cut_mp4s_by') }
                      
-        format, ac3 = self.get_format(filename)                 
+        format, ac3, bframe_delay = self.get_format(filename)
 
         if format < 0:
             return -1, "Format konnte nicht bestimmt werden/wird noch nicht unterstützt.", False

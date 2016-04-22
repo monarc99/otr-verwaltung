@@ -358,7 +358,7 @@ class DecodeOrCut(Cut):
             returns: error_message, cutlist """
         
         program, config_value, ac3file = self.get_program(filename, manually=True)
-        format, ac3_file = self.get_format(filename)
+        format, ac3_file, bframe_delay = self.get_format(filename)
         fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
 
         if error:

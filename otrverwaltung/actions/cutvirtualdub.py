@@ -47,13 +47,13 @@ class CutVirtualdub(Cut):
  
         if error != None:
             return None,  error
-        format, ac3_file = self.get_format(filename)
+        format, ac3_file, bframe_delay = self.get_format(filename)
         cuts_frames, cutlist_error = self.__create_cutlist_virtualdub(os.path.join(self.config.get('general', 'folder_uncut_avis'), "cutlist.vcf"), format)
 
         return cuts_frames,  cutlist_error
 
     def __cut_file_virtualdub(self, filename, config_value, cuts=None, manually=False):
-        format, ac3_file = self.get_format(filename)
+        format, ac3_file, bframe_delay = self.get_format(filename)
         fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
         if sar == None or dar == None:
             return None, error

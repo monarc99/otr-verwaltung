@@ -83,7 +83,7 @@ class CutSmartMkvmerge(Cut):
 
         # codec configuration string
         if self.config.get('smartmkvmerge', 'encoder_engine') == 'x264':
-            format, ac3_file = self.get_format(filename)
+            format, ac3_file, bframe_delay = self.get_format(filename)
             if format == Format.HQ:
                 codec,  codec_core = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hq_string').split(' '),  filename)
             elif format == Format.HD:
@@ -97,22 +97,19 @@ class CutSmartMkvmerge(Cut):
             fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
             if error:
                 return None, "Konnte FPS nicht bestimmen: " + error
-            # otr avi have 2-bframe delay
-            root, extension = os.path.splitext(filename)
-            if extension == '.avi':
-                bframe_delay = 2
-            else:
-                bframe_delay = 0
-            
-            format, ac3_file = self.get_format(filename)
+
+            format, ac3_file, bframe_delay = self.get_format(filename)
             if format == Format.HQ:
                 codec,  codec_core = self.__ffmpeg_codec_options(self.config.get('smartmkvmerge', 'ffmpeg_hq_x264_options').split(' '),  filename)
             elif format == Format.HD:
                 codec,  codec_core = self.__ffmpeg_codec_options(self.config.get('smartmkvmerge', 'ffmpeg_hd_x264_options').split(' '),  filename)
             elif format == Format.MP4:
                 codec,  codec_core = self.__ffmpeg_codec_options(self.config.get('smartmkvmerge', 'ffmpeg_mp4_x264_options').split(' '),  filename)
+            elif format == Format.AVI:
+                codec = self.config.get('smartmkvmerge', 'ffmpeg_avi_mpeg4_options').split(' ')
+                codec_core = 125
             else:
-                return None, "Format nicht unterstützt (Nur MP4 H264, HQ H264 und HD H264 sind möglich)."
+                return None, "Format nicht unterstützt (Nur AVI DIVX, MP4 H264, HQ H264 und HD H264 sind möglich)."
         else:
             return None,  "Keine unterstützte Render-Engine zum Kodieren eingestellt"
 
@@ -303,7 +300,7 @@ class CutSmartMkvmerge(Cut):
             cut_video = self.workingdir + '/' + os.path.basename(os.path.splitext(self.generate_filename((filename),1))[0] + ".mkv")
         else:
             cut_video = os.path.splitext(self.generate_filename(filename,1))[0] + ".mkv"
-        command = [mkvmerge,  '--engage', 'no_cue_duration', '--engage',  'no_cue_relative_position',  '--ui-language',  'en_US',  '-o',  cut_video] + self.video_files + self.audio_files
+        command = [mkvmerge,  '--engage', 'no_cue_duration', '--engage',  'no_cue_relative_position', '--ui-language',  'en_US',  '-o',  cut_video] + self.video_files + self.audio_files
         logging.debug(command)
         try:
             blocking_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=my_env)
@@ -362,6 +359,10 @@ class CutSmartMkvmerge(Cut):
                 
                 for index in sorted(self.rawstreams.keys()):
                     args.append('-add')
+                    if '.dx50' in self.rawstreams[index]:
+                        (root_dx50, dx50) = os.path.splitext(self.rawstreams[index])
+                        os.rename(self.rawstreams[index], root_dx50 + '.m4v')
+                        self.rawstreams[index] = root_dx50 + '.m4v'
                     args.append(self.rawstreams[index])
 
                 cut_video = os.path.splitext(self.generate_filename(filename,1))[0] + ".mp4"
