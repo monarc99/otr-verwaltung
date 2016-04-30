@@ -664,16 +664,16 @@ class App:
         f_mpv_sub = join(video_filename_dirname, ".tmp_mpv.sub")
 
         cmd_exists = lambda x: any(os.access(os.path.join(pathx, x), os.X_OK) for pathx in os.environ["PATH"].split(os.pathsep))
-        if cmd_exists('mpv'):
+        if cmd_exists('mplayer'):
+            if self.config.get('general', 'mplayer_fullscreen'):
+                p = subprocess.Popen([self.config.get_program('mplayer'), "-fs", "-zoom", "-geometry",  "50%:50%", "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
+            else:
+                p = subprocess.Popen([self.config.get_program('mplayer'), "-geometry",  "50%:50%", "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
+        elif cmd_exists('mpv'):
             if self.config.get('general', 'mplayer_fullscreen'):
                 p = subprocess.Popen([self.config.get_program('mpv'), "-fs", "--merge-files", "-geometry",  "50%:50%", "-sub-file", f_mpv_sub, f_mpv_edl])
             else:
                 p = subprocess.Popen([self.config.get_program('mpv'), "--merge-files", "-geometry",  "50%:50%", "-sub-file", f_mpv_sub, f_mpv_edl])
-        elif cmd_exists('mplayer'):
-            if self.config.get('general', 'mplayer_fullscreen'):
-                p = subprocess.Popen([self.config.get_program('mplayer'), "-fs", "-geometry",  "50%:50%", "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
-            else:
-                p = subprocess.Popen([self.config.get_program('mplayer'), "-geometry",  "50%:50%", "-osdlevel", "3", "-edl", f_edl, "-sub", f_sub, video_filename])
         else:
             self.__gui.message_error_box("Weder mpv noch mplayer sind zum Anzeigen der Schnitte installiert.")
             return
