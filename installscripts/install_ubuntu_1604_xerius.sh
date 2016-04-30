@@ -51,7 +51,7 @@ if [ "$DISTRIB_RELEASE" == "16.04" ]
 	sudo add-apt-repository -y "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
 	sudo apt-get -y update
 
-	sudo apt-get -y install avidemux-cli gstreamer0.10-plugins-ugly python-glade2 python-libtorrent wine mediainfo-gui python-xdg python-gst0.10 python-dbus avidemux2.6-qt mplayer gstreamer0.10-ffmpeg gstreamer0.10-gnonlin
+	sudo apt-get -y install avidemux-cli gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-alsa python-glade2 python-libtorrent wine mediainfo-gui python-xdg python-gst0.10 python-dbus avidemux2.6-qt mplayer gstreamer0.10-ffmpeg gstreamer0.10-gnonlin
 
 	sudo apt-get -y remove getdeb-repository
 	sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
