@@ -45,6 +45,7 @@ if [ "$DISTRIB_RELEASE" == "16.04" ]
 	# Paketliste updaten und Abhängigkeiten installieren
 	wget http://archive.getdeb.net/install_deb/getdeb-repository_0.1-1~getdeb1_all.deb
 	sudo dpkg -i getdeb-repository_0.1-1~getdeb1_all.deb
+	rm getdeb-repository_0.1-1~getdeb1_all.deb
 	sudo apt-add-repository -y ppa:mc3man/gstffmpeg-keep
 	# use wily for gstreamer-ffmpeg
 	sudo sed -i s/xerius/wily/ /etc/apt/sources.list.d/mc3man-ubuntu-gstffmpeg-keep-xenial.list
@@ -70,6 +71,7 @@ wget -P ~/Downloads https://github.com/monarc99/otr-verwaltung/archive/master.zi
 mkdir -p ~/"$INSTALLDIR"
 unzip -uod ~/"$INSTALLDIR" ~/Downloads/master.zip
 rm ~/Downloads/master.zip
+sudo chown -R $USER ~/"$INSTALLDIR"/otr-verwaltung-master  
 
 # Menü Eintrag erstellen
 mkdir -p ~/.local/share/applications/
