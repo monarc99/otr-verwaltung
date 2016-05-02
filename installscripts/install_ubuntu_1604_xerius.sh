@@ -72,6 +72,7 @@ if [ "$DISTRIB_RELEASE" == "16.04" ]
 	wget http://archive.getdeb.net/install_deb/getdeb-repository_0.1-1~getdeb1_all.deb
 	sudo dpkg -i getdeb-repository_0.1-1~getdeb1_all.deb
 	rm getdeb-repository_0.1-1~getdeb1_all.deb
+	sudo apt-get update
 	sudo apt-get -y install avidemux2.6-qt
 	sudo apt-get -y remove getdeb-repository
 	
@@ -80,6 +81,7 @@ if [ "$DISTRIB_RELEASE" == "16.04" ]
 	# repository wieder entfernen
 	sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
 	sudo add-apt-repository -y -r "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
+	sudo apt-get update
   else
     echo "Für diese Ubuntu Version konnte keine geeignete Abhängigkeiten gefunden werden."
     echo "OTRV++ bitte manuell installieren."
