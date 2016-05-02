@@ -6,7 +6,7 @@ cleanup() {
   case $EXIT_CODE in
     0)
       trap - 0
-      echo "Script ganz durchgelaufen. Wenn nicht etwas schief ging, sollte OTR Verwaltung++ jetzt per Menü startbar sein. Manchmal taucht OTV++ erst nach einem Reset von Unity (also z.B. Reboot) im Menü auf."
+      echo "Script ganz durchgelaufen. Wenn nicht etwas schief ging, sollte OTR Verwaltung++ jetzt per Menü startbar sein. Manchmal taucht OTV++ erst nach einem Reset von Unity (also z.B. durch neu einloggen) im Menü auf."
       ;;
     *)
       echo "Unbekannter Fehler. Sie müssen OTRV++ manuell installieren, falls sie das Script nicht gerade selbst abgebrochen haben."
@@ -43,18 +43,41 @@ echo "Sollte beim Bestätigen nichts passieren, ist der OK Button nicht ausgewä
 if [ "$DISTRIB_RELEASE" == "16.04" ]
   then
 	# Paketliste updaten und Abhängigkeiten installieren
-	wget http://archive.getdeb.net/install_deb/getdeb-repository_0.1-1~getdeb1_all.deb
-	sudo dpkg -i getdeb-repository_0.1-1~getdeb1_all.deb
-	rm getdeb-repository_0.1-1~getdeb1_all.deb
 	sudo apt-add-repository -y ppa:mc3man/gstffmpeg-keep
 	# use wily for gstreamer-ffmpeg
 	sudo sed -i s/xerius/wily/ /etc/apt/sources.list.d/mc3man-ubuntu-gstffmpeg-keep-xenial.list
 	sudo add-apt-repository -y "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
 	sudo apt-get -y update
 
-	sudo apt-get -y install avidemux-cli gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-alsa python-glade2 python-libtorrent wine mediainfo-gui python-xdg python-gst0.10 python-dbus avidemux2.6-qt mplayer gstreamer0.10-ffmpeg gstreamer0.10-gnonlin
+	# unbedingt benötigte Abhängigkeiten
+	sudo apt-get -y install gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-alsa gstreamer0.10-pulseaudio python-glade2 python-libtorrent python-xdg python-gst0.10 python-dbus mplayer gstreamer0.10-ffmpeg gstreamer0.10-gnonlin
 
+	
+	### optionale Abhängigkeiten
+	
+        # Avidemux 2.5 cli fürs Schneiden von divx - Smartmkvmerge kann divx ebenfalls schneiden, deshalb nicht unbedingt benötigt
+	# folgende Zeile mit # auskommentieren, wenn nicht benötigt
+	sudo apt-get -y install avidemux-cli 
+
+	# wine für Virtualdub
+	# folgende Zeile mit # auskommentieren, wenn nicht benötigt
+	sudo apt-get -y install wine 
+
+	# mediainfo GUI - falls nicht benötigt
+	# folgende Zeile mit # auskommentieren, wenn nicht benötigt
+	sudo apt-get -y install mediainfo-gui
+	
+	# Avidemux 2.6 zum Erstellen von Cutlisten, wenn das Cutinterface nicht verwendet werden soll
+	# folgende Zeilen mit # auskommentieren, wenn nicht benötigt
+	wget http://archive.getdeb.net/install_deb/getdeb-repository_0.1-1~getdeb1_all.deb
+	sudo dpkg -i getdeb-repository_0.1-1~getdeb1_all.deb
+	rm getdeb-repository_0.1-1~getdeb1_all.deb
+	sudo apt-get -y install avidemux2.6-qt
 	sudo apt-get -y remove getdeb-repository
+	
+	###
+	
+	# repository wieder entfernen
 	sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
 	sudo add-apt-repository -y -r "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
   else
