@@ -75,43 +75,47 @@ class CutSmartMkvmerge(Cut):
         mkvmerge =  self.config.get_program('mkvmerge')
         x264 = self.config.get_program('x264')
         ffmpeg = self.config.get_program('ffmpeg')
+        encoder_engine = self.config.get('smartmkvmerge', 'encoder_engine')
         # env
         my_env = os.environ.copy()
         my_env["LANG"] = "C"
         my_env["LC_COLLATE"] = "C"
         my_env["LC_ALL"] = "C"
 
-        # codec configuration string
-        if self.config.get('smartmkvmerge', 'encoder_engine') == 'x264':
-            format, ac3_file, bframe_delay = self.get_format(filename)
-            if format == Format.HQ:
-                codec,  codec_core = self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hq_string').split(' '),  filename)
-            elif format == Format.HD:
-                codec,  codec_core =  self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_hd_string').split(' '),  filename)
-            elif format == Format.MP4:
-                codec,  codec_core =  self.complete_x264_opts(self.config.get('smartmkvmerge', 'x264_mp4_string').split(' '),  filename)
-            else:
-                return None, "Format nicht unterstützt (Nur MP4 H264, HQ H264 und HD H264 sind möglich)."
-        elif self.config.get('smartmkvmerge', 'encoder_engine') == 'ffmpeg':
-            # analyse file 
-            fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
-            if error:
-                return None, "Konnte FPS nicht bestimmen: " + error
+        # analyse file
+        fps, dar, sar, max_frames, ac3_stream, error = self.analyse_mediafile(filename)
+        if error:
+            return None, "Konnte FPS nicht bestimmen: " + error
 
-            format, ac3_file, bframe_delay = self.get_format(filename)
-            if format == Format.HQ:
-                codec,  codec_core = self.__ffmpeg_codec_options(self.config.get('smartmkvmerge', 'ffmpeg_hq_x264_options').split(' '),  filename)
-            elif format == Format.HD:
-                codec,  codec_core = self.__ffmpeg_codec_options(self.config.get('smartmkvmerge', 'ffmpeg_hd_x264_options').split(' '),  filename)
-            elif format == Format.MP4:
-                codec,  codec_core = self.__ffmpeg_codec_options(self.config.get('smartmkvmerge', 'ffmpeg_mp4_x264_options').split(' '),  filename)
-            elif format == Format.AVI:
-                codec = self.config.get('smartmkvmerge', 'ffmpeg_avi_mpeg4_options').split(' ')
-                codec_core = 125
-            else:
-                return None, "Format nicht unterstützt (Nur AVI DIVX, MP4 H264, HQ H264 und HD H264 sind möglich)."
+        # codec configuration string
+        format, ac3_file, bframe_delay = self.get_format(filename)
+        if format == Format.HQ:
+            if encoder_engine == 'x264':
+                codec, codec_core = self.complete_x264_opts(
+                    self.config.get('smartmkvmerge', 'x264_hq_string').split(' '), filename)
+            elif encoder_engine == 'ffmpeg':
+                codec, codec_core = self.__ffmpeg_codec_options(
+                    self.config.get('smartmkvmerge', 'ffmpeg_hq_x264_options').split(' '), filename)
+        elif format == Format.HD:
+            if encoder_engine == 'x264':
+                codec, codec_core = self.complete_x264_opts(
+                    self.config.get('smartmkvmerge', 'x264_hd_string').split(' '), filename)
+            elif encoder_engine == 'ffmpeg':
+                codec, codec_core = self.__ffmpeg_codec_options(
+                    self.config.get('smartmkvmerge', 'ffmpeg_hd_x264_options').split(' '), filename)
+        elif format == Format.MP4:
+            if encoder_engine == 'x264':
+                codec, codec_core = self.complete_x264_opts(
+                    self.config.get('smartmkvmerge', 'x264_mp4_string').split(' '), filename)
+            elif encoder_engine == 'ffmpeg':
+                codec, codec_core = self.__ffmpeg_codec_options(
+                    self.config.get('smartmkvmerge', 'ffmpeg_mp4_x264_options').split(' '), filename)
+        elif format == Format.AVI:
+            encoder_engine = 'ffmpeg'
+            codec = self.config.get('smartmkvmerge', 'ffmpeg_avi_mpeg4_options').split(' ')
+            codec_core = 125
         else:
-            return None,  "Keine unterstützte Render-Engine zum Kodieren eingestellt"
+            return None, "Format nicht unterstützt (Nur MP4 H264, HQ H264 und HD H264 sind möglich)."
 
         logging.debug(codec)
         logging.debug(codec_core)
