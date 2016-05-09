@@ -180,9 +180,9 @@ class CutSmartMkvmerge(Cut):
         # video part 3 - encode small parts - smart rendering part (1/2) 
         for encode, start,  duration,  video_part_filename in videolist:
             self.video_files.append('+'+ self.workingdir +'/' + video_part_filename)
-            if self.config.get('smartmkvmerge', 'encoder_engine') == 'x264':
+            if encoder_engine == 'x264':
                 command = [x264] + codec + ['--demuxer','ffms','--index', self.workingdir + '/x264.index','--seek',  str(start),'--frames',  str(duration),  '--output',  self.workingdir + '/' + video_part_filename,  filename ]
-            elif self.config.get('smartmkvmerge', 'encoder_engine') == 'ffmpeg':
+            elif encoder_engine == 'ffmpeg':
                 command = [ffmpeg,  '-ss', str(self.get_timecode((start+bframe_delay)/fps)),  '-i',  filename, '-vframes',  str(duration), '-vf',  'setsar=' + str(sar), '-threads',  '0',  '-an',  '-sn',  '-dn', '-y',   self.workingdir + '/' + video_part_filename]
                 command[5:5]=codec
             else:
