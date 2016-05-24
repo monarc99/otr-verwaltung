@@ -30,7 +30,7 @@ class ConvertToMP3(Plugin):
     Configurable = False
         
     def enable(self):
-        self.toolbutton = self.gui.main_window.add_toolbutton(gtk.image_new_from_file(self.get_path('music.png')), 'ConvertToMP3', [Section.VIDEO_CUT, Section.ARCHIVE])
+        self.toolbutton = self.gui.main_window.add_toolbutton(gtk.image_new_from_file(self.get_path('music.png')), 'In MP3 umwandeln', [Section.VIDEO_CUT])
         self.toolbutton.connect('clicked', self.on_converttomp3_clicked)                
         
     def disable(self):
@@ -39,10 +39,26 @@ class ConvertToMP3(Plugin):
     # plugin methods
   
     # signal methods
-    def self.on_converttomp3_clicked(self, widget, data=None):   
-        filename = self.gui.main_window.get_selected_filenames()[0]
-        
-        ffmpeg -i filename -vn -ar 44100 -ac 2 -ab 320k -f mp3 filename.mp3
-        
-        self.gui.main_window.change_status(0, "Erfolgreich %s umgewandelt." % (filename)
+    def on_converttomp3_clicked(self, widget, data=None):   
+        filenames = self.gui.main_window.get_selected_filenames()[0]
+            
+        if len(filenames) == 0:
+        	self.gui.message_error_box("Es muss eine Datei markiert sein.")
+        	return
 
+	try:
+		# pipe output to /dev/null for silence
+		null = open("/dev/null", "w")
+		subprocess.Popen("ffmpeg", stdout=null, stderr=null)
+		null.close()
+
+		self.gui.main_window.change_status(0, "Datei %s wird umgewandelt..." % (filenames))
+	
+		subprocess.call(['ffmpeg', '-y','-i', filenames, '-vn', '-ar', '44100', '-ac', '2', '-ab', '320k', '-f',  'mp3', filenames  +'.mp3'])    
+
+		self.gui.main_window.change_status(0, "Erfolgreich %s umgewandelt." % (filenames))
+		self.app.gui.message_info_box("Die Datei %s.mp3 wurde erfolgreich erstellt!" % (filenames))
+
+	except OSError:
+		self.app.gui.message_error_box("FFMPEG ist nicht installiert! Bitte installieren Sie FFMPEG um das Plugin nutzen zu können!")	
+    
