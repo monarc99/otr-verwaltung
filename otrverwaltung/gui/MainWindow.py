@@ -81,7 +81,7 @@ class MainWindow(gtk.Window, gtk.Buildable):
         toolbar_buttons = [
             ('decodeandcut', 'decodeandcut.png', "Dekodieren und Schneiden", Action.DECODEANDCUT),
             ('decode', 'decode.png', 'Dekodieren', Action.DECODE),
-            ('delete', 'delete.png', "In den Müll verschieben", Action.DELETE),
+            ('delete', 'bin.png', "In den Müll verschieben", Action.DELETE),
             ('archive', 'archive.png', "Archivieren", Action.ARCHIVE),
             ('cut', 'cut.png', "Schneiden", Action.CUT),          
             ('restore', 'restore.png', "Wiederherstellen", Action.RESTORE),
