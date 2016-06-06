@@ -1,5 +1,6 @@
 #!/bin/bash
-INSTALLDIR=${1:-$(eval echo ~)/"Software"}
+INSTALLDIR=${1:-"~/Software"}
+INSTALLDIR=$(eval echo "$INSTALLDIR")
 
 cleanup() {
   EXIT_CODE=$?
