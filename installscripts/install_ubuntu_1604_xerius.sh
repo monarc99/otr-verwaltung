@@ -1,4 +1,5 @@
 #!/bin/bash
+INSTALLDIR=${1:-$(eval echo ~)/"Software"}
 
 cleanup() {
   EXIT_CODE=$?
@@ -27,7 +28,6 @@ done
 # bei Fehler abbrechen
 set -e
 cd ~
-INSTALLDIR="Software"
 source /etc/lsb-release
 
 echo "Installscript OTRV++ für Ubuntu 16.04 Xerius"
@@ -93,16 +93,16 @@ fi
 wget -P ~/Downloads https://github.com/monarc99/otr-verwaltung/archive/master.zip
 
 # und entpacken
-mkdir -p ~/"$INSTALLDIR"
-unzip -uod ~/"$INSTALLDIR" ~/Downloads/master.zip
+mkdir -p "$INSTALLDIR"
+unzip -uod "$INSTALLDIR" ~/Downloads/master.zip
 rm ~/Downloads/master.zip
-sudo chown -R $USER ~/"$INSTALLDIR"/otr-verwaltung-master  
+sudo chown -R $USER "$INSTALLDIR"/otr-verwaltung-master
 
 # Menü Eintrag erstellen
 mkdir -p ~/.local/share/applications/
-sed -e "/Icon=/d" ~/"$INSTALLDIR"/otr-verwaltung-master/otrverwaltung.desktop.in > ~/.local/share/applications/otrverwaltung.desktop
-echo Icon=$(eval echo ~)/"$INSTALLDIR"/otr-verwaltung-master/data/media/icon.png >> ~/.local/share/applications/otrverwaltung.desktop
+sed -e "/Icon=/d" "$INSTALLDIR"/otr-verwaltung-master/otrverwaltung.desktop.in > ~/.local/share/applications/otrverwaltung.desktop
+echo Icon="$INSTALLDIR"/otr-verwaltung-master/data/media/icon.png >> ~/.local/share/applications/otrverwaltung.desktop
 
 # Link auf otrverwaltung setzen
 
-sudo ln -sf $(eval echo ~)/"$INSTALLDIR"/otr-verwaltung-master/bin/otrverwaltung /usr/local/bin/otrverwaltung
+sudo ln -sf "$INSTALLDIR"/otr-verwaltung-master/bin/otrverwaltung /usr/local/bin/otrverwaltung
