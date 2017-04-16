@@ -798,10 +798,13 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
         colormap = slider.get_colormap()        
         gc_red = slider.window.new_gc()
         gc_orange = slider.window.new_gc()
+        gc_green = slider.window.new_gc()
         red = colormap.alloc_color('red')
         orange = colormap.alloc_color('orange')
+        green = colormap.alloc_color('green')
         gc_red.set_foreground(red)
         gc_orange.set_foreground(orange)
+        gc_green.set_foreground(green)
 
         border = 11
         if self.get_frames() != 0:
@@ -816,6 +819,7 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
                     marker_b = border + int(round(self.marker_b * one_frame_in_pixels)) 
                     # print marker_a
                     #print marker_b         
+
                                                             
                     slider.window.draw_rectangle(gc_red, True, marker_a, 0, marker_b - marker_a, 5)       
                     
@@ -824,8 +828,14 @@ class CutinterfaceDialog(gtk.Dialog, gtk.Buildable,  Cut):
                     for start, duration in inverted:
                         pixel_start = border + int(round(start * one_frame_in_pixels))
                         pixel_duration = int(round(duration * one_frame_in_pixels))
-                        slider.window.draw_rectangle(gc_orange, True, pixel_start, slider.window.get_size()[1] - 5, pixel_duration, 5)
-                
+
+                        gc_color = gc_orange
+                        # draw keyframe cuts that don't need reencoding with a different color
+                        if ((start + duration) in self.keyframes) or (start + duration == self.frames):
+                            gc_color = gc_green
+
+                        slider.window.draw_rectangle(gc_color, True, pixel_start, slider.window.get_size()[1] - 5, pixel_duration, 5)
+
                 # slider.queue_draw()
             except AttributeError:
                 pass
