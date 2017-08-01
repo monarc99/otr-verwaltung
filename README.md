@@ -7,6 +7,17 @@ Copyright (C) 2010 Benjamin Elbers <elbersb@gmail.com>
 
 ![Screenshot](http://github.com/elbersb/otr-verwaltung/raw/master/data/media/screenshots/search.png)
 
+Installation
+------------
+
+Eines der nachfolgenden Scripte herunterladen und ausführen
+(Download and execute one of the following scripts)
+
+* [Ubuntu 14.04](installscripts/install_ubuntu_1404_trusty.sh)
+* [Ubuntu 16.04](installscripts/install_ubuntu_1604_xerius.sh)
+* [Mint 18.2](installscripts/install_mint_1802_sonya.sh)
+
+
 TODO
 ----
 
