@@ -4,7 +4,7 @@ INSTALLDIR=$(eval echo "$INSTALLDIR")
 
 cleanup() {
   EXIT_CODE=$?
-  
+
   case $EXIT_CODE in
     0)
       trap - 0
@@ -15,7 +15,7 @@ cleanup() {
       rm ~/Downloads/master.zip
       sudo apt-get -y remove getdeb-repository
       sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
-      sudo add-apt-repository -y -r "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
+      sudo add-apt-repository -y -r "deb http://old-releases.ubuntu.com/ubuntu/ wily main universe multiverse"
       ;;
   esac
   echo bitte ENTER drücken, um das Script zu beenden; read;
@@ -47,41 +47,41 @@ if [ "$DISTRIB_RELEASE" == "16.04" ]
 	sudo apt-add-repository -y ppa:mc3man/gstffmpeg-keep
 	# use wily for gstreamer-ffmpeg
 	sudo sed -i s/xerius/wily/ /etc/apt/sources.list.d/mc3man-ubuntu-gstffmpeg-keep-xenial.list
-	sudo add-apt-repository -y "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
+	sudo add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu/ wily main universe multiverse"
 	sudo apt-get -y update
 
 	# unbedingt benötigte Abhängigkeiten
 	sudo apt-get -y install gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-alsa gstreamer0.10-pulseaudio python-glade2 python-libtorrent python-xdg python-gst0.10 python-dbus mplayer gstreamer0.10-ffmpeg gstreamer0.10-gnonlin
 
-	
+
 	### optionale Abhängigkeiten
-	
+
         # Avidemux 2.5 cli fürs Schneiden von divx - Smartmkvmerge kann divx ebenfalls schneiden, deshalb nicht unbedingt benötigt
 	# folgende Zeile mit # auskommentieren, wenn nicht benötigt
-	sudo apt-get -y install avidemux-cli 
+	sudo apt-get -y install avidemux-cli
 
 	# wine für Virtualdub
 	# folgende Zeile mit # auskommentieren, wenn nicht benötigt
-	sudo apt-get -y install wine 
+	sudo apt-get -y install wine
 
 	# mediainfo GUI - falls nicht benötigt
 	# folgende Zeile mit # auskommentieren, wenn nicht benötigt
 	sudo apt-get -y install mediainfo-gui
-	
+
 	# Avidemux 2.6 zum Erstellen von Cutlisten, wenn das Cutinterface nicht verwendet werden soll
 	# folgende Zeilen mit # auskommentieren, wenn nicht benötigt
 	wget http://archive.getdeb.net/install_deb/getdeb-repository_0.1-1~getdeb1_all.deb
 	sudo dpkg -i getdeb-repository_0.1-1~getdeb1_all.deb
 	rm getdeb-repository_0.1-1~getdeb1_all.deb
 	sudo apt-get update
-	sudo apt-get -y install avidemux2.6-qt
+	sudo apt-get -y --fix-missing install avidemux2.6-qt
 	sudo apt-get -y remove getdeb-repository
-	
+
 	###
-	
+
 	# repository wieder entfernen
 	sudo apt-add-repository -y -r ppa:mc3man/gstffmpeg-keep
-	sudo add-apt-repository -y -r "deb http://de.archive.ubuntu.com/ubuntu/ wily main universe multiverse"
+	sudo add-apt-repository -y -r "deb http://old-releases.ubuntu.com/ubuntu/ wily main universe multiverse"
 	sudo apt-get update
   else
     echo "Für diese Ubuntu Version konnte keine geeignete Abhängigkeiten gefunden werden."
@@ -91,7 +91,7 @@ fi
 
 
 # otrv++ laden
-wget -P ~/Downloads https://github.com/monarc99/otr-verwaltung/archive/master.zip
+wget -P ~/Downloads -O ~/Downloads/master.zip https://github.com/monarc99/otr-verwaltung/archive/master.zip
 
 # und entpacken
 mkdir -p "$INSTALLDIR"
