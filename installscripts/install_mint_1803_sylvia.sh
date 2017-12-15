@@ -77,6 +77,7 @@ if [ "$DISTRIB_RELEASE" == "18.3" ]
 	sudo apt-get update
 	sudo apt-get -y install avidemux2.6-qt
 	sudo apt-get -y remove getdeb-repository
+	[ -f /etc/apt/sources.list.d/getdeb.list.bck ] && sudo mv /etc/apt/sources.list.d/getdeb.list.bck /etc/apt/sources.list.d/getdeb.list
 
 	###
 
@@ -108,4 +109,3 @@ echo Icon="$INSTALLDIR"/otr-verwaltung-master/data/media/icon.png >> ~/.local/sh
 # Link auf otrverwaltung setzen
 
 sudo ln -sf "$INSTALLDIR"/otr-verwaltung-master/bin/otrverwaltung /usr/local/bin/otrverwaltung
-
