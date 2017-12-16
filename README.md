@@ -15,7 +15,8 @@ Eines der nachfolgenden Scripte herunterladen und ausführen
 
 * [Ubuntu 14.04](installscripts/install_ubuntu_1404_trusty.sh)
 * [Ubuntu 16.04](installscripts/install_ubuntu_1604_xerius.sh)
-* [Mint 18.2](installscripts/install_mint_1802_sonya.sh)
+* [Linux Mint 18.2](installscripts/install_mint_1802_sonya.sh)
+* [Linux Mint 18.3](installscripts/install_mint_1803_sylvia.sh)
 
 
 TODO
