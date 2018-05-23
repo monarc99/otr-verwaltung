@@ -90,7 +90,7 @@ class Cutlist:
         headers = { 'Content-Type': 'multipart/form-data; boundary=%s' % boundary }
 
         try:
-            connection.request('POST', server + "index.php?upload=2", body, headers)
+            connection.request('POST', server + "", body, headers)
         except Exception, error_message:
            return error_message       
 
