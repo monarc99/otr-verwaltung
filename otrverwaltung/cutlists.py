@@ -228,7 +228,6 @@ class Cutlist:
                 "FramesPerSecond=%s\n" % str(self.fps),
                 "IntendedCutApplicationName=%s\n" % intended_app_name,
                 "IntendedCutApplication=%s\n" % self.intended_app,
-                "IntendedCutApplicationVersion=\n",
                 "VDUseSmartRendering=%s\n" % str(int(self.smart)),
                 "VDSmartRenderingCodecFourCC=0x53444646\n",
                 "VDSmartRenderingCodecVersion=0x00000000\n",
