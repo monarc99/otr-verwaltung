@@ -90,7 +90,7 @@ class Cutlist:
         headers = { 'Content-Type': 'multipart/form-data; boundary=%s' % boundary }
 
         try:
-            connection.request('POST', server + "index.php?upload=2", body, headers)
+            connection.request('POST', server + "", body, headers)
         except Exception, error_message:
            return error_message       
 
@@ -228,7 +228,6 @@ class Cutlist:
                 "FramesPerSecond=%s\n" % str(self.fps),
                 "IntendedCutApplicationName=%s\n" % intended_app_name,
                 "IntendedCutApplication=%s\n" % self.intended_app,
-                "IntendedCutApplicationVersion=\n",
                 "VDUseSmartRendering=%s\n" % str(int(self.smart)),
                 "VDSmartRenderingCodecFourCC=0x53444646\n",
                 "VDSmartRenderingCodecVersion=0x00000000\n",
